@@ -1,0 +1,34 @@
+.search-result-container {
+  padding-bottom: 20px;
+}
+
+.search-result-container-view {
+  display: block;
+}
+.search-result-container-view.hide-view {
+  display: none;
+}
+
+.product-stores {
+  display: none;
+}
+
+.product-stores.store-full-view {
+  display: block;
+  padding-top: 10px;
+}
+
+.back-to-product-button {
+  display: flex;
+  gap: 5px;
+  border: 1.5px solid black;
+  color: #0b0b0b;
+  padding: 5px 12px;
+  margin: 5px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 20px;
+  background: white;
+  cursor: pointer;
+}

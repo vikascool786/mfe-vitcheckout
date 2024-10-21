@@ -1,0 +1,25 @@
+.button {
+  cursor: pointer;
+  display: inline-block;
+  font-family: "Roboto";
+  font-weight: 500;
+  min-height: 40px;
+  padding: 5px 20px;
+  text-align: center;
+  text-decoration: none;
+  -webkit-transition: all 0.2s ease 0s;
+  transition: all 0.2s ease 0s;
+  vertical-align: middle;
+  font-size: 16px;
+  line-height: 28px;
+  overflow: hidden;
+  color: white;
+  background-color: rgba(42, 47, 79, 1);
+  border-radius: 40px;
+  border: none;
+  &:hover {
+    transform: scale(1.05);
+    background-color: rgba(42, 47, 79, 0.9);
+    color: white;
+  }
+}

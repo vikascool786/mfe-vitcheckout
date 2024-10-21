@@ -1,0 +1,132 @@
+import React from "react";
+import "./ProductStore.scss";
+import { Reward, ProductStore as TProductStore } from "../../utils/types/types";
+
+interface ProductStoreProps {
+  position: number;
+  productStoreData: TProductStore;
+  partial?: boolean;
+}
+const ProductStore: React.FC<ProductStoreProps> = ({
+  position,
+  productStoreData: pData,
+  partial = false,
+}) => {
+  const baseUrl = "https://shop.com";
+  const openInNewTab = () => window.open(pData.wwwLink, "_blank");
+
+  const openShopSite = () => {
+    const url = baseUrl + pData.derived.linkUrl;
+    window.open(url, "_blank");
+  };
+
+  const openShopStore = () => {
+    const url = baseUrl + pData.derived.storePageUrl;
+    window.open(url, "_blank");
+  };
+
+  const renderSlash = (index: number) => <>{index > 0 ? "/" : ""}</>;
+
+  const { volumeId } = pData;
+  return (
+    <div
+      className={`qa-store-card product-store-container ${!partial ? "full" : "partial"}`}
+      data-postion={position}
+      data-storeid={volumeId}
+    >
+      {pData.labels && pData.labels.length > 0 && (
+        <div className="product-store-meta-tag-container">
+          <div className="product-store-meta-tag">{pData.labels[0]!.name!}</div>
+        </div>
+      )}
+      <div className="product-store-image-container">
+        <img src={pData.catalogLogo} alt="Store Logo" />
+      </div>
+      <div className="product-store-information-container">
+        <div className="product-store-information">
+          <div className="product-store-title-container">
+            <div className="qa-store-title product-store-title">
+              {pData.name}{" "}
+              {/* <div className="open-in-new-tab" onClick={openInNewTab}>
+                <svg
+                  width="18"
+                  height="17"
+                  viewBox="0 0 18 17"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M2.56109 16.6383C2.07028 16.6383 1.65484 16.4682 1.31478 16.1282C0.974717 15.7881 0.804688 15.3727 0.804688 14.8819V1.8775C0.804688 1.38668 0.974717 0.971242 1.31478 0.631183C1.65484 0.291123 2.07028 0.121094 2.56109 0.121094H8.68945V1.57849H2.56109C2.48628 1.57849 2.41778 1.60966 2.3556 1.67201C2.29326 1.73419 2.26208 1.80269 2.26208 1.8775V14.8819C2.26208 14.9567 2.29326 15.0252 2.3556 15.0873C2.41778 15.1497 2.48628 15.1809 2.56109 15.1809H15.5655C15.6403 15.1809 15.7088 15.1497 15.7709 15.0873C15.8333 15.0252 15.8645 14.9567 15.8645 14.8819V8.7535H17.3219V14.8819C17.3219 15.3727 17.1518 15.7881 16.8118 16.1282C16.4717 16.4682 16.0563 16.6383 15.5655 16.6383H2.56109ZM6.8473 11.6195L5.82348 10.5957L14.8406 1.57849H11.0065V0.121094H17.3219V6.43648H15.8645V2.60231L6.8473 11.6195Z"
+                    fill="#1C1B1F"
+                  />
+                </svg>
+              </div> */}
+            </div>
+          </div>
+          {pData.rewards && pData.rewards.length > 0 && (
+            <div className="reward-container">
+              {pData.rewards.map((reward, index) => {
+                const type = reward.type.toLowerCase();
+                if (type === "cashback") {
+                  return (
+                    <p
+                      key={new Date().getTime() * Math.random()}
+                      className="reward"
+                    >
+                      {renderSlash(index)} up to {reward.percent}
+                      <img
+                        className="reward-cashback-icon"
+                        src="https://img.shop.com/Image/resources/images/cashback-icon.svg"
+                        alt=""
+                      />
+                      Cashback
+                    </p>
+                  );
+                }
+
+                return (
+                  <p className="reward">
+                    {renderSlash(index)} {reward.percent} {type.toUpperCase()}
+                  </p>
+                );
+              })}
+            </div>
+          )}
+          <a
+            className="terms-and-condition"
+            href={baseUrl + pData.derived.storePageUrl}
+            target="_blank"
+          >
+            See Terms & Conditions
+          </a>
+        </div>
+      </div>
+      <div className="product-store-link">
+        {pData.derived.isLinkOff ? (
+          <button className="qa-button button" onClick={openShopSite}>
+            Shop Site{" "}
+            <span style={{ position: "relative", top: "4px", left: "4px" }}>
+              <svg
+                width="18"
+                height="17"
+                viewBox="0 0 18 17"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M2.56109 16.6383C2.07028 16.6383 1.65484 16.4682 1.31478 16.1282C0.974717 15.7881 0.804688 15.3727 0.804688 14.8819V1.8775C0.804688 1.38668 0.974717 0.971242 1.31478 0.631183C1.65484 0.291123 2.07028 0.121094 2.56109 0.121094H8.68945V1.57849H2.56109C2.48628 1.57849 2.41778 1.60966 2.3556 1.67201C2.29326 1.73419 2.26208 1.80269 2.26208 1.8775V14.8819C2.26208 14.9567 2.29326 15.0252 2.3556 15.0873C2.41778 15.1497 2.48628 15.1809 2.56109 15.1809H15.5655C15.6403 15.1809 15.7088 15.1497 15.7709 15.0873C15.8333 15.0252 15.8645 14.9567 15.8645 14.8819V8.7535H17.3219V14.8819C17.3219 15.3727 17.1518 15.7881 16.8118 16.1282C16.4717 16.4682 16.0563 16.6383 15.5655 16.6383H2.56109ZM6.8473 11.6195L5.82348 10.5957L14.8406 1.57849H11.0065V0.121094H17.3219V6.43648H15.8645V2.60231L6.8473 11.6195Z"
+                  fill="#FFF"
+                />
+              </svg>
+            </span>
+          </button>
+        ) : (
+          <button className="qa-button button" onClick={openShopStore}>
+            Shop Store
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
+export default ProductStore;
