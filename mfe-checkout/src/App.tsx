@@ -1,13 +1,14 @@
 import React from "react";
+import "./App.scss"
 import { createRoot } from "react-dom/client";
-import { Skeleton } from "./component";
+import { Checkout } from "./Checkout";
 
 interface AppProps {}
 
 const App: React.FC<AppProps> = () => {
   return (
-    <div className="search-app__container">
-      <Skeleton />
+    <div className="container">
+      <Checkout />
     </div>
   );
 };

@@ -1,0 +1,31 @@
+.checkbox-container {
+    display: flex;
+    flex-direction: row;
+    padding-top: 5px;
+}
+.checkbox-text {
+  font-family: "Roboto", sans-serif;
+  font-size: 14px;
+  line-height: 16.41px;
+  font-weight: 400;
+  text-align: left;
+  display: flex;
+  flex-direction: row;
+
+}
+
+.checkbox-sub-text {
+  font-family: "Inter", sans-serif;
+  font-size: 10px;
+  font-style: italic;
+  font-weight: 300;
+  line-height: 12.1px;
+  text-align: left;
+}
+
+.checkbox-sub-container {
+    display: flex;
+    flex-direction: column;
+}
+
+
