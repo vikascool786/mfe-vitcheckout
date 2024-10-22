@@ -1,6 +1,6 @@
 .custom-button {
   display: flex;
-  background-color: #1d2337; // Dark navy color
+  background-color: #1d2337; // Dark navy color as default
   color: white;
   font-size: 18px;
   font-weight: 500;
@@ -8,7 +8,19 @@
   border: none;
   border-radius: 50px;
   cursor: pointer;
-  text-align: center;
   justify-content: center;
   width: 100%;
+}
+
+// Primary Button Styles
+.custom-button.primary {
+  background-color: #1d2337; // Dark navy color for primary
+  color: #FFFFFF; // White text
+}
+
+// Secondary Button Styles
+.custom-button.secondary {
+  background-color: #FFFFFF; // White background for secondary
+  color: #202340; // Dark text
+  border: 1px solid #202340; // Optional: adding border for better contrast
 }

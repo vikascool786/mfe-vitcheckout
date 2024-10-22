@@ -1,14 +1,14 @@
 import React from "react";
 import "./App.scss"
 import { createRoot } from "react-dom/client";
-import { Checkout } from "./Checkout";
+import { CheckoutContainer } from "./CheckoutContainer";
 
 interface AppProps {}
 
 const App: React.FC<AppProps> = () => {
   return (
     <div className="container">
-      <Checkout />
+      <CheckoutContainer />
     </div>
   );
 };

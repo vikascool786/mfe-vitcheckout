@@ -67,7 +67,7 @@ module.exports = (env, argv) => {
             : "mfeSearchContainer@https://mcds-main.s3.amazonaws.com/SearchContainer/remoteEntry.js",
         },
         exposes: {
-          "./CheckoutSkeleton": "./src/Checkout",
+          "./CheckoutSkeleton": "./src/CheckoutContainer",
           "./React": "react",
           "./ReactDOM": "react-dom",
           "./ReactDOMClient": "react-dom/client",

@@ -1,8 +1,15 @@
 import React from "react";
 import './Button.scss';
 
-export const Button: React.FC = () => {
+interface IButtonProps {
+    type: 'primary' | 'secondary';
+    label: string;
+}
+
+export const Button: React.FC<IButtonProps> = ({ label, type }) => {
   return (
-    <button className="custom-button">Save Shipping Address & Continue</button>
+    <button className={`custom-button ${type}`}>
+      {label}
+    </button>
   );
 };

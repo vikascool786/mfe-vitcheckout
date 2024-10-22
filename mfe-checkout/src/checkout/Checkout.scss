@@ -9,10 +9,11 @@ body {
   border: 0.2px solid #79787833;
   flex-direction: column;
   padding: 20px;
+  border-radius: 5px;
 }
 
 .form-header {
-    display: flex;
+  display: flex;
   padding-bottom: 20px;
 }
 
@@ -20,11 +21,14 @@ body {
   display: flex;
   justify-content: center;
   flex-direction: row;
+  gap: 10px;
+  margin-top: 10px;
 }
 
 .form-field-container-full {
   display: flex;
   width: 100%;
+  margin-top: 10px;
 }
 
 .form-footer {

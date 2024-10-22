@@ -4,3 +4,9 @@ body {
 .container {
   display: flex;
 }
+
+.checkout-container {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}

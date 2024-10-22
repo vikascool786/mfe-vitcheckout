@@ -3,7 +3,7 @@ import "./FormField.scss";
 import { Checkbox } from "../Checkbox/Checkbox";
 
 interface IFormFieldProps {
-  label: string;
+  label?: string;
   renderCheckBox?: ReactNode;
   required?: boolean;
 }
@@ -15,7 +15,7 @@ export const FormField: React.FC<IFormFieldProps> = ({
 }) => {
   return (
     <div className="field-item-container">
-      <div className={required ? "required-field" : ""}>{label}</div>
+      {label && <div className={required ? "required-field" : ""}>{label}</div>}
       <input className="input-container" {...props} />
       {renderCheckBox}
     </div>

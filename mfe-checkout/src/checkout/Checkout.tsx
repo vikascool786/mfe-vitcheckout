@@ -1,9 +1,9 @@
 import React from "react";
 import "./Checkout.scss";
-import { Button } from "./component/Button/Button";
-import { Checkbox } from "./component/Form/Checkbox/Checkbox";
-import { FormField } from "./component/Form/Field/FormField";
-import { FormHeading } from "./component/Form/Heading/FormHeading";
+import { Button } from "../component/Button/Button";
+import { Checkbox } from "../component/Form/Checkbox/Checkbox";
+import { FormField } from "../component/Form/Field/FormField";
+import { FormHeading } from "../component/Form/Heading/FormHeading";
 
 export const Checkout: React.FC = () => {
   return (
@@ -44,7 +44,7 @@ export const Checkout: React.FC = () => {
         />
       </div>
       <div className="form-footer">
-        <Button />
+        <Button label="Save Shipping Address & Continue" type="primary" />
       </div>
     </div>
   );

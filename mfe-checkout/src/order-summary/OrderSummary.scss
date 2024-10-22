@@ -1,0 +1,83 @@
+.order-summary-container {
+  display: flex;
+  background-color: white;
+  box-shadow: 0px 0px 5px 1px #79787840;
+  border: 0.2px solid #79787833;
+  border-radius: 5px;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.order-summary-coupon-container {
+  display: flex;
+  flex: 1;
+  flex-grow: 1;
+  flex-direction: row;
+  justify-content: center;
+  gap: 10px;
+  padding-top: 10px;
+}
+
+.order-input-container {
+  display: flex;
+  flex: 0.8;
+  flex-direction: column;
+}
+
+.order-apply-container {
+  display: flex;
+  flex: 0.2;
+}
+
+.order-sub-text {
+  font-family: "Roboto", sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 18.75px;
+  text-align: left;
+  padding-top: 10px;
+}
+
+.order-sub-text.underlined {
+  text-decoration: underline;
+}
+
+.order-charges-table {
+  display: flex;
+  flex-direction: column;
+  border-top: 0.5px solid #939393; // Adds top border
+  border-bottom: 0.5px solid #939393; // Adds bottom border
+  margin-top: 6px;
+  margin-bottom: 6px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.order-summary-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-top: 6px;
+}
+
+.order-summary-total {
+  display: flex;
+  justify-content: space-between;
+  font-family: "Roboto", sans-serif;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 23.44px;
+  padding-bottom: 10px;
+}
+
+.order-summary-cashback-container {
+  display: flex;
+  background-color: #f0f1f7;
+  border-radius: 5px;
+  justify-content: space-between;
+  padding: 4px;
+  padding-top: 10px;
+  font-size: 16px;
+  line-height: 19.75px;
+  color: black;
+}
