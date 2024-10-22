@@ -1,7 +1,7 @@
 {
   "name": "mfe-checkout",
   "version": "1.0.0",
-  "author": "Sahil  <subasish.chakraborty@divi-t.com>",
+  "author": "Vikas W  <vikasw@marketamerica.com>",
   "license": "MIT",
   "scripts": {
     "build:prod": "webpack --mode production",
