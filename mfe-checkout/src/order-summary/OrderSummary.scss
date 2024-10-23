@@ -10,8 +10,6 @@
 
 .order-summary-coupon-container {
   display: flex;
-  flex: 1;
-  flex-grow: 1;
   flex-direction: row;
   justify-content: center;
   gap: 10px;
@@ -19,18 +17,22 @@
 }
 
 .order-input-container {
-  display: flex;
-  flex: 0.8;
-  flex-direction: column;
+  flex: 7; // This will take 80% of the space
 }
 
 .order-apply-container {
-  display: flex;
-  flex: 0.2;
+  flex: 3; // This will take 20% of the space
+}
+
+.order-reedem-coupon-text {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 18.75px;
+  text-align: left;
+  margin-top: 12px;
 }
 
 .order-sub-text {
-  font-family: "Roboto", sans-serif;
   font-size: 16px;
   font-weight: 400;
   line-height: 18.75px;
@@ -40,6 +42,7 @@
 
 .order-sub-text.underlined {
   text-decoration: underline;
+  margin-bottom: 10px;
 }
 
 .order-charges-table {
@@ -63,7 +66,6 @@
 .order-summary-total {
   display: flex;
   justify-content: space-between;
-  font-family: "Roboto", sans-serif;
   font-size: 20px;
   font-weight: 500;
   line-height: 23.44px;
@@ -75,9 +77,10 @@
   background-color: #f0f1f7;
   border-radius: 5px;
   justify-content: space-between;
-  padding: 4px;
+  padding: 8px;
   padding-top: 10px;
   font-size: 16px;
   line-height: 19.75px;
   color: black;
+  gap: 2rem;
 }

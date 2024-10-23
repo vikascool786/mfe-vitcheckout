@@ -1,15 +1,16 @@
 .custom-button {
   display: flex;
+  width: 100%; // Ensures the button takes full width
   background-color: #1d2337; // Dark navy color as default
   color: white;
   font-size: 18px;
   font-weight: 500;
-  padding: 12px 40px;
+  padding: 12px 0; // Removed horizontal padding to avoid conflict with full width
   border: none;
   border-radius: 50px;
   cursor: pointer;
   justify-content: center;
-  width: 100%;
+  align-items: center; // Ensures content is vertically centered
 }
 
 // Primary Button Styles
