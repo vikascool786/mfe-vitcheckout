@@ -8,13 +8,14 @@ body {
 .checkout-container {
   display: flex;
   justify-content: center;
-  column-gap: 21px;
+  column-gap: 38px;
   width: 100%;
+  margin-top: 31px;
 }
 
 .checkout-sub-container {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 21px;
+  gap: 38px;
 }

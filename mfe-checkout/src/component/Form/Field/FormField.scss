@@ -1,22 +1,29 @@
 .field-item-container {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 }
 
 .required-field::after {
-    content: "*";
-    color: red;
+  content: "*";
+  color: red;
 }
 
 .input-container {
-    padding: 0 4px;
-    vertical-align: middle;
-    border-radius: 3px;
-    background-color: #ffffff;
-    border: 1px solid #000000;
-    font-size: 16px;
-    min-height: 42px;
-    line-height: 18px;
-    font-weight: normal;
+  padding: 0 4px;
+  vertical-align: middle;
+  border-radius: 3px;
+  background-color: #ffffff;
+  border: 1px solid #000000;
+  font-size: 16px;
+  min-height: 42px;
+  line-height: 18px;
+  font-weight: normal;
+}
+
+.field-extra-label {
+  font-size: 15px;
+  font-weight: 100;
+  margin-top: 4px;
+  margin-bottom: 4px;
 }

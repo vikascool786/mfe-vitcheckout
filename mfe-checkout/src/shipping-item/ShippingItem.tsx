@@ -1,6 +1,8 @@
 import React from "react";
 import { Close } from "../assets/svgs/Close";
 import "./ShippingItem.scss";
+import { Cashback } from "../assets/svgs/Cashback";
+import ProductImage from "../assets/images/ProductImage.png";
 
 interface IProduct {
   imageUrl: string;
@@ -22,12 +24,14 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({ product }) => {
       <div className="item-detail-container">
         <img
           className="item-image"
-          src={require("../assets/images/ProductImage.png")}
+          src={ProductImage}
         />
         <div className="item-info">
           <div className="item-name">{name}</div>
           <div>{description}</div>
-          <div>{cashback}</div>
+          <div className="item-cashback">
+            {cashback} <Cashback /> Cashback
+          </div>
           <div>{price}</div>
         </div>
       </div>

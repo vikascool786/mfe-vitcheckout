@@ -3,6 +3,7 @@ import "./OrderSummary.scss";
 import { FormField } from "../component/Form/Field/FormField";
 import { Button } from "../component/Button/Button";
 import { FormHeading } from "../component/Form/Heading/FormHeading";
+import { Cashback } from "../assets/svgs/Cashback";
 
 const ORDER_SUMMARY = [
   {
@@ -49,7 +50,10 @@ export const OrderSummary: React.FC = () => {
       </div>
 
       <div className="order-summary-cashback-container">
-        <div>VIFT Cashback earned in this order</div>
+        <div className="order-cashback">
+          <Cashback />
+          VIFT Cashback earned in this order
+        </div>
         <div>$0.25</div>
       </div>
     </div>

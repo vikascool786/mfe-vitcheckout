@@ -6,7 +6,7 @@ import { ShippingItem } from '../shipping-item/ShippingItem';
 const Product = {
   name: "Isotonix Calcium Plus",
   description: "Single Bottle (90 Servings)",
-  cashback: "+ $0.52 Cashback",
+  cashback: "+ $0.52",
   price: "$25.00",
   quantity: 1,
   imageUrl: require('../assets/images/ProductImage.png')
