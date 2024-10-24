@@ -35,3 +35,8 @@ body {
   display: flex;
   margin-top: 20px;
 }
+
+.form-field-container,
+.form-field-container-full {
+  transition: max-height 0.3s ease-in-out;
+}

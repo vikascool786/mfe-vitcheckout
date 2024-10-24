@@ -1,0 +1,31 @@
+.shipping-option-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 14px 24px;
+  background-color: white;
+  align-items: center;
+  font-weight: 400;
+  font-size: 16px;
+  gap: 9rem;
+  border-bottom: 1px solid #ACA8A8;
+}
+
+.shipping-option-container.selected {
+  background-color: #f0f1f7;
+}
+
+.shipping-option-sub-container {
+  display: flex;
+  flex-direction: column;
+  font-weight: 400;
+  font-size: 16px;
+  min-width: 9rem;
+}
+
+.shipping-option-select-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
