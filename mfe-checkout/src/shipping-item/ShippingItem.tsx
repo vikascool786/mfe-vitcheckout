@@ -22,15 +22,14 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({ product }) => {
   return (
     <div className="item-container">
       <div className="item-detail-container">
-        <img
-          className="item-image"
-          src={ProductImage}
-        />
+        <img className="item-image" src={ProductImage} />
         <div className="item-info">
           <div className="item-name">{name}</div>
           <div>{description}</div>
           <div className="item-cashback">
-            {cashback} <Cashback /> Cashback
+            <div className="item-cashback-value">{cashback}</div>
+            <Cashback viewBox="0 -2 24 22" />
+            Cashback
           </div>
           <div>{price}</div>
         </div>
