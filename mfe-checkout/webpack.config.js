@@ -94,6 +94,9 @@ module.exports = (env, argv) => {
             singleton: true,
             requiredVersion: deps["react-dom"],
           },
+          "@fontsource/roboto": {
+            singleton: true,
+          },
         },
       }),
 

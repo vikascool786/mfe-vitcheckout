@@ -1,15 +1,17 @@
 .checkbox-container {
-    display: flex;
-    flex-direction: row;
-    padding-top: 10px;
-}
-.checkbox-text {
-  font-size: 14px;
-  line-height: 16.41px;
-  font-weight: 400;
   display: flex;
   flex-direction: row;
-
+  align-items: center;
+  padding-top: 10px;
+  gap: 4px;
+}
+.checkbox-text {
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  line-height: 16.41px;
+  font-weight: 300;
+  display: flex;
+  flex-direction: row;
 }
 
 .checkbox-sub-text {
@@ -22,8 +24,6 @@
 }
 
 .checkbox-sub-container {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
-
-

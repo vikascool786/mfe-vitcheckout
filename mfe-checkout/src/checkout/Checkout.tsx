@@ -35,7 +35,7 @@ export const Checkout: React.FC = () => {
         <FormField
           label="Phone"
           required
-          extraLabel="10 Digits"
+          extraLabel="10 digits"
           renderCheckBox={
             <Checkbox
               title="Get Text Updates for this Order"
