@@ -8,7 +8,18 @@
   font-weight: 400;
   font-size: 16px;
   gap: 9rem;
-  border-bottom: 1px solid #ACA8A8;
+  border: 1px solid #ACA8A8;
+
+}
+
+.shipping-option-container.end {
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+
+.shipping-option-container.start {
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
 }
 
 .shipping-option-container.selected {
