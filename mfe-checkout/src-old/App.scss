@@ -1,0 +1,21 @@
+body {
+  font-family: "Roboto", "Inter", Arial, Helvetica, sans-serif;
+}
+.container {
+  display: flex;
+}
+
+.checkout-container {
+  display: flex;
+  justify-content: center;
+  column-gap: 38px;
+  width: 100%;
+  margin-top: 31px;
+}
+
+.checkout-sub-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 38px;
+}

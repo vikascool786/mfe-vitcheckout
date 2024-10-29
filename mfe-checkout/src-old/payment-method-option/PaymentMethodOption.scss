@@ -1,0 +1,39 @@
+@use '../styles/abstracts/mixins' as *;
+
+.payment-option-container {
+  @extend %container-base;
+  gap: 9rem;
+  cursor: pointer;
+
+  &.end {
+    @include rounded-borders(bottom);
+  }
+
+  &.start {
+    @include rounded-borders(top);
+  }
+
+  &.selected {
+    background-color: #f0f1f7;
+    border: 1px solid black;
+  }
+}
+
+.payment-option-sub-container {
+  @include flex-row;
+  gap: 1rem;
+  font-weight: 400;
+  font-size: 16px;
+  min-width: 9rem;
+}
+
+.payment-option-select-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.payment-option-name {
+    font-size: 18px;
+    font-weight: 500;
+}
