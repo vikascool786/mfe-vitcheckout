@@ -1,9 +1,9 @@
 @use '../styles/abstracts/mixins' as *;
 
-.shipping-option-container {
+.payment-option-container {
   @extend %container-base;
-  @include flex-row-between;
   gap: 9rem;
+  cursor: pointer;
 
   &.end {
     @include rounded-borders(bottom);
@@ -19,16 +19,21 @@
   }
 }
 
-.shipping-option-sub-container {
-  @include flex-column;
+.payment-option-sub-container {
+  @include flex-row;
+  gap: 1rem;
   font-weight: 400;
   font-size: 16px;
   min-width: 9rem;
 }
 
-.shipping-option-select-container {
+.payment-option-select-container {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
+  justify-content: space-between;
+}
+
+.payment-option-name {
+    font-size: 18px;
+    font-weight: 500;
 }

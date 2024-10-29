@@ -14,13 +14,13 @@
   flex-direction: row;
 }
 
-.checkbox-sub-text {
+.checkbox-text {
   font-family: "Inter", sans-serif;
-  font-size: 10px;
-  font-style: italic;
+  font-size: 14px;
+  line-height: 16.41px;
   font-weight: 300;
-  line-height: 12.1px;
-  text-align: left;
+  display: flex;
+  flex-direction: row;
 }
 
 .checkbox-sub-container {

@@ -4,28 +4,27 @@ import { Button } from "../component/Button/Button";
 import { Checkbox } from "../component/Form/Checkbox/Checkbox";
 import { FormField } from "../component/Form/Field/FormField";
 import { FormHeading } from "../component/Form/Heading/FormHeading";
+import { Back } from "../assets/svgs/Back";
+import withAccordion from "../hoc/withAccordian";
 
-export const Checkout: React.FC = () => {
-  // State to manage whether the form is expanded or collapsed
-  const [isExpanded, setIsExpanded] = useState(false);
+interface CheckoutProps {
+  isExpanded: boolean;
+  toggleAccordion: () => void;
+}
 
-  // Function to toggle accordion state
-  const toggleAccordion = () => {
-    setIsExpanded(!isExpanded);
-  };
-
+const Checkout: React.FC<CheckoutProps> = ({ isExpanded, toggleAccordion }) => {
   return (
     <div className="form-container">
       <div className="form-header">
         <FormHeading title="Shipping Address" />
-        <Button
-          label={isExpanded ? "Hide" : "Show"}
-          type="secondary"
+        <Back
+          className={`accordion ${isExpanded ? "open" : "close"}`}
           onClick={toggleAccordion}
         />
       </div>
-
-      {/* Conditionally render form fields based on accordion state */}
+      {!isExpanded && (
+        <div className="shipping-address">Ruby Boyle, 1 Lower Ragsdale Dr. Monterey, CA 93430</div>
+      )}
       {isExpanded && (
         <>
           <div className="form-field-container">
@@ -69,3 +68,5 @@ export const Checkout: React.FC = () => {
     </div>
   );
 };
+
+export default withAccordion(Checkout);

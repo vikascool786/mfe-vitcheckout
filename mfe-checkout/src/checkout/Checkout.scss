@@ -1,5 +1,5 @@
 body {
-  font-family: 'Roboto', Arial, Helvetica, sans-serif;
+  font-family: "Roboto", Arial, Helvetica, sans-serif;
 }
 
 .form-container {
@@ -10,11 +10,13 @@ body {
   flex-direction: column;
   padding: 20px;
   border-radius: 5px;
+  min-width: 34.813rem;
 }
 
 .form-header {
   display: flex;
-  padding-bottom: 20px;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .form-field-container {
@@ -22,7 +24,7 @@ body {
   justify-content: center;
   flex-direction: row;
   gap: 21px;
-  margin-top: 10px;
+  margin-top: 21px;
 }
 
 .form-field-container-full {
@@ -40,3 +42,33 @@ body {
 .form-field-container-full {
   transition: max-height 0.3s ease-in-out;
 }
+
+.accordion {
+  cursor: pointer;
+  transform-origin: center;
+  align-self: center;
+  transition: transform 0.3s ease-in-out; // Smooth rotation
+
+  &.open {
+    transform: rotate(180deg); // Rotate the arrow when open
+  }
+
+  &.close {
+    transform: rotate(0deg); // Default position when closed
+  }
+}
+
+
+.shipping-address {
+  font-size: 18px;
+  margin-top: 9px;
+}
+
+.card-information-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 16px;
+}
+
+
