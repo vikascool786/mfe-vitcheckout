@@ -17,10 +17,16 @@
 }
 
 .avs-addresslist{
+  border: 1px solid #ACA8A8;
+  border-radius: 5px;
   &-container{
     display: flex;
     padding: 10px;
-    border: 1px solid #ACA8A8;
+    gap: 10px;
+    border-bottom: 1px solid #ACA8A8;
+    &:last-child{
+      border: 0;
+    }
   }
   &__content{
     display: flex;

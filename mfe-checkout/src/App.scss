@@ -19,3 +19,19 @@ body {
   justify-content: center;
   gap: 38px;
 }
+
+.parsley-errors-list{
+  background-color: #d71d1d;
+  color: #fff;
+  margin: 0;
+  li{
+    border-radius: 2px;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 5px;
+    margin-bottom: 5px;
+    margin-top: 2px;
+    list-style-type: none;
+  }
+
+}

@@ -30,7 +30,7 @@ export const AddressVerification: React.FC<AppProps> = ({ addressList, addressTo
                   <div className="avs-address-container__address">
                       <AddressDisplay address={addressToVerify}/>
                   </div>
-                  <div className="form-footer">
+                  <div className="form-footer form-footer__dual-button">
                       <Button label="Edit Address" type="secondary" onClick={() => handleEditClick()}/>
                       <Button label="Use Address Entered" type="primary"/>
                   </div>
@@ -43,7 +43,7 @@ export const AddressVerification: React.FC<AppProps> = ({ addressList, addressTo
                   or you may select to keep the address as entered</span>
                   </div>
                   <AddressList addressList={addressList} addressToVerify={addressToVerify}/>
-                  <div className="form-footer">
+                  <div className="form-footer form-footer__dual-button">
                       <Button label="Edit Address" type="secondary" onClick={() => handleEditClick()}/>
                       <Button label="Use Selected Address" type="primary"/>
                   </div>

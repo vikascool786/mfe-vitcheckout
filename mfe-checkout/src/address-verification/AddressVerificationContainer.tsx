@@ -5,17 +5,8 @@ import {postAVS} from "../api/service/AddressVerification";
 import {AddressVerification} from "./AddressVerification";
 import {AddressHandler} from "../interfaces/AddressHandler";
 
-const testAddress: Address = {
-    first: 'John',
-    last: 'Doe',
-    address1: "123 test rd",
-    address2: "",
-    zip: "93940",
-    city: "Monterey",
-    state: "CA"
-};
-
 export const AddressVerificationContainer = forwardRef<AddressHandler>((props, ref) => {
+    const [addressToVerify, setAddressToVerify] = useState<Address>({first: '', last: '', address1: '', address2: '', zip: '', city: '', state: ''});
     const [hasAddressSuggestions, setAddressSuggestions] = useState(false);
     const [showAVS, setShowAVS] = useState(false);
 
@@ -27,23 +18,24 @@ export const AddressVerificationContainer = forwardRef<AddressHandler>((props, r
     };
 
     useImperativeHandle(ref, () => ({
+        setAddressToVerify,
         verifyAddress
     }));
 
-    const verifyAddress = async () => {
+    const verifyAddress = async (addressEntered: Address) => {
         try {
             const response = await postAVS(
-                testAddress.address1,
-                testAddress.address2,
-                testAddress.city,
-                testAddress.state,
-                testAddress.zip,
+                addressEntered.address1,
+                addressEntered.address2,
+                addressEntered.city,
+                addressEntered.state,
+                addressEntered.zip,
                 ""
             );
             const candidates = response.data.response.candidates;
             const mappedAddresses: Address[] = candidates.map((address: any) => ({
-                first: testAddress.first,
-                last: testAddress.last,
+                first: addressEntered.first,
+                last: addressEntered.last,
                 address1: address.shpAddr1,
                 address2: address.shpAddr2,
                 zip: address.shpPCode,
@@ -67,7 +59,7 @@ export const AddressVerificationContainer = forwardRef<AddressHandler>((props, r
 
   return (
       <div className="form-container">
-          <AddressVerification addressList={addressList} addressToVerify={testAddress} hasAddressSuggestions={hasAddressSuggestions} handleEditClick={handleEditClick}/>
+          <AddressVerification addressList={addressList} addressToVerify={addressToVerify} hasAddressSuggestions={hasAddressSuggestions} handleEditClick={handleEditClick}/>
       </div>
   )
 });
