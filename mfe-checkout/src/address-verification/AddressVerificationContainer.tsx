@@ -5,24 +5,24 @@ import {postAVS} from "../api/service/AddressVerification";
 import {AddressVerification} from "./AddressVerification";
 import {AddressHandler} from "../interfaces/AddressHandler";
 
-export const AddressVerificationContainer = forwardRef<AddressHandler>((props, ref) => {
+interface MyComponentProps {
+    showAvs: boolean;
+    onClick: () => void;
+}
+
+export const AddressVerificationContainer = forwardRef<AddressHandler, MyComponentProps>((props, ref) => {
     const [addressToVerify, setAddressToVerify] = useState<Address>({first: '', last: '', address1: '', address2: '', zip: '', city: '', state: ''});
     const [hasAddressSuggestions, setAddressSuggestions] = useState(false);
-    const [showAVS, setShowAVS] = useState(false);
 
     const [addressList, setAddressList] = useState<Address[]>([]);
-
-    const handleEditClick =() => {
-        console.log("edit button clicked");
-        setShowAVS(false);
-    };
 
     useImperativeHandle(ref, () => ({
         setAddressToVerify,
         verifyAddress
     }));
 
-    const verifyAddress = async (addressEntered: Address) => {
+    const verifyAddress = async (addressEntered: Address): Promise<boolean> => {
+        let isValidAddress = true;
         try {
             const response = await postAVS(
                 addressEntered.address1,
@@ -45,21 +45,18 @@ export const AddressVerificationContainer = forwardRef<AddressHandler>((props, r
             console.log(mappedAddresses);
             setAddressList(mappedAddresses);
             setAddressSuggestions(mappedAddresses.length > 1);
-            setShowAVS(!response.data.response.indicators.validAddressIndicator);
+            isValidAddress = await response.data.response.indicators.validAddressIndicator;
         } catch (err) {
             console.log(err);
         } finally {
             console.log("done");
         }
+        return isValidAddress;
     };
 
-    if (!showAVS) {
-        return null;
-    }
-
   return (
-      <div className="form-container">
-          <AddressVerification addressList={addressList} addressToVerify={addressToVerify} hasAddressSuggestions={hasAddressSuggestions} handleEditClick={handleEditClick}/>
+      <div className={`${!props.showAvs ? "form-container__hide" : "form-container"}`}>
+          <AddressVerification addressList={addressList} addressToVerify={addressToVerify} hasAddressSuggestions={hasAddressSuggestions} handleEditClick={props.onClick}/>
       </div>
   )
 });
