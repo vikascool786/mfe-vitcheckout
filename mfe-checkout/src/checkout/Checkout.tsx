@@ -45,11 +45,10 @@ export const Checkout: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const siteId = "260"
+    const siteId = "260" /*todo - need to update with dynamic siteId*/
     const fetchCountryAndStateData = async () => {
       try {
         const response = await fetchStatesAndCountries(siteId);
-        console.log("response fetchCountryAndStateData" + JSON.stringify(response));
         const stateList: DropdownOption[] = response.map((item: any) => ({
           label: item.description,
           value: item.regionID,
@@ -70,6 +69,9 @@ export const Checkout: React.FC = () => {
       if (formRef.current) {
         const formData = new FormData(formRef.current);
         const data = Object.fromEntries(formData.entries());
+        console.log("formData: " + formData);
+        console.log("data: " + JSON.stringify(data));
+
         address.first = data.first as string | "";
         address.last = data.last as string | "";
         address.address1 = data.address1 as string | "";
@@ -124,18 +126,18 @@ export const Checkout: React.FC = () => {
             {isExpanded && (
                 <>
                   <div className="form-field-container">
-                    <FormField label="First Name" required name={"first"} data-parsley-required="true"/>
-                    <FormField label="Last Name" required name={"last"} data-parsley-required="true"/>
+                    <FormField label="First Name" required name={"first"} data-parsley-required="true" value={shippingAddress.first}/>
+                    <FormField label="Last Name" required name={"last"} data-parsley-required="true" value={shippingAddress.last}/>
                   </div>
                   <div className="form-field-container-full">
-                    <FormField label="Address Line 1" required name={"address1"} data-parsley-required="true"/>
+                    <FormField label="Address Line 1" required name={"address1"} data-parsley-required="true" value={shippingAddress.address1}/>
                   </div>
                   <div className="form-field-container-full">
-                    <FormField label="Address Line 2" name={"address2"}/>
+                    <FormField label="Address Line 2" name={"address2"} value={shippingAddress.address2}/>
                   </div>
                   <div className="form-field-container">
-                    <FormField label="City" required name={"city"} data-parsley-required="true"/>
-                    <DropdownField options={stateDropdownList} label="State/Province" required/>
+                    <FormField label="City" required name={"city"} data-parsley-required="true" value={shippingAddress.city}/>
+                    <DropdownField options={stateDropdownList} label="State/Province" required selectedValue={shippingAddress.state}/>
                   </div>
 
                   <div className="form-field-container">
@@ -145,6 +147,7 @@ export const Checkout: React.FC = () => {
                         renderCheckBox={<Checkbox title="This address is a PO box"/>}
                         name={"zip"}
                         data-parsley-required="true"
+                        value={shippingAddress.zip}
                     />
                     <FormField
                         label="Phone"
