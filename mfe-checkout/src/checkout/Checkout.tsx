@@ -14,6 +14,7 @@ import {Address} from "../interfaces/Address";
 import {AddressDisplay} from "../address-verification/AddressDisplay";
 import {fetchStatesAndCountries} from "../api/service/CountriesAndStates";
 import {DropdownOption} from "../interfaces/DropdownOption";
+import {Countries} from "../data/Countries";
 
 const testAddress: Address = {
   first: 'John',
@@ -27,10 +28,15 @@ const testAddress: Address = {
 
 export const Checkout: React.FC = () => {
   // State to manage whether the form is expanded or collapsed
+
+  const COUNTRIES = Countries.map(country => ({
+    label: country.description,
+    value: country.regionID
+  }));
   const [isExpanded, setIsExpanded] = useState(false);
   const [shippingAddress, setShippingAddress] = useState<Address>(testAddress);
   const [showAVS, setShowAVS] = useState(false);
-  const [stateDropdownList, setStateDropdownList] = useState<DropdownOption[]>([]);
+  const [stateDropdownList, setStateDropdownList] = useState<DropdownOption[]>(COUNTRIES);
 
   const shipFormRef = useRef<HTMLFormElement>(null);
   const childRef = useRef<AddressHandler>(null);
