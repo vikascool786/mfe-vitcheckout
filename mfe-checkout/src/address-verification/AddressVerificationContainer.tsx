@@ -8,6 +8,7 @@ import {AddressHandler} from "../interfaces/AddressHandler";
 interface MyComponentProps {
     showAvs: boolean;
     onClick: () => void;
+    onSelectAddress: () => void;
 }
 
 export const AddressVerificationContainer = forwardRef<AddressHandler, MyComponentProps>((props, ref) => {
@@ -57,7 +58,7 @@ export const AddressVerificationContainer = forwardRef<AddressHandler, MyCompone
 
   return (
       <div className={`${!props.showAvs ? "form-container__hide" : "form-container"}`}>
-          <AddressVerification addressList={addressList} addressToVerify={addressToVerify} hasAddressSuggestions={hasAddressSuggestions} handleEditClick={props.onClick}/>
+          <AddressVerification addressList={addressList} addressToVerify={addressToVerify} hasAddressSuggestions={hasAddressSuggestions} handleEditClick={props.onClick} handleSelectedAddressClick={props.onSelectAddress}/>
       </div>
   )
 });

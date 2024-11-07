@@ -190,6 +190,10 @@ export const Checkout: React.FC = () => {
     setShowShipAddressForm(!showShipAddressForm)
   }
 
+  const handleUseSelectedAddress = () => {
+    setShowShipAddressForm(!showShipAddressForm)
+  }
+
   return (
     <div>
       <form
@@ -337,6 +341,7 @@ export const Checkout: React.FC = () => {
         ref={childRef}
         showAvs={showAVS}
         onClick={handleEditClick}
+        onSelectAddress={handleUseSelectedAddress}
       />
     </div>
   );
