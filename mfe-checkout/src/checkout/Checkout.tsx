@@ -91,7 +91,7 @@ export const Checkout: React.FC = () => {
   useEffect(() => {
     const shopperID =
       "hqwxZzYzzqpeVzhWmZzZmZpzzkxkjzmZWqqWzxzkzj"; /*todo - need to update with dynamic shopperId*/
-    //const shopperID = "mZjhWVwjzVzpVzhYxWzpeWXzUzUxepzXYXVWzkjh"; //shopperId with empty addressbook
+      //"mZjhWVwjzVzpVzhYxWzpeWXzUzUxepzXYXVWzkjh"; //shopperId with empty addressbook
     const fetchAddressBookData = async () => {
       try {
         const response = await fetchShopperAddressBook(shopperID);
@@ -327,12 +327,19 @@ export const Checkout: React.FC = () => {
                   }
                 />
               </div>
-              <div className="form-footer">
-                <Button
-                  label="Save Shipping Address & Continue"
-                  type="primary"
-                />
-              </div>
+              {shopperAddressBook.length > 0 ?
+                  <div className="form-footer form-footer__dual-button">
+                    <Button label="Cancel" type="secondary"/>
+                    <Button label="Save & Continue" type="primary"/>
+                  </div>
+                  :
+                  <div className="form-footer">
+                    <Button
+                        label="Save Shipping Address & Continue"
+                        type="primary"
+                    />
+                  </div>
+              }
             </>
           )}
         </div>

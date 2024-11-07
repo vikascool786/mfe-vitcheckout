@@ -19,7 +19,8 @@ export const createShopperAddressBookEntry = async (
     addressData: object
 ): Promise<any> => {
     try {
-        const shopperAddressBookApiEndpoint = `${GET_API_ENDPOINT_BASE_URL}/shopper-addressbooks/v1/${shopperId}/AddressBook?api_key=${API_KEY}`;
+        // const shopperAddressBookApiEndpoint = `${GET_API_ENDPOINT_BASE_URL}/shopper-addressbooks/v1/${shopperId}/AddressBook?api_key=${API_KEY}`;
+        const shopperAddressBookApiEndpoint = `${GET_API_ENDPOINT_BASE_URL}/Shopper/${shopperId}/AddressBook?siteId=222&api_key=${API_KEY}`;
         const response = await axiosInstance(shopperAddressBookApiEndpoint).post("", addressData)
         return response.data;
     } catch (error) {
