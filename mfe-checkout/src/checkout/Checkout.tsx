@@ -14,7 +14,6 @@ import {Address} from "../interfaces/Address";
 import {AddressDisplay} from "../address-verification/AddressDisplay";
 import {fetchStatesAndCountries} from "../api/service/CountriesAndStates";
 import {DropdownOption} from "../interfaces/DropdownOption";
-import {Countries} from "../data/Countries";
 import {fetchShopperAddressBook} from "../api/service/ShopperAddressBook";
 import {AddressList} from "./AddressList";
 import {fetchSiteData} from "../api/service/Site";
@@ -25,16 +24,12 @@ export const Checkout: React.FC = () => {
   const siteId = "260" /*todo - need to update with dynamic siteId*/
   // State to manage whether the form is expanded or collapsed
 
-  const COUNTRIES = Countries.map(country => ({
-    label: country.description,
-    value: country.regionID
-  }));
   const [isExpanded, setIsExpanded] = useState(false);
   const [showShipAddressForm, setShowShipAddressForm] = useState(false);
   const [shopperAddressBook, setShopperAddressBook] = useState<Address[]>([]);
   const [shippingAddress, setShippingAddress] = useState<Address>(defaultAddress);
   const [showAVS, setShowAVS] = useState(false);
-  const [stateDropdownList, setStateDropdownList] = useState<DropdownOption[]>(COUNTRIES);
+  const [stateDropdownList, setStateDropdownList] = useState<DropdownOption[]>([]);
   const [familyNameFirst, setFamilyNameFirst] = useState(false);
 
   const shipFormRef = useRef<HTMLFormElement>(null);
