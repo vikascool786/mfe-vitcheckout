@@ -3,7 +3,7 @@ import {FormHeading} from "../component/Form/Heading/FormHeading";
 import {Alert} from "../assets/icons/Alert";
 import "./AddressVerification.scss"
 import {Button} from "../component/Button/Button";
-import {AddressList} from "./AddressList";
+import {AddressVerificationAddressList} from "./AddressVerificationAddressList";
 import {Address} from "../interfaces/Address";
 import {AddressDisplay} from "./AddressDisplay";
 
@@ -28,7 +28,7 @@ export const AddressVerification: React.FC<AppProps> = ({ addressList, addressTo
                       <div className="avs-alert-container__text">There are no suggestions for the address entered</div>
                   </div>
                   <div className="avs-address-container__address">
-                      <AddressDisplay address={addressToVerify}/>
+                      <AddressDisplay address={addressToVerify} familyNameFirst={false}/>
                   </div>
                   <div className="form-footer form-footer__dual-button">
                       <Button label="Edit Address" type="secondary" onClick={() => handleEditClick()}/>
@@ -42,7 +42,7 @@ export const AddressVerification: React.FC<AppProps> = ({ addressList, addressTo
                       <span className="avs-alert-container__text">Please select one of the address corrections,
                   or you may select to keep the address as entered</span>
                   </div>
-                  <AddressList addressList={addressList} addressToVerify={addressToVerify}/>
+                  <AddressVerificationAddressList addressList={addressList} addressToVerify={addressToVerify}/>
                   <div className="form-footer form-footer__dual-button">
                       <Button label="Edit Address" type="secondary" onClick={() => handleEditClick()}/>
                       <Button label="Use Selected Address" type="primary"/>

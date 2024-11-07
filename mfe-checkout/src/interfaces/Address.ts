@@ -1,4 +1,6 @@
 export interface Address {
+    id: number;
+    isPrimary: boolean;
     first: string;
     last: string;
     address1: string;
@@ -6,4 +8,5 @@ export interface Address {
     zip: string;
     city: string;
     state: string;
+    phone: string;
 }

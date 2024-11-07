@@ -11,7 +11,7 @@ interface MyComponentProps {
 }
 
 export const AddressVerificationContainer = forwardRef<AddressHandler, MyComponentProps>((props, ref) => {
-    const [addressToVerify, setAddressToVerify] = useState<Address>({first: '', last: '', address1: '', address2: '', zip: '', city: '', state: ''});
+    const [addressToVerify, setAddressToVerify] = useState<Address>({id: 0, isPrimary: false, first: '', last: '', address1: '', address2: '', zip: '', city: '', state: '', phone: ''});
     const [hasAddressSuggestions, setAddressSuggestions] = useState(false);
 
     const [addressList, setAddressList] = useState<Address[]>([]);
@@ -40,7 +40,8 @@ export const AddressVerificationContainer = forwardRef<AddressHandler, MyCompone
                 address2: address.shpAddr2,
                 zip: address.shpPCode,
                 city: address.shpCity,
-                state: address.shpState
+                state: address.shpState,
+                phone: addressEntered.phone
             }));
             console.log(mappedAddresses);
             setAddressList(mappedAddresses);

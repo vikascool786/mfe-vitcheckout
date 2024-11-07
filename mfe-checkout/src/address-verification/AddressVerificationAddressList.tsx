@@ -8,22 +8,22 @@ interface AppProps {
     addressToVerify: Address;
 }
 
-export const AddressList: React.FC<AppProps> = ({ addressList, addressToVerify }) => {
+export const AddressVerificationAddressList: React.FC<AppProps> = ({ addressList, addressToVerify }) => {
 
     return (
-        <div className="avs-addresslist">
+        <div className="addresslist">
             {addressList.map((add, index) => (
-                <div className="avs-addresslist-container">
+                <div className="addresslist-container">
                     <RadioButton id={String(index + 1)} name={"avs-select"} />
-                    <AddressDisplay address={add} />
+                    <AddressDisplay address={add} familyNameFirst={false} />
                 </div>
             ))}
             {/*Address entered by shopper*/}
-            <div className="avs-addresslist-container">
+            <div className="addresslist-container">
                 <RadioButton id={"0"} name={"avs-select"} />
-                <div className="avs-addresslist-container__content">
-                    <div className="avs-addresslist__subtitle">Address Entered</div>
-                    <AddressDisplay address={addressToVerify} />
+                <div className="addresslist-container__content">
+                    <div className="addresslist__subtitle">Address Entered</div>
+                    <AddressDisplay address={addressToVerify} familyNameFirst={false}/>
                 </div>
             </div>
         </div>

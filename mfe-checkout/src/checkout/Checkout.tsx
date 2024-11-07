@@ -14,24 +14,28 @@ import {Address} from "../interfaces/Address";
 import {AddressDisplay} from "../address-verification/AddressDisplay";
 import {fetchStatesAndCountries} from "../api/service/CountriesAndStates";
 import {DropdownOption} from "../interfaces/DropdownOption";
+import {Countries} from "../data/Countries";
+import {fetchShopperAddressBook} from "../api/service/ShopperAddressBook";
+import {AddressList} from "./AddressList";
+import {fetchSiteData} from "../api/service/Site";
 
-const testAddress: Address = {
-  first: 'John',
-  last: 'Doe',
-  address1: "1 lower ragsdale dr",
-  address2: "",
-  zip: "93940",
-  city: "Monterey",
-  state: "CA"
-};
+const defaultAddress: Address = {id: 0, isPrimary: true, first: '', last: '', address1: '', address2: '', zip: '', city: '', state: '', phone:''};
 
 export const Checkout: React.FC = () => {
+  const siteId = "260" /*todo - need to update with dynamic siteId*/
   // State to manage whether the form is expanded or collapsed
 
+  const COUNTRIES = Countries.map(country => ({
+    label: country.description,
+    value: country.regionID
+  }));
   const [isExpanded, setIsExpanded] = useState(false);
-  const [shippingAddress, setShippingAddress] = useState<Address>(testAddress);
+  const [showShipAddressForm, setShowShipAddressForm] = useState(false);
+  const [shopperAddressBook, setShopperAddressBook] = useState<Address[]>([]);
+  const [shippingAddress, setShippingAddress] = useState<Address>(defaultAddress);
   const [showAVS, setShowAVS] = useState(false);
-  const [stateDropdownList, setStateDropdownList] = useState<DropdownOption[]>([]);
+  const [stateDropdownList, setStateDropdownList] = useState<DropdownOption[]>(COUNTRIES);
+  const [familyNameFirst, setFamilyNameFirst] = useState(false);
 
   const shipFormRef = useRef<HTMLFormElement>(null);
   const childRef = useRef<AddressHandler>(null);
@@ -46,7 +50,19 @@ export const Checkout: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const siteId = "260" /*todo - need to update with dynamic siteId*/
+    const fetchSiteInfo = async () => {
+      try {
+        const response = await fetchSiteData(siteId);
+        setFamilyNameFirst(response.locale.familyNameFirst);
+      } catch (error) {
+        console.error("Failed to fetch site info:", error);
+      }
+    };
+
+    fetchSiteInfo();
+  }, []);
+
+  useEffect(() => {
     const fetchCountryAndStateData = async () => {
       try {
         const response = await fetchStatesAndCountries(siteId);
@@ -63,15 +79,50 @@ export const Checkout: React.FC = () => {
     fetchCountryAndStateData();
   }, []);
 
+  useEffect(() => {
+    const shopperID = "hqwxZzYzzqpeVzhWmZzZmZpzzkxkjzmZWqqWzxzkzj" /*todo - need to update with dynamic shopperId*/
+    //const shopperID = "mZjhWVwjzVzpVzhYxWzpeWXzUzUxepzXYXVWzkjh"; //shopperId with empty addressbook
+    const fetchAddressBookData = async () => {
+      try {
+        const response = await fetchShopperAddressBook(shopperID);
+        const addressList: Address[] = buildShoppersAddressBookFromResponse(response);
+        setShopperAddressBook(addressList);
+      } catch (error) {
+        console.error("Failed to fetch data:", error);
+      }
+    };
+
+    fetchAddressBookData();
+  }, []);
+
+  const buildShoppersAddressBookFromResponse =(addressBookResponse: any) => {
+    let filteredAddresses: Address[] = [];
+    let hasPrimaryAddress: boolean = false;
+    addressBookResponse.forEach((address: any) => {
+      if(address.hasAddress as boolean){
+        const newAddress: Address = {id: address.id, isPrimary: address.isPrimary, first: address.first, last: address.last, address1: address.address1, address2: address.address2, city: address.city, state: address.state, zip: address.zip, phone: address.phone};
+        if(newAddress.isPrimary){
+          hasPrimaryAddress = true;
+          setShippingAddress(newAddress);
+        }
+        filteredAddresses.push(newAddress);
+      }
+    });
+
+    if(!hasPrimaryAddress){
+      setShippingAddress(filteredAddresses[0] ?? defaultAddress);
+    }
+    setShowShipAddressForm(filteredAddresses.length < 1);
+    return filteredAddresses;
+  };
+
   const handleSaveAddress = async (e: React.FormEvent) => {
       e.preventDefault();
       const buildAddress = (formRef: RefObject<HTMLFormElement>) => {
-      let address: Address = {first: '', last: '', address1: '', address2: '', zip: '', city: '', state: ''};
+      let address: Address = defaultAddress;
       if (formRef.current) {
         const formData = new FormData(formRef.current);
         const data = Object.fromEntries(formData.entries());
-        console.log("formData: " + formData);
-        console.log("data: " + JSON.stringify(data));
 
         address.first = data.first as string | "";
         address.last = data.last as string | "";
@@ -80,6 +131,7 @@ export const Checkout: React.FC = () => {
         address.zip = data.zip as string | "";
         address.city = data.city as string | "";
         address.state = data.state as string | "";
+        address.phone = data.phone as string | "";
       }
       return address;
     };
@@ -90,7 +142,7 @@ export const Checkout: React.FC = () => {
       try {
         const isValidAddress = await childRef.current.verifyAddress(addressEntered);
         setShippingAddress(addressEntered);
-        setIsExpanded(false);
+        setShowShipAddressForm(false);
         setShowAVS(!isValidAddress);
       } catch (error) {
         console.error("Error:", error);
@@ -101,7 +153,7 @@ export const Checkout: React.FC = () => {
   const handleEditClick =() => {
     console.log("edit button clicked");
     setShowAVS(false);
-    setIsExpanded(true);
+    setShowShipAddressForm(true);
   };
 
   return (
@@ -110,26 +162,43 @@ export const Checkout: React.FC = () => {
           <div className={`${!showAVS ? "form-container" : "form-container__hide"}`}>
             <div className="form-header">
               <FormHeading title="Shipping Address"/>
-              <Back
-                  className={`accordion ${isExpanded ? "open" : "close"}`}
-                  onClick={toggleAccordion}
-              />
+              {shopperAddressBook.length > 0 && (
+                  <Back
+                      className={`accordion ${isExpanded ? "open" : "close"}`}
+                      onClick={toggleAccordion}
+                  />
+              )}
+
             </div>
 
             {/* show details fields based on accordion state close  */}
-            {!isExpanded && (
+            {!showShipAddressForm && (
                 <div className="shipping-address">
-                  <AddressDisplay address={shippingAddress}/>
+                  <AddressDisplay address={shippingAddress} familyNameFirst={familyNameFirst}/>
+                  {shopperAddressBook.length > 0 && isExpanded && (
+                      <AddressList addressBook={shopperAddressBook} familyNameFirst={familyNameFirst}/>
+                  )}
                 </div>
             )}
 
             {/* Conditionally render form fields based on accordion state */}
-            {isExpanded && (
-                <>
-                  <div className="form-field-container">
-                    <FormField label="First Name" required name={"first"} data-parsley-required="true" value={shippingAddress.first}/>
-                    <FormField label="Last Name" required name={"last"} data-parsley-required="true" value={shippingAddress.last}/>
-                  </div>
+            {showShipAddressForm && (
+                /*some countries display family name before first name (TWN/HKG/SGP)*/
+                <>{familyNameFirst ? (
+                        <div className="form-field-container">
+                          <FormField label="Last Name" required name={"last"} data-parsley-required="true"
+                                     value={shippingAddress.last}/>
+                          <FormField label="First Name" required name={"first"} data-parsley-required="true"
+                                     value={shippingAddress.first}/>
+                        </div>
+                    ) :
+                    <div className="form-field-container">
+                      <FormField label="First Name" required name={"first"} data-parsley-required="true"
+                                 value={shippingAddress.first}/>
+                      <FormField label="Last Name" required name={"last"} data-parsley-required="true"
+                                 value={shippingAddress.last}/>
+                    </div>
+                }
                   <div className="form-field-container-full">
                     <FormField label="Address Line 1" required name={"address1"} data-parsley-required="true" value={shippingAddress.address1}/>
                   </div>
@@ -138,7 +207,7 @@ export const Checkout: React.FC = () => {
                   </div>
                   <div className="form-field-container">
                     <FormField label="City" required name={"city"} data-parsley-required="true" value={shippingAddress.city}/>
-                    <DropdownField options={stateDropdownList} label="State/Province" required selectedValue={shippingAddress.state}/>
+                    <DropdownField options={stateDropdownList} label="State/Province" required selectedValue={shippingAddress.state} formName={"state"}/>
                   </div>
 
                   <div className="form-field-container">
@@ -155,6 +224,8 @@ export const Checkout: React.FC = () => {
                         required
                         extraLabel="10 digits"
                         data-parsley-required="true"
+                        name={"phone"}
+                        value={shippingAddress.phone}
                         renderCheckBox={
                           <Checkbox
                               title="Get Text Updates for this Order"

@@ -12,8 +12,8 @@ module.exports = (env, argv) => {
   const dotenvFilename = isProduction
     ? '.env.production'
     : isStaging
-    ? '.env.staging'
-    : '.env.development';
+      ? '.env.staging'
+      : '.env.development';
   const isLocal = env.local ?? false;
 
   return {
@@ -90,7 +90,7 @@ module.exports = (env, argv) => {
       }),
 
       new HtmlWebPackPlugin({ template: "./src/index.html" }),
-      
+
       new Dotenv({ path: dotenvFilename }),
 
       new ProvidePlugin({
