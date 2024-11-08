@@ -1,0 +1,52 @@
+@import "../../styles/abstracts/variables";
+
+a.title-anchor {
+  text-decoration: none;
+  &:hover {
+    span.tooltip-title {
+      color: $highlight-color;
+      background: $primary-background;
+      visibility: visible;
+      opacity: 1;
+    }
+  }
+}
+.title,
+span.tooltip-title {
+  line-height: 1.5em;
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+  font-size: 1rem;
+  font-weight: 400;
+  color: black;
+  white-space: pre-wrap;
+  width: 100%;
+  padding-right: 1em;
+}
+.title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Number of lines to show */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-height: 3em;
+}
+
+span.tooltip-title {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  font-size: 1rem;
+  color: $primary-color;
+  background-color: $primary-background;
+  border-radius: 3px;
+  max-width: 100%;
+  width: 100%;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s, visibility 0.3s;
+}

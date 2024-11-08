@@ -1,0 +1,43 @@
+$skeleton-bg: #eeeeee;
+$skeleton-dark-bg: #4b5563;
+$skeleton-border: #e5e7eb;
+.skeleton-list-container {
+  position: relative;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-row-gap: 10px;
+  padding: 10px 0;
+}
+.product-store-skeleton {
+  padding-right: 10px;
+
+  .skeleton-store {
+    position: relative;
+    height: 5rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: $skeleton-bg;
+    animation: pulse 1.5s infinite;
+  }
+}
+
+.skeleton-product-store-count {
+  height: 1.5rem;
+  background-color: $skeleton-bg;
+  width: 15%;
+  border-radius: 20px;
+}
+// Pulse animation
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "name": "mfe-search-results",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "webpack serve --open --mode development --live-reload --hot",
+    "start:dev": "webpack --mode development && cd dist && cross-env PORT=3007 npx servor",
+    "start:prod": "webpack --mode production && cd dist && PORT=3003 npx servor",
+    "build:prod": "webpack --mode production",
+    "start:live": "webpack serve --open --mode development --live-reload --hot",
+    "start:local": "webpack serve --open --mode development --live-reload --hot --env local"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Daniel Cipoletti",
+    "email": "dcipoletti@gmail.com"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.15.8",
+    "@babel/plugin-transform-runtime": "^7.15.8",
+    "@babel/preset-env": "^7.15.8",
+    "@babel/preset-react": "^7.14.5",
+    "autoprefixer": "^10.1.0",
+    "babel-loader": "^8.2.2",
+    "cross-env": "^7.0.3",
+    "css-loader": "^6.10.0",
+    "dotenv-webpack": "^8.0.1",
+    "html-webpack-plugin": "^5.3.2",
+    "postcss": "^8.2.1",
+    "postcss-loader": "^8.1.1",
+    "prettier": "^3.3.2",
+    "sass": "^1.72.0",
+    "sass-loader": "^14.1.1",
+    "style-loader": "^3.3.4",
+    "webpack": "^5.57.1",
+    "webpack-cli": "^4.10.0",
+    "webpack-dev-server": "^4.3.1"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.13.10",
+    "@fortawesome/fontawesome-svg-core": "^6.5.2",
+    "@fortawesome/free-brands-svg-icons": "^6.5.2",
+    "@fortawesome/free-regular-svg-icons": "^6.5.2",
+    "@fortawesome/free-solid-svg-icons": "^6.5.2",
+    "@fortawesome/react-fontawesome": "^0.2.2",
+    "axios": "^1.7.2",
+    "jotai": "^2.7.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "swiper": "^11.1.14"
+  }
+}
