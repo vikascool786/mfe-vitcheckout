@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import "./PaymentMethods.scss";
 import { FormHeading } from "../component/Form/Heading/FormHeading";
 import { Button } from "../component/Button/Button";
@@ -7,11 +7,15 @@ import PayPal from "../assets/images/PayPal.png";
 import Sezzle from "../assets/images/Sezzle.png";
 import ClickToPay from "../assets/images/ClickToPay.png";
 import { PaymentMethodOption } from "../payment-method-option/PaymentMethodOption";
+import {fetchShoppersPaymentMethods} from "../api/service/ShoppersPaymentMethods";
+import {ShopperSavedPayments} from "../interfaces/ShopperSavedPayments";
+import {SavedCreditCard} from "../payment-method-option/SavedCreditCard";
 
 export interface IPaymentMethodOption {
   name: string;
   image: string;
   selected: boolean;
+  shopperSavedPayment?: ShopperSavedPayments;
 }
 
 const paymentMethods: IPaymentMethodOption[] = [
@@ -33,11 +37,45 @@ const paymentMethods: IPaymentMethodOption[] = [
 ];
 
 export const PaymentMethod: React.FC = () => {
+  const [shopperPayments, setShopperPayments] = useState<IPaymentMethodOption[]>([]);
+
+  useEffect(() => {
+    const shopperID =
+        //"WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz";
+        "hqwxZzYzzqpeVzhWmZzZmZpzzkxkjzmZWqqWzxzkzj"; /*todo - need to update with dynamic shopperId*/
+    const fetchShoppersSavedPayments = async () => {
+      try {
+        const response = await fetchShoppersPaymentMethods(shopperID);
+        console.log("wallet response: " + JSON.stringify(response));
+        const shopperPayments: IPaymentMethodOption[] = response.map((item: any) => ({
+          name: item.type,
+          image: item.imageUrl,
+          selected: item.preferred,
+          shopperSavedPayment: {
+            id: item.id as string | "",
+            expirationDate: item.expires as string | "",
+            cardMask: item.mask as string | "",
+            preferred: item.preferred as boolean,
+            type: item.type as string | ""
+          }
+        }));
+        setShopperPayments(shopperPayments);
+      } catch (error) {
+        console.error("Failed to fetch shopper payment data:", error);
+      }
+    };
+
+    fetchShoppersSavedPayments();
+  }, []);
+
   return (
     <div>
       <div className="pm-container">
         <FormHeading title="Payment Method" />
         <div className="pm-sub-container">
+          {shopperPayments.map((shopperPayment, index) => (
+            <SavedCreditCard paymentMethod={shopperPayment} index={index}/>
+          ))}
           {paymentMethods.map((paymentMethod, index) => (
             <PaymentMethodOption
               key={index}

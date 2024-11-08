@@ -17,6 +17,12 @@
     background-color: #f0f1f7;
     border: 1px solid black;
   }
+  &__card {
+    display: flex;
+    &-img{
+      max-width: 30px;
+    }
+  }
 }
 
 .payment-option-sub-container {
