@@ -1,0 +1,34 @@
+.tm-container {
+  display: flex;
+  background-color: white;
+  box-shadow: 0px 0px 5px 1px #79787840;
+  border: 0.2px solid #79787833;
+  flex-direction: column;
+  padding: 20px;
+  border-radius: 5px;
+  min-width: 34.813rem;
+  gap: 4px;
+}
+
+.tm-form-container {
+  display: flex;
+  justify-content: center;
+  flex-direction: row;
+  gap: 21px;
+  margin-top: 21px;
+  align-items: center;
+}
+
+.tm-form-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.tm-rates {
+  font-size: 13px;
+  font-style: italic;
+  font-weight: 300;
+  line-height: 15.23px;
+  text-align: left;
+  color: #212121;
+}

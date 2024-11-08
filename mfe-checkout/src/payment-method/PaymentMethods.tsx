@@ -1,15 +1,17 @@
 import React, {useEffect, useState} from "react";
 import "./PaymentMethods.scss";
-import { FormHeading } from "../component/Form/Heading/FormHeading";
-import { Button } from "../component/Button/Button";
 import CardOptions from "../assets/images/CardOptions.png";
+import ClickToPay from "../assets/images/ClickToPay.png";
 import PayPal from "../assets/images/PayPal.png";
 import Sezzle from "../assets/images/Sezzle.png";
-import ClickToPay from "../assets/images/ClickToPay.png";
+import { Button } from "../component/Button/Button";
+import { FormHeading } from "../component/Form/Heading/FormHeading";
 import { PaymentMethodOption } from "../payment-method-option/PaymentMethodOption";
 import {fetchShoppersPaymentMethods} from "../api/service/ShoppersPaymentMethods";
 import {ShopperSavedPayments} from "../interfaces/ShopperSavedPayments";
 import {SavedCreditCard} from "../payment-method-option/SavedCreditCard";
+import { TextUpdates } from "../text-updates/TextUpdates";
+import "./PaymentMethods.scss";
 
 export interface IPaymentMethodOption {
   name: string;
@@ -69,7 +71,7 @@ export const PaymentMethod: React.FC = () => {
   }, []);
 
   return (
-    <div>
+    <div className="pm-main-container">
       <div className="pm-container">
         <FormHeading title="Payment Method" />
         <div className="pm-sub-container">
@@ -101,6 +103,7 @@ export const PaymentMethod: React.FC = () => {
           </div>
         </div>
       </div>
+      <TextUpdates />
       <div className="checkout-place-order">
         <div className="checkout-place-order-text">
           By clicking place order, you agree to the SHOP.COM Terms of Use and
