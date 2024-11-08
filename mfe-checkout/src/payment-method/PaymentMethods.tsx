@@ -1,7 +1,5 @@
 import React, {useEffect, useState} from "react";
 import "./PaymentMethods.scss";
-import { FormHeading } from "../component/Form/Heading/FormHeading";
-import { Button } from "../component/Button/Button";
 import CardOptions from "../assets/images/CardOptions.png";
 import ClickToPay from "../assets/images/ClickToPay.png";
 import PayPal from "../assets/images/PayPal.png";
