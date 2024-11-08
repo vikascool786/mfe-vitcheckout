@@ -8,7 +8,11 @@
   border-radius: 5px;
   min-width: 34.813rem;
 }
-
+.pm-main-container {
+  display: flex;
+  flex-direction: column;
+  gap: 21px;
+}
 .checkout-place-order {
   display: flex;
   flex-direction: column;

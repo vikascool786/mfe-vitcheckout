@@ -1,11 +1,10 @@
-import React from "react";
 // import Checkout from "./checkout/Checkout";
-import { OrderSummary } from "./order-summary/OrderSummary";
+import React from 'react'
 import "./App.scss";
-import { ShippingMethod } from "./shipping-methods/ShippingMethod";
-import { PaymentMethod } from "./payment-method/PaymentMethods";
-import { Button } from "./component/Button/Button";
 import { Checkout } from "./checkout/Checkout";
+import { OrderSummary } from "./order-summary/OrderSummary";
+import { PaymentMethod } from "./payment-method/PaymentMethods";
+import { ShippingMethod } from "./shipping-methods/ShippingMethod";
 
 export const CheckoutContainer = () => {
   return (
