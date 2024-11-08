@@ -13,14 +13,14 @@ export const AddressVerificationAddressList: React.FC<AppProps> = ({ addressList
     return (
         <div className="addresslist">
             {addressList.map((add, index) => (
-                <div className="addresslist-container">
+                <div className={`addresslist-container ${index == 0 && 'start'}`}>
                     <RadioButton id={String(index + 1)} name={"avs-select"} />
                     <AddressDisplay address={add} familyNameFirst={false} />
                 </div>
             ))}
             {/*Address entered by shopper*/}
-            <div className="addresslist-container">
-                <RadioButton id={"0"} name={"avs-select"} />
+            <div className="addresslist-container selected end">
+                <RadioButton id={"0"} name={"avs-select"} checked={true}/>
                 <div className="addresslist-container__content">
                     <div className="addresslist__subtitle">Address Entered</div>
                     <AddressDisplay address={addressToVerify} familyNameFirst={false}/>
