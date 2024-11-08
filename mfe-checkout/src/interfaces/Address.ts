@@ -9,4 +9,5 @@ export interface Address {
     city: string;
     state: string;
     phone: string;
+    country?: string;
 }

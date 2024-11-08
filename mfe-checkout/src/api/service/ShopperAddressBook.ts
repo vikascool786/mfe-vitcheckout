@@ -16,7 +16,7 @@ export const fetchShopperAddressBook = async (
 
 export const createShopperAddressBookEntry = async (
     shopperId: string,
-    addressData: object
+    addressData: string
 ): Promise<any> => {
     try {
         const shopperAddressBookApiEndpoint = `${GET_API_ENDPOINT_BASE_URL}/shopper-addressbooks/v1/${shopperId}/AddressBook?api_key=${API_KEY}`;

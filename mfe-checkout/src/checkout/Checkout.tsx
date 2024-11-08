@@ -167,12 +167,15 @@ export const Checkout: React.FC = () => {
         const isValidAddress = await childRef.current.verifyAddress(
           addressEntered
         );
-        setShippingAddress(addressEntered);
+        const validatedAddress = {...addressEntered,  country: "USA"}
+        setShippingAddress({...addressEntered, country: "USA"});
         setShowShipAddressForm(false);
         const updatedAddresses = [...shopperAddressBook, addressEntered]
         setShopperAddressBook(updatedAddresses);
         setShowAVS(!isValidAddress);
-        await createShopperAddressBookEntry(shopperID, addressEntered)
+        console.log(addressEntered)
+        const add = new URLSearchParams(Object.entries(validatedAddress)).toString();
+        await createShopperAddressBookEntry(shopperID, validatedAddress)
       } catch (error) {
         console.error("Error:", error);
       }
