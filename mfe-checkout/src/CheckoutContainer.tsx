@@ -1,4 +1,3 @@
-// import Checkout from "./checkout/Checkout";
 import React from 'react'
 import "./App.scss";
 import { Checkout } from "./checkout/Checkout";
