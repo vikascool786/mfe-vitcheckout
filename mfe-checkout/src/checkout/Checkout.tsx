@@ -14,14 +14,9 @@ import { Address } from "../interfaces/Address";
 import { AddressDisplay } from "../address-verification/AddressDisplay";
 import { fetchStatesAndCountries } from "../api/service/CountriesAndStates";
 import { DropdownOption } from "../interfaces/DropdownOption";
-import {
-  createShopperAddressBookEntry,
-  fetchShopperAddressBook,
-} from "../api/service/ShopperAddressBook";
+import { createShopperAddressBookEntry, fetchShopperAddressBook } from "../api/service/ShopperAddressBook";
 import { fetchSiteData } from "../api/service/Site";
 import { AddressList } from "../address-list/AddressList";
-import { ADDRESS_BOOK } from "../data/AddressBook";
-import { STATES } from "../data/States";
 
 const defaultAddress: Address = {
   id: 0,
@@ -40,8 +35,8 @@ export const Checkout: React.FC = () => {
   const siteId = "260"; /*todo - need to update with dynamic siteId*/
   // State to manage whether the form is expanded or collapsed
 
-  const [isExpanded, setIsExpanded] = useState(true);
-  const [showShipAddressForm, setShowShipAddressForm] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [showShipAddressForm, setShowShipAddressForm] = useState(false);
   const [shopperAddressBook, setShopperAddressBook] = useState<Address[]>([]);
   const [shippingAddress, setShippingAddress] =
     useState<Address>(defaultAddress);
@@ -87,12 +82,6 @@ export const Checkout: React.FC = () => {
         setStateDropdownList(stateList);
       } catch (error) {
         console.error("Failed to fetch data:", error);
-      } finally {
-        const stateList: DropdownOption[] = STATES.map((item: any) => ({
-          label: item.description,
-          value: item.regionID,
-        }));
-        setStateDropdownList(stateList);
       }
     };
 
@@ -102,7 +91,7 @@ export const Checkout: React.FC = () => {
   useEffect(() => {
     const shopperID =
       "hqwxZzYzzqpeVzhWmZzZmZpzzkxkjzmZWqqWzxzkzj"; /*todo - need to update with dynamic shopperId*/
-    //"mZjhWVwjzVzpVzhYxWzpeWXzUzUxepzXYXVWzkjh"; //shopperId with empty addressbook
+      //"mZjhWVwjzVzpVzhYxWzpeWXzUzUxepzXYXVWzkjh"; //shopperId with empty addressbook
     const fetchAddressBookData = async () => {
       try {
         const response = await fetchShopperAddressBook(shopperID);
@@ -111,8 +100,6 @@ export const Checkout: React.FC = () => {
         setShopperAddressBook(addressList);
       } catch (error) {
         console.error("Failed to fetch data:", error);
-      } finally {
-        buildShoppersAddressBookFromResponse(ADDRESS_BOOK);
       }
     };
 
@@ -153,7 +140,8 @@ export const Checkout: React.FC = () => {
 
   const handleSaveAddress = async (e: React.FormEvent) => {
     e.preventDefault();
-    const shopperID = "hqwxZzYzzqpeVzhWmZzZmZpzzkxkjzmZWqqWzxzkzj";
+    const shopperID =
+      "hqwxZzYzzqpeVzhWmZzZmZpzzkxkjzmZWqqWzxzkzj";
     const buildAddress = (formRef: RefObject<HTMLFormElement>) => {
       let address: Address = defaultAddress;
       if (formRef.current) {
@@ -179,16 +167,14 @@ export const Checkout: React.FC = () => {
         const isValidAddress = await childRef.current.verifyAddress(
           addressEntered
         );
-        const validatedAddress = { ...addressEntered, country: "USA" };
-        setShippingAddress({ ...addressEntered, country: "USA" });
+        const validatedAddress = {...addressEntered,  country: "USA"}
+        setShippingAddress({...addressEntered, country: "USA"});
         setShowShipAddressForm(false);
-        const updatedAddresses = [...shopperAddressBook, addressEntered];
+        const updatedAddresses = [...shopperAddressBook, addressEntered]
         setShopperAddressBook(updatedAddresses);
         setShowAVS(!isValidAddress);
-        const address = new URLSearchParams(
-          Object.entries(validatedAddress)
-        ).toString();
-        await createShopperAddressBookEntry(shopperID, address);
+        const address = new URLSearchParams(Object.entries(validatedAddress)).toString();
+        await createShopperAddressBookEntry(shopperID, address)
       } catch (error) {
         console.error("Error:", error);
       }
@@ -202,13 +188,13 @@ export const Checkout: React.FC = () => {
   };
 
   const handleNewAddressClick = () => {
-    setShippingAddress(defaultAddress);
-    setShowShipAddressForm(!showShipAddressForm);
-  };
+    setShippingAddress(defaultAddress)
+    setShowShipAddressForm(!showShipAddressForm)
+  }
 
   const handleUseSelectedAddress = () => {
-    setShowShipAddressForm(!showShipAddressForm);
-  };
+    setShowShipAddressForm(!showShipAddressForm)
+  }
 
   return (
     <div>
@@ -343,19 +329,19 @@ export const Checkout: React.FC = () => {
                   }
                 />
               </div>
-              {shopperAddressBook.length > 0 ? (
-                <div className="form-footer form-footer__dual-button">
-                  <Button label="Cancel" type="secondary" />
-                  <Button label="Save & Continue" type="primary" />
-                </div>
-              ) : (
-                <div className="form-footer">
-                  <Button
-                    label="Save Shipping Address & Continue"
-                    type="primary"
-                  />
-                </div>
-              )}
+              {shopperAddressBook.length > 0 ?
+                  <div className="form-footer form-footer__dual-button">
+                    <Button label="Cancel" type="secondary"/>
+                    <Button label="Save & Continue" type="primary"/>
+                  </div>
+                  :
+                  <div className="form-footer">
+                    <Button
+                        label="Save Shipping Address & Continue"
+                        type="primary"
+                    />
+                  </div>
+              }
             </>
           )}
         </div>

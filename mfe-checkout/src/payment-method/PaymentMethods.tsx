@@ -55,7 +55,8 @@ export const PaymentMethod: React.FC = () => {
 
     const fetchShoppersSavedPayments = async () => {
       try {
-        const shopperPayments = WALLET.map((item: any, index: number) => ({
+        const response = await fetchShoppersPaymentMethods(shopperID);
+        const shopperPayments = response.map((item: any, index: number) => ({
           name: item.type,
           image: item.imageUrl,
           selected: index === 0, // Mark the first saved card as selected
