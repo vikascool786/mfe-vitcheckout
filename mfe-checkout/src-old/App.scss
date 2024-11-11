@@ -1,0 +1,37 @@
+body {
+  font-family: "Roboto", "Inter", Arial, Helvetica, sans-serif;
+}
+.container {
+  display: flex;
+}
+
+.checkout-container {
+  display: flex;
+  justify-content: center;
+  column-gap: 38px;
+  width: 100%;
+  margin-top: 31px;
+}
+
+.checkout-sub-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 38px;
+}
+
+.parsley-errors-list{
+  background-color: #d71d1d;
+  color: #fff;
+  margin: 0;
+  li{
+    border-radius: 2px;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 5px;
+    margin-bottom: 5px;
+    margin-top: 2px;
+    list-style-type: none;
+  }
+
+}

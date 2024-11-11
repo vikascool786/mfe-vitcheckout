@@ -173,9 +173,8 @@ export const Checkout: React.FC = () => {
         const updatedAddresses = [...shopperAddressBook, addressEntered]
         setShopperAddressBook(updatedAddresses);
         setShowAVS(!isValidAddress);
-        console.log(addressEntered)
-        const add = new URLSearchParams(Object.entries(validatedAddress)).toString();
-        await createShopperAddressBookEntry(shopperID, validatedAddress)
+        const address = new URLSearchParams(Object.entries(validatedAddress)).toString();
+        await createShopperAddressBookEntry(shopperID, address)
       } catch (error) {
         console.error("Error:", error);
       }

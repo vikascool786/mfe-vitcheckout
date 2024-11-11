@@ -1,0 +1,55 @@
+.item-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  margin-top: 10px;
+}
+
+.item-detail-container {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.item-image {
+  height: 65.96px;
+  width: 65.96px;
+}
+
+.item-info {
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 15.23px;
+  text-align: left;
+}
+
+.item-name {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 18.75px;
+  text-align: left;
+}
+
+.item-cancel {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 15.23px;
+  text-align: left;
+}
+
+.item-cashback {
+  display: flex;
+  align-items: center;
+}
+
+.item-cashback-value {
+  margin-right: 2px;
+}
