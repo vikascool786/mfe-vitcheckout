@@ -13,6 +13,21 @@
   flex-direction: column;
   gap: 21px;
 }
+
+.pm-title-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row;
+}
+
+.pm-show-card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+}
+
 .checkout-place-order {
   display: flex;
   flex-direction: column;
@@ -36,7 +51,7 @@
   border-bottom-right-radius: 5px;
   padding-top: 1.375rem;
   padding-bottom: 1.375rem;
-  color: #000 ;
+  color: #000;
 }
 
 .checkout-method-click-to-pay-text {
@@ -57,7 +72,6 @@
 .checkout-method-save-information {
   min-width: 16rem;
 }
-
 
 .pm-sub-container {
   margin-top: 1.275rem;

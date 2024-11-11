@@ -1,8 +1,8 @@
-// PaymentOption.tsx
-import React from "react";
+import React, { useState } from "react";
 import "./PaymentMethodOption.scss";
 import { RadioButton } from "../../component/RadioButton/RadioButton";
 import { CardInformation } from "../card-information/CardInformation";
+import { FormField } from "../../component/Form/Field/FormField";
 
 export interface IPaymentOptionProps {
   name: string;
@@ -29,9 +29,21 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   isSavedCard = false,
   shopperSavedPayment,
 }) => {
+  const [isEditing, setIsEditing] = useState(false);
+
+  const handleEditClick = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    setIsEditing(true);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+  };
+
   const isSelected = selected ? "selected" : "";
   const isFirst = index === 0 ? "start" : "";
   const showCardImage = isSavedCard && shopperSavedPayment;
+
   return (
     <div
       className={`payment-option-container ${isSelected} ${isFirst}`}
@@ -45,25 +57,53 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
             checked={selected}
           />
           {!showCardImage && <div className="payment-option-name">{name}</div>}
-          {!showCardImage && <img src={image} />}
+          {showCardImage && !isEditing && (
+            <div className="payment-option-container__card">
+              <div className="payment-option-container__card-details">
+                <img
+                  className="payment-option-container__card-img"
+                  src={image}
+                  alt={name}
+                />
+                <div>*{shopperSavedPayment.cardMask.slice(-4)}</div>
+              </div>
+              <div className="payment-option-container__card-expiration">
+                Expires {shopperSavedPayment.expirationDate}
+              </div>
+            </div>
+          )}
         </div>
-      </div>
 
-      {showCardImage ? (
-        <div className="payment-option-container__card">
-          <div className="payment-option-container__card-details">
-            <img
-              className="payment-option-container__card-img"
-              src={image}
-              alt={name}
-            />
-            <div>{shopperSavedPayment.cardMask}</div>
+        {!showCardImage && <img src={image} alt={name} />}
+        {showCardImage ? (
+          <div className="payment-option-container__card-cvv-container">
+            {isSelected && !isEditing && (
+              <div className="payment-option-container__card-cvv">
+                <div>CVV</div>
+                <input className="payment-option-container__card-cvv-form" />
+              </div>
+            )}
+            {isEditing ? (
+              <CardInformation
+                initialData={{
+                  cardMask: shopperSavedPayment?.cardMask,
+                  expirationDate: shopperSavedPayment?.expirationDate,
+                }}
+                onCancel={handleCancelEdit}
+              />
+            ) : (
+              <div
+                className="payment-option-container__card-cvv-edit"
+                onClick={handleEditClick}
+              >
+                edit
+              </div>
+            )}
           </div>
-          <div>Expires {shopperSavedPayment.expirationDate}</div>
-        </div>
-      ) : index === 0 ? (
-        <CardInformation />
-      ) : null}
+        ) : index === 0 && selected ? (
+          <CardInformation />
+        ) : null}
+      </div>
     </div>
   );
 };

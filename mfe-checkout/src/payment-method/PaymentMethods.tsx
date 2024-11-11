@@ -1,5 +1,3 @@
-// In PaymentMethods.tsx
-
 import React, { useEffect, useState } from "react";
 import "./PaymentMethods.scss";
 import CardOptions from "../assets/images/CardOptions.png";
@@ -11,7 +9,12 @@ import { fetchShoppersPaymentMethods } from "../api/service/ShoppersPaymentMetho
 import { ShopperSavedPayments } from "../interfaces/ShopperSavedPayments";
 import { TextUpdates } from "../text-updates/TextUpdates";
 import ClickToPay from "../assets/images/ClickToPay.png";
-import { IPaymentOptionProps, PaymentOption } from "./payment-option/PaymentOption";
+import {
+  IPaymentOptionProps,
+  PaymentOption,
+} from "./payment-option/PaymentOption";
+import { WALLET } from "../data/Wallet";
+import { Back } from "../assets/svgs/Back";
 
 const staticPaymentMethods: IPaymentOptionProps[] = [
   {
@@ -19,7 +22,7 @@ const staticPaymentMethods: IPaymentOptionProps[] = [
     image: CardOptions,
     selected: false,
     index: 0,
-    size: 0, // This will be updated later
+    size: 0,
     onChange: () => {},
   },
   {
@@ -41,21 +44,24 @@ const staticPaymentMethods: IPaymentOptionProps[] = [
 ];
 
 export const PaymentMethod: React.FC = () => {
-  const [allPaymentOptions, setAllPaymentOptions] = useState<IPaymentOptionProps[]>(staticPaymentMethods);
+  const [allPaymentOptions, setAllPaymentOptions] = useState<
+    IPaymentOptionProps[]
+  >([]);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [savedCards, setSavedCards] = useState<IPaymentOptionProps[]>([]);
 
   useEffect(() => {
-    const shopperID = "hqwxZzYzzqpeVzhWmZzZmZpzzkxkjzmZWqqWzxzkzj"; /* Replace with dynamic ID */
-    
+    const shopperID = "hqwxZzYzzqpeVzhWmZzZmZpzzkxkjzmZWqqWzxzkzj"; // Replace with dynamic ID
+
     const fetchShoppersSavedPayments = async () => {
       try {
-        const response = await fetchShoppersPaymentMethods(shopperID);
-        const shopperPayments = response.map((item: any, index: number) => ({
+        const shopperPayments = WALLET.map((item: any, index: number) => ({
           name: item.type,
           image: item.imageUrl,
-          selected: item.preferred,
+          selected: index === 0, // Mark the first saved card as selected
           index,
-          size: 0, // Updated later
-          onChange: () => {}, // Will be replaced in render
+          size: 0,
+          onChange: () => {},
           isSavedCard: true,
           shopperSavedPayment: {
             id: item.id,
@@ -63,24 +69,28 @@ export const PaymentMethod: React.FC = () => {
             cardMask: item.mask,
           },
         }));
-        
-        // Combine static and shopper payments
-        const combinedOptions = [...shopperPayments, ...staticPaymentMethods];
-        // Update the size property for each option to reflect the total number
-        const optionsWithSize = combinedOptions.map((option, index) => ({
-          ...option,
-          index,
-          size: combinedOptions.length,
-        }));
 
-        setAllPaymentOptions(optionsWithSize);
+        setSavedCards(shopperPayments);
+        updatePaymentOptions(shopperPayments);
       } catch (error) {
         console.error("Failed to fetch shopper payment data:", error);
       }
     };
 
+    const updatePaymentOptions = (shopperPayments: IPaymentOptionProps[]) => {
+      const hasSavedCards = shopperPayments.length > 0;
+      const displayedOptions = [
+        ...(hasSavedCards ? [shopperPayments[0]] : [staticPaymentMethods[0]]),
+        ...(isExpanded ? shopperPayments.slice(1) : []),
+        staticPaymentMethods[1], // PayPal
+        staticPaymentMethods[2], // Sezzle
+      ];
+
+      setAllPaymentOptions(displayedOptions);
+    };
+
     fetchShoppersSavedPayments();
-  }, []);
+  }, [isExpanded]);
 
   const handlePaymentMethodChange = (selectedIndex: number) => {
     setAllPaymentOptions((prevOptions) =>
@@ -91,25 +101,42 @@ export const PaymentMethod: React.FC = () => {
     );
   };
 
+  // Toggle function for expanding or collapsing the card list
+  const toggleAccordion = () => {
+    if (isExpanded) {
+      // show all the cards
+    } else {
+      // only show one saved card or show credit/debit option if no card is saved
+    }
+    setIsExpanded(!isExpanded);
+  };
+
   return (
     <div className="pm-main-container">
       <div className="pm-container">
-        <FormHeading title="Payment Method" />
+        <div className="pm-title-container">
+          <FormHeading title="Payment Method" />
+          <div className="pm-show-card" onClick={toggleAccordion}>
+            <div>{isExpanded ? "Hide other cards" : "See other cards"}</div>
+            <Back className={`accordion ${isExpanded ? "open" : "close"}`} />
+          </div>
+        </div>
         <div className="pm-sub-container">
           {allPaymentOptions.map((paymentOption, index) => (
             <PaymentOption
               key={paymentOption.shopperSavedPayment?.id || paymentOption.name}
-              {...paymentOption}
+              {...{ ...paymentOption, index }}
               onChange={() => handlePaymentMethodChange(index)}
             />
           ))}
           <div className="checkout-method-click-to-pay">
             <div className="checkout-method-save-information">
-              <div className={`checkout-method-click-to-pay-text`}>
+              <div className="checkout-method-click-to-pay-text">
                 Save my information with Click to Pay
               </div>
               <div className="checkout-method-click-to-pay-text">
-                for fast, secure checkout. <span className="learn-more">Learn more</span>
+                for fast, secure checkout.{" "}
+                <span className="learn-more">Learn more</span>
               </div>
               <div>+ Continue to Click to Pay</div>
               <img src={ClickToPay} alt="Click to Pay" />
@@ -120,7 +147,8 @@ export const PaymentMethod: React.FC = () => {
       <TextUpdates />
       <div className="checkout-place-order">
         <div className="checkout-place-order-text">
-          By clicking place order, you agree to the SHOP.COM Terms of Use and Privacy Policy.
+          By clicking place order, you agree to the SHOP.COM Terms of Use and
+          Privacy Policy.
         </div>
         <Button label="Place Order" type="primary" />
       </div>
