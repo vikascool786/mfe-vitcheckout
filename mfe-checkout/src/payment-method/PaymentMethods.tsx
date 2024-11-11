@@ -51,24 +51,41 @@ export const PaymentMethod: React.FC = () => {
   const [savedCards, setSavedCards] = useState<IPaymentOptionProps[]>([]);
 
   useEffect(() => {
-    const shopperID = "hqwxZzYzzqpeVzhWmZzZmZpzzkxkjzmZWqqWzxzkzj"; // Replace with dynamic ID
+    const shopperID = "WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz"; // Replace with dynamic ID
 
     const fetchShoppersSavedPayments = async () => {
       try {
-        const shopperPayments = WALLET.map((item: any, index: number) => ({
+        const response = await fetchShoppersPaymentMethods(shopperID);
+        const shopperPayments =
+            response.length ?
+                response.map((item: any) => ({
           name: item.type,
           image: item.imageUrl,
-          selected: index === 0, // Mark the first saved card as selected
-          index,
-          size: 0,
-          onChange: () => {},
-          isSavedCard: true,
+          selected: item.preferred,
+          show: true,
           shopperSavedPayment: {
-            id: item.id,
-            expirationDate: item.expires,
-            cardMask: item.mask,
-          },
-        }));
+            id: item.id as string | "",
+            expirationDate: item.expires as string | "",
+            cardMask: item.mask as string | "",
+            preferred: item.preferred as boolean,
+            type: item.type as string | ""
+          }
+        }))
+        : [];
+        // const shopperPayments = WALLET.map((item: any, index: number) => ({
+        //   name: item.type,
+        //   image: item.imageUrl,
+        //   selected: index === 0, // Mark the first saved card as selected
+        //   index,
+        //   size: 0,
+        //   onChange: () => {},
+        //   isSavedCard: true,
+        //   shopperSavedPayment: {
+        //     id: item.id,
+        //     expirationDate: item.expires,
+        //     cardMask: item.mask,
+        //   },
+        // }));
 
         setSavedCards(shopperPayments);
         updatePaymentOptions(shopperPayments);
