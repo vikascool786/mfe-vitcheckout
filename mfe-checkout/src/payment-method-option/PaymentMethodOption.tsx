@@ -89,18 +89,18 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
               </div>
             )}
           </div>
-        ) : index === 0 && selected ? (
-          <CardInformation />
         ) : null}
       </div>
-      {isEditing && (
+      {isEditing ? (
         <CardInformation
           initialData={{
             ...shopperSavedPayment
           }}
           onCancel={handleCancelEdit}
         />
-      )}
+      ): index === 0 && selected ? (
+        <CardInformation />
+      ) : null}
     </div>
   );
 };

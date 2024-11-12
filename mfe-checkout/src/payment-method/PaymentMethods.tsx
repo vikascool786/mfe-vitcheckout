@@ -45,7 +45,7 @@ const staticPaymentMethods: IPaymentOptionProps[] = [
 export const PaymentMethod: React.FC = () => {
   const [allPaymentOptions, setAllPaymentOptions] = useState<
     IPaymentOptionProps[]
-  >([]);
+  >(staticPaymentMethods);
   const [isExpanded, setIsExpanded] = useState(false);
   const [savedCards, setSavedCards] = useState<IPaymentOptionProps[]>([]);
 
