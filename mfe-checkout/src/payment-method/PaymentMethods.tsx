@@ -10,22 +10,10 @@ import { ShopperSavedPayments } from "../interfaces/ShopperSavedPayments";
 import { TextUpdates } from "../text-updates/TextUpdates";
 import ClickToPay from "../assets/images/ClickToPay.png";
 import { Back } from "../assets/svgs/Back";
-import { PaymentOption } from "../payment-method-option/PaymentMethodOption";
-
-export interface IPaymentOptionProps {
-  name: string;
-  image: string;
-  selected: boolean;
-  index: number;
-  size: number;
-  isSavedCard?: boolean;
-  onChange: () => void;
-  shopperSavedPayment?: {
-    id: string;
-    cardMask: string;
-    expirationDate: string;
-  };
-}
+import {
+  IPaymentOptionProps,
+  PaymentOption,
+} from "../payment-method-option/PaymentMethodOption";
 
 const staticPaymentMethods: IPaymentOptionProps[] = [
   {
@@ -62,28 +50,312 @@ export const PaymentMethod: React.FC = () => {
   const [savedCards, setSavedCards] = useState<IPaymentOptionProps[]>([]);
 
   useEffect(() => {
-    const shopperID =
-      // "mZjhWVwjzVzpVzhYxWzpeWXzUzUxepzXYXVWzkjh"; //shopper with empty wallet
-      "WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz"; // shopper with multiple types of cards
-    //"hqwxZzYzzqpeVzhWmZzZmZpzzkxkjzmZWqqWzxzkzj"; /*todo - need to update with dynamic shopperId*/
+    const shopperID = "WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz"; // Replace with dynamic ID
+
     const fetchShoppersSavedPayments = async () => {
       try {
-        const response = await fetchShoppersPaymentMethods(shopperID);
-        const shopperPayments = response.map((item: any, index: number) => ({
-          name: item.type,
-          image: item.imageUrl,
-          selected: index === 0, // Mark the first saved card as selected
-          index,
-          size: 0,
-          onChange: () => {},
-          isSavedCard: true,
-          shopperSavedPayment: {
-            id: item.id,
-            expirationDate: item.expires,
-            cardMask: item.mask,
+        const shopperPayments = [
+          {
+            id: 31164058,
+            number: "411111******1111",
+            expires: "01/2024",
+            type: "Visa",
+            typeID: 9,
+            html: '<img src="https://img.shop.com/Image/local/images/cc/visa.jpg" alt="Visa" align="middle">',
+            imageUrl: "https://img.shop.com/Image/local/images/cc/visa.svg",
+            categoryID: 1,
+            cvv: 1,
+            token: "2df0e8b5-e8fb-11df-b64c-005056842e7d",
+            accountName: "test test",
+            mask: "4***********1111",
+            expMonth: 1,
+            expYear: 2024,
+            addressId: 23168784,
+            shopperAccountDisabled: 0,
+            links: [
+              {
+                rel: "update",
+                href: "/Shopper/WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz/Wallet/31164058?siteId=0",
+                type: "application/json; charset=UTF-8",
+              },
+              {
+                rel: "cvvCheck",
+                href: "/Shopper/WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz/Wallet/31164058/cvv?siteId=0",
+                type: "application/json; charset=UTF-8",
+              },
+              {
+                rel: "addresses",
+                href: "/Shopper/WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz/Wallet/Addresses?siteId=0",
+                type: "application/json; charset=UTF-8",
+              },
+            ],
           },
-        }));
-        setAllPaymentOptions(shopperPayments);
+          {
+            id: 31176880,
+            number: "491891******5005",
+            expires: "07/2033",
+            type: "Visa",
+            typeID: 9,
+            html: '<img src="https://img.shop.com/Image/local/images/cc/visa.jpg" alt="Visa" align="middle">',
+            imageUrl: "https://img.shop.com/Image/local/images/cc/visa.svg",
+            categoryID: 1,
+            cvv: 1,
+            token: "8206a9b9-e8fd-11df-b64c-005056842e7d",
+            accountName: "test test",
+            expMonth: 7,
+            expYear: 2033,
+            addressId: 23168783,
+            shopperAccountDisabled: 0,
+            links: [
+              {
+                rel: "update",
+                href: "/Shopper/WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz/Wallet/31176880?siteId=0",
+                type: "application/json; charset=UTF-8",
+              },
+              {
+                rel: "cvvCheck",
+                href: "/Shopper/WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz/Wallet/31176880/cvv?siteId=0",
+                type: "application/json; charset=UTF-8",
+              },
+              {
+                rel: "addresses",
+                href: "/Shopper/WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz/Wallet/Addresses?siteId=0",
+                type: "application/json; charset=UTF-8",
+              },
+            ],
+          },
+          {
+            id: 99223740,
+            number: "589258******5892",
+            expires: "05/2026",
+            type: "MasterCard",
+            typeID: 6,
+            html: '<img src="https://img.shop.com/Image/local/images/cc/mastercard.png" alt="MasterCard" align="middle">',
+            imageUrl:
+              "https://img.shop.com/Image/local/images/cc/mastercard.svg",
+            categoryID: 1,
+            cvv: 1,
+            token: "51c4ade6-f659-11df-b64c-005056842e7d",
+            accountName: "MC PO BOX TEST",
+            mask: "589258******5892",
+            expMonth: 5,
+            expYear: 2026,
+            addressId: 23207496,
+            shopperAccountDisabled: 0,
+            links: [
+              {
+                rel: "update",
+                href: "/Shopper/WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz/Wallet/99223740?siteId=0",
+                type: "application/json; charset=UTF-8",
+              },
+              {
+                rel: "cvvCheck",
+                href: "/Shopper/WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz/Wallet/99223740/cvv?siteId=0",
+                type: "application/json; charset=UTF-8",
+              },
+              {
+                rel: "addresses",
+                href: "/Shopper/WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz/Wallet/Addresses?siteId=0",
+                type: "application/json; charset=UTF-8",
+              },
+            ],
+          },
+          {
+            id: 99223741,
+            number: "378282*****0005",
+            expires: "07/2026",
+            type: "American Express",
+            typeID: 1,
+            html: '<img src="https://img.shop.com/Image/local/images/cc/amex.jpg" alt="American Express Cards" align="middle">',
+            imageUrl: "https://img.shop.com/Image/local/images/cc/amex.svg",
+            categoryID: 1,
+            cvv: 1,
+            token: "32ac68ae-f651-11df-b64c-005056842e7d",
+            accountName: "amex test",
+            mask: "378282*****0005",
+            expMonth: 7,
+            expYear: 2026,
+            addressId: 23207497,
+            shopperAccountDisabled: 0,
+            links: [
+              {
+                rel: "update",
+                href: "/Shopper/WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz/Wallet/99223741?siteId=0",
+                type: "application/json; charset=UTF-8",
+              },
+              {
+                rel: "cvvCheck",
+                href: "/Shopper/WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz/Wallet/99223741/cvv?siteId=0",
+                type: "application/json; charset=UTF-8",
+              },
+              {
+                rel: "addresses",
+                href: "/Shopper/WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz/Wallet/Addresses?siteId=0",
+                type: "application/json; charset=UTF-8",
+              },
+            ],
+          },
+          {
+            id: 99223764,
+            number: "491891******5005",
+            expires: "04/2027",
+            type: "Visa",
+            typeID: 9,
+            html: '<img src="https://img.shop.com/Image/local/images/cc/visa.jpg" alt="Visa" align="middle">',
+            imageUrl: "https://img.shop.com/Image/local/images/cc/visa.svg",
+            categoryID: 1,
+            cvv: 1,
+            token: "8206a9b9-e8fd-11df-b64c-005056842e7d",
+            accountName: "egift test",
+            mask: "491891******5005",
+            expMonth: 4,
+            expYear: 2027,
+            addressId: 23207780,
+            shopperAccountDisabled: 0,
+            links: [
+              {
+                rel: "update",
+                href: "/Shopper/WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz/Wallet/99223764?siteId=0",
+                type: "application/json; charset=UTF-8",
+              },
+              {
+                rel: "cvvCheck",
+                href: "/Shopper/WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz/Wallet/99223764/cvv?siteId=0",
+                type: "application/json; charset=UTF-8",
+              },
+              {
+                rel: "addresses",
+                href: "/Shopper/WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz/Wallet/Addresses?siteId=0",
+                type: "application/json; charset=UTF-8",
+              },
+            ],
+          },
+          {
+            id: 99223778,
+            number: "589258******5892",
+            expires: "06/2026",
+            type: "MasterCard",
+            typeID: 6,
+            html: '<img src="https://img.shop.com/Image/local/images/cc/mastercard.png" alt="MasterCard" align="middle">',
+            imageUrl:
+              "https://img.shop.com/Image/local/images/cc/mastercard.svg",
+            categoryID: 1,
+            cvv: 1,
+            token: "51c4ade6-f659-11df-b64c-005056842e7d",
+            accountName: "test AI-97101",
+            mask: "589258******5892",
+            expMonth: 6,
+            expYear: 2026,
+            addressId: 23207864,
+            shopperAccountDisabled: 0,
+            links: [
+              {
+                rel: "update",
+                href: "/Shopper/WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz/Wallet/99223778?siteId=0",
+                type: "application/json; charset=UTF-8",
+              },
+              {
+                rel: "cvvCheck",
+                href: "/Shopper/WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz/Wallet/99223778/cvv?siteId=0",
+                type: "application/json; charset=UTF-8",
+              },
+              {
+                rel: "addresses",
+                href: "/Shopper/WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz/Wallet/Addresses?siteId=0",
+                type: "application/json; charset=UTF-8",
+              },
+            ],
+          },
+          {
+            id: 99223779,
+            number: "378282*****0005",
+            expires: "05/2026",
+            type: "American Express",
+            typeID: 1,
+            html: '<img src="https://img.shop.com/Image/local/images/cc/amex.jpg" alt="American Express Cards" align="middle">',
+            imageUrl: "https://img.shop.com/Image/local/images/cc/amex.svg",
+            categoryID: 1,
+            cvv: 1,
+            token: "32ac68ae-f651-11df-b64c-005056842e7d",
+            accountName: "AMEX AI-97101",
+            mask: "378282*****0005",
+            preferred: true,
+            expMonth: 5,
+            expYear: 2026,
+            addressId: 23207865,
+            shopperAccountDisabled: 0,
+            links: [
+              {
+                rel: "update",
+                href: "/Shopper/WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz/Wallet/99223779?siteId=0",
+                type: "application/json; charset=UTF-8",
+              },
+              {
+                rel: "cvvCheck",
+                href: "/Shopper/WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz/Wallet/99223779/cvv?siteId=0",
+                type: "application/json; charset=UTF-8",
+              },
+              {
+                rel: "addresses",
+                href: "/Shopper/WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz/Wallet/Addresses?siteId=0",
+                type: "application/json; charset=UTF-8",
+              },
+            ],
+          },
+          {
+            id: 99223781,
+            number: "491891******5005",
+            expires: "04/2037",
+            type: "Visa",
+            typeID: 9,
+            html: '<img src="https://img.shop.com/Image/local/images/cc/visa.jpg" alt="Visa" align="middle">',
+            imageUrl: "https://img.shop.com/Image/local/images/cc/visa.svg",
+            categoryID: 1,
+            cvv: 1,
+            token: "8206a9b9-e8fd-11df-b64c-005056842e7d",
+            accountName: "visa save",
+            mask: "491891******5005",
+            expMonth: 4,
+            expYear: 2037,
+            addressId: 23207867,
+            shopperAccountDisabled: 0,
+            links: [
+              {
+                rel: "update",
+                href: "/Shopper/WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz/Wallet/99223781?siteId=0",
+                type: "application/json; charset=UTF-8",
+              },
+              {
+                rel: "cvvCheck",
+                href: "/Shopper/WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz/Wallet/99223781/cvv?siteId=0",
+                type: "application/json; charset=UTF-8",
+              },
+              {
+                rel: "addresses",
+                href: "/Shopper/WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz/Wallet/Addresses?siteId=0",
+                type: "application/json; charset=UTF-8",
+              },
+            ],
+          },
+        ]
+          .map((item: any, index: number) => ({
+            name: item.type,
+            image: item.imageUrl,
+            selected: item.preferred,
+            index,
+            size: 0,
+            onChange: () => {},
+            isSavedCard: true,
+            shopperSavedPayment: {
+              id: item.id,
+              expirationDate: item.expires,
+              cardMask: item.mask,
+            },
+          }))
+          .sort((a, b) => (b.selected ? 1 : 0) - (a.selected ? 1 : 0));
+
+        setSavedCards(shopperPayments);
+        updatePaymentOptions(shopperPayments);
       } catch (error) {
         console.error("Failed to fetch shopper payment data:", error);
       }
@@ -92,30 +364,19 @@ export const PaymentMethod: React.FC = () => {
     const updatePaymentOptions = (shopperPayments: IPaymentOptionProps[]) => {
       const hasSavedCards = shopperPayments.length > 0;
       const displayedOptions = [
-        ...(hasSavedCards ? [shopperPayments[0]] : [staticPaymentMethods[0]]),
-        ...(isExpanded ? shopperPayments.slice(1) : []),
-        staticPaymentMethods[1], // PayPal
-        staticPaymentMethods[2], // Sezzle
+        ...(hasSavedCards && shopperPayments && shopperPayments[0]
+          ? [shopperPayments[0]]
+          : [staticPaymentMethods[0]]),
+        ...(isExpanded && shopperPayments ? shopperPayments.slice(1) : []),
+        staticPaymentMethods?.[1] ?? [], // PayPal
+        staticPaymentMethods?.[2] ?? [], // Sezzle
       ];
 
-      setAllPaymentOptions(displayedOptions);
-      updatePaymentOptions(shopperPayments);
+      setAllPaymentOptions(displayedOptions as IPaymentOptionProps[]);
     };
 
     fetchShoppersSavedPayments();
   }, [isExpanded]);
-
-  // const updatePaymentOptions = (shopperPayments: IPaymentOptionProps[]) => {
-  //   const hasSavedCards = shopperPayments.length > 0;
-  //   const displayedOptions = [
-  //     ...(hasSavedCards ? [shopperPayments[0]] : [staticPaymentMethods[0]]),
-  //     ...(isExpanded ? shopperPayments.slice(1) : []),
-  //     staticPaymentMethods[1], // PayPal
-  //     staticPaymentMethods[2], // Sezzle
-  //   ];
-
-  //   setAllPaymentOptions(displayedOptions);
-  // };
 
   const handlePaymentMethodChange = (selectedIndex: number) => {
     setAllPaymentOptions((prevOptions) =>
@@ -128,11 +389,6 @@ export const PaymentMethod: React.FC = () => {
 
   // Toggle function for expanding or collapsing the card list
   const toggleAccordion = () => {
-    if (isExpanded) {
-      // show all the cards
-    } else {
-      // only show one saved card or show credit/debit option if no card is saved
-    }
     setIsExpanded(!isExpanded);
   };
 

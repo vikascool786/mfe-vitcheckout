@@ -82,15 +82,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                 <input className="payment-option-container__card-cvv-form" />
               </div>
             )}
-            {isEditing ? (
-              <CardInformation
-                initialData={{
-                  cardMask: shopperSavedPayment?.cardMask,
-                  expirationDate: shopperSavedPayment?.expirationDate,
-                }}
-                onCancel={handleCancelEdit}
-              />
-            ) : (
+            {!isEditing && (
               <div
                 className="payment-option-container__card-cvv-edit"
                 onClick={handleEditClick}
@@ -103,6 +95,15 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
           <CardInformation />
         ) : null}
       </div>
+      {isEditing && (
+        <CardInformation
+          initialData={{
+            cardMask: shopperSavedPayment?.cardMask,
+            expirationDate: shopperSavedPayment?.expirationDate,
+          }}
+          onCancel={handleCancelEdit}
+        />
+      )}
     </div>
   );
 };
