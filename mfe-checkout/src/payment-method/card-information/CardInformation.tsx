@@ -1,22 +1,43 @@
 import React from "react";
-import "./CardInformation.scss";
 import { FormField } from "../../component/Form/Field/FormField";
-import { Checkbox } from "../../component/Form/Checkbox/Checkbox";
+import { ShopperSavedPayments } from "../../interfaces/ShopperSavedPayments";
+import "./CardInformation.scss";
 
-export const CardInformation = () => {
+interface ICardInformationProps {
+  initialData?: Partial<ShopperSavedPayments>;
+  onCancel?: () => void;
+}
+
+export const CardInformation: React.FC<ICardInformationProps> = ({
+  initialData,
+  onCancel,
+}) => {
+
   return (
     <div className="card-information-container">
-      <FormField label="Name on Card" required />
-      <FormField label="Card Number" required />
+      <FormField label="Name on Card" required value={initialData?.accountName as string} />
+      <FormField
+        label="Card Number"
+        required
+        value={initialData?.cardMask}
+      />
       <div className="form-field-container">
-        <FormField label="Expiration Month" />
-        <FormField label="Expiration Year" />
+        <FormField
+          label="Expiration Month"
+          value={initialData?.expirationDate?.slice(0, 2)}
+        />
+        <FormField
+          label="Expiration Year"
+          value={initialData?.expirationDate?.slice(-2)}
+        />
       </div>
       <div className="form-field-container">
         <FormField label="CVV" required extraLabel="3 or 4 digits" />
         <div className="save-for-later">
           <input className="checkbox" type="checkbox" />
-          <span className="shipping-text">Save card for later</span>
+          <span onClick={onCancel} className="shipping-text">
+            Save card for later
+          </span>
         </div>
       </div>
       <div className="billing">
