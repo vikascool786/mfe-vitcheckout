@@ -22,7 +22,7 @@ const staticPaymentMethods: IPaymentOptionProps[] = [
     selected: false,
     index: 0,
     size: 0,
-    onChange: () => {},
+    onChange: () => { },
   },
   {
     name: "PayPal",
@@ -30,7 +30,7 @@ const staticPaymentMethods: IPaymentOptionProps[] = [
     selected: false,
     index: 1,
     size: 0,
-    onChange: () => {},
+    onChange: () => { },
   },
   {
     name: "Sezzle",
@@ -38,20 +38,18 @@ const staticPaymentMethods: IPaymentOptionProps[] = [
     selected: false,
     index: 2,
     size: 0,
-    onChange: () => {},
+    onChange: () => { },
   },
 ];
 
 export const PaymentMethod: React.FC = () => {
-  const [allPaymentOptions, setAllPaymentOptions] = useState<
-    IPaymentOptionProps[]
-  >(staticPaymentMethods);
+  const [allPaymentOptions, setAllPaymentOptions] = useState<IPaymentOptionProps[]>(staticPaymentMethods);
   const [isExpanded, setIsExpanded] = useState(false);
   const [savedCards, setSavedCards] = useState<IPaymentOptionProps[]>([]);
 
   useEffect(() => {
     const shopperID =
-    "mZjhWVwjzVzpVzhYxWzpeWXzUzUxepzXYXVWzkjh"; //shopper with empty wallet
+      "mZjhWVwjzVzpVzhYxWzpeWXzUzUxepzXYXVWzkjh"; //shopper with empty wallet
     //"WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz"; // shopper with multiple types of cards
     //"hqwxZzYzzqpeVzhWmZzZmZpzzkxkjzmZWqqWzxzkzj"; /*todo - need to update with dynamic shopperId*/
 
@@ -66,7 +64,7 @@ export const PaymentMethod: React.FC = () => {
             selected: item.preferred,
             index,
             size: 0,
-            onChange: () => {},
+            onChange: () => { },
             isSavedCard: true,
             shopperSavedPayment: {
               id: item.id,

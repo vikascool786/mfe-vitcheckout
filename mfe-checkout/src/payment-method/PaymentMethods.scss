@@ -8,11 +8,13 @@
   border-radius: 5px;
   min-width: 34.813rem;
 }
+
 .pm-main-container {
   display: flex;
   flex-direction: column;
   gap: 21px;
 }
+
 .checkout-place-order {
   display: flex;
   flex-direction: column;
@@ -36,7 +38,7 @@
   border-bottom-right-radius: 5px;
   padding-top: 1.375rem;
   padding-bottom: 1.375rem;
-  color: #000 ;
+  color: #000;
 }
 
 .checkout-method-click-to-pay-text {
