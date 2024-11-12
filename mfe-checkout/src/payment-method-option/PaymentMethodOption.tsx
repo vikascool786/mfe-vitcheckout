@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import "./PaymentMethodOption.scss";
 import { RadioButton } from "../component/RadioButton/RadioButton";
+import { ShopperSavedPayments } from "../interfaces/ShopperSavedPayments";
 import { CardInformation } from "../payment-method/card-information/CardInformation";
+import "./PaymentMethodOption.scss";
 
 export interface IPaymentOptionProps {
   name: string;
@@ -11,11 +12,7 @@ export interface IPaymentOptionProps {
   size: number;
   isSavedCard?: boolean;
   onChange: () => void;
-  shopperSavedPayment?: {
-    id: string;
-    cardMask: string;
-    expirationDate: string;
-  };
+  shopperSavedPayment?: ShopperSavedPayments
 }
 
 export const PaymentOption: React.FC<IPaymentOptionProps> = ({
@@ -43,6 +40,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   const isFirst = index === 0 ? "start" : "";
   const showCardImage = isSavedCard && shopperSavedPayment;
 
+
   return (
     <div
       className={`payment-option-container ${isSelected} ${isFirst}`}
@@ -51,7 +49,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
       <div className="payment-option-select-container">
         <div className="payment-option-sub-container">
           <RadioButton
-            id={shopperSavedPayment?.id || name}
+            id={shopperSavedPayment?.id?.toString() || name}
             onChange={onChange}
             checked={selected}
           />
@@ -98,8 +96,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
       {isEditing && (
         <CardInformation
           initialData={{
-            cardMask: shopperSavedPayment?.cardMask,
-            expirationDate: shopperSavedPayment?.expirationDate,
+            ...shopperSavedPayment
           }}
           onCancel={handleCancelEdit}
         />

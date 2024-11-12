@@ -1,19 +1,18 @@
 import React, { useEffect, useState } from "react";
-import "./PaymentMethods.scss";
 import CardOptions from "../assets/images/CardOptions.png";
+import ClickToPay from "../assets/images/ClickToPay.png";
 import PayPal from "../assets/images/PayPal.png";
 import Sezzle from "../assets/images/Sezzle.png";
+import { Back } from "../assets/svgs/Back";
 import { Button } from "../component/Button/Button";
 import { FormHeading } from "../component/Form/Heading/FormHeading";
-import { fetchShoppersPaymentMethods } from "../api/service/ShoppersPaymentMethods";
-import { ShopperSavedPayments } from "../interfaces/ShopperSavedPayments";
-import { TextUpdates } from "../text-updates/TextUpdates";
-import ClickToPay from "../assets/images/ClickToPay.png";
-import { Back } from "../assets/svgs/Back";
+import { Address } from "../interfaces/Address";
 import {
   IPaymentOptionProps,
   PaymentOption,
 } from "../payment-method-option/PaymentMethodOption";
+import { TextUpdates } from "../text-updates/TextUpdates";
+import "./PaymentMethods.scss";
 
 const staticPaymentMethods: IPaymentOptionProps[] = [
   {
@@ -50,7 +49,10 @@ export const PaymentMethod: React.FC = () => {
   const [savedCards, setSavedCards] = useState<IPaymentOptionProps[]>([]);
 
   useEffect(() => {
-    const shopperID = "WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz"; // Replace with dynamic ID
+    const shopperID =
+    "mZjhWVwjzVzpVzhYxWzpeWXzUzUxepzXYXVWzkjh"; //shopper with empty wallet
+    //"WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz"; // shopper with multiple types of cards
+    //"hqwxZzYzzqpeVzhWmZzZmZpzzkxkjzmZWqqWzxzkzj"; /*todo - need to update with dynamic shopperId*/
 
     const fetchShoppersSavedPayments = async () => {
       try {
@@ -348,8 +350,14 @@ export const PaymentMethod: React.FC = () => {
             isSavedCard: true,
             shopperSavedPayment: {
               id: item.id,
-              expirationDate: item.expires,
-              cardMask: item.mask,
+              expirationDate: item.expires as string | "",
+              cardMask: item.mask as string | "",
+              preferred: item.preferred as boolean,
+              type: item.type as string | "",
+              accountName: item.accountName as string | "",
+              name: item.type,
+              image: item.imageUrl,
+              address: {} as Address,
             },
           }))
           .sort((a, b) => (b.selected ? 1 : 0) - (a.selected ? 1 : 0));

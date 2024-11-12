@@ -1,13 +1,10 @@
 import React from "react";
-import "./CardInformation.scss";
 import { FormField } from "../../component/Form/Field/FormField";
-import { Checkbox } from "../../component/Form/Checkbox/Checkbox";
+import { ShopperSavedPayments } from "../../interfaces/ShopperSavedPayments";
+import "./CardInformation.scss";
 
 interface ICardInformationProps {
-  initialData?: {
-    cardMask?: string;
-    expirationDate?: string;
-  };
+  initialData?: Partial<ShopperSavedPayments>;
   onCancel?: () => void;
 }
 
@@ -15,22 +12,23 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   initialData,
   onCancel,
 }) => {
+
   return (
     <div className="card-information-container">
-      <FormField label="Name on Card" required />
+      <FormField label="Name on Card" required value={initialData?.accountName as string} />
       <FormField
         label="Card Number"
         required
-        defaultValue={initialData?.cardMask}
+        value={initialData?.cardMask}
       />
       <div className="form-field-container">
         <FormField
           label="Expiration Month"
-          defaultValue={initialData?.expirationDate?.slice(0, 2)}
+          value={initialData?.expirationDate?.slice(0, 2)}
         />
         <FormField
           label="Expiration Year"
-          defaultValue={initialData?.expirationDate?.slice(-2)}
+          value={initialData?.expirationDate?.slice(-2)}
         />
       </div>
       <div className="form-field-container">
