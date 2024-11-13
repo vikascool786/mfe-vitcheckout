@@ -12,7 +12,7 @@ export interface IPaymentOptionProps {
   size: number;
   isSavedCard?: boolean;
   onChange: () => void;
-  shopperSavedPayment?: ShopperSavedPayments
+  shopperSavedPayment?: ShopperSavedPayments;
 }
 
 export const PaymentOption: React.FC<IPaymentOptionProps> = ({
@@ -39,7 +39,6 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   const isSelected = selected ? "selected" : "";
   const isFirst = index === 0 ? "start" : "";
   const showCardImage = isSavedCard && shopperSavedPayment;
-
 
   return (
     <div
@@ -94,11 +93,11 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
       {isEditing ? (
         <CardInformation
           initialData={{
-            ...shopperSavedPayment
+            ...shopperSavedPayment,
           }}
           onCancel={handleCancelEdit}
         />
-      ): index === 0 && selected ? (
+      ) : index === 0 && selected && !isSavedCard ? (
         <CardInformation />
       ) : null}
     </div>

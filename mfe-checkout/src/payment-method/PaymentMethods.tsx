@@ -50,7 +50,7 @@ export const PaymentMethod: React.FC = () => {
   useEffect(() => {
     const shopperID =
       "mZjhWVwjzVzpVzhYxWzpeWXzUzUxepzXYXVWzkjh"; //shopper with empty wallet
-    //"WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz"; // shopper with multiple types of cards
+    // "WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz"; // shopper with multiple types of cards
     //"hqwxZzYzzqpeVzhWmZzZmZpzzkxkjzmZWqqWzxzkzj"; /*todo - need to update with dynamic shopperId*/
 
     const fetchShoppersSavedPayments = async () => {
@@ -99,6 +99,7 @@ export const PaymentMethod: React.FC = () => {
       ];
 
       setAllPaymentOptions(displayedOptions as IPaymentOptionProps[]);
+      updatePaymentOptions(shopperPayments);
     };
 
     fetchShoppersSavedPayments();

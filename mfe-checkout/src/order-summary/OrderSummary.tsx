@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./OrderSummary.scss";
 import { FormField } from "../component/Form/Field/FormField";
 import { Button } from "../component/Button/Button";
 import { FormHeading } from "../component/Form/Heading/FormHeading";
 import { Cashback } from "../assets/svgs/Cashback";
+import { ApplyCashback } from "./apply-cashback/ApplyCashback";
+import { useShopperEWallet } from "../api/service/ShopperEWallet";
 
 const ORDER_SUMMARY = [
   {
@@ -21,9 +23,13 @@ const ORDER_SUMMARY = [
 ];
 
 export const OrderSummary: React.FC = () => {
+  const { eWalletData, loading, error } = useShopperEWallet("2115715663");
   return (
     <div className="order-summary-container">
       <FormHeading title="Order Summary" />
+      {!loading && !error && eWalletData && (
+        <ApplyCashback cashbackData={eWalletData} />
+      )}
       <div className="order-reedem-coupon-text">Redeem Coupon</div>
       <div className="order-summary-coupon-container">
         <div className="order-input-container">

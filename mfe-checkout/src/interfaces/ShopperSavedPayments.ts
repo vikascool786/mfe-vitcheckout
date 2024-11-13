@@ -8,5 +8,5 @@ export interface ShopperSavedPayments {
     preferred: boolean;
     type: string;
     address: Address;
-    accountName: String;
+    accountName: string;
 }
