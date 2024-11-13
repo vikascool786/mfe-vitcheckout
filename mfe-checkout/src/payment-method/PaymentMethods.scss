@@ -60,8 +60,21 @@
   min-width: 16rem;
 }
 
-
 .pm-sub-container {
   margin-top: 1.275rem;
   padding-bottom: 1.275;
+}
+
+.pm-title-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pm-show-card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: .6rem;
 }

@@ -15,21 +15,12 @@ export const FormField: React.FC<IFormFieldProps> = ({
   extraLabel,
   renderCheckBox,
   name,
-  value,
   ...props
 }) => {
-  const [inputValue, setValue] = useState(value || "");
-
   return (
     <div className="field-item-container">
       {label && <div className={required ? "required-field" : ""}>{label}</div>}
-      <input
-        className="input-container"
-        name={name}
-        value={inputValue}
-        onChange={(e) => setValue(e.target.value)}
-        {...props}
-      />
+      <input className="input-container" {...props} />
       {extraLabel && <div className="field-extra-label">{extraLabel}</div>}
       {renderCheckBox}
     </div>
