@@ -72,7 +72,7 @@ async function loadAndRegisterComponent(mfeComponent, endpoint) {
 // Load mfeStore before components
 const loadMfeStore = async () => {
   if (!window.mfeStore) {
-    await setRemoteScript("https://mcds-main.s3.amazonaws.com/Store");
+    await setRemoteScript("https://d29q5zo2af0lw0.cloudfront.net/Store");
     const container = window.mfeStore;
     if (!container.__initialized) {
       container.__initialized = true;
@@ -86,22 +86,22 @@ const loadMfeStore = async () => {
 
 // Component Registry
 const components = [
-  {
+  /*{
     componentName: "Products",
-    endpoint: "https://mcds-main.s3.amazonaws.com/Products",
+    endpoint: "https://d29q5zo2af0lw0.cloudfront.net/Products",
   },
   {
     componentName: "SearchFilter",
-    endpoint: "https://mcds-main.s3.amazonaws.com/SearchFilter",
+    endpoint: "https://d29q5zo2af0lw0.cloudfront.net/SearchFilter",
   },
   {
     componentName: "SearchContainer",
-    endpoint: "https://mcds-main.s3.amazonaws.com/SearchContainer",
-  },
-  /*{
-    componentName: "Genealogy",
-    endpoint: "https://mcds-main.s3.amazonaws.com/Genealogy",
+    endpoint: "https://d29q5zo2af0lw0.cloudfront.net/SearchContainer",
   },*/
+  {
+    componentName: "Genealogy",
+    endpoint: "http://localhost:3004",
+  },
 ];
 
 (async () => {
