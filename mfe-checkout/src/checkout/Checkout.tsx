@@ -17,13 +17,15 @@ import { DropdownOption } from "../interfaces/DropdownOption";
 import {
   createShopperAddressBookEntry,
   fetchShopperAddressBook,
+  updateShopperAddressBookEntry,
+  updateTextUpdatesForPhone,
 } from "../api/service/ShopperAddressBook";
 import { fetchSiteData } from "../api/service/Site";
 import { AddressList } from "../address-list/AddressList";
 
 const defaultAddress: Address = {
   id: 0,
-  isPrimary: true,
+  isPrimary: 0,
   first: "",
   last: "",
   address1: "",
@@ -39,7 +41,7 @@ export const Checkout: React.FC = () => {
   // State to manage whether the form is expanded or collapsed
 
   const [isExpanded, setIsExpanded] = useState(true);
-  const [showShipAddressForm, setShowShipAddressForm] = useState(true);
+  const [showShipAddressForm, setShowShipAddressForm] = useState(false);
   const [shopperAddressBook, setShopperAddressBook] = useState<Address[]>([]);
   const [shippingAddress, setShippingAddress] =
     useState<Address>(defaultAddress);
@@ -48,6 +50,7 @@ export const Checkout: React.FC = () => {
     []
   );
   const [familyNameFirst, setFamilyNameFirst] = useState(false);
+  const [isUpdateEnabled, setIsUpdateEnabled] = useState(false); // New state to track edit mode
 
   const shipFormRef = useRef<HTMLFormElement>(null);
   const childRef = useRef<AddressHandler>(null);
@@ -55,6 +58,11 @@ export const Checkout: React.FC = () => {
   // Function to toggle accordion state
   const toggleAccordion = () => {
     setIsExpanded(!isExpanded);
+  };
+
+  const handlePhoneShippingUpdates = () => {
+    setIsUpdateEnabled(!isUpdateEnabled);
+    updateTextUpdatesForPhone(shippingAddress.phone);
   };
 
   useEffect(() => {
@@ -109,11 +117,13 @@ export const Checkout: React.FC = () => {
     fetchAddressBookData();
   }, []);
 
-  const buildShoppersAddressBookFromResponse = (addressBookResponse: any) => {
+  const buildShoppersAddressBookFromResponse = (
+    addressBookResponse: Address[]
+  ) => {
     let filteredAddresses: Address[] = [];
     let hasPrimaryAddress: boolean = false;
-    addressBookResponse.forEach((address: any) => {
-      if (address.hasAddress as boolean) {
+    addressBookResponse.forEach((address: Address) => {
+      if (address.id) {
         const newAddress: Address = {
           id: address.id,
           isPrimary: address.isPrimary,
@@ -125,6 +135,7 @@ export const Checkout: React.FC = () => {
           state: address.state,
           zip: address.zip,
           phone: address.phone,
+          isPoBox: address.isPoBox,
         };
         if (newAddress.isPrimary) {
           hasPrimaryAddress = true;
@@ -144,47 +155,72 @@ export const Checkout: React.FC = () => {
   const handleSaveAddress = async (e: React.FormEvent) => {
     e.preventDefault();
     const shopperID = "hqwxZzYzzqpeVzhWmZzZmZpzzkxkjzmZWqqWzxzkzj";
-    const buildAddress = (formRef: RefObject<HTMLFormElement>) => {
-      let address: Address = defaultAddress;
+
+    const buildAddress = (formRef: RefObject<HTMLFormElement>): Address => {
+      let address: Address = {
+        ...defaultAddress, // Spread defaults for optional fields
+      };
+
       if (formRef.current) {
         const formData = new FormData(formRef.current);
         const data = Object.fromEntries(formData.entries());
 
-        address.first = data.first as string | "";
-        address.last = data.last as string | "";
-        address.address1 = data.address1 as string | "";
-        address.address2 = data.address2 as string | "";
-        address.zip = data.zip as string | "";
-        address.city = data.city as string | "";
-        address.state = data.state as string | "";
-        address.phone = data.phone as string | "";
+        // Assign values for mandatory fields
+        address.id = Number(data.id) || 0;
+        address.first = (data.first as string) || "";
+        address.last = (data.last as string) || "";
+        address.address1 = (data.address1 as string) || "";
+        address.address2 = (data.address2 as string) || "";
+        address.zip = (data.zip as string) || "";
+        address.city = (data.city as string) || "";
+        address.state = (data.state as string) || "";
+        address.phone = (data.phone as string) || "";
+        address.isPoBox = (data.isPoBox as boolean) || false;
+
+        // Assign optional fields if they are available
+        address.country = (data.country as string) || "USA";
       }
       return address;
     };
 
     if (childRef.current) {
       const addressEntered = buildAddress(shipFormRef);
+      console.log(addressEntered);
       childRef.current.setAddressToVerify(addressEntered);
+
       try {
         const isValidAddress = await childRef.current.verifyAddress(
           addressEntered
         );
-        const validatedAddress = { ...addressEntered, country: "USA" };
-        setShippingAddress({ ...addressEntered, country: "USA" });
+        const validatedAddress = { ...addressEntered };
+
+        setShippingAddress(validatedAddress);
         setShowShipAddressForm(false);
-        const updatedAddresses = [...shopperAddressBook, addressEntered];
+
+        const updatedAddresses = [...shopperAddressBook, validatedAddress];
         setShopperAddressBook(updatedAddresses);
         setShowAVS(!isValidAddress);
-        const address = new URLSearchParams(
+
+        const addressParams = new URLSearchParams(
           Object.entries(validatedAddress)
         ).toString();
-        await createShopperAddressBookEntry(shopperID, address);
+
+        if (validatedAddress.id > 0) {
+          // Use PUT request for existing address (update)
+          await updateShopperAddressBookEntry(
+            shopperID,
+            validatedAddress.id,
+            addressParams
+          );
+        } else {
+          // Use POST request for new address (create)
+          await createShopperAddressBookEntry(shopperID, addressParams);
+        }
       } catch (error) {
         console.error("Error:", error);
       }
     }
   };
-
   const handleEditClick = () => {
     console.log("edit button clicked");
     setShowAVS(false);
@@ -196,10 +232,38 @@ export const Checkout: React.FC = () => {
     setShowShipAddressForm(!showShipAddressForm);
   };
 
+  const handleEditAddressClick = (address: Address) => {
+    setShippingAddress(address);
+    setShowShipAddressForm(!showShipAddressForm);
+  };
+
   const handleUseSelectedAddress = () => {
     setShowShipAddressForm(!showShipAddressForm);
   };
 
+  const onCancelClick = () => {
+    setShowShipAddressForm(!showShipAddressForm);
+    setIsExpanded(!isExpanded)
+  };
+
+  // Handle input changes
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    let poValue = "false";
+    if (name === "isPoBox") {
+      poValue = value === "on" ? "true" : "false";
+    }
+    console.log(poValue)
+    const address = {
+      ...shippingAddress,
+      [name]: poValue,
+    };
+    setShippingAddress(address);
+  };
+
+  const handleAddressSelectChange = (index: number) => {
+    // const newSelectedAddress = shopperAddressBook.reduce({fn, cv, id} => )
+  };
   return (
     <div>
       <form
@@ -231,7 +295,9 @@ export const Checkout: React.FC = () => {
                 <AddressList
                   addressBook={shopperAddressBook}
                   familyNameFirst={familyNameFirst}
+                  onSelectChange={handleAddressSelectChange}
                   onAddNewAddressClick={handleNewAddressClick}
+                  onEditAddressClick={handleEditAddressClick}
                 />
               )}
             </div>
@@ -246,16 +312,18 @@ export const Checkout: React.FC = () => {
                   <FormField
                     label="Last Name"
                     required
-                    name={"last"}
+                    name="last"
                     data-parsley-required="true"
                     value={shippingAddress.last}
+                    onChange={handleInputChange}
                   />
                   <FormField
                     label="First Name"
                     required
-                    name={"first"}
+                    name="first"
                     data-parsley-required="true"
                     value={shippingAddress.first}
+                    onChange={handleInputChange}
                   />
                 </div>
               ) : (
@@ -263,49 +331,57 @@ export const Checkout: React.FC = () => {
                   <FormField
                     label="First Name"
                     required
-                    name={"first"}
+                    name="first"
                     data-parsley-required="true"
                     value={shippingAddress.first}
+                    onChange={handleInputChange}
                   />
                   <FormField
                     label="Last Name"
                     required
-                    name={"last"}
+                    name="last"
                     data-parsley-required="true"
                     value={shippingAddress.last}
+                    onChange={handleInputChange}
                   />
                 </div>
               )}
+
               <div className="form-field-container-full">
                 <FormField
                   label="Address Line 1"
                   required
-                  name={"address1"}
+                  name="address1"
                   data-parsley-required="true"
                   value={shippingAddress.address1}
+                  onChange={handleInputChange}
                 />
               </div>
+
               <div className="form-field-container-full">
                 <FormField
                   label="Address Line 2"
-                  name={"address2"}
+                  name="address2"
                   value={shippingAddress.address2}
+                  onChange={handleInputChange}
                 />
               </div>
+
               <div className="form-field-container">
                 <FormField
                   label="City"
                   required
-                  name={"city"}
+                  name="city"
                   data-parsley-required="true"
                   value={shippingAddress.city}
+                  onChange={handleInputChange}
                 />
                 <DropdownField
                   options={stateDropdownList}
                   label="State/Province"
                   required
                   selectedValue={shippingAddress.state}
-                  formName={"state"}
+                  formName="state"
                 />
               </div>
 
@@ -313,29 +389,45 @@ export const Checkout: React.FC = () => {
                 <FormField
                   label="Zip Code"
                   required
-                  renderCheckBox={<Checkbox title="This address is a PO box" />}
-                  name={"zip"}
+                  renderCheckBox={
+                    <Checkbox
+                      title="This address is a PO box"
+                      checked={shippingAddress.isPoBox}
+                      name="isPoBox"
+                      onChange={handleInputChange}
+                    />
+                  }
+                  name="zip"
                   data-parsley-required="true"
                   value={shippingAddress.zip}
+                  onChange={handleInputChange}
                 />
                 <FormField
                   label="Phone"
                   required
                   extraLabel="10 digits"
                   data-parsley-required="true"
-                  name={"phone"}
+                  name="phone"
                   value={shippingAddress.phone}
+                  onChange={handleInputChange}
                   renderCheckBox={
                     <Checkbox
                       title="Get Text Updates for this Order"
                       subtitle="Messaging data rates may apply."
+                      checked={isUpdateEnabled}
+                      onChange={handlePhoneShippingUpdates}
                     />
                   }
                 />
               </div>
+
               {shopperAddressBook.length > 0 ? (
                 <div className="form-footer form-footer__dual-button">
-                  <Button label="Cancel" type="secondary" />
+                  <Button
+                    label="Cancel"
+                    type="secondary"
+                    onClick={onCancelClick}
+                  />
                   <Button label="Save & Continue" type="primary" />
                 </div>
               ) : (

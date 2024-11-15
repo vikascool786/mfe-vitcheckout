@@ -29,6 +29,13 @@
   }
 }
 
+@mixin underlined-text {
+  font-size: 18px;
+  line-height: 21px;
+  text-decoration: underline;
+  font-weight: 400;
+}
+
 %container-base {
   padding: 14px 24px;
   background-color: white;
@@ -36,4 +43,3 @@
   font-size: 16px;
   border: 1px solid #aca8a8;
 }
-

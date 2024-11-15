@@ -1,11 +1,13 @@
-import React, { useState, useRef } from "react";
 import $ from "jquery";
 import "parsleyjs";
+import React, { useRef, useState } from "react";
+import { addShoppersPaymentMethod } from "../../api/service/ShoppersPaymentMethods";
+import { AddressForm } from "../../component/AddressForm";
+import { DropdownField } from "../../component/Form/Field/DropdownField";
 import { FormField } from "../../component/Form/Field/FormField";
+import { Address } from "../../interfaces/Address";
 import { ShopperSavedPayments } from "../../interfaces/ShopperSavedPayments";
 import "./CardInformation.scss";
-import { AddressForm } from "../../component/AddressForm";
-import { Address } from "../../interfaces/Address";
 
 interface ICardInformationProps {
   initialData?: Partial<ShopperSavedPayments>;
@@ -29,7 +31,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   initialData,
   onCancel,
 }) => {
-  console.log(initialData)
+  console.log(initialData);
   const [sameShippingAddress, setSameShippingAddress] =
     useState<boolean>(false);
   const [address, setAddress] = useState<Address>(defaultAddress);
@@ -60,6 +62,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   const handleSaveAddress = () => {
     const isValid = validateFormFields();
     if (isValid) {
+      addShoppersPaymentMethod("", cardInformation);
       setSaveAddress(!saveAddress);
     } else {
       setSaveAddress(false);
@@ -74,7 +77,19 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
     return $(form).parsley().isValid();
   };
 
-  console.log(cardInformation)
+  const getYears = (startYear: number, endYear: number) => {
+    const years = [];
+    for (let year = startYear; year <= endYear; year++) {
+      years.push({
+        value: year.toString(),
+        label: year.toString(),
+      });
+    }
+    return years;
+  };
+
+  const currentYear = new Date().getFullYear();
+  const years = getYears(currentYear, currentYear + 10);
 
   return (
     <div className="card-information-container">
@@ -93,25 +108,28 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
         onChange={(e) => handleInputChange("cardMask", e.target.value)}
       />
       <div className="form-field-container">
-        <FormField
+        <DropdownField
           label="Expiration Month"
-          value={cardInformation.expirationDate?.slice(0, 2) || ""}
-          onChange={(e) =>
-            handleInputChange(
-              "expirationDate",
-              `${e.target.value}/${cardInformation.expirationDate?.slice(3)}`
-            )
-          }
+          selectedValue={cardInformation.expirationDate?.slice(0, 2) || ""}
+          options={[
+            { value: "01", label: "01" },
+            { value: "02", label: "02" },
+            { value: "03", label: "03" },
+            { value: "04", label: "04" },
+            { value: "05", label: "05" },
+            { value: "06", label: "06" },
+            { value: "07", label: "07" },
+            { value: "08", label: "08" },
+            { value: "09", label: "09" },
+            { value: "10", label: "10" },
+            { value: "11", label: "11" },
+            { value: "12", label: "12" },
+          ]}
         />
-        <FormField
+        <DropdownField
           label="Expiration Year"
-          value={cardInformation.expirationDate?.slice(-2) || ""}
-          onChange={(e) =>
-            handleInputChange(
-              "expirationDate",
-              `${cardInformation.expirationDate?.slice(0, 2)}/${e.target.value}`
-            )
-          }
+          selectedValue={cardInformation.expirationDate?.slice(-2) || ""}
+          options={years}
         />
       </div>
       <div className="form-field-container">
@@ -119,6 +137,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           label="CVV"
           required
           extraLabel="3 or 4 digits"
+          maxLength={4}
           // onChange={(e) => handleInputChange("cvv", e.target.value)}
         />
         <div className="save-for-later">

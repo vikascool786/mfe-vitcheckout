@@ -20,7 +20,7 @@ export const FormField: React.FC<IFormFieldProps> = ({
   return (
     <div className="field-item-container">
       {label && <div className={required ? "required-field" : ""}>{label}</div>}
-      <input className="input-container" {...props} />
+      <input className="input-container" name={name} {...props} />
       {extraLabel && <div className="field-extra-label">{extraLabel}</div>}
       {renderCheckBox}
     </div>
