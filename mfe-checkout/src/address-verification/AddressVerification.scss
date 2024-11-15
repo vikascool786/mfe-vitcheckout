@@ -1,17 +1,26 @@
-.avs-address-container{
+.avs-address-container {
   display: flex;
   flex-direction: column;
-  &__address{
+  &__address {
     align-self: center;
     padding: 20px 0;
   }
 }
 
-.avs-alert-container{
+.avs-alert-container {
   display: flex;
   align-items: center;
   padding-bottom: 10px;
-  &__text{
+  &__text {
     padding-left: 5px;
   }
+}
+
+.add-display {
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 21.09px;
+  text-align: left;
+  text-underline-position: from-font;
+  text-decoration-skip-ink: none;
 }

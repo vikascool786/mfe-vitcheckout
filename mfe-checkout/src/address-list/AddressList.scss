@@ -1,4 +1,8 @@
-@use '../styles/abstracts/mixins' as *;
+@use "../styles/abstracts/mixins" as *;
+
+.addresslist {
+  margin-top: 1rem;
+}
 
 .addresslist-container {
   display: flex;
@@ -7,6 +11,8 @@
   border: 1px solid #79787833;
   flex-direction: row;
   padding: 20px;
+  align-items: center;
+  justify-content: space-between;
 
   &.end {
     @include rounded-borders(bottom);
@@ -31,6 +37,24 @@
   font-weight: 400;
   line-height: 21.09px;
   text-align: left;
+  text-underline-position: from-font;
+  text-decoration-skip-ink: none;
+}
+
+.addresslist-item-holder {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.edit {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 18.75px;
+  text-align: left;
+  text-decoration-line: underline;
+  text-decoration-style: solid;
   text-underline-position: from-font;
   text-decoration-skip-ink: none;
 }
