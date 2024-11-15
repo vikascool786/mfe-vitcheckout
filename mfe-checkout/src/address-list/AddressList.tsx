@@ -8,7 +8,7 @@ import "./AddressList.scss";
 interface AppProps {
   addressBook: Address[];
   familyNameFirst: boolean;
-  onSelectChange: () => void;
+  onSelectChange: (id: number) => void;
   onAddNewAddressClick: () => void;
   onEditAddressClick: (address: Address) => void;
 }
@@ -23,7 +23,7 @@ export const AddressList: React.FC<AppProps> = ({
   return (
     <div className="addresslist">
       {addressBook.map((address, index) => {
-        const isSelected = index === 0 ? "selected" : "";
+        const isSelected = address.isPrimary === 1 ? "selected" : "";
         const isFirst = index === 0 ? "start" : "";
         return (
           <div className={`addresslist-container ${isSelected} ${isFirst}`}>
@@ -31,8 +31,8 @@ export const AddressList: React.FC<AppProps> = ({
               <RadioButton
                 id={String(address.id)}
                 name={"ship-address"}
-                checked={!!isSelected}
-                onChange={onSelectChange}
+                checked={address.isPrimary === 1}
+                onChange={() => onSelectChange(address.id)}
               />
               <AddressDisplay
                 address={address}

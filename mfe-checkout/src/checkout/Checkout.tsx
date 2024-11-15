@@ -175,7 +175,8 @@ export const Checkout: React.FC = () => {
         address.city = (data.city as string) || "";
         address.state = (data.state as string) || "";
         address.phone = (data.phone as string) || "";
-        address.isPoBox = (data.isPoBox as boolean) || false;
+        address.isPoBox =
+          Boolean(data.isPoBox === "on" ? true : false) || false;
 
         // Assign optional fields if they are available
         address.country = (data.country as string) || "USA";
@@ -222,7 +223,6 @@ export const Checkout: React.FC = () => {
     }
   };
   const handleEditClick = () => {
-    console.log("edit button clicked");
     setShowAVS(false);
     setShowShipAddressForm(true);
   };
@@ -243,26 +243,32 @@ export const Checkout: React.FC = () => {
 
   const onCancelClick = () => {
     setShowShipAddressForm(!showShipAddressForm);
-    setIsExpanded(!isExpanded)
+    setShippingAddress(
+      shopperAddressBook.find((address) => address.isPrimary === 1) ||
+        shippingAddress
+    );
+    setIsExpanded(!isExpanded);
   };
 
   // Handle input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    let poValue = "false";
-    if (name === "isPoBox") {
-      poValue = value === "on" ? "true" : "false";
-    }
-    console.log(poValue)
     const address = {
       ...shippingAddress,
-      [name]: poValue,
+      [name]: value,
     };
     setShippingAddress(address);
   };
 
-  const handleAddressSelectChange = (index: number) => {
-    // const newSelectedAddress = shopperAddressBook.reduce({fn, cv, id} => )
+  const handleAddressSelectChange = (id: number) => {
+    const updatedSelectedAddress = shopperAddressBook.map(
+      (address) =>
+        address.id === id
+          ? { ...address, isPrimary: 1 }
+          : { ...address, isPrimary: 0 } // Reset other addresses' `isPrimary` to 0
+    );
+
+    setShopperAddressBook(updatedSelectedAddress);
   };
   return (
     <div>
