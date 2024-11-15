@@ -1,0 +1,77 @@
+.feedback-form {
+  background-color: rgb(238, 239, 245);
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 50%;
+  margin: 0 auto;
+  text-align: center;
+  @media only screen and (max-width: 800px) {
+    max-width: 90%;
+  }
+  &__text {
+    text-align: left;
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+
+  &__email-prompt {
+    text-align: left;
+    font-size: 0.875rem;
+    font-style: italic;
+    margin-bottom: 20px;
+  }
+
+  &__input-group {
+    margin-bottom: 15px;
+    text-align: left;
+  }
+
+  &__textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    resize: vertical;
+  }
+
+  &__error {
+    display: inline-block;
+    background-color: #fff;
+    padding: 8px 12px;
+    border-left: 3px solid #ff0000;
+    margin-top: 5px;
+    color: #202340;
+    font-size: 0.875rem;
+    font-weight: 700;
+    width: 100%;
+  }
+  .feedback_label {
+    font-weight: 700;
+    margin: 10px 0 0;
+    font-size: 0.875rem;
+  }
+  &__submit-button {
+    background-color: #5865f2;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+
+    &:hover {
+      background-color: #4752c4;
+    }
+  }
+  .feedback-form__thanks {
+    font-size: 1rem;
+    text-align: left;
+  }
+  .feedback-form__review {
+    font-size: 0.875rem;
+    margin-bottom: 10px;
+    text-align: left;
+  }
+}

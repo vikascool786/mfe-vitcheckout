@@ -1,0 +1,131 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0%);
+  }
+}
+
+@keyframes slideInTop {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0%);
+  }
+}
+
+.filter-container {
+  position: relative;
+  background-color: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  animation: slideInRight 0.3s ease-out;
+  width: 25%;
+  height: 100vh;
+  border: 1px solid grey;
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+@media (max-width: 600px) {
+  .filter-container {
+    width: 100%;
+    top: 140px;
+    height: calc(100vh - 140px);
+    animation: slideInTop 0.3s ease-out;
+    position: fixed; 
+    display: flex; 
+    flex-direction: column; 
+  }
+  .filter-data-container {
+    flex-grow: 1;
+    overflow-y: auto;
+    height: 100vh;
+  }
+  .filter-btns {
+    margin-bottom: 20px;
+  }
+}
+
+.close-btn,
+.back-btn {
+  cursor: pointer;
+}
+.filter-title-container {
+  padding: 15px;
+  text-align: center;
+  border-bottom: 1px solid #eeeeee;
+  display: flex;
+  justify-content: space-between;
+}
+
+.filter-data-container {
+  max-height: 100vh;
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+.filter-heading {
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+.filter-content {
+  width: 90%;
+  font-size: 16px;
+}
+.filter-item {
+  display: flex;
+  padding: 15px;
+  border-bottom: 1px solid #eeeeee;
+  cursor: pointer;
+  text-transform: capitalize;
+}
+
+.filter-item:hover {
+  background-color: #eeeeee;
+}
+
+.filter-btns {
+  display: flex;
+  justify-content: center;
+}
+
+.dept-filter-content {
+  display: flex;
+  padding: 15px;
+  border-bottom: 1px solid #eeeeee;
+  cursor: pointer;
+  text-transform: capitalize;
+  flex-direction: column;
+}
+
+.dept-filter-item {
+  display: flex;
+  flex-direction: row;
+  font-weight: bold;
+  justify-content: space-between;
+}
+
+.dept-filter-sub-item {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 5px 0px 5px 10px;
+}

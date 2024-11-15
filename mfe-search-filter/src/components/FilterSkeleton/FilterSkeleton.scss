@@ -1,0 +1,38 @@
+.skeleton-container {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.skeleton-block {
+  background-color: #e0e0e0;
+  border-radius: 20px;
+  animation: pulse 1.5s infinite ease-in-out;
+  height: 20px;
+  min-width: 80px;
+  margin-right: 10px;
+
+  &.small {
+    min-width: 100px;
+  }
+
+  &.large {
+    min-width: 200px;
+  }
+}
+.additional-skeleton-block {
+  background-color: #e0e0e0;
+  border-radius: 20px;
+  animation: pulse 1.5s infinite ease-in-out;
+  height: 20px;
+  width: 400px;
+  margin-top: 10px;
+  @media (max-width: 768px) {
+    width: 300px;
+  }
+
+  @media (max-width: 480px) {
+    width: 200px;
+  }
+}

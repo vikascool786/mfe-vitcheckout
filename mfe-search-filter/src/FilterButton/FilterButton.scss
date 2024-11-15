@@ -1,0 +1,42 @@
+.filter-btn {
+  border: 1.5px solid black;
+  color: black;
+  padding: 5px 10px 5px 10px;
+  margin: 5px;
+  text-align: center;
+  font-size: 14px;
+  border-radius: 20px;
+  background: white;
+  cursor: pointer;
+  text-transform: capitalize;
+}
+
+.filter-btn:focus,
+:focus-visible {
+  outline: none;
+}
+
+.filter-btn:disabled {
+  cursor: not-allowed;
+}
+
+.filter-btn:hover {
+  background-color: #eeeeee;
+}
+
+.prefix-icon-btn {
+  padding: 2px;
+}
+
+.suffix-icon-btn {
+  padding: 2px;
+}
+
+.sort-value {
+  font-weight: bold;
+  margin-left: 5px;
+}
+
+.btn-text {
+  margin: 0px 5px 0px 5px;
+}

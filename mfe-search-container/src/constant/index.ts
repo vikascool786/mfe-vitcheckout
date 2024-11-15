@@ -1,0 +1,10 @@
+export const MFE_PRODUCT_REMOTE_URL = "http://localhost:3008/remoteEntry.js";
+export const MFE_FILTER_REMOTE_URL = "http://localhost:3007/remoteEntry.js";
+export const PRODUCT_LIST_MODULE_NAME = "ProductList";
+export const PRODUCT_STORE_LIST_MODULE_NAME = "ProductStoreList";
+export const SEARCH_FILTER_MODULE_NAME = "SearchFilter";
+export const PRODUCT_REMOTE_NAME = "mfeProducts";
+export const SEARCH_REMOTE_NAME = "mfeSearchFilter";
+export const MODULE_ORDER = "moduleOrder";
+export const PRODUCT_LIST = "productList";
+export const PRODUCT_STORE_LIST = "productStoreList";
