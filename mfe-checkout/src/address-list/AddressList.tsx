@@ -26,7 +26,10 @@ export const AddressList: React.FC<AppProps> = ({
         const isSelected = address.isPrimary === 1 ? "selected" : "";
         const isFirst = index === 0 ? "start" : "";
         return (
-          <div className={`addresslist-container ${isSelected} ${isFirst}`}>
+          <div
+            key={address.id}
+            className={`addresslist-container ${isSelected} ${isFirst}`}
+          >
             <div className="addresslist-item-holder">
               <RadioButton
                 id={String(address.id)}
@@ -45,8 +48,9 @@ export const AddressList: React.FC<AppProps> = ({
           </div>
         );
       })}
+      {/* Add New Address Section */}
       <div
-        className={`addresslist-container end`}
+        className="addresslist-container end"
         onClick={onAddNewAddressClick}
       >
         <div className="address-center">

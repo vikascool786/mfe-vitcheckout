@@ -3,11 +3,13 @@ import "../OrderSummary.scss";
 import { EWallet } from "../../interfaces/EWallet";
 
 interface IApplyCashbackContainer {
-    cashbackData: EWallet;
+  cashbackData: EWallet;
 }
 
-export const ApplyCashback: React.FC<IApplyCashbackContainer> = ({cashbackData}) => {
-
+export const ApplyCashback: React.FC<IApplyCashbackContainer> = ({
+  cashbackData,
+}) => {
+  console.log(cashbackData);
   return (
     <div className="order-apply-cashback-container">
       <span className="order-apply-cashback-container-cb-text">
@@ -18,7 +20,7 @@ export const ApplyCashback: React.FC<IApplyCashbackContainer> = ({cashbackData})
       </span>
       <div className="order-apply-cashback-container-cb-bold">
         <input className="checkbox" type="checkbox" />
-        {`${cashbackData.cashbackAvail} - Use VIFT Cashback on this order`}
+        {`$${cashbackData.cashbackAvail} - Use VIFT Cashback on this order`}
       </div>
     </div>
   );

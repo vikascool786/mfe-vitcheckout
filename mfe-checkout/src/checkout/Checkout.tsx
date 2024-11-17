@@ -34,7 +34,7 @@ const defaultAddress: Address = {
   city: "",
   state: "",
   phone: "",
-};
+} as Address;
 
 export const Checkout: React.FC = () => {
   const siteId = "260"; /*todo - need to update with dynamic siteId*/
@@ -136,7 +136,7 @@ export const Checkout: React.FC = () => {
           zip: address.zip,
           phone: address.phone,
           isPoBox: address.isPoBox,
-        };
+        } as Address;
         if (newAddress.isPrimary) {
           hasPrimaryAddress = true;
           setShippingAddress(newAddress);
@@ -177,6 +177,7 @@ export const Checkout: React.FC = () => {
         address.phone = (data.phone as string) || "";
         address.isPoBox =
           Boolean(data.isPoBox === "on" ? true : false) || false;
+        address.isPrimary = Number(data.isPrimary) || 1;
 
         // Assign optional fields if they are available
         address.country = (data.country as string) || "USA";
@@ -198,12 +199,18 @@ export const Checkout: React.FC = () => {
         setShippingAddress(validatedAddress);
         setShowShipAddressForm(false);
 
-        const updatedAddresses = [...shopperAddressBook, validatedAddress];
+        const updatedAddresses = [
+          { ...validatedAddress, isPrimary: 1 }, // Set the validated address as primary
+          ...shopperAddressBook
+            .filter((address) => address.id !== validatedAddress.id) // Exclude the validated address
+            .map((address) => ({ ...address, isPrimary: 0 })), // Reset isPrimary for other addresses
+        ];
+
         setShopperAddressBook(updatedAddresses);
         setShowAVS(!isValidAddress);
 
         const addressParams = new URLSearchParams(
-          Object.entries(validatedAddress)
+          Object.entries(validatedAddress as Address)
         ).toString();
 
         if (validatedAddress.id > 0) {
@@ -228,6 +235,7 @@ export const Checkout: React.FC = () => {
   };
 
   const handleNewAddressClick = () => {
+    window.scrollTo(0, 0);
     setShippingAddress(defaultAddress);
     setShowShipAddressForm(!showShipAddressForm);
   };
@@ -238,7 +246,7 @@ export const Checkout: React.FC = () => {
   };
 
   const handleUseSelectedAddress = () => {
-    setShowShipAddressForm(!showShipAddressForm);
+    setShowAVS(!showAVS);
   };
 
   const onCancelClick = () => {
