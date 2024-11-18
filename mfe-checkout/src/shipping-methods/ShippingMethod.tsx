@@ -3,6 +3,8 @@ import { FormHeading } from "../component/Form/Heading/FormHeading";
 import "./ShippingMethod.scss";
 import { ShippingItem } from "../shipping-item/ShippingItem";
 import { ShippingOptions } from "../shipping-options/ShippingOptions";
+import { ShippingSelection } from "../interfaces/ShippingMethod";
+import { RadioButton } from "../component/RadioButton/RadioButton";
 
 const SHIPPING_OPTIONS = [
   {
@@ -37,9 +39,25 @@ const Product = {
   imageUrl: require("../assets/images/ProductImage.png"),
 };
 
-interface IShippingMethodProps {}
+interface ShippingMethodProps {
+  shippingSelections: ShippingSelection[] | null;
+}
 
-export const ShippingMethod = () => {
+export const ShippingMethod: React.FC<ShippingMethodProps> = ({ shippingSelections }) => {
+
+  const SHIPPING_OPTIONS = shippingSelections
+    ? shippingSelections.map((option) => ({
+      id: option.id,
+      method: option.method,
+      price: option.total.toFixed(2),
+      estimatedDelivery: option.estShipDate,
+    }))
+    : [];
+
+  if (!shippingSelections) {
+    return <p>Loading shipping methods...</p>;
+  }
+
   return (
     <div className="shipping-container">
       <FormHeading title="Shipping Methods & Review Items" />
@@ -48,7 +66,27 @@ export const ShippingMethod = () => {
         <ShippingItem product={Product} />
       </div>
 
-      <ShippingOptions shippingOptions={SHIPPING_OPTIONS} />
+      <div className="shipping-options-container">
+        {shippingSelections.map((option) => (
+          <div className={`shipping-option-container`} key={option.id}>
+            <div className="shipping-option-select-container">
+
+              <div className="radio-wrapper">
+                <input className="radio-style" type="radio" />
+                <label>{option.method}</label>
+              </div>
+              <div className={`shipping-option-sub-container`}>
+                <div>{option.method}</div>
+                <div>{option.estShipDate}</div>
+              </div>
+            </div>
+            <div>{option.total}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* need rework on it  */}
+      {/* <ShippingOptions shippingOptions={SHIPPING_OPTIONS} /> */}
     </div>
   );
 };
