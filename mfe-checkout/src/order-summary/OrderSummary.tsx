@@ -60,13 +60,13 @@ export const OrderSummary: React.FC<IOrderSummary> = ({ totals }) => {
         <div>$33.02</div>
       </div>
 
-      {totals.cashBack && <div className="order-summary-cashback-container">
+      {/* {totals.cashBack && <div className="order-summary-cashback-container">
         <div className="order-cashback">
           <Cashback />
           VIFT Cashback earned in this order
         </div>
         <div>{`$${totals.cashBack}`}</div>
-      </div>}
+      </div>} */}
     </div>
   );
 };
