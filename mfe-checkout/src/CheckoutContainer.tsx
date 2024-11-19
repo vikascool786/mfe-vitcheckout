@@ -57,8 +57,6 @@ export const CheckoutContainer: React.FC = () => {
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
 
-  console.log("Order Data => ", orderData?.stores);
-
   return (
     <div className="checkout-container">
       <div className="checkout-sub-container">
@@ -70,7 +68,7 @@ export const CheckoutContainer: React.FC = () => {
         <PaymentMethod />
       </div>
       <div>
-        <OrderSummary totals={totals} />
+        <OrderSummary totals={totals}  />
       </div>
     </div>
     //   <div>
