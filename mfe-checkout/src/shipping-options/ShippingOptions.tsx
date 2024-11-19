@@ -29,7 +29,7 @@ export const ShippingOptions: React.FC<IShippingOptionsProps> = ({
     (method: string) => {
       const updatedOptions = shippingOptionsState.map((option) => ({
         ...option,
-        isSelected: shippingSelected === method, // Set true for selected, false for others
+        isSelected: option.method === method, // Set true for selected, false for others
       }));
       setShippingOptionsState(updatedOptions); // Update state to re-render with new selection
     },
