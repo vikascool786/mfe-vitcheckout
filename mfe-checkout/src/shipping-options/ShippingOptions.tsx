@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import "./ShippingOptions.scss";
 import { ShippingOptionItem } from "../shipping-option-item/ShippingOptionItem";
 import { ShippingSelection } from "../interfaces/ShippingMethod";
@@ -25,13 +25,16 @@ export const ShippingOptions: React.FC<IShippingOptionsProps> = ({
     setShippingOptionsState(updatedShippingOptions);
   }, [shippingOptions, shippingSelected]);
 
-  const handleChange = (method: string) => {
-    const updatedOptions = shippingOptionsState.map((option) => ({
-      ...option,
-      isSelected: shippingSelected === method, // Set true for selected, false for others
-    }));
-    setShippingOptionsState(updatedOptions); // Update state to re-render with new selection
-  };
+  const handleChange = useCallback(
+    (method: string) => {
+      const updatedOptions = shippingOptionsState.map((option) => ({
+        ...option,
+        isSelected: shippingSelected === method, // Set true for selected, false for others
+      }));
+      setShippingOptionsState(updatedOptions); // Update state to re-render with new selection
+    },
+    [shippingOptionsState]
+  );
 
   return (
     <div className="shipping-options-container">
