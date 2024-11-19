@@ -6,6 +6,7 @@ import { FormHeading } from "../component/Form/Heading/FormHeading";
 import { Cashback } from "../assets/svgs/Cashback";
 import { ApplyCashback } from "./apply-cashback/ApplyCashback";
 import { useShopperEWallet } from "../api/service/ShopperEWallet";
+import { ITotal } from "../interfaces/ShopperCart";
 
 const ORDER_SUMMARY = [
   {
@@ -22,7 +23,11 @@ const ORDER_SUMMARY = [
   },
 ];
 
-export const OrderSummary: React.FC = () => {
+interface IOrderSummary {
+  totals: ITotal;
+}
+
+export const OrderSummary: React.FC<IOrderSummary> = ({ totals }) => {
   const { eWalletData, loading, error } = useShopperEWallet("2115715663");
   return (
     <div className="order-summary-container">
@@ -55,13 +60,13 @@ export const OrderSummary: React.FC = () => {
         <div>$33.02</div>
       </div>
 
-      <div className="order-summary-cashback-container">
+      {totals.cashBack && <div className="order-summary-cashback-container">
         <div className="order-cashback">
           <Cashback />
           VIFT Cashback earned in this order
         </div>
-        <div>$0.25</div>
-      </div>
+        <div>{`$${totals.cashBack}`}</div>
+      </div>}
     </div>
   );
 };

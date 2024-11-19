@@ -5,11 +5,20 @@ import { OrderSummary } from "./order-summary/OrderSummary";
 import { PaymentMethod } from "./payment-method/PaymentMethods";
 import { ShippingMethod } from "./shipping-methods/ShippingMethod";
 import { fetchOrderDetail } from "./api/service/GetOrder";
-import { ResponseData, ShippingSelection } from "./interfaces/ShippingMethod";
+import {
+  ResponseData,
+  ShippingSelection,
+  Store,
+} from "./interfaces/ShippingMethod";
 
 export const CheckoutContainer: React.FC = () => {
   const [orderData, setOrderData] = useState<ResponseData | null>(null);
-  const [shippingSelections, setShippingSelections] = useState<ShippingSelection[] | null>(null);
+  
+  const [shippingSelections, setShippingSelections] = useState<
+    ShippingSelection[] | null
+  >(null);
+  const [selectedShipping, setSelectedShipping] = useState("");
+  const [totals, setTotal] = useState();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -21,7 +30,7 @@ export const CheckoutContainer: React.FC = () => {
         setOrderData(response);
 
         const stores = response?.stores;
-        console.log(stores)
+        console.log(stores);
         const storeKeys = Object.keys(stores);
         if (storeKeys.length === 0) {
           console.error("No stores found");
@@ -30,7 +39,10 @@ export const CheckoutContainer: React.FC = () => {
         const firstStoreKey = Object.keys(stores)[0];
         const firstStore = stores[firstStoreKey!];
         setShippingSelections(firstStore?.shippingSelections || []);
-
+        setSelectedShipping(
+          firstStore?.shippingMethod ? firstStore.shippingMethod : ""
+        );
+        setTotal(firstStore?.totals)
       } catch (error) {
         setError("Failed to fetch data.");
         console.error("Failed to fetch data:", error);
@@ -45,15 +57,20 @@ export const CheckoutContainer: React.FC = () => {
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
 
+  console.log("Order Data => ", orderData?.stores);
+
   return (
     <div className="checkout-container">
       <div className="checkout-sub-container">
         <Checkout />
-        <ShippingMethod shippingSelections={shippingSelections} />
+        <ShippingMethod
+          shippingSelections={shippingSelections}
+          shippingSelected={selectedShipping}
+        />
         <PaymentMethod />
       </div>
       <div>
-        <OrderSummary />
+        <OrderSummary totals={totals} />
       </div>
     </div>
     //   <div>

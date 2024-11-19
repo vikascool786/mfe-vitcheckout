@@ -1,30 +1,35 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./ShippingOptions.scss";
 import { ShippingOptionItem } from "../shipping-option-item/ShippingOptionItem";
-
-interface IShippingOption {
-  shippingType: string;
-  arrivesIn: string;
-  price: string;
-  isSelected?: boolean;
-}
+import { ShippingSelection } from "../interfaces/ShippingMethod";
 
 interface IShippingOptionsProps {
-  shippingOptions: IShippingOption[];
+  shippingOptions: ShippingSelection[];
+  shippingSelected: string;
 }
 
 export const ShippingOptions: React.FC<IShippingOptionsProps> = ({
+  shippingSelected,
   shippingOptions,
 }) => {
-  const [shippingOptionsState, setShippingOptionsState] =
-    useState<IShippingOption[]>(shippingOptions);
+  const [shippingOptionsState, setShippingOptionsState] = useState<
+    ShippingSelection[]
+  >([]);
 
-  const handleChange = (selectedOptionIndex: number) => {
-    const updatedOptions = shippingOptionsState.map((option, index) => ({
+  useEffect(() => {
+    // Initialize state with isSelected based on the method prop
+    const updatedShippingOptions = shippingOptions.map((option) => ({
       ...option,
-      isSelected: index === selectedOptionIndex, // Set true for selected, false for others
+      isSelected: option.method === shippingSelected,
     }));
+    setShippingOptionsState(updatedShippingOptions);
+  }, [shippingOptions, shippingSelected]);
 
+  const handleChange = (method: string) => {
+    const updatedOptions = shippingOptionsState.map((option) => ({
+      ...option,
+      isSelected: shippingSelected === method, // Set true for selected, false for others
+    }));
     setShippingOptionsState(updatedOptions); // Update state to re-render with new selection
   };
 
@@ -36,7 +41,8 @@ export const ShippingOptions: React.FC<IShippingOptionsProps> = ({
           shippingOption={shippingOption}
           index={index}
           size={shippingOptionsState.length - 1}
-          onChange={() => handleChange(index)}
+          isSelected={shippingOption.isSelected}
+          onChange={() => handleChange(shippingOption.method)}
         />
       ))}
     </div>
