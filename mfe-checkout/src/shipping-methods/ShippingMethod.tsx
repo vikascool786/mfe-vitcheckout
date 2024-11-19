@@ -3,7 +3,7 @@ import { FormHeading } from "../component/Form/Heading/FormHeading";
 import "./ShippingMethod.scss";
 import { ShippingItem } from "../shipping-item/ShippingItem";
 import { ShippingOptions } from "../shipping-options/ShippingOptions";
-import { ShippingSelection } from "../interfaces/ShippingMethod";
+import { Item, ShippingSelection } from "../interfaces/ShippingMethod";
 import { RadioButton } from "../component/RadioButton/RadioButton";
 
 const Product = {
@@ -17,10 +17,12 @@ const Product = {
 
 interface ShippingMethodProps {
   shippingSelections: ShippingSelection[] | null;
+  shippingItems: Item[];
   shippingSelected: string;
 }
 
 export const ShippingMethod: React.FC<ShippingMethodProps> = ({
+  shippingItems,
   shippingSelected,
   shippingSelections,
 }) => {
@@ -28,16 +30,20 @@ export const ShippingMethod: React.FC<ShippingMethodProps> = ({
     return <p>Loading shipping methods...</p>;
   }
 
-
   return (
     <div className="shipping-container">
       <FormHeading title="Shipping Methods & Review Items" />
 
       <div className="shipping-item-container">
-        <ShippingItem product={Product} />
+        {shippingItems.map((item) => (
+          <ShippingItem product={item} />
+        ))}
       </div>
 
-      <ShippingOptions shippingOptions={shippingSelections} shippingSelected={shippingSelected}/>
+      <ShippingOptions
+        shippingOptions={shippingSelections}
+        shippingSelected={shippingSelected}
+      />
     </div>
   );
 };

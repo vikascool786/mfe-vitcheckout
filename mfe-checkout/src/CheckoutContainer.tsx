@@ -6,6 +6,7 @@ import { PaymentMethod } from "./payment-method/PaymentMethods";
 import { ShippingMethod } from "./shipping-methods/ShippingMethod";
 import { fetchOrderDetail } from "./api/service/GetOrder";
 import {
+  Item,
   ResponseData,
   ShippingSelection,
   Store,
@@ -18,7 +19,9 @@ export const CheckoutContainer: React.FC = () => {
     ShippingSelection[] | null
   >(null);
   const [selectedShipping, setSelectedShipping] = useState("");
+  const [shippingItems, setShippingItem] = useState<Item[]>();
   const [totals, setTotal] = useState();
+
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -42,6 +45,7 @@ export const CheckoutContainer: React.FC = () => {
         setSelectedShipping(
           firstStore?.shippingMethod ? firstStore.shippingMethod : ""
         );
+        setShippingItem(firstStore?.items);
         setTotal(firstStore?.totals)
       } catch (error) {
         setError("Failed to fetch data.");
@@ -62,6 +66,7 @@ export const CheckoutContainer: React.FC = () => {
       <div className="checkout-sub-container">
         <Checkout />
         <ShippingMethod
+          shippingItems={shippingItems}
           shippingSelections={shippingSelections}
           shippingSelected={selectedShipping}
         />
