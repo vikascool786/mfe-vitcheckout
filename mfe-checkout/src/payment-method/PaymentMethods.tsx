@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useShopperEWalletAddresses } from "../api/service/ShopperEWallet";
 import { fetchShoppersPaymentMethods } from "../api/service/ShoppersPaymentMethods";
 import CardOptions from "../assets/images/CardOptions.png";
 import ClickToPay from "../assets/images/ClickToPay.png";
@@ -46,11 +47,12 @@ export const PaymentMethod: React.FC = () => {
   const [allPaymentOptions, setAllPaymentOptions] = useState<IPaymentOptionProps[]>(staticPaymentMethods);
   const [isExpanded, setIsExpanded] = useState(false);
   const [savedCards, setSavedCards] = useState<IPaymentOptionProps[]>([]);
-
+  const {addresses} = useShopperEWalletAddresses("WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz");
+  console.log(allPaymentOptions, addresses)
   useEffect(() => {
     const shopperID =
-      "mZjhWVwjzVzpVzhYxWzpeWXzUzUxepzXYXVWzkjh"; //shopper with empty wallet
-    // "WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz"; // shopper with multiple types of cards
+      // "mZjhWVwjzVzpVzhYxWzpeWXzUzUxepzXYXVWzkjh"; //shopper with empty wallet
+    "WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz"; // shopper with multiple types of cards
     //"hqwxZzYzzqpeVzhWmZzZmZpzzkxkjzmZWqqWzxzkzj"; /*todo - need to update with dynamic shopperId*/
 
     const fetchShoppersSavedPayments = async () => {
