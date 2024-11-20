@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { fetchOrderDetail } from "./api/service/GetOrder";
 import "./App.scss";
 import { Checkout } from "./checkout/Checkout";
+import { Item } from "./interfaces/Order";
 import { OrderSummary } from "./order-summary/OrderSummary";
 import { PaymentMethod } from "./payment-method/PaymentMethods";
 import { ShippingMethod } from "./shipping-methods/ShippingMethod";
@@ -29,7 +30,7 @@ export const CheckoutContainer: React.FC = () => {
         const firstStore = stores[firstStoreKey!];
         setShippingData({
           shippingSelections: firstStore?.shippingSelections || [],
-          shippingItems: firstStore?.items,
+          shippingItems: firstStore?.items as Item[],
           shippingSelected: firstStore?.shippingMethod
             ? firstStore.shippingMethod
             : "",
@@ -57,7 +58,7 @@ export const CheckoutContainer: React.FC = () => {
         <PaymentMethod />
       </div>
       <div>
-        <OrderSummary />
+        <OrderSummary/>
       </div>
     </div>
     //   <div>

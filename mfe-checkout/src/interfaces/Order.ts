@@ -8,10 +8,21 @@ export interface Order {
   billingAddress: Address;
   paymentMethod: IPaymentMethod;
   id: string;
-  stores: IStores[];
+  stores: OrderStores;
   totals: ITotal;
   paymentMethods: IPaymentMethod2[];
   userOptions: IUserOptions;
+}
+
+interface OrderStores {
+  [key: string] : OrderStore
+}
+
+export interface OrderStore {
+  totals: ITotal
+  items: Item[]
+  shippingSelections: ShippingSelection[]
+  shippingMethod: string
 }
 
 export interface Item {
