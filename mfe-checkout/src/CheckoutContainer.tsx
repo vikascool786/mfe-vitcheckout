@@ -1,27 +1,16 @@
-import React, { RefObject, useEffect, useRef, useState } from "react";
+import { useAtom } from "jotai";
+import React, { useEffect, useState } from "react";
+import { fetchOrderDetail } from "./api/service/GetOrder";
 import "./App.scss";
 import { Checkout } from "./checkout/Checkout";
 import { OrderSummary } from "./order-summary/OrderSummary";
 import { PaymentMethod } from "./payment-method/PaymentMethods";
 import { ShippingMethod } from "./shipping-methods/ShippingMethod";
-import { fetchOrderDetail } from "./api/service/GetOrder";
-import {
-  Item,
-  ResponseData,
-  ShippingSelection,
-  Store,
-} from "./interfaces/ShippingMethod";
+import { shippingData, total } from "./store";
 
 export const CheckoutContainer: React.FC = () => {
-  const [orderData, setOrderData] = useState<ResponseData | null>(null);
-  
-  const [shippingSelections, setShippingSelections] = useState<
-    ShippingSelection[] | null
-  >(null);
-  const [selectedShipping, setSelectedShipping] = useState("");
-  const [shippingItems, setShippingItem] = useState<Item[]>();
-  const [totals, setTotal] = useState();
-
+  const [, setShippingData] = useAtom(shippingData);
+  const [, setTotal] = useAtom(total);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,23 +19,22 @@ export const CheckoutContainer: React.FC = () => {
     const fetOrderDetail = async () => {
       try {
         const response = await fetchOrderDetail();
-        setOrderData(response);
-
         const stores = response?.stores;
-        console.log(stores);
         const storeKeys = Object.keys(stores);
         if (storeKeys.length === 0) {
           console.error("No stores found");
           return;
         }
-        const firstStoreKey = Object.keys(stores)[0];
+        const firstStoreKey = Object.keys(stores)[0] as string;
         const firstStore = stores[firstStoreKey!];
-        setShippingSelections(firstStore?.shippingSelections || []);
-        setSelectedShipping(
-          firstStore?.shippingMethod ? firstStore.shippingMethod : ""
-        );
-        setShippingItem(firstStore?.items);
-        setTotal(firstStore?.totals)
+        setShippingData({
+          shippingSelections: firstStore?.shippingSelections || [],
+          shippingItems: firstStore?.items,
+          shippingSelected: firstStore?.shippingMethod
+            ? firstStore.shippingMethod
+            : "",
+        });
+        setTotal(firstStore?.totals);
       } catch (error) {
         setError("Failed to fetch data.");
         console.error("Failed to fetch data:", error);
@@ -65,15 +53,11 @@ export const CheckoutContainer: React.FC = () => {
     <div className="checkout-container">
       <div className="checkout-sub-container">
         <Checkout />
-        <ShippingMethod
-          shippingItems={shippingItems}
-          shippingSelections={shippingSelections}
-          shippingSelected={selectedShipping}
-        />
+        <ShippingMethod />
         <PaymentMethod />
       </div>
       <div>
-        <OrderSummary totals={totals}  />
+        <OrderSummary />
       </div>
     </div>
     //   <div>

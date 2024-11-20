@@ -1,12 +1,13 @@
-import React, { useEffect } from "react";
-import "./OrderSummary.scss";
-import { FormField } from "../component/Form/Field/FormField";
-import { Button } from "../component/Button/Button";
-import { FormHeading } from "../component/Form/Heading/FormHeading";
-import { Cashback } from "../assets/svgs/Cashback";
-import { ApplyCashback } from "./apply-cashback/ApplyCashback";
+import { useAtom } from "jotai";
+import React from "react";
 import { useShopperEWallet } from "../api/service/ShopperEWallet";
-import { ITotal } from "../interfaces/ShopperCart";
+import { Button } from "../component/Button/Button";
+import { FormField } from "../component/Form/Field/FormField";
+import { FormHeading } from "../component/Form/Heading/FormHeading";
+import { shippingData, total } from "../store";
+import { ApplyCashback } from "./apply-cashback/ApplyCashback";
+import "./OrderSummary.scss";
+import { Cashback } from "../assets/svgs/Cashback";
 
 const ORDER_SUMMARY = [
   {
@@ -24,10 +25,11 @@ const ORDER_SUMMARY = [
 ];
 
 interface IOrderSummary {
-  totals: ITotal;
 }
 
-export const OrderSummary: React.FC<IOrderSummary> = ({ totals }) => {
+export const OrderSummary: React.FC<IOrderSummary> = () => {
+  const [totalData] = useAtom(total);
+  const [shipping] = useAtom(shippingData);
   const { eWalletData, loading, error } = useShopperEWallet("2115715663");
   return (
     <div className="order-summary-container">
@@ -57,16 +59,16 @@ export const OrderSummary: React.FC<IOrderSummary> = ({ totals }) => {
 
       <div className="order-summary-total">
         <div>Total Due</div>
-        <div>$33.02</div>
+        <div>${totalData?.price}</div>
       </div>
 
-      {/* {totals.cashBack && <div className="order-summary-cashback-container">
+      {totalData?.cashBack && <div className="order-summary-cashback-container">
         <div className="order-cashback">
           <Cashback />
           VIFT Cashback earned in this order
         </div>
-        <div>{`$${totals.cashBack}`}</div>
-      </div>} */}
+        <div>{`$${totalData.cashBack}`}</div>
+      </div>}
     </div>
   );
 };

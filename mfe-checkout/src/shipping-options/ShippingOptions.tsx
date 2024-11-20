@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
-import "./ShippingOptions.scss";
-import { ShippingOptionItem } from "../shipping-option-item/ShippingOptionItem";
 import { ShippingSelection } from "../interfaces/ShippingMethod";
+import { ShippingOptionItem } from "../shipping-option-item/ShippingOptionItem";
+import "./ShippingOptions.scss";
 
 interface IShippingOptionsProps {
   shippingOptions: ShippingSelection[];
@@ -44,7 +44,7 @@ export const ShippingOptions: React.FC<IShippingOptionsProps> = ({
           shippingOption={shippingOption}
           index={index}
           size={shippingOptionsState.length - 1}
-          isSelected={shippingOption.isSelected}
+          isSelected={shippingOption.isSelected || false}
           onChange={() => handleChange(shippingOption.method)}
         />
       ))}

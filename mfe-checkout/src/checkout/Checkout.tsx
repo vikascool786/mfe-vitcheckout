@@ -1,19 +1,10 @@
-import React, { RefObject, useEffect, useRef, useState } from "react";
 import $ from "jquery";
 import "parsleyjs";
-import "./Checkout.scss";
-import { Button } from "../component/Button/Button";
-import { Checkbox } from "../component/Form/Checkbox/Checkbox";
-import { FormField } from "../component/Form/Field/FormField";
-import { DropdownField } from "../component/Form/Field/DropdownField";
-import { FormHeading } from "../component/Form/Heading/FormHeading";
-import { Back } from "../assets/svgs/Back";
-import { AddressVerificationContainer } from "../address-verification/AddressVerificationContainer";
-import { AddressHandler } from "../interfaces/AddressHandler";
-import { Address } from "../interfaces/Address";
+import React, { RefObject, useEffect, useRef, useState } from "react";
+import { AddressList } from "../address-list/AddressList";
 import { AddressDisplay } from "../address-verification/AddressDisplay";
+import { AddressVerificationContainer } from "../address-verification/AddressVerificationContainer";
 import { fetchStatesAndCountries } from "../api/service/CountriesAndStates";
-import { DropdownOption } from "../interfaces/DropdownOption";
 import {
   createShopperAddressBookEntry,
   fetchShopperAddressBook,
@@ -21,7 +12,16 @@ import {
   updateTextUpdatesForPhone,
 } from "../api/service/ShopperAddressBook";
 import { fetchSiteData } from "../api/service/Site";
-import { AddressList } from "../address-list/AddressList";
+import { Back } from "../assets/svgs/Back";
+import { Button } from "../component/Button/Button";
+import { Checkbox } from "../component/Form/Checkbox/Checkbox";
+import { DropdownField } from "../component/Form/Field/DropdownField";
+import { FormField } from "../component/Form/Field/FormField";
+import { FormHeading } from "../component/Form/Heading/FormHeading";
+import { Address } from "../interfaces/Address";
+import { AddressHandler } from "../interfaces/AddressHandler";
+import { DropdownOption } from "../interfaces/DropdownOption";
+import "./Checkout.scss";
 
 const defaultAddress: Address = {
   id: 0,
@@ -40,7 +40,7 @@ export const Checkout: React.FC = () => {
   const siteId = "260"; /*todo - need to update with dynamic siteId*/
   // State to manage whether the form is expanded or collapsed
 
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [showShipAddressForm, setShowShipAddressForm] = useState(false);
   const [shopperAddressBook, setShopperAddressBook] = useState<Address[]>([]);
   const [shippingAddress, setShippingAddress] =
@@ -109,6 +109,9 @@ export const Checkout: React.FC = () => {
         const addressList: Address[] =
           buildShoppersAddressBookFromResponse(response);
         setShopperAddressBook(addressList);
+        if (addressList.length < 1) {
+          setIsExpanded(!isExpanded)
+        }
       } catch (error) {
         console.error("Failed to fetch data:", error);
       }
