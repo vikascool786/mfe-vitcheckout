@@ -1,3 +1,5 @@
+import { Order } from "./Order";
+
 export interface Address {
   id: number;
   description: string;
@@ -76,7 +78,7 @@ export interface ResponseData {
 export interface ApiResponse {
   response: {
     success: {
-      data: ResponseData;
+      data: Order;
     };
   };
 }

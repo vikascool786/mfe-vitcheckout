@@ -7,7 +7,7 @@ export interface IShopperCart {
 }
 
 export interface IStores {
-  string: IStoreQuantity;
+  [key: string]: IStoreQuantity;
 }
 
 export interface IStoreQuantity {
