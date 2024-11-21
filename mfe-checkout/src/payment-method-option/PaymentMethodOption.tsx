@@ -14,28 +14,24 @@ export interface IPaymentOptionProps {
   onChange: () => void;
   shopperSavedPayment?: ShopperSavedPayments;
 }
-
-export const PaymentOption: React.FC<IPaymentOptionProps> = ({
+export const PaymentOption: React.FC<
+  IPaymentOptionProps & {
+    isEditing: boolean;
+    onEdit: () => void;
+    onCancelEdit: () => void;
+  }
+> = ({
   name,
   image,
   selected,
   onChange,
   index,
-  size,
+  isEditing,
+  onEdit,
+  onCancelEdit,
   isSavedCard = false,
   shopperSavedPayment,
 }) => {
-  const [isEditing, setIsEditing] = useState(false);
-
-  const handleEditClick = (event: React.MouseEvent) => {
-    event.stopPropagation();
-    setIsEditing(true);
-  };
-
-  const handleCancelEdit = () => {
-    setIsEditing(false);
-  };
-
   const isSelected = selected ? "selected" : "";
   const isFirst = index === 0 ? "start" : "";
   const showCardImage = isSavedCard && shopperSavedPayment;
@@ -82,7 +78,10 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
             {!isEditing && (
               <div
                 className="payment-option-container__card-cvv-edit"
-                onClick={handleEditClick}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit();
+                }}
               >
                 edit
               </div>
@@ -90,16 +89,14 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
           </div>
         ) : null}
       </div>
-      {isEditing ? (
+      {isEditing && (
         <CardInformation
           initialData={{
             ...shopperSavedPayment,
           }}
-          onCancel={handleCancelEdit}
+          onCancel={onCancelEdit}
         />
-      ) : index === 0 && selected && !isSavedCard ? (
-        <CardInformation />
-      ) : null}
+      )}
     </div>
   );
 };

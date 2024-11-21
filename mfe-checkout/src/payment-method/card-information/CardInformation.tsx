@@ -34,7 +34,9 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   console.log(initialData);
   const [sameShippingAddress, setSameShippingAddress] =
     useState<boolean>(false);
-  const [address, setAddress] = useState<Address>(defaultAddress);
+  const [address, setAddress] = useState<Address>(
+    initialData?.address || defaultAddress
+  );
   const [saveAddress, setSaveAddress] = useState<boolean>(false);
   const [cardInformation, setCardInformation] = useState<ShopperSavedPayments>({
     accountName: initialData?.accountName || "",

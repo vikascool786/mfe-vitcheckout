@@ -23,7 +23,7 @@ const staticPaymentMethods: IPaymentOptionProps[] = [
     selected: false,
     index: 0,
     size: 0,
-    onChange: () => { },
+    onChange: () => {},
   },
   {
     name: "PayPal",
@@ -31,7 +31,7 @@ const staticPaymentMethods: IPaymentOptionProps[] = [
     selected: false,
     index: 1,
     size: 0,
-    onChange: () => { },
+    onChange: () => {},
   },
   {
     name: "Sezzle",
@@ -39,20 +39,25 @@ const staticPaymentMethods: IPaymentOptionProps[] = [
     selected: false,
     index: 2,
     size: 0,
-    onChange: () => { },
+    onChange: () => {},
   },
 ];
 
 export const PaymentMethod: React.FC = () => {
-  const [allPaymentOptions, setAllPaymentOptions] = useState<IPaymentOptionProps[]>(staticPaymentMethods);
+  const [allPaymentOptions, setAllPaymentOptions] =
+    useState<IPaymentOptionProps[]>(staticPaymentMethods);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [savedCards, setSavedCards] = useState<IPaymentOptionProps[]>([]);
-  const {addresses} = useShopperEWalletAddresses("WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz");
-  console.log(allPaymentOptions, addresses)
+  const { addresses } = useShopperEWalletAddresses(
+    "WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz"
+  );
+  const [editingOptionIndex, setEditingOptionIndex] = useState<number | null>(
+    null
+  );
+
   useEffect(() => {
     const shopperID =
       // "mZjhWVwjzVzpVzhYxWzpeWXzUzUxepzXYXVWzkjh"; //shopper with empty wallet
-    "WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz"; // shopper with multiple types of cards
+      "WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz"; // shopper with multiple types of cards
     //"hqwxZzYzzqpeVzhWmZzZmZpzzkxkjzmZWqqWzxzkzj"; /*todo - need to update with dynamic shopperId*/
 
     const fetchShoppersSavedPayments = async () => {
@@ -60,29 +65,32 @@ export const PaymentMethod: React.FC = () => {
         const response = await fetchShoppersPaymentMethods(shopperID);
 
         const shopperPayments: IPaymentOptionProps[] = response
-          .map((item: any, index: number) => ({
-            name: item.type,
-            image: item.imageUrl,
-            selected: item.preferred,
-            index,
-            size: 0,
-            onChange: () => { },
-            isSavedCard: true,
-            shopperSavedPayment: {
-              id: item.id,
-              expirationDate: item.expires as string | "",
-              cardMask: item.mask as string | "",
-              preferred: item.preferred as boolean,
-              type: item.type as string | "",
-              accountName: item.accountName as string | "",
+          .map((item: any, index: number) => {
+            return {
               name: item.type,
               image: item.imageUrl,
-              address: {} as Address,
-            },
-          }))
-          .sort((a: { selected: boolean; }, b: { selected: boolean; }) => (b.selected ? 1 : 0) - (a.selected ? 1 : 0));
-
-        setSavedCards(shopperPayments);
+              selected: item.preferred,
+              index,
+              size: 0,
+              onChange: () => {},
+              isSavedCard: true,
+              shopperSavedPayment: {
+                id: item.id,
+                expirationDate: item.expires as string | "",
+                cardMask: item.mask as string | "",
+                preferred: item.preferred as boolean,
+                type: item.type as string | "",
+                accountName: item.accountName as string | "",
+                name: item.type,
+                image: item.imageUrl,
+                address: addresses[item.addressId] || ({} as Address),
+              },
+            };
+          })
+          .sort(
+            (a: { selected: boolean }, b: { selected: boolean }) =>
+              (b.selected ? 1 : 0) - (a.selected ? 1 : 0)
+          );
         updatePaymentOptions(shopperPayments);
       } catch (error) {
         console.error("Failed to fetch shopper payment data:", error);
@@ -90,9 +98,8 @@ export const PaymentMethod: React.FC = () => {
     };
 
     const updatePaymentOptions = (shopperPayments: IPaymentOptionProps[]) => {
-      const hasSavedCards = shopperPayments.length > 0;
       const displayedOptions = [
-        ...(hasSavedCards && shopperPayments && shopperPayments[0]
+        ...(shopperPayments && shopperPayments[0]
           ? [shopperPayments[0]]
           : [staticPaymentMethods[0]]),
         ...(isExpanded && shopperPayments ? shopperPayments.slice(1) : []),
@@ -105,7 +112,7 @@ export const PaymentMethod: React.FC = () => {
     };
 
     fetchShoppersSavedPayments();
-  }, [isExpanded]);
+  }, [isExpanded, addresses]);
 
   const handlePaymentMethodChange = (selectedIndex: number) => {
     setAllPaymentOptions((prevOptions) =>
@@ -114,6 +121,10 @@ export const PaymentMethod: React.FC = () => {
         selected: index === selectedIndex,
       }))
     );
+    // Collapse any editing card when a new payment method is selected
+    if (editingOptionIndex !== null && editingOptionIndex !== selectedIndex) {
+      setEditingOptionIndex(null);
+    }
   };
 
   // Toggle function for expanding or collapsing the card list
@@ -136,6 +147,9 @@ export const PaymentMethod: React.FC = () => {
             <PaymentOption
               key={paymentOption.shopperSavedPayment?.id || paymentOption.name}
               {...{ ...paymentOption, index }}
+              isEditing={editingOptionIndex === index}
+              onEdit={() => setEditingOptionIndex(index)}
+              onCancelEdit={() => setEditingOptionIndex(null)}
               onChange={() => handlePaymentMethodChange(index)}
             />
           ))}
