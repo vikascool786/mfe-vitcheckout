@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from "react";
+import { fetchStatesAndCountries } from "../../api/service/CountriesAndStates";
 import { Address } from "../../interfaces/Address";
+import { DropdownOption } from "../../interfaces/DropdownOption";
 import { DropdownField } from "../Form/Field/DropdownField";
 import { FormField } from "../Form/Field/FormField";
-import { Checkbox } from "../Form/Checkbox/Checkbox";
-import { DropdownOption } from "../../interfaces/DropdownOption";
-import { fetchStatesAndCountries } from "../../api/service/CountriesAndStates";
-import { STATES } from "../../data/States";
 
 interface IAddressFormProps {
   siteId: string; // Pass siteId as a prop to make it dynamic
@@ -110,6 +108,7 @@ export const AddressForm: React.FC<IAddressFormProps> = ({
           required
           selectedValue={shippingAddress.state}
           formName="state"
+          onChange={(e) => handleInputChange("state", "New York")}
         />
       </div>
       <div className="form-field-container">

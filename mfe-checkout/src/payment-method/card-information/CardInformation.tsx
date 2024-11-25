@@ -14,9 +14,29 @@ interface ICardInformationProps {
   onCancel?: () => void;
 }
 
+/**
+ * const requestData = {
+  name: "Am",
+  token: "8206a9b9-e8fd-11df-b64c-005056842e7d",
+  number: "4111111111111111",
+  month: 7,
+  year: 2033,
+  type: 9,
+  preferred: true,
+  first: "vikas",
+  last: "w",
+  address1: "NY",
+  city: "New York",
+  country: "USA",
+  zip: "10001",
+  state: "New York",
+  isPoBox: false,
+};
+ */
+
 const defaultAddress: Address = {
   id: 0,
-  isPrimary: true,
+  isPrimary: 0,
   first: "",
   last: "",
   address1: "",
@@ -25,13 +45,12 @@ const defaultAddress: Address = {
   city: "",
   state: "",
   phone: "",
-};
+} as Address;
 
 export const CardInformation: React.FC<ICardInformationProps> = ({
   initialData,
   onCancel,
 }) => {
-  console.log(initialData);
   const [sameShippingAddress, setSameShippingAddress] =
     useState<boolean>(false);
   const [address, setAddress] = useState<Address>(
@@ -46,7 +65,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
     id: initialData?.id || 0,
     image: initialData?.image || "",
     preferred: initialData?.preferred || false,
-    type: initialData?.type || "",
+    type: 9,
   });
 
   const cardInformationRef = useRef(cardInformation);
@@ -61,13 +80,35 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
     setCardInformation({ ...cardInformationRef.current });
   };
 
-  const handleSaveAddress = () => {
-    const isValid = validateFormFields();
-    if (isValid) {
-      addShoppersPaymentMethod("", cardInformation);
-      setSaveAddress(!saveAddress);
-    } else {
-      setSaveAddress(false);
+  const handleSaveAddress = async () => {
+    console.log(cardInformation.expirationDate);
+    const expirationMonth = cardInformation.expirationDate?.slice(0, 2);
+    const expirationYear = cardInformation.expirationDate?.slice(-4);
+
+    const requestData = {
+      name: cardInformation.accountName,
+      number: cardInformation.cardMask,
+      month: expirationMonth ? parseInt(expirationMonth, 10) : undefined,
+      year: expirationYear ? parseInt(expirationYear, 10) : undefined,
+      type: cardInformation.type,
+      preferred: cardInformation.preferred,
+      first: address.first,
+      last: address.last,
+      address1: address.address1,
+      address2: address.address2,
+      city: "New York",
+      state: address.state,
+      zip: address.zip,
+      country: "USA", // Replace with dynamic data if available
+      phone: address.phone,
+      isPoBox: address.isPoBox || false,
+    };
+
+    try {
+      await addShoppersPaymentMethod(requestData);
+      console.log("Card information successfully saved.");
+    } catch (error) {
+      console.error("Unable to save card information:", error);
     }
   };
 
@@ -127,11 +168,28 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
             { value: "11", label: "11" },
             { value: "12", label: "12" },
           ]}
+          onChange={(value) =>
+            setCardInformation((prev) => ({
+              ...prev,
+              expirationDate: `${value}/${cardInformation.expirationDate?.slice(
+                -4
+              )}`,
+            }))
+          }
         />
         <DropdownField
           label="Expiration Year"
-          selectedValue={cardInformation.expirationDate?.slice(-2) || ""}
+          selectedValue={cardInformation.expirationDate?.slice(-4) || ""}
           options={years}
+          onChange={(value) =>
+            setCardInformation((prev) => ({
+              ...prev,
+              expirationDate: `${cardInformation.expirationDate?.slice(
+                0,
+                2
+              )}/${value}`,
+            }))
+          }
         />
       </div>
       <div className="form-field-container">
@@ -149,9 +207,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
             checked={saveAddress}
             onChange={handleSaveAddress}
           />
-          <span onClick={onCancel} className="shipping-text">
-            Save card for later
-          </span>
+          <span className="shipping-text">Save card for later</span>
         </div>
       </div>
       <div className="billing">
@@ -170,9 +226,13 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
         <AddressForm
           shippingAddress={address}
           siteId="260"
-          onAddressChange={(updatedAddress: Address) =>
-            setAddress(updatedAddress)
-          }
+          onAddressChange={(updatedAddress: Address) => {
+            setAddress(updatedAddress);
+            setCardInformation((prev) => ({
+              ...prev,
+              address: updatedAddress,
+            }));
+          }}
         />
       ) : (
         <div className="checkbox-text">

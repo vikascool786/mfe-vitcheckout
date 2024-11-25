@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useShopperEWalletAddresses } from "../api/service/ShopperEWallet";
-import { fetchShoppersPaymentMethods } from "../api/service/ShoppersPaymentMethods";
+import { addShoppersPaymentMethod, fetchShoppersPaymentMethods } from "../api/service/ShoppersPaymentMethods";
 import CardOptions from "../assets/images/CardOptions.png";
 import ClickToPay from "../assets/images/ClickToPay.png";
 import PayPal from "../assets/images/PayPal.png";
@@ -15,6 +15,7 @@ import {
 } from "../payment-method-option/PaymentMethodOption";
 import { TextUpdates } from "../text-updates/TextUpdates";
 import "./PaymentMethods.scss";
+import { Add } from "../assets/icons/Add";
 
 const staticPaymentMethods: IPaymentOptionProps[] = [
   {
@@ -83,7 +84,9 @@ export const PaymentMethod: React.FC = () => {
                 accountName: item.accountName as string | "",
                 name: item.type,
                 image: item.imageUrl,
-                address: addresses[item.addressId] || ({} as Address),
+                address: addresses
+                  ? addresses[item.addressId]
+                  : ({} as Address),
               },
             };
           })
@@ -132,6 +135,35 @@ export const PaymentMethod: React.FC = () => {
     setIsExpanded(!isExpanded);
   };
 
+  const onAddNewCard = async () => {
+    const newCardIndex = allPaymentOptions.length;
+  
+    // Add a temporary entry for the new card in edit mode
+    const newCard: IPaymentOptionProps = {
+      name: "New Card",
+      image: CardOptions, // Replace with a placeholder image or icon for new cards
+      selected: false,
+      index: newCardIndex,
+      size: 0,
+      onChange: () => {},
+      isSavedCard: false,
+      shopperSavedPayment: {
+        id: 0, // Generate an ID if necessary
+        expirationDate: "",
+        cardMask: "",
+        preferred: false,
+        type: 9,
+        accountName: "",
+        image: CardOptions,
+        address: {} as Address,
+      },
+    };
+  
+    setAllPaymentOptions((prevOptions) => [...prevOptions, newCard]);
+    setEditingOptionIndex(newCardIndex);
+
+  };
+
   return (
     <div className="pm-main-container">
       <div className="pm-container">
@@ -165,6 +197,9 @@ export const PaymentMethod: React.FC = () => {
               <div>+ Continue to Click to Pay</div>
               <img src={ClickToPay} alt="Click to Pay" />
             </div>
+          </div>
+          <div className="checkout-method-click-to-pay" onClick={onAddNewCard}>
+            <Add /> Add New Card
           </div>
         </div>
       </div>
