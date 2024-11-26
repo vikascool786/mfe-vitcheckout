@@ -24,13 +24,13 @@ const ORDER_SUMMARY = [
   },
 ];
 
-interface IOrderSummary {
-}
+interface IOrderSummary {}
 
 export const OrderSummary: React.FC<IOrderSummary> = () => {
   const [totalData] = useAtom(total);
   const [shipping] = useAtom(shippingData);
   const { eWalletData, loading, error } = useShopperEWallet("2115715663");
+
   return (
     <div className="order-summary-container">
       <FormHeading title="Order Summary" />
@@ -49,12 +49,24 @@ export const OrderSummary: React.FC<IOrderSummary> = () => {
       <div className="order-sub-text underlined">Apply gift card</div>
 
       <div className="order-charges-table">
-        {ORDER_SUMMARY.map((item, index) => (
-          <div key={index} className="order-summary-row">
-            <div>{item.title}</div>
-            <div>{item.value}</div>
+        <div className="order-summary-row">
+          <div>Items Subtotal</div>
+          <div>${totalData?.price}</div>
+        </div>
+        <div className="order-summary-row">
+          <div>Tax Total</div>
+          <div>TBD</div>
+        </div>
+        {shipping && (
+          <div className="order-summary-row">
+            <div>{shipping?.shippingSelected?.method} Shipping</div>
+            <div>
+              {shipping?.shippingSelected?.total === 0
+                ? "Free"
+                : `$${shipping?.shippingSelected?.total}`}
+            </div>
           </div>
-        ))}
+        )}
       </div>
 
       <div className="order-summary-total">
@@ -62,13 +74,15 @@ export const OrderSummary: React.FC<IOrderSummary> = () => {
         <div>${totalData?.price}</div>
       </div>
 
-      {totalData?.cashBack && <div className="order-summary-cashback-container">
-        <div className="order-cashback">
-          <Cashback />
-          VIFT Cashback earned in this order
+      {totalData?.cashBack && (
+        <div className="order-summary-cashback-container">
+          <div className="order-cashback">
+            <Cashback />
+            VIFT Cashback earned in this order
+          </div>
+          <div>{`$${totalData.cashBack}`}</div>
         </div>
-        <div>{`$${totalData.cashBack}`}</div>
-      </div>}
+      )}
     </div>
   );
 };

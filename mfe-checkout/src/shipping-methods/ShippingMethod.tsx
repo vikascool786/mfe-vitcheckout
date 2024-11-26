@@ -6,14 +6,11 @@ import { ShippingOptions } from "../shipping-options/ShippingOptions";
 import { shippingData } from "../store";
 import "./ShippingMethod.scss";
 
-export const ShippingMethod: React.FC = ({
-}) => {
-
+export const ShippingMethod: React.FC = ({}) => {
   const [shipping] = useAtom(shippingData);
   if (!shipping?.shippingSelections) {
     return <p>Loading shipping methods...</p>;
   }
-
 
   return (
     <div className="shipping-container">
@@ -25,10 +22,7 @@ export const ShippingMethod: React.FC = ({
         ))}
       </div>
 
-      <ShippingOptions
-        shippingOptions={shipping.shippingSelections}
-        shippingSelected={shipping.shippingSelected}
-      />
+      <ShippingOptions />
     </div>
   );
 };

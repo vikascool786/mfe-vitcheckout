@@ -5,10 +5,10 @@ import { ITotal } from "../interfaces/ShopperCart";
 
 
 interface IShippingAtom {
-    shippingSelections: ShippingSelection[] | null;
+    shippingSelections: ShippingSelection[];
     shippingItems: Item[];
-    shippingSelected: string;
+    shippingSelected: ShippingSelection;
 }
 
-export const shippingData = atom<IShippingAtom>();
+export const shippingData = atom<IShippingAtom>({} as IShippingAtom);
 export const total = atom<ITotal>();

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useShopperEWalletAddresses } from "../api/service/ShopperEWallet";
-import { addShoppersPaymentMethod, fetchShoppersPaymentMethods } from "../api/service/ShoppersPaymentMethods";
+import { fetchShoppersPaymentMethods } from "../api/service/ShoppersPaymentMethods";
+import { Add } from "../assets/icons/Add";
 import CardOptions from "../assets/images/CardOptions.png";
 import ClickToPay from "../assets/images/ClickToPay.png";
 import PayPal from "../assets/images/PayPal.png";
@@ -15,7 +16,6 @@ import {
 } from "../payment-method-option/PaymentMethodOption";
 import { TextUpdates } from "../text-updates/TextUpdates";
 import "./PaymentMethods.scss";
-import { Add } from "../assets/icons/Add";
 
 const staticPaymentMethods: IPaymentOptionProps[] = [
   {
@@ -198,8 +198,13 @@ export const PaymentMethod: React.FC = () => {
               <img src={ClickToPay} alt="Click to Pay" />
             </div>
           </div>
-          <div className="checkout-method-click-to-pay" onClick={onAddNewCard}>
+          <div className="checkout-add-card" onClick={onAddNewCard}>
+            <div className="checkout-add-card-text">
             <Add /> Add New Card
+            </div>
+            <div>
+              <img src={CardOptions}/>
+            </div>
           </div>
         </div>
       </div>
