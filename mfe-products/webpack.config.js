@@ -5,7 +5,7 @@ const { ProvidePlugin } = require("webpack");
 const deps = require("./package.json").dependencies;
 module.exports = (env, argv) => {
   const isDev = argv.mode === "development";
-  const isLocal = true;
+  const isLocal = env.local ?? false;
   return {
     output: {
       publicPath: isDev

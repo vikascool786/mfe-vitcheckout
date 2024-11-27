@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 // Bootstrap Elements
 import Button from 'react-bootstrap/Button';
@@ -8,11 +8,11 @@ import Accordion from 'react-bootstrap/Accordion';
 
 // YFiles Elements
 import {
-    OrgChart,
-    Overview,
-    Controls,
-    OrgChartControlButtons,
-    registerLicense
+	OrgChart,
+	Overview,
+	Controls,
+	OrgChartControlButtons,
+	registerLicense
 } from '@yworks/react-yfiles-orgchart';
 
 // Default YFiles Styles
@@ -28,142 +28,194 @@ import data from './data/eugeneW.json';
 // Component-scoped styles
 import "./Genealogy.scss";
 
-function TooltipComponent({ text }) {
-    console.log(text);
-    return (
-        <div
-            style={{
-                backgroundColor: "tomato",
-                padding: 5,
-                borderRadius: 10,
-                color: "white",
-            }}
-        >
-            {text}
-        </div>
-    );
-}
+const TooltipComponent = ({ text }) => (
+	<div style={{
+		backgroundColor: "#000",
+		padding: 5,
+		borderRadius: 10,
+		color: "#fff",
+	}}>
+		{text}
+	</div>
+);
 
-export default function Counter(props) {
-    const [text, setText] = useState('');
-    const [searchQuery, setSearchQuery] = useState("");
+export default function Genealogy() {
+	const [searchQuery, setSearchQuery] = useState("");
 
-    useEffect(() => {
-        setText(("name" in data) ? `${data.name}, ${data.position}` :
-                ("source" in data) ? `${data.source.name} → ${data.target.name}` : '');
-    }, [data]);
+	return (
+		<div className="Genealogy">
+			<div className="mfe-genealogy">
+				<div className="app">
+					<div className="group">
+						<div className="sidebar">
+							<div className="sidebar__input-group">
+								<Form>
+									<Form.Label
+										className="flex-form"
+										htmlFor="ufoId">
+										Starting Point UFO ID#
+									</Form.Label>
+									<br />
+									<div className="search__with-button">
+										<Form.Control 
+											className="w-auto" 
+											type="text" 
+											id="ufoId" 
+											name="ufo id" 
+											placeholder="1234567" />
+										<Button variant="info">
+											Run Report
+										</Button>
+									</div>
+								</Form>
+							</div>
 
-    return (
-        <div className="Genealogy">
-            <div className="mfe-genealogy">
-                <div className="c-app">
-                    <div className="c-group">
-                        {/* <div className="c-sidebar">
-                            <div className="c-sidebar__input-group">
-                                <Form>
-                                    <Form.Label className="c-flex-form" htmlFor="ufoId">Starting Point UFO ID#</Form.Label>
-                                    <div className="c-search__with-button">
-                                        <Form.Control className="w-auto" type="text" id="ufoId" name="ufo id" placeholder="1234567" />
-                                        <Button variant="info">Run Report</Button>
-                                    </div>
-                                </Form>
-                            </div>
+							<div className="sidebar__input-group">
+								<Form className="leg-org-count">
+									<Form.Group>
+										<Form.Label htmlFor="legExt">
+											Leg Ext
+										</Form.Label>
+										<br />
+										<Form.Control 
+											type="text" 
+											id="legExt" 
+											name="Leg Ext" 
+											placeholder="001" />
+									</Form.Group>
+									<Form.Group>
+										<Form.Label htmlFor="orgSide">
+											Org Side
+										</Form.Label>
+										<Form.Select
+											id="orgSide"
+											defaultValue="Both">
+											<option value="1">Both</option>
+											<option value="2">Left</option>
+											<option value="3">Right</option>
+										</Form.Select>
+									</Form.Group>
+									<Form.Group>
+										<Form.Label htmlFor="country">
+											Country
+										</Form.Label>
+										<Form.Select
+											id="country"
+											defaultValue="USA">
+											<option value="1">USA</option>
+											<option value="2">GBR</option>
+											<option value="3">HKG</option>
+										</Form.Select>
+									</Form.Group>
+								</Form>
+							</div>
 
-                            <div className="c-sidebar__input-group">
-                                <Form className="c-leg-org-count">
-                                    <Form.Group>
-                                        <Form.Label htmlFor="legExt">Leg Ext</Form.Label>
-                                        <Form.Control type="text" id="legExt" name="Leg Ext" placeholder="001" />
-                                    </Form.Group>
-                                    <Form.Group>
-                                        <Form.Label htmlFor="orgSide">Org Side</Form.Label>
-                                        <Form.Select id="orgSide">
-                                            <option value="1" selected>Both</option>
-                                            <option value="2">Left</option>
-                                            <option value="3">Right</option>
-                                        </Form.Select>
-                                    </Form.Group>
-                                    <Form.Group>
-                                        <Form.Label htmlFor="country">Country</Form.Label>
-                                        <Form.Select id="country">
-                                            <option value="1" selected>USA</option>
-                                            <option value="2">GBR</option>
-                                            <option value="3">HKG</option>
-                                        </Form.Select>
-                                    </Form.Group>
-                                </Form>
-                            </div>
+							{/*<div className="ledgers">
+								<p className="title">
+									Ledgers
+								</p>
+								<p className="sponsored">
+									Personally Sponsored
+								</p>
+								<p className="not-sponsored">
+									Not Personally Sponsored
+								</p>
+							</div>*/}
 
-                            <div className="c-ledgers">
-                                <p className="c-title">Ledgers</p>
-                                <p className="c-sponsored">Personally Sponsored</p>
-                                <p className="c-not-sponsored">Not Personally Sponsored</p>
-                            </div>
+							<div className="filter">
+								<p className="title">
+									Quick Filter
+								</p>
+								<Form>
+									<Form.Label 
+										className="flex-form" 
+										htmlFor="fName">
+										First Name
+									</Form.Label>
+									<br />
+									<Form.Control 
+										className="w-auto" 
+										type="text" 
+										id="fName" 
+										name="first name" 
+										placeholder="Greg" />
+									<br />
+									<Form.Label 
+										className="flex-form" 
+										htmlFor="lName">
+										Last Name
+									</Form.Label>
+									<br />
+									<Form.Control 
+										className="w-auto" 
+										type="text" 
+										id="lName" 
+										name="last name" 
+										placeholder="Johnson" />
+								</Form>
+							</div>
 
-                            <div className="c-filter">
-                                <p className="c-title">Quick Filter</p>
-                                <Form>
-                                    <Form.Label className="c-flex-form" htmlFor="fName">First Name</Form.Label>
-                                    <Form.Control className="w-auto" type="text" id="fName" name="first name" placeholder="Greg" />
-                                    <Form.Label className="c-flex-form" htmlFor="lName">Last Name</Form.Label>
-                                    <Form.Control className="w-auto" type="text" id="lName" name="last name" placeholder="Johnson" />
-                                </Form>
-                            </div>
-
-                            <div className="c-list">
-                                <p className="c-title">Click on a name to generate a report</p>
-                                <Accordion defaultActiveKey="0">
-                                    <Accordion.Item eventKey="0">
-                                        <Accordion.Header>
-                                            <div className="c-list__header">All UFOs (6)</div>
-                                        </Accordion.Header>
-                                        <Accordion.Body>
-                                            <div className="c-list__grid p-b-10">
-                                                <span>Gen</span>
-                                                <span>First Name</span>
-                                                <span>Last Name</span>
-                                                <span>BDC</span>
-                                                <span>Side</span>
-                                            </div>
-                                            <ListGroup defaultActiveKey="#Link1">
-                                                <ListGroup.Item action href="#link1">
-                                                    <div className="c-list__grid">
-                                                        <span>1</span>
-                                                        <span>Dave</span>
-                                                        <span>Tim</span>
-                                                        <span>001</span>
-                                                        <span>left</span>
-                                                    </div>
-                                                </ListGroup.Item>
-                                                <ListGroup.Item action href="#link2">
-                                                    <div className="c-list__grid">
-                                                        <span>2</span>
-                                                        <span>Greg</span>
-                                                        <span>Bag</span>
-                                                        <span>002</span>
-                                                        <span>left</span>
-                                                    </div>
-                                                </ListGroup.Item>
-                                            </ListGroup>
-                                        </Accordion.Body>
-                                    </Accordion.Item>
-                                </Accordion>
-                            </div>
-                        </div> */}
-                        <OrgChart
-                            data={data}
-                            renderTooltip={() => <TooltipComponent text={text} />}
-                            searchNeedle={searchQuery}
-                            onSearch={(data, searchQuery) =>
-                                data.name.toLowerCase().includes(searchQuery.toLowerCase())
-                            }
-                        >
-                            <Overview />
-                            <Controls buttons={OrgChartControlButtons} />
-                        </OrgChart>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
+							<div className="list">
+								<p className="title">
+									Click on a name to generate a report
+								</p>
+								<Accordion defaultActiveKey="0">
+									<Accordion.Item eventKey="0">
+										<Accordion.Header>
+											<div className="list__header">
+												All UFOs (6)
+											</div>
+										</Accordion.Header>
+										<Accordion.Body>
+											<div className="list__grid p-b-10">
+												<span>Gen</span>
+												<span>First Name</span>
+												<span>Last Name</span>
+												<span>BDC</span>
+												<span>Side</span>
+											</div>
+											<ListGroup defaultActiveKey="#Link1">
+												<ListGroup.Item action href="#link1">
+													<div className="list__grid">
+														<span>1</span>
+														<span>Dave</span>
+														<span>Tim</span>
+														<span>001</span>
+														<span>left</span>
+													</div>
+												</ListGroup.Item>
+												<ListGroup.Item action href="#link2">
+													<div className="list__grid">
+														<span>2</span>
+														<span>Greg</span>
+														<span>Bag</span>
+														<span>002</span>
+														<span>left</span>
+													</div>
+												</ListGroup.Item>
+											</ListGroup>
+										</Accordion.Body>
+									</Accordion.Item>
+								</Accordion>
+							</div>
+						</div>
+						{console.log(data,searchQuery)}
+						<OrgChart
+							data={data}
+							searchNeedle={searchQuery}
+							renderTooltip={(data) => <TooltipComponent text={data.data.position} />}
+							/*onSearch={(data, searchQuery) => console.log(data, searchQuery)}*/
+							onItemSelect={(data) => console.log('Search Attributes:',data,{
+								name: data[0].name,
+								subordinates: data[0].subordinates.length,
+								ufoId: data[0].ufoId
+							})}>
+							<Overview />
+							<Controls buttons={OrgChartControlButtons} />
+						</OrgChart>
+					</div>
+				</div>
+			</div>
+		</div>
+	);
 }

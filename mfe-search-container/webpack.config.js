@@ -9,7 +9,7 @@ const CompressionPlugin = require("compression-webpack-plugin");
 
 module.exports = (env, argv) => {
   const isDev = argv.mode === "development";
-  const isLocal = true;
+  const isLocal = env.local ?? false;
   return {
     output: {
       publicPath: isDev
