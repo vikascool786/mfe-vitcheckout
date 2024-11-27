@@ -12,3 +12,4 @@ interface IShippingAtom {
 
 export const shippingData = atom<IShippingAtom>({} as IShippingAtom);
 export const total = atom<ITotal>();
+export const orderData = atom<Order>();
