@@ -1,13 +1,12 @@
 import { useAtom } from "jotai";
 import React from "react";
-import { useShopperEWallet } from "../api/service/ShopperEWallet";
+import { Cashback } from "../assets/svgs/Cashback";
 import { Button } from "../component/Button/Button";
 import { FormField } from "../component/Form/Field/FormField";
 import { FormHeading } from "../component/Form/Heading/FormHeading";
-import { shippingData, total } from "../store";
+import { orderData, shippingData, total } from "../store";
 import { ApplyCashback } from "./apply-cashback/ApplyCashback";
 import "./OrderSummary.scss";
-import { Cashback } from "../assets/svgs/Cashback";
 
 const ORDER_SUMMARY = [
   {
@@ -29,14 +28,19 @@ interface IOrderSummary {}
 export const OrderSummary: React.FC<IOrderSummary> = () => {
   const [totalData] = useAtom(total);
   const [shipping] = useAtom(shippingData);
-  const { eWalletData, loading, error } = useShopperEWallet("2115715663");
+  const [order] = useAtom(orderData);
+  // const { eWalletData, loading, error } = useShopperEWallet("2115715663");
+
+  const eWalletData = {
+    cashbackAvail: 26.1,
+  };
 
   return (
     <div className="order-summary-container">
       <FormHeading title="Order Summary" />
-      {!loading && !error && eWalletData && (
-        <ApplyCashback cashbackData={eWalletData} />
-      )}
+      {/* {!loading && !error && eWalletData && ( */}
+      <ApplyCashback cashbackData={eWalletData} />
+      {/* )} */}
       <div className="order-reedem-coupon-text">Redeem Coupon</div>
       <div className="order-summary-coupon-container">
         <div className="order-input-container">
@@ -57,16 +61,22 @@ export const OrderSummary: React.FC<IOrderSummary> = () => {
           <div>Tax Total</div>
           <div>TBD</div>
         </div>
-        {shipping && (
+        {order?.userOptions.applyCashback && (
           <div className="order-summary-row">
-            <div>{shipping?.shippingSelected?.method} Shipping</div>
-            <div>
-              {shipping?.shippingSelected?.total === 0
-                ? "Free"
-                : `$${shipping?.shippingSelected?.total}`}
+            <div className="order-summary-row-bold">
+              VIFT <span className="order-summary-row-green">Cashback</span>
             </div>
+            <div>${eWalletData.cashbackAvail}</div>
           </div>
         )}
+        <div className="order-summary-row">
+          <div>{shipping?.shippingSelected?.method} Shipping</div>
+          <div>
+            {shipping?.shippingSelected?.total === 0
+              ? "Free"
+              : `$${shipping?.shippingSelected?.total}`}
+          </div>
+        </div>
       </div>
 
       <div className="order-summary-total">

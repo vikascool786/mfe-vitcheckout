@@ -7,11 +7,12 @@ import { ITotal } from "./interfaces/ShopperCart";
 import { OrderSummary } from "./order-summary/OrderSummary";
 import { PaymentMethod } from "./payment-method/PaymentMethods";
 import { ShippingMethod } from "./shipping-methods/ShippingMethod";
-import { shippingData, total } from "./store";
+import { orderData, shippingData, total } from "./store";
 
 export const CheckoutContainer: React.FC = () => {
   const [, setShippingData] = useAtom(shippingData);
   const [, setTotal] = useAtom(total);
+  const [, setOrder] = useAtom(orderData);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -238,6 +239,7 @@ export const CheckoutContainer: React.FC = () => {
           ) as ShippingSelection,
         });
         setTotal(response.totals as ITotal);
+        setOrder(response)
       } catch (error) {
         setError("Failed to fetch data.");
         console.error("Failed to fetch data:", error);
