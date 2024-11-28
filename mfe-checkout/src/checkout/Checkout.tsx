@@ -101,8 +101,8 @@ export const Checkout: React.FC = () => {
 
   useEffect(() => {
     const shopperID =
-      "hqwxZzYzzqpeVzhWmZzZmZpzzkxkjzmZWqqWzxzkzj"; /*todo - need to update with dynamic shopperId*/
-    //"mZjhWVwjzVzpVzhYxWzpeWXzUzUxepzXYXVWzkjh"; //shopperId with empty addressbook
+      "WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz"; /*todo - need to update with dynamic shopperId*/
+    // "mZjhWVwjzVzpVzhYxWzpeWXzUzUxepzXYXVWzkjh"; //shopperId with empty addressbook
     const fetchAddressBookData = async () => {
       try {
         const response = await fetchShopperAddressBook(shopperID);
@@ -169,7 +169,7 @@ export const Checkout: React.FC = () => {
         const data = Object.fromEntries(formData.entries());
 
         // Assign values for mandatory fields
-        address.id = Number(data.id) || 0;
+        address.id = Number(data.id) || shippingAddress.id;
         address.first = (data.first as string) || "";
         address.last = (data.last as string) || "";
         address.address1 = (data.address1 as string) || "";
@@ -256,7 +256,7 @@ export const Checkout: React.FC = () => {
     setShowShipAddressForm(!showShipAddressForm);
     setShippingAddress(
       shopperAddressBook.find((address) => address.isPrimary === 1) ||
-        shippingAddress
+      shippingAddress
     );
     setIsExpanded(!isExpanded);
   };
@@ -399,6 +399,13 @@ export const Checkout: React.FC = () => {
                   required
                   selectedValue={shippingAddress.state}
                   formName="state"
+                  onChange={(value) => {
+                    const address = {
+                      ...shippingAddress,
+                      state: value,
+                    };
+                    setShippingAddress(address);
+                  }}
                 />
               </div>
 
