@@ -2,6 +2,8 @@ import axios from "axios";
 import { ShopperSavedPayments } from "../../interfaces/ShopperSavedPayments";
 import { API_KEY, GET_API_ENDPOINT_BASE_URL } from "../../utils/ApiConstants";
 import axiosInstance from "../axios";
+import { useAtom } from "jotai";
+import { checkoutData } from "../../store";
 
 const shopperWalletApiEndpoint = (id: string) =>
   `${GET_API_ENDPOINT_BASE_URL}/shopper-wallets/v1/Shopper/${id}/Wallet?api_key=${API_KEY}`;
@@ -44,8 +46,9 @@ export const addShoppersPaymentMethod = async (
   walletData: any
 ): Promise<any> => {
   try {
+    const [checkout] = useAtom(checkoutData);
     const response = await axiosInstance(
-      `https://devapi2.shop.com/shopper-wallets/v1/Shopper/WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz/Wallet?api_key=c7f5de6a77644516b24c68fc4ac173fc`
+      `https://devapi2.shop.com/shopper-wallets/v1/Shopper/${checkout.shopperId}/Wallet?api_key=c7f5de6a77644516b24c68fc4ac173fc`
     ).post("", walletData, {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",

@@ -7,13 +7,22 @@ import { ITotal } from "./interfaces/ShopperCart";
 import { OrderSummary } from "./order-summary/OrderSummary";
 import { PaymentMethod } from "./payment-method/PaymentMethods";
 import { ShippingMethod } from "./shipping-methods/ShippingMethod";
-import { orderData, shippingData, total } from "./store";
+import { checkoutData, orderData, shippingData, total } from "./store";
 import { fetchOrderDetail } from "./api/service/GetOrder";
 
-export const CheckoutContainer: React.FC = () => {
+interface ICheckoutContainer {
+  shopperId: string;
+  cartId: string;
+}
+
+export const CheckoutContainer: React.FC<ICheckoutContainer> = ({
+  shopperId,
+  cartId,
+}) => {
   const [, setShippingData] = useAtom(shippingData);
   const [, setTotal] = useAtom(total);
   const [, setOrder] = useAtom(orderData);
+  const [, setCheckout] = useAtom(checkoutData);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,7 +30,7 @@ export const CheckoutContainer: React.FC = () => {
   useEffect(() => {
     const fetOrderDetail = async () => {
       try {
-        const response = await fetchOrderDetail();
+        const response = await fetchOrderDetail(cartId);
         // const response = {
         //   orderId: -1,
         //   email: "kk20241029-02@yopmail.com",
@@ -240,7 +249,10 @@ export const CheckoutContainer: React.FC = () => {
           ) as ShippingSelection,
         });
         setTotal(response.totals as ITotal);
-        setOrder(response)
+        setOrder(response);
+        setCheckout({
+          shopperId,
+        });
       } catch (error) {
         setError("Failed to fetch data.");
         console.error("Failed to fetch data:", error);

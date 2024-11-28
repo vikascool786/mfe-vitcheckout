@@ -16,6 +16,8 @@ import {
 } from "../payment-method-option/PaymentMethodOption";
 import { TextUpdates } from "../text-updates/TextUpdates";
 import "./PaymentMethods.scss";
+import { useAtom } from "jotai";
+import { checkoutData } from "../store";
 
 const staticPaymentMethods: IPaymentOptionProps[] = [
   {
@@ -48,22 +50,16 @@ export const PaymentMethod: React.FC = () => {
   const [allPaymentOptions, setAllPaymentOptions] =
     useState<IPaymentOptionProps[]>(staticPaymentMethods);
   const [isExpanded, setIsExpanded] = useState(false);
-  const { addresses } = useShopperEWalletAddresses(
-    "WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz"
-  );
+  const [checkout] = useAtom(checkoutData);
+  const { addresses } = useShopperEWalletAddresses(checkout.shopperId);
   const [editingOptionIndex, setEditingOptionIndex] = useState<number | null>(
     null
   );
 
   useEffect(() => {
-    const shopperID =
-      // "mZjhWVwjzVzpVzhYxWzpeWXzUzUxepzXYXVWzkjh"; //shopper with empty wallet
-      "WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz"; // shopper with multiple types of cards
-    //"hqwxZzYzzqpeVzhWmZzZmZpzzkxkjzmZWqqWzxzkzj"; /*todo - need to update with dynamic shopperId*/
-
     const fetchShoppersSavedPayments = async () => {
       try {
-        const response = await fetchShoppersPaymentMethods(shopperID);
+        const response = await fetchShoppersPaymentMethods(checkout.shopperId);
 
         const shopperPayments: IPaymentOptionProps[] = response
           .map((item: any, index: number) => {
@@ -137,7 +133,7 @@ export const PaymentMethod: React.FC = () => {
 
   const onAddNewCard = async () => {
     const newCardIndex = allPaymentOptions.length;
-  
+
     // Add a temporary entry for the new card in edit mode
     const newCard: IPaymentOptionProps = {
       name: "New Card",
@@ -158,10 +154,9 @@ export const PaymentMethod: React.FC = () => {
         address: {} as Address,
       },
     };
-  
+
     setAllPaymentOptions((prevOptions) => [...prevOptions, newCard]);
     setEditingOptionIndex(newCardIndex);
-
   };
 
   return (
@@ -200,10 +195,10 @@ export const PaymentMethod: React.FC = () => {
           </div>
           <div className="checkout-add-card" onClick={onAddNewCard}>
             <div className="checkout-add-card-text">
-            <Add /> Add New Card
+              <Add /> Add New Card
             </div>
             <div>
-              <img src={CardOptions}/>
+              <img src={CardOptions} />
             </div>
           </div>
         </div>

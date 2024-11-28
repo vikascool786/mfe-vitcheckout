@@ -22,6 +22,8 @@ import { Address } from "../interfaces/Address";
 import { AddressHandler } from "../interfaces/AddressHandler";
 import { DropdownOption } from "../interfaces/DropdownOption";
 import "./Checkout.scss";
+import { useAtom } from "jotai";
+import { checkoutData } from "../store";
 
 const defaultAddress: Address = {
   id: 0,
@@ -39,6 +41,7 @@ const defaultAddress: Address = {
 export const Checkout: React.FC = () => {
   const siteId = "260"; /*todo - need to update with dynamic siteId*/
   // State to manage whether the form is expanded or collapsed
+  const [checkout] = useAtom(checkoutData);
 
   const [isExpanded, setIsExpanded] = useState(false);
   const [showShipAddressForm, setShowShipAddressForm] = useState(false);
@@ -100,17 +103,14 @@ export const Checkout: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const shopperID =
-      "WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz"; /*todo - need to update with dynamic shopperId*/
-    // "mZjhWVwjzVzpVzhYxWzpeWXzUzUxepzXYXVWzkjh"; //shopperId with empty addressbook
     const fetchAddressBookData = async () => {
       try {
-        const response = await fetchShopperAddressBook(shopperID);
+        const response = await fetchShopperAddressBook(checkout?.shopperId);
         const addressList: Address[] =
           buildShoppersAddressBookFromResponse(response);
         setShopperAddressBook(addressList);
         if (addressList.length < 1) {
-          setIsExpanded(!isExpanded)
+          setIsExpanded(!isExpanded);
         }
       } catch (error) {
         console.error("Failed to fetch data:", error);
@@ -256,7 +256,7 @@ export const Checkout: React.FC = () => {
     setShowShipAddressForm(!showShipAddressForm);
     setShippingAddress(
       shopperAddressBook.find((address) => address.isPrimary === 1) ||
-      shippingAddress
+        shippingAddress
     );
     setIsExpanded(!isExpanded);
   };
