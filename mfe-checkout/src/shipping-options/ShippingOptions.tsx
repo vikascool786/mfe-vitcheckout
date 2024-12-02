@@ -15,7 +15,7 @@ export const ShippingOptions: React.FC = () => {
         return {
           ...selection,
           isSelected:
-            selection.method === shippingOptions.shippingSelected.method,
+            selection.method === shippingOptions.shippingSelected?.method || false,
         };
       }
     );

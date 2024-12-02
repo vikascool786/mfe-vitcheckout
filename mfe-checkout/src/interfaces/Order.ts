@@ -8,7 +8,7 @@ export interface Order {
   billingAddress: Address;
   paymentMethod: IPaymentMethod;
   id: string;
-  stores: OrderStores;
+  stores: OrderStores[];
   totals: ITotal;
   paymentMethods: IPaymentMethod2[];
   userOptions: IUserOptions;

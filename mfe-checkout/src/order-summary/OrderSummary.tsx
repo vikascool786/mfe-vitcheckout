@@ -58,7 +58,7 @@ export const OrderSummary: React.FC<IOrderSummary> = () => {
           <div>Tax Total</div>
           <div>TBD</div>
         </div>
-        {order?.userOptions.applyCashback && eWalletData?.cashbackAvail && (
+        {order?.userOptions?.applyCashback && eWalletData?.cashbackAvail && (
           <div className="order-summary-row">
             <div className="order-summary-row-bold">
               VIFT <span className="order-summary-row-green">Cashback</span>
