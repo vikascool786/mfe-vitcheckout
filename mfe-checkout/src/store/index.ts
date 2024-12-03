@@ -11,11 +11,10 @@ interface IShippingAtom {
 
 interface ICheckout {
   shopperId: string;
+  cartId: string;
 }
 
 export const shippingData = atom<IShippingAtom>({} as IShippingAtom);
 export const total = atom<ITotal>();
 export const orderData = atom<Order>();
-export const checkoutData = atom<ICheckout>({
-  shopperId: "",
-});
+export const checkoutData = atom<ICheckout>();
