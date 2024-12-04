@@ -54,7 +54,7 @@ export const ApplyCashback: React.FC<IApplyCashbackContainer> = ({
         <input
           className="checkbox"
           type="checkbox"
-          checked={order?.userOptions.applyCashback}
+          checked={order?.userOptions?.applyCashback}
           onChange={handleAddApplyCashback}
         />
         {`$${cashbackData.cashbackAvail} - Use VIFT Cashback on this order`}

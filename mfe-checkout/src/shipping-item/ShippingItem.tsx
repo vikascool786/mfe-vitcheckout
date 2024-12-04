@@ -15,29 +15,29 @@ interface IProduct {
 }
 
 interface IShippingItemProps {
-  product: Item;
+  item: Item;
 }
 
-export const ShippingItem: React.FC<IShippingItemProps> = ({ product }) => {
-  const { image, caption ,  catalogName, totals, quantity } = product;
+export const ShippingItem: React.FC<IShippingItemProps> = ({ item }) => {
+  const { product } = item;
   return (
     <div className="item-container">
       <div className="item-detail-container">
-        <img className="item-image" src={image.url} />
+        <img className="item-image" src={product.image.url} />
         <div className="item-info">
-          <div className="item-name">{caption}</div>
-          <div>{catalogName}</div>
+          <div className="item-name">{product.caption}</div>
+          <div>{product.catalogName}</div>
           <div className="item-cashback">
-            <div className="item-cashback-value">+ ${totals?.cashBack}</div>
+            <div className="item-cashback-value">+ ${product.totals?.cashBack}</div>
             <Cashback viewBox="0 -2 24 22" />
             Cashback
           </div>
-          <div>${totals?.price}</div>
+          <div>${product.totals?.price}</div>
         </div>
       </div>
       <div className="item-cancel">
         <Close />
-        Quantity: {quantity}
+        Quantity: {product.quantity}
       </div>
     </div>
   );
