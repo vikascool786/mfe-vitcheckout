@@ -5,7 +5,7 @@ import axiosInstance from "../axios";
 
 export const fetchOrderDetail = async (cartId: string): Promise<Order> => {
   try {
-    const shopperAddressBookApiEndpoint = `${GET_API_ENDPOINT_BASE_URL}/checkout-universal/v1/checkouts/id/${cartId}?api_key=${API_KEY}`;
+    const shopperAddressBookApiEndpoint = `${GET_API_ENDPOINT_BASE_URL}/cart-universal/v2/carts/id/${cartId}?api_key=${API_KEY}`;
     const orderResponse = await axiosInstance(
       shopperAddressBookApiEndpoint
     ).get<ApiResponse>("");

@@ -105,7 +105,9 @@ export const Checkout: React.FC = () => {
   useEffect(() => {
     const fetchAddressBookData = async () => {
       try {
-        const response = await fetchShopperAddressBook(checkout?.shopperId);
+        const response = await fetchShopperAddressBook(
+          checkout?.shopperId || ""
+        );
         const addressList: Address[] =
           buildShoppersAddressBookFromResponse(response);
         setShopperAddressBook(addressList);
@@ -118,7 +120,7 @@ export const Checkout: React.FC = () => {
     };
 
     fetchAddressBookData();
-  }, []);
+  }, [checkout]);
 
   const buildShoppersAddressBookFromResponse = (
     addressBookResponse: Address[]
@@ -190,7 +192,6 @@ export const Checkout: React.FC = () => {
 
     if (childRef.current) {
       const addressEntered = buildAddress(shipFormRef);
-      console.log(addressEntered);
       childRef.current.setAddressToVerify(addressEntered);
 
       try {

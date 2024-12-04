@@ -51,15 +51,15 @@ export const PaymentMethod: React.FC = () => {
     useState<IPaymentOptionProps[]>(staticPaymentMethods);
   const [isExpanded, setIsExpanded] = useState(false);
   const [checkout] = useAtom(checkoutData);
-  const { addresses } = useShopperEWalletAddresses(checkout.shopperId);
+  const { addresses } = useShopperEWalletAddresses(checkout?.shopperId || "");
   const [editingOptionIndex, setEditingOptionIndex] = useState<number | null>(
     null
   );
 
   useEffect(() => {
-    const fetchShoppersSavedPayments = async () => {
+    const fetchShoppersSavedPayments = async (shopperId: string) => {
       try {
-        const response = await fetchShoppersPaymentMethods(checkout.shopperId);
+        const response = await fetchShoppersPaymentMethods(shopperId);
 
         const shopperPayments: IPaymentOptionProps[] = response
           .map((item: any, index: number) => {
@@ -110,8 +110,8 @@ export const PaymentMethod: React.FC = () => {
       updatePaymentOptions(shopperPayments);
     };
 
-    fetchShoppersSavedPayments();
-  }, [isExpanded, addresses]);
+    checkout?.shopperId && fetchShoppersSavedPayments(checkout.shopperId);
+  }, [isExpanded, addresses, checkout]);
 
   const handlePaymentMethodChange = (selectedIndex: number) => {
     setAllPaymentOptions((prevOptions) =>

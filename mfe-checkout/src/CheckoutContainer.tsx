@@ -1,4 +1,4 @@
-import { useAtom } from "jotai";
+import { useAtom, useSetAtom } from "jotai";
 import React, { useEffect, useState } from "react";
 import "./App.scss";
 import { Checkout } from "./checkout/Checkout";
@@ -20,10 +20,14 @@ export const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   shopperId,
   cartId,
 }) => {
-  const [, setShippingData] = useAtom(shippingData);
-  const [, setTotal] = useAtom(total);
-  const [, setOrder] = useAtom(orderData);
-  const [, setCheckout] = useAtom(checkoutData);
+  const setShippingData = useSetAtom(shippingData);
+  const setTotal = useSetAtom(total);
+  const setOrder = useSetAtom(orderData);
+  const setCheckout = useSetAtom(checkoutData);
+  setCheckout({
+    shopperId,
+    cartId,
+  });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -252,9 +256,6 @@ export const CheckoutContainer: React.FC<ICheckoutContainer> = ({
         });
         setTotal(response.totals as ITotal);
         setOrder(response);
-        setCheckout({
-          shopperId,
-        });
       } catch (error) {
         // setError("Failed to fetch data.");
         console.error("Failed to fetch data:", error);
