@@ -16,6 +16,7 @@ import {
 } from "../payment-method-option/PaymentMethodOption";
 import { TextUpdates } from "../text-updates/TextUpdates";
 import "./PaymentMethods.scss";
+import {PaymentOptionClick2Pay} from "../payment-method-click2pay/PaymentMethodOptionClick2Pay";
 import { useAtom } from "jotai";
 import { checkoutData } from "../store";
 
@@ -180,19 +181,7 @@ export const PaymentMethod: React.FC = () => {
               onChange={() => handlePaymentMethodChange(index)}
             />
           ))}
-          <div className="checkout-method-click-to-pay">
-            <div className="checkout-method-save-information">
-              <div className="checkout-method-click-to-pay-text">
-                Save my information with Click to Pay
-              </div>
-              <div className="checkout-method-click-to-pay-text">
-                for fast, secure checkout.{" "}
-                <span className="learn-more">Learn more</span>
-              </div>
-              <div>+ Continue to Click to Pay</div>
-              <img src={ClickToPay} alt="Click to Pay" />
-            </div>
-          </div>
+         <PaymentOptionClick2Pay/>
           <div className="checkout-add-card" onClick={onAddNewCard}>
             <div className="checkout-add-card-text">
               <Add /> Add New Card
