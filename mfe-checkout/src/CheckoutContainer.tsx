@@ -1,5 +1,6 @@
-import { useAtom, useSetAtom } from "jotai";
+import { useSetAtom } from "jotai";
 import React, { useEffect, useState } from "react";
+import { fetchOrderDetail } from "./api/service/GetOrder";
 import "./App.scss";
 import { Checkout } from "./checkout/Checkout";
 import { Item, ShippingSelection } from "./interfaces/Order";
@@ -8,8 +9,6 @@ import { OrderSummary } from "./order-summary/OrderSummary";
 import { PaymentMethod } from "./payment-method/PaymentMethods";
 import { ShippingMethod } from "./shipping-methods/ShippingMethod";
 import { checkoutData, orderData, shippingData, total } from "./store";
-import { fetchOrderDetail } from "./api/service/GetOrder";
-import { ORDER_DATA } from "./utils/MOCKS";
 
 interface ICheckoutContainer {
   shopperId: string;
@@ -35,7 +34,8 @@ export const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   useEffect(() => {
     const fetOrderDetail = async () => {
       try {
-        const response = fetchOrderDetail(cartId);
+        const response = await fetchOrderDetail(cartId);
+        setOrder(response);
         // const response = {
         //   orderId: -1,
         //   email: "kk20241029-02@yopmail.com",
@@ -245,7 +245,6 @@ export const CheckoutContainer: React.FC<ICheckoutContainer> = ({
         }
         const firstStoreKey = Object.keys(stores)[0] as string;
         const firstStore = stores[firstStoreKey!];
-        console.log(firstStore, firstStoreKey);
         setShippingData({
           shippingSelections: firstStore?.shippingSelections || [],
           shippingItems: firstStore?.items as Item[],
@@ -255,7 +254,7 @@ export const CheckoutContainer: React.FC<ICheckoutContainer> = ({
           ) as ShippingSelection,
         });
         setTotal(response.totals as ITotal);
-        setOrder(response);
+        console.log("RESPONSE", response)
       } catch (error) {
         // setError("Failed to fetch data.");
         console.error("Failed to fetch data:", error);

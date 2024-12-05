@@ -9,7 +9,7 @@ import "./ShippingMethod.scss";
 
 export const ShippingMethod: React.FC = ({}) => {
   const [orders] = useAtom(orderData);
-  if (!orders?.id) {
+  if (!orders) {
     return <p>Loading shipping methods...</p>;
   }
 
