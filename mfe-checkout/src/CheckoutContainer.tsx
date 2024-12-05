@@ -9,6 +9,7 @@ import { OrderSummary } from "./order-summary/OrderSummary";
 import { PaymentMethod } from "./payment-method/PaymentMethods";
 import { ShippingMethod } from "./shipping-methods/ShippingMethod";
 import { checkoutData, orderData, shippingData, total } from "./store";
+import { ORDER_DATA } from "./utils/MOCKS";
 
 interface ICheckoutContainer {
   shopperId: string;
@@ -254,7 +255,7 @@ export const CheckoutContainer: React.FC<ICheckoutContainer> = ({
           ) as ShippingSelection,
         });
         setTotal(response.totals as ITotal);
-        console.log("RESPONSE", response)
+        console.log("RESPONSE", response);
       } catch (error) {
         // setError("Failed to fetch data.");
         console.error("Failed to fetch data:", error);
