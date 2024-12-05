@@ -9,26 +9,9 @@ import { ApplyCashback } from "./apply-cashback/ApplyCashback";
 import "./OrderSummary.scss";
 import { useShopperEWallet } from "../api/service/ShopperEWallet";
 
-const ORDER_SUMMARY = [
-  {
-    title: "Items Subtotal",
-    value: "$25.00",
-  },
-  {
-    title: "Tax Total",
-    value: "$2.02",
-  },
-  {
-    title: "Standard Shipping",
-    value: "$6.00",
-  },
-];
-
 interface IOrderSummary {}
 
 export const OrderSummary: React.FC<IOrderSummary> = () => {
-  const [totalData] = useAtom(total);
-  const [shipping] = useAtom(shippingData);
   const [order] = useAtom(orderData);
   const { eWalletData, loading, error } = useShopperEWallet("2115715663");
 
@@ -52,11 +35,11 @@ export const OrderSummary: React.FC<IOrderSummary> = () => {
       <div className="order-charges-table">
         <div className="order-summary-row">
           <div>Items Subtotal</div>
-          <div>${totalData?.price}</div>
+          <div>${order?.totals?.price}</div>
         </div>
         <div className="order-summary-row">
           <div>Tax Total</div>
-          <div>TBD</div>
+          <div>${order?.totals.tax}</div>
         </div>
         {order?.userOptions?.applyCashback && eWalletData?.cashbackAvail && (
           <div className="order-summary-row">
@@ -67,27 +50,23 @@ export const OrderSummary: React.FC<IOrderSummary> = () => {
           </div>
         )}
         <div className="order-summary-row">
-          <div>{shipping?.shippingSelected?.method} Shipping</div>
-          <div>
-            {shipping?.shippingSelected?.total === 0
-              ? "Free"
-              : `$${shipping?.shippingSelected?.total}`}
-          </div>
+          <div>Shipping</div>
+          <div>${order?.totals.shipping}</div>
         </div>
       </div>
 
       <div className="order-summary-total">
         <div>Total Due</div>
-        <div>${totalData?.price}</div>
+        <div>${order?.totals?.price}</div>
       </div>
 
-      {totalData?.cashBack && (
+      {order?.totals?.cashBack && (
         <div className="order-summary-cashback-container">
           <div className="order-cashback">
             <Cashback />
             VIFT Cashback earned in this order
           </div>
-          <div>{`$${totalData.cashBack}`}</div>
+          <div>{`$${order.totals.cashBack}`}</div>
         </div>
       )}
     </div>

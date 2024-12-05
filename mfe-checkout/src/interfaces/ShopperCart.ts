@@ -27,6 +27,8 @@ export interface ITotal {
   ibvOnly?: number;
   vat: number;
   customerIncentivePoints: number;
+  tax: number;
+  shipping: number;
 }
 
 export interface IItem {
