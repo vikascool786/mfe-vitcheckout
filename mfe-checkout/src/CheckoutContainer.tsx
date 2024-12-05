@@ -35,7 +35,7 @@ export const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   useEffect(() => {
     const fetOrderDetail = async () => {
       try {
-        const response = ORDER_DATA;
+        const response = fetchOrderDetail(cartId);
         // const response = {
         //   orderId: -1,
         //   email: "kk20241029-02@yopmail.com",
