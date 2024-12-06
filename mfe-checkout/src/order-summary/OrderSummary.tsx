@@ -1,19 +1,41 @@
 import { useAtom } from "jotai";
-import React from "react";
+import React, { useState } from "react";
 import { Cashback } from "../assets/svgs/Cashback";
 import { Button } from "../component/Button/Button";
 import { FormField } from "../component/Form/Field/FormField";
 import { FormHeading } from "../component/Form/Heading/FormHeading";
-import { orderData, shippingData, total } from "../store";
+import { orderData } from "../store";
 import { ApplyCashback } from "./apply-cashback/ApplyCashback";
 import "./OrderSummary.scss";
 import { useShopperEWallet } from "../api/service/ShopperEWallet";
+import { Close } from "../assets/svgs/Close";
 
 interface IOrderSummary {}
 
 export const OrderSummary: React.FC<IOrderSummary> = () => {
   const [order] = useAtom(orderData);
   const { eWalletData, loading, error } = useShopperEWallet("2115715663");
+  const [coupons, setCoupons] = useState<string[]>([]);
+  const [coupon, setCoupon] = useState("");
+
+  // Handle input text change for coupon
+  const handleCouponTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCoupon(e.target.value);
+  };
+
+  // Add coupon to the list
+  const handleAddCoupon = () => {
+    if (coupon.trim() && !coupons.includes(coupon.trim())) {
+      setCoupons([...coupons, coupon.trim()]);
+      setCoupon(""); // Clear the input field after adding
+    }
+  };
+
+  const handleRemoveCoupon = (couponToRemove: string) => {
+    setCoupons(
+      coupons.filter((appliedCoupon) => appliedCoupon !== couponToRemove)
+    );
+  };
 
   return (
     <div className="order-summary-container">
@@ -24,12 +46,22 @@ export const OrderSummary: React.FC<IOrderSummary> = () => {
       <div className="order-reedem-coupon-text">Redeem Coupon</div>
       <div className="order-summary-coupon-container">
         <div className="order-input-container">
-          <FormField />
+          <FormField value={coupon} onChange={handleCouponTextChange} />
         </div>
         <div className="order-apply-container">
-          <Button label="Apply" type="secondary" />
+          <Button label="Apply" type="secondary" onClick={handleAddCoupon} />
         </div>
       </div>
+      {coupons.length > 0 && (
+        <div className="order-applied-coupons">
+          {coupons.map((appliedCoupon, index) => (
+            <li key={index} className="order-applied-coupon">
+              {appliedCoupon}
+              <Close onClick={() => handleRemoveCoupon(appliedCoupon)} />
+            </li>
+          ))}
+        </div>
+      )}
       <div className="order-sub-text underlined">Apply gift card</div>
 
       <div className="order-charges-table">
