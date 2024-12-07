@@ -17,14 +17,14 @@ export interface IStoreQuantity {
 }
 
 export interface ITotal {
-  cashBack?: number;
-  ibvOnlyCampaign?: number;
+  cashBack: number;
+  ibvOnlyCampaign: number;
   bv: number;
   price: number;
-  ibvStandardCampaign?: number;
-  ibv?: number;
-  ibvStandard?: number;
-  ibvOnly?: number;
+  ibvStandardCampaign: number;
+  ibv: number;
+  ibvStandard: number;
+  ibvOnly: number;
   vat: number;
   customerIncentivePoints: number;
   tax: number;

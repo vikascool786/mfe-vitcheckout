@@ -3,16 +3,15 @@ import React from "react";
 import { FormHeading } from "../component/Form/Heading/FormHeading";
 import { ShippingItem } from "../shipping-item/ShippingItem";
 import { ShippingOptions } from "../shipping-options/ShippingOptions";
-import { orderData } from "../store";
 import { getCatalogName } from "../utils/helpers/GetCatalog";
 import "./ShippingMethod.scss";
+import { orderAtom } from "../store";
 
 export const ShippingMethod: React.FC = ({}) => {
-  const [orders] = useAtom(orderData);
+  const [orders] = useAtom(orderAtom);
   if (!orders) {
     return <p>Loading shipping methods...</p>;
   }
-
 
   return (
     <div className="shipping-container">

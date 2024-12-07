@@ -8,21 +8,21 @@ export interface Order {
   billingAddress: Address;
   paymentMethod: IPaymentMethod;
   id: string;
-  stores: OrderStores[];
+  stores: OrderStores;
   totals: ITotal;
   paymentMethods: IPaymentMethod2[];
   userOptions: IUserOptions;
 }
 
 interface OrderStores {
-  [key: string] : OrderStore
+  [key: string]: OrderStore;
 }
 
 export interface OrderStore {
-  totals: ITotal
-  items: Item[]
-  shippingSelections: ShippingSelection[]
-  shippingMethod: string
+  totals: ITotal;
+  items: Item[];
+  shippingSelections: ShippingSelection[];
+  shippingMethod: string;
 }
 
 export interface Item {
@@ -40,7 +40,6 @@ export interface Item {
 export interface Image {
   url: string;
 }
-
 
 export interface ShippingSelection {
   id: number;
@@ -73,4 +72,5 @@ export interface IUserOptions {
   signatureRequired: boolean;
   oosConsolidate: boolean;
   userSessionId: string;
+  coupons: string[];
 }
