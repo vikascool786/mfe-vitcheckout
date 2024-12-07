@@ -24,30 +24,32 @@ export const OrderSummary: React.FC<IOrderSummary> = () => {
 
   // Add coupon to the list and update order.userOptions.coupons
   const handleAddCoupon = () => {
-    if (order?.userOptions.coupons) {
-      const { coupons } = order.userOptions;
-      const trimmedCoupon = coupon.trim();
+    if (order) {
+      if (order?.userOptions.coupons) {
+        const { coupons } = order.userOptions;
+        const trimmedCoupon = coupon.trim();
 
-      // Add coupon if not empty and not already present
-      if (trimmedCoupon && !coupons.includes(trimmedCoupon)) {
+        // Add coupon if not empty and not already present
+        if (trimmedCoupon && !coupons.includes(trimmedCoupon)) {
+          setOrder({
+            ...order,
+            userOptions: {
+              ...order.userOptions,
+              coupons: [...coupons, coupon],
+            },
+          });
+
+          setCoupon("");
+        }
+      } else {
         setOrder({
           ...order,
           userOptions: {
             ...order.userOptions,
-            coupons: [...coupons, coupon],
+            coupons: [coupon],
           },
         });
-
-        setCoupon("");
       }
-    } else {
-      setOrder({
-        ...order,
-        userOptions: {
-          ...order.userOptions,
-          coupons: [coupon],
-        },
-      });
     }
   };
 
@@ -88,16 +90,17 @@ export const OrderSummary: React.FC<IOrderSummary> = () => {
           <Button label="Apply" type="secondary" onClick={handleAddCoupon} />
         </div>
       </div>
-      {order?.userOptions.coupons?.length > 0 && (
-        <div className="order-applied-coupons">
-          {order?.userOptions.coupons.map((appliedCoupon, index) => (
-            <li key={index} className="order-applied-coupon">
-              {appliedCoupon}
-              <Close onClick={() => handleRemoveCoupon(appliedCoupon)} />
-            </li>
-          ))}
-        </div>
-      )}
+      {order?.userOptions.coupons?.length &&
+        order?.userOptions.coupons?.length > 0 && (
+          <div className="order-applied-coupons">
+            {order?.userOptions.coupons.map((appliedCoupon, index) => (
+              <li key={index} className="order-applied-coupon">
+                {appliedCoupon}
+                <Close onClick={() => handleRemoveCoupon(appliedCoupon)} />
+              </li>
+            ))}
+          </div>
+        )}
       <div className="order-sub-text underlined">Apply gift card</div>
 
       <div className="order-charges-table">

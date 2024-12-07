@@ -12,6 +12,7 @@ import "./CardInformation.scss";
 interface ICardInformationProps {
   initialData?: Partial<ShopperSavedPayments>;
   onCancel?: () => void;
+  shopperId: string;
 }
 
 /**
@@ -49,7 +50,7 @@ const defaultAddress: Address = {
 
 export const CardInformation: React.FC<ICardInformationProps> = ({
   initialData,
-  onCancel,
+  shopperId,
 }) => {
   const [sameShippingAddress, setSameShippingAddress] =
     useState<boolean>(false);
@@ -105,7 +106,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
     };
 
     try {
-      await addShoppersPaymentMethod(requestData);
+      await addShoppersPaymentMethod(shopperId, requestData);
       console.log("Card information successfully saved.");
     } catch (error) {
       console.error("Unable to save card information:", error);

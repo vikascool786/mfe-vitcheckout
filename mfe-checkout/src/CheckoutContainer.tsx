@@ -27,8 +27,7 @@ export const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   useEffect(() => {
     const fetOrderDetail = async () => {
       try {
-        // const response = await fetchOrderDetail(cartId);
-        const response = ORDER_DATA;
+        const response = await fetchOrderDetail(cartId);
         setOrderAtom(response);
         setError(null);
       } catch (error) {
