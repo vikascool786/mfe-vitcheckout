@@ -25,7 +25,7 @@ export const changeOrder = async (
   try {
     const orderResponse = await axiosInstance(
       shopperOrderAPIEndpoint(changeStorePayload.id)
-    ).put("", changeStorePayload);
+    ).post("", changeStorePayload);
     return orderResponse.data.response.success.data;
   } catch (error) {
     console.error(error);
