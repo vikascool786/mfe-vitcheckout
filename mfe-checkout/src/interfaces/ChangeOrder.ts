@@ -44,5 +44,5 @@ export interface UserOptions {
   signatureRequired: boolean;
   oosConsolidate: boolean;
   userSessionId: string;
-  coupons: number[];
+  coupons: string[];
 }
