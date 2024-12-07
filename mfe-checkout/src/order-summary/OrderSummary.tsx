@@ -4,18 +4,17 @@ import { Cashback } from "../assets/svgs/Cashback";
 import { Button } from "../component/Button/Button";
 import { FormField } from "../component/Form/Field/FormField";
 import { FormHeading } from "../component/Form/Heading/FormHeading";
-import { orderData } from "../store";
 import { ApplyCashback } from "./apply-cashback/ApplyCashback";
 import "./OrderSummary.scss";
 import { useShopperEWallet } from "../api/service/ShopperEWallet";
 import { Close } from "../assets/svgs/Close";
+import { orderAtom } from "../store";
 
 interface IOrderSummary {}
 
 export const OrderSummary: React.FC<IOrderSummary> = () => {
-  const [order] = useAtom(orderData);
+  const [order, setOrder] = useAtom(orderAtom);
   const { eWalletData, loading, error } = useShopperEWallet("2115715663");
-  const [coupons, setCoupons] = useState<string[]>([]);
   const [coupon, setCoupon] = useState("");
 
   // Handle input text change for coupon
@@ -23,19 +22,56 @@ export const OrderSummary: React.FC<IOrderSummary> = () => {
     setCoupon(e.target.value);
   };
 
-  // Add coupon to the list
+  // Add coupon to the list and update order.userOptions.coupons
   const handleAddCoupon = () => {
-    if (coupon.trim() && !coupons.includes(coupon.trim())) {
-      setCoupons([...coupons, coupon.trim()]);
-      setCoupon(""); // Clear the input field after adding
+    if (order?.userOptions.coupons) {
+      const { coupons } = order.userOptions;
+      const trimmedCoupon = coupon.trim();
+
+      // Add coupon if not empty and not already present
+      if (trimmedCoupon && !coupons.includes(trimmedCoupon)) {
+        setOrder({
+          ...order,
+          userOptions: {
+            ...order.userOptions,
+            coupons: [...coupons, coupon],
+          },
+        });
+
+        setCoupon("");
+      }
+    } else {
+      setOrder({
+        ...order,
+        userOptions: {
+          ...order.userOptions,
+          coupons: [coupon],
+        },
+      });
     }
   };
 
+  // Remove coupon from the list and update order.userOptions.coupons
   const handleRemoveCoupon = (couponToRemove: string) => {
-    setCoupons(
-      coupons.filter((appliedCoupon) => appliedCoupon !== couponToRemove)
-    );
+    if (order?.userOptions.coupons) {
+      const { coupons } = order.userOptions;
+
+      // Filter out the coupon to remove
+      const updatedCoupons = coupons.filter(
+        (appliedCoupon) => appliedCoupon !== couponToRemove
+      );
+
+      setOrder({
+        ...order,
+        userOptions: {
+          ...order.userOptions,
+          coupons: updatedCoupons, // Update the coupons array
+        },
+      });
+    }
   };
+
+  console.log(order?.userOptions);
 
   return (
     <div className="order-summary-container">
@@ -43,7 +79,7 @@ export const OrderSummary: React.FC<IOrderSummary> = () => {
       {!loading && !error && eWalletData && (
         <ApplyCashback cashbackData={eWalletData} />
       )}
-      <div className="order-reedem-coupon-text">Redeem Coupon</div>
+      <div className="order-redeem-coupon-text">Redeem Coupon</div>
       <div className="order-summary-coupon-container">
         <div className="order-input-container">
           <FormField value={coupon} onChange={handleCouponTextChange} />
@@ -52,9 +88,9 @@ export const OrderSummary: React.FC<IOrderSummary> = () => {
           <Button label="Apply" type="secondary" onClick={handleAddCoupon} />
         </div>
       </div>
-      {coupons.length > 0 && (
+      {order?.userOptions.coupons?.length > 0 && (
         <div className="order-applied-coupons">
-          {coupons.map((appliedCoupon, index) => (
+          {order?.userOptions.coupons.map((appliedCoupon, index) => (
             <li key={index} className="order-applied-coupon">
               {appliedCoupon}
               <Close onClick={() => handleRemoveCoupon(appliedCoupon)} />

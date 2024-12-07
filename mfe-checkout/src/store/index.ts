@@ -1,20 +1,9 @@
-import { atom } from "jotai";
-import { Item, Order } from "../interfaces/Order";
-import { ShippingSelection } from "../interfaces/ShippingMethod";
-import { ITotal } from "../interfaces/ShopperCart";
+import { atom, createStore } from "jotai";
+import { Order } from "../interfaces/Order";
 
-interface IShippingAtom {
-  shippingSelections: ShippingSelection[];
-  shippingItems: Item[];
-  shippingSelected: ShippingSelection;
-}
+export const orderAtom = atom<Order>();
 
-interface ICheckout {
-  shopperId: string;
-  cartId: string;
-}
+export const OrderStore = createStore();
 
-export const shippingData = atom<IShippingAtom>({} as IShippingAtom);
-export const total = atom<ITotal>();
-export const orderData = atom<Order>();
-export const checkoutData = atom<ICheckout>();
+
+

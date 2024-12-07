@@ -16,9 +16,8 @@ import {
 } from "../payment-method-option/PaymentMethodOption";
 import { TextUpdates } from "../text-updates/TextUpdates";
 import "./PaymentMethods.scss";
-import {PaymentOptionClick2Pay} from "../payment-method-click2pay/PaymentMethodOptionClick2Pay";
+import { PaymentOptionClick2Pay } from "../payment-method-click2pay/PaymentMethodOptionClick2Pay";
 import { useAtom } from "jotai";
-import { checkoutData } from "../store";
 
 const staticPaymentMethods: IPaymentOptionProps[] = [
   {
@@ -47,12 +46,15 @@ const staticPaymentMethods: IPaymentOptionProps[] = [
   },
 ];
 
-export const PaymentMethod: React.FC = () => {
+interface IPaymentMethod {
+  shopperId: string;
+}
+
+export const PaymentMethod: React.FC<IPaymentMethod> = ({ shopperId }) => {
   const [allPaymentOptions, setAllPaymentOptions] =
     useState<IPaymentOptionProps[]>(staticPaymentMethods);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [checkout] = useAtom(checkoutData);
-  const { addresses } = useShopperEWalletAddresses(checkout?.shopperId || "");
+  const { addresses } = useShopperEWalletAddresses(shopperId || "");
   const [editingOptionIndex, setEditingOptionIndex] = useState<number | null>(
     null
   );
@@ -111,8 +113,8 @@ export const PaymentMethod: React.FC = () => {
       updatePaymentOptions(shopperPayments);
     };
 
-    checkout?.shopperId && fetchShoppersSavedPayments(checkout.shopperId);
-  }, [isExpanded, addresses, checkout]);
+    fetchShoppersSavedPayments(shopperId);
+  }, [isExpanded, addresses, shopperId]);
 
   const handlePaymentMethodChange = (selectedIndex: number) => {
     setAllPaymentOptions((prevOptions) =>
@@ -181,7 +183,7 @@ export const PaymentMethod: React.FC = () => {
               onChange={() => handlePaymentMethodChange(index)}
             />
           ))}
-         <PaymentOptionClick2Pay/>
+          <PaymentOptionClick2Pay />
           <div className="checkout-add-card" onClick={onAddNewCard}>
             <div className="checkout-add-card-text">
               <Add /> Add New Card
