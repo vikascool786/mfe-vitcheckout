@@ -13,6 +13,7 @@ export interface IPaymentOptionProps {
   isSavedCard?: boolean;
   onChange: () => void;
   shopperSavedPayment?: ShopperSavedPayments;
+  shopperId?: string;
 }
 export const PaymentOption: React.FC<
   IPaymentOptionProps & {
@@ -31,6 +32,7 @@ export const PaymentOption: React.FC<
   onCancelEdit,
   isSavedCard = false,
   shopperSavedPayment,
+  shopperId,
 }) => {
   const isSelected = selected ? "selected" : "";
   const isFirst = index === 0 ? "start" : "";
@@ -91,6 +93,7 @@ export const PaymentOption: React.FC<
       </div>
       {isEditing && (
         <CardInformation
+          shopperId=""
           initialData={{
             ...shopperSavedPayment,
           }}

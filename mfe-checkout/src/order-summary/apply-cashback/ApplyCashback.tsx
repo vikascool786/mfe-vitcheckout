@@ -13,19 +13,20 @@ export const ApplyCashback: React.FC<IApplyCashbackContainer> = ({
 }) => {
   const [order, setOrder] = useAtom(orderAtom);
 
-  console.log(order)
-
   const handleAddApplyCashback = () => {
     // Determine if cashback is being applied or removed
-    const isCashbackApplied = !order?.userOptions.applyCashback;
 
-    setOrder({
-      ...order,
-      userOptions: {
-        ...order.userOptions,
-        applyCashback: isCashbackApplied,
-      },
-    });
+    if (order) {
+      const isCashbackApplied = !order?.userOptions.applyCashback;
+
+      setOrder({
+        ...order,
+        userOptions: {
+          ...order.userOptions,
+          applyCashback: isCashbackApplied,
+        },
+      });
+    }
   };
 
   return (

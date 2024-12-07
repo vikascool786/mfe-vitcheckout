@@ -181,6 +181,7 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({ shopperId }) => {
               onEdit={() => setEditingOptionIndex(index)}
               onCancelEdit={() => setEditingOptionIndex(null)}
               onChange={() => handlePaymentMethodChange(index)}
+              shopperId={shopperId}
             />
           ))}
           <PaymentOptionClick2Pay />
