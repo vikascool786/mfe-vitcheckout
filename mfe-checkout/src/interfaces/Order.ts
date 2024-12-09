@@ -46,6 +46,7 @@ export interface ShippingSelection {
   method: string;
   total: number;
   estShipDate: string;
+  isSelected?: boolean;
 }
 
 export interface N101062InStock {

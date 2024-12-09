@@ -7,6 +7,7 @@ import axiosInstance from "../axios";
 const shopperOrderAPIEndpoint = (cartId: string) =>
   `${GET_API_ENDPOINT_BASE_URL}/checkout-universal/v1/checkouts/id/${cartId}?api_key=${API_KEY}`;
 
+
 export const fetchOrderDetail = async (cartId: string): Promise<Order> => {
   try {
     const orderResponse = await axiosInstance(
@@ -24,9 +25,9 @@ export const changeOrder = async (
 ): Promise<Order> => {
   try {
     const orderResponse = await axiosInstance(
-      shopperOrderAPIEndpoint(changeStorePayload.id)
+      `${GET_API_ENDPOINT_BASE_URL}/checkout-universal/v1/checkouts?api_key=${API_KEY}`
     ).post("", changeStorePayload);
-    return orderResponse.data.response.success.data;
+    return orderResponse.data.response;
   } catch (error) {
     console.error(error);
     throw error;

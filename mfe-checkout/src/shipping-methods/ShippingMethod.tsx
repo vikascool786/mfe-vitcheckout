@@ -18,36 +18,29 @@ export const ShippingMethod: React.FC = ({}) => {
       <FormHeading title="Shipping Methods & Review Items" />
 
       {orders?.stores && (
-        <div className="shipping-item-container">
-          {Object.values(orders?.stores).map((store, index) => {
-            return (
-              <>
-                {store && (
-                  <div key={index}>
-                    <div className="shipping-catolog-name">
-                      {getCatalogName(store)}
-                    </div>
-                    {store.items.map((item, itemIndex) => (
-                      <>
-                        <div key={itemIndex}>
-                          <ShippingItem item={item} />
-                        </div>
-                      </>
-                    ))}
-                    {/* Pass store-specific shippingSelections */}
-                    {store.shippingSelections && (
-                      <ShippingOptions
-                        shippingSelections={store.shippingSelections}
-                        selectedItem={store.shippingMethod}
-                      />
-                    )}
-                  </div>
-                )}
-              </>
-            );
-          })}
-        </div>
-      )}
+  <div className="shipping-item-container">
+    {Object.entries(orders?.stores).map(([key, store], index) => {
+      return (
+        store && (
+          <div key={key}>
+            <div className="shipping-catolog-name">
+              {getCatalogName(store)}
+            </div>
+            {store.items.map((item, itemIndex) => (
+              <div key={itemIndex}>
+                <ShippingItem item={item} />
+              </div>
+            ))}
+            {/* Pass store-specific shippingSelections */}
+            {store.shippingSelections && (
+              <ShippingOptions store={store} storeKey={key} />
+            )}
+          </div>
+        )
+      );
+    })}
+  </div>
+)}
     </div>
   );
 };

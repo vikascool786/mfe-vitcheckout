@@ -2,27 +2,32 @@ import React, { useEffect, useState } from "react";
 import { ShippingSelection } from "../interfaces/ShippingMethod";
 import "./ShippingOptions.scss";
 import { ShippingOptionItem } from "../shipping-option-item/ShippingOptionItem";
+import { OrderStore } from "../interfaces/Order";
+import { useAtom, useAtomValue } from "jotai";
+import { orderAtom } from "../store";
 
 interface IShippingOptions {
-  shippingSelections: ShippingSelection[];
-  selectedItem: string;
+  store: OrderStore;
+  storeKey: string;
 }
 
 export const ShippingOptions: React.FC<IShippingOptions> = ({
-  selectedItem,
-  shippingSelections,
+  store,
+  storeKey,
 }) => {
+  const { shippingSelections, shippingMethod } = store;
+  const [order, setOrder] = useAtom(orderAtom); // Access both getter and setter for the atom
   const [shipping, setShipping] = useState(shippingSelections);
 
   useEffect(() => {
     const defaultShippingOptions = shippingSelections.map((selection) => {
       return {
         ...selection,
-        isSelected: selection.method === selectedItem || false,
+        isSelected: selection.method === shippingMethod || false,
       };
     });
     setShipping(defaultShippingOptions);
-  }, []);
+  }, [shippingSelections, shippingMethod]);
 
   const handleChange = (method: string) => {
     // Map through the selections to update the isSelected flag
@@ -31,7 +36,20 @@ export const ShippingOptions: React.FC<IShippingOptions> = ({
       isSelected: option.method === method, // Set true for selected, false for others
     }));
 
-    setShipping(updatedOptions)
+    // Set updated shipping options locally
+    setShipping(updatedOptions);
+
+    // Update the correct store in the global OrderStores object
+    setOrder({
+      ...order, // Spread other stores
+      stores: {
+        ...order.stores,
+        [storeKey]: {
+          ...store,
+          shippingMethod: method,
+        },
+      },
+    });
   };
 
   return (
