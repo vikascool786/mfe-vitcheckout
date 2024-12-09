@@ -2,12 +2,15 @@
  * Copyright (c) 2024. Market America/SHOP.com. All rights reserved.
  */
 import Click2PayLogger from "./Click2PayLogger";
+import Click2PayEventUtil from "./Click2PayCardEventUtil";
+import Click2PayCardLoader from "./Click2PayCardLoader";
 const srcOtpInput = "src-otp-input";
 const srcOtpSelection = "src-otp-channel-selection";
 const CUSTOM_ATTRIBUTE_EVENT_LISTENER = "data-has-event-listener";
 const CUSTOM_ATTR_OTP_CHANNEL_ID = "data-otp-channel-id";
 const otpInputContainerClass = '.js-c2p-otp-container';
 const otpSelectionContainerClass = '.js-c2p-otp-selection-container';
+const accessCardsContainer = '.js-c2p-access-cards-msg';
 
 export const initiateValidation = (c2pInstance, selectedChannel) => {
     console.log("initiate validation");
@@ -36,7 +39,7 @@ export const initiateValidation = (c2pInstance, selectedChannel) => {
             }
         })
         .catch(error => {
-            Click2PayLogger.logInfo("initiateValidation() failed error: " + error.message);
+            //Click2PayLogger.logInfo("initiateValidation() failed error: " + error.message);
             console.log("error: " + error.message);
         })
 };
@@ -149,11 +152,33 @@ function validateOTP(c2pInstance, otpCode){
 
 function validateOTPSuccessHandler(response, c2pInstance){
     closeOTPModal();
-    //handleOTPResponse(response, c2pInstance);
+    handleOTPResponse(response, c2pInstance);
 }
 
 function validateOTPFailedHandler(error){
-    Click2PayLogger.logInfo("initiateValidation() failed error: " + error.message);
+    console.log("error: " + error.message);
+    //Click2PayLogger.logInfo("initiateValidation() failed error: " + error.message);
     //updateOTPErrorReason(error.reason);
     //enableOTPInput();
+}
+
+function handleOTPResponse(cardList, c2pInstance){
+    if(cardList.length){
+        Click2PayCardLoader.loadSRCCardsOnPage(cardList, c2pInstance, false, false, false);
+        hideAccessCardsMessage();
+        Click2PayEventUtil.deselectAllPayments();
+        //checkoutPaymentMethods.hideAllPaymentMethods();
+    } else{
+        //debug.log("Mastercard click2pay embedded cardlist returned empty");
+        //hideAccessCardsMessage();
+        //checkoutClick2payUtil.showEmptyCardListMsg();
+        //checkoutC2PCardLoader.showCardListAddNewC2PCard();
+    }
+}
+
+function hideAccessCardsMessage(){
+    const accessCards = document.querySelector(accessCardsContainer);
+    if(accessCards){
+        accessCards.style.display = "none";
+    }
 }
