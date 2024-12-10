@@ -3,21 +3,19 @@ import { useShopperEWalletAddresses } from "../api/service/ShopperEWallet";
 import { fetchShoppersPaymentMethods } from "../api/service/ShoppersPaymentMethods";
 import { Add } from "../assets/icons/Add";
 import CardOptions from "../assets/images/CardOptions.png";
-import ClickToPay from "../assets/images/ClickToPay.png";
 import PayPal from "../assets/images/PayPal.png";
 import Sezzle from "../assets/images/Sezzle.png";
 import { Back } from "../assets/svgs/Back";
 import { Button } from "../component/Button/Button";
 import { FormHeading } from "../component/Form/Heading/FormHeading";
 import { Address } from "../interfaces/Address";
+import { PaymentOptionClick2Pay } from "../payment-method-click2pay/PaymentMethodOptionClick2Pay";
 import {
   IPaymentOptionProps,
   PaymentOption,
 } from "../payment-method-option/PaymentMethodOption";
 import { TextUpdates } from "../text-updates/TextUpdates";
 import "./PaymentMethods.scss";
-import { PaymentOptionClick2Pay } from "../payment-method-click2pay/PaymentMethodOptionClick2Pay";
-import { useAtom } from "jotai";
 
 const staticPaymentMethods: IPaymentOptionProps[] = [
   {

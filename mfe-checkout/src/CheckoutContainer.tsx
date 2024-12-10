@@ -1,4 +1,4 @@
-import { Provider, useSetAtom } from "jotai";
+import { Provider, useAtom, useSetAtom } from "jotai";
 import React, { useEffect, useState } from "react";
 import { changeOrder, fetchOrderDetail } from "./api/service/Order";
 import "./App.scss";
@@ -7,6 +7,7 @@ import { OrderSummary } from "./order-summary/OrderSummary";
 import { PaymentMethod } from "./payment-method/PaymentMethods";
 import { ShippingMethod } from "./shipping-methods/ShippingMethod";
 import { orderAtom, OrderStore } from "./store";
+import { isEqual } from "lodash";
 import { ORDER_DATA } from "./utils/MOCKS";
 import { generateChangeStoreResponse } from "./utils/helpers/GenerateChangeStoreResponse";
 
@@ -19,7 +20,7 @@ export const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   shopperId,
   cartId,
 }) => {
-  const setOrderAtom = useSetAtom(orderAtom);
+  const [order, setOrderAtom] = useAtom(orderAtom);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,6 +29,7 @@ export const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     const fetOrderDetail = async () => {
       try {
         const response = await fetchOrderDetail(cartId);
+        // const response = ORDER_DATA;
         setOrderAtom(response);
         setError(null);
       } catch (error) {
@@ -41,7 +43,10 @@ export const CheckoutContainer: React.FC<ICheckoutContainer> = ({
 
     const unsubscribe = OrderStore.sub(orderAtom, () => {
       const updatedOrder = OrderStore.get(orderAtom);
-      if (updatedOrder) {
+
+      // Check if updatedOrder is different from the current order
+      console.log("isEqual", isEqual(updatedOrder, order));
+      if (updatedOrder && !isEqual(updatedOrder, order)) {
         changeOrder(generateChangeStoreResponse(updatedOrder));
       }
     });
