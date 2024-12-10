@@ -91,11 +91,14 @@ export const PaymentOptionClick2Pay: React.FC = ({ }) => {
         <div className="checkout-method-click-to-pay">
             {hasSavedCards ? (
                 <div className="checkout-method-save-information">
-                    <div className="checkout-method-click-to-pay-text">
-                        Pay with your cards saved to Click to Pay for fast, secure checkout
+                    <div className="js-c2p-access-cards-msg">
+                        <div className="checkout-method-click-to-pay-text">
+                            Pay with your cards saved to Click to Pay for fast, secure checkout
+                        </div>
+                        <button onClick={() => initiateOTPValidation()}>Access your cards</button>
                     </div>
-                    <button onClick={() => initiateOTPValidation()}>Access your cards</button>
-                    <src-card-list card-brands={cardBrandsString} />
+                    <src-card-list card-brands={cardBrandsString} display-preferred-card="true"
+                                   card-selection-type="radioButton" display-sign-out="false"/>
                 </div>
             ) :
                 <div className="checkout-method-save-information">

@@ -24,7 +24,7 @@ const staticPaymentMethods: IPaymentOptionProps[] = [
     selected: false,
     index: 0,
     size: 0,
-    onChange: () => {},
+    onChange: () => { },
   },
   {
     name: "PayPal",
@@ -32,7 +32,7 @@ const staticPaymentMethods: IPaymentOptionProps[] = [
     selected: false,
     index: 1,
     size: 0,
-    onChange: () => {},
+    onChange: () => { },
   },
   {
     name: "Sezzle",
@@ -40,7 +40,7 @@ const staticPaymentMethods: IPaymentOptionProps[] = [
     selected: false,
     index: 2,
     size: 0,
-    onChange: () => {},
+    onChange: () => { },
   },
 ];
 
@@ -70,7 +70,7 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({ shopperId }) => {
               selected: item.preferred,
               index,
               size: 0,
-              onChange: () => {},
+              onChange: () => { },
               isSavedCard: true,
               shopperSavedPayment: {
                 id: item.id,
@@ -114,6 +114,14 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({ shopperId }) => {
     fetchShoppersSavedPayments(shopperId);
   }, [isExpanded, addresses, shopperId]);
 
+  useEffect(() => {
+    const handleDeselectPaymentMethodsEvent = () => {
+      handlePaymentMethodChange(-1);
+    };
+    document.addEventListener('deselectPaymentMethods', handleDeselectPaymentMethodsEvent);
+
+  }, []);
+
   const handlePaymentMethodChange = (selectedIndex: number) => {
     setAllPaymentOptions((prevOptions) =>
       prevOptions.map((option, index) => ({
@@ -142,7 +150,7 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({ shopperId }) => {
       selected: false,
       index: newCardIndex,
       size: 0,
-      onChange: () => {},
+      onChange: () => { },
       isSavedCard: false,
       shopperSavedPayment: {
         id: 0, // Generate an ID if necessary
