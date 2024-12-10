@@ -18,6 +18,7 @@ import { TextUpdates } from "../text-updates/TextUpdates";
 import "./PaymentMethods.scss";
 import { PaymentOptionClick2Pay } from "../payment-method-click2pay/PaymentMethodOptionClick2Pay";
 import { useAtom } from "jotai";
+import Click2PayPlaceOrder from "../payment-method-click2pay/Click2PayPlaceOrder";
 
 const staticPaymentMethods: IPaymentOptionProps[] = [
   {
@@ -26,7 +27,8 @@ const staticPaymentMethods: IPaymentOptionProps[] = [
     selected: false,
     index: 0,
     size: 0,
-    onChange: () => {},
+    typeId: 1,
+    onChange: () => { },
   },
   {
     name: "PayPal",
@@ -34,7 +36,8 @@ const staticPaymentMethods: IPaymentOptionProps[] = [
     selected: false,
     index: 1,
     size: 0,
-    onChange: () => {},
+    typeId: 48,
+    onChange: () => { },
   },
   {
     name: "Sezzle",
@@ -42,10 +45,12 @@ const staticPaymentMethods: IPaymentOptionProps[] = [
     selected: false,
     index: 2,
     size: 0,
-    onChange: () => {},
+    typeId: 56,
+    onChange: () => { },
   },
 ];
 
+const CLICK2PAY_PAYMENT_TYPE_ID = 60;
 interface IPaymentMethod {
   shopperId: string;
 }
@@ -58,6 +63,7 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({ shopperId }) => {
   const [editingOptionIndex, setEditingOptionIndex] = useState<number | null>(
     null
   );
+  const [paymentTypeId, setPaymentTypeId] = useState<number>(0);
 
   // Memoize fetched addresses to prevent unnecessary updates
   const memoizedAddresses = useMemo(() => addresses || {}, [addresses]);
@@ -73,7 +79,8 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({ shopperId }) => {
           selected: item.preferred,
           index,
           size: 0,
-          onChange: () => {},
+          typeId: item.typeID,
+          onChange: () => { },
           isSavedCard: true,
           shopperSavedPayment: {
             id: item.id,
@@ -103,7 +110,9 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({ shopperId }) => {
       staticPaymentMethods?.[1] || [],
       staticPaymentMethods?.[2] || [],
     ];
-    setAllPaymentOptions(displayedOptions);
+    setAllPaymentOptions(displayedOptions as IPaymentOptionProps[]);
+    updateSelectedPaymentType(displayedOptions);
+    updatePaymentOptions(shopperPayments);
   };
 
   useEffect(() => {
@@ -113,33 +122,34 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({ shopperId }) => {
   }, [shopperId, isExpanded, memoizedAddresses]);
 
   useEffect(() => {
-    const handleDeselectPaymentMethodsEvent = () => {
+    const handleC2PSelectedCardEvent = () => {
+      //deselect radio buttons from other payment methods
       handlePaymentMethodChange(-1);
+      setPaymentTypeId(CLICK2PAY_PAYMENT_TYPE_ID);
     };
+    document.addEventListener('c2pSelectedCard', handleC2PSelectedCardEvent);
 
-    document.addEventListener(
-      "deselectPaymentMethods",
-      handleDeselectPaymentMethodsEvent
-    );
-    return () => {
-      document.removeEventListener(
-        "deselectPaymentMethods",
-        handleDeselectPaymentMethodsEvent
-      );
-    };
   }, []);
 
   const handlePaymentMethodChange = (selectedIndex: number) => {
-    setAllPaymentOptions((prevOptions) =>
-      prevOptions.map((option, index) => ({
-        ...option,
-        selected: index === selectedIndex,
-      }))
-    );
+    const updatedPaymentMethods = allPaymentOptions.map((option, index) => ({
+      ...option,
+      selected: index === selectedIndex,
+    }));
+    setAllPaymentOptions(updatedPaymentMethods);
+    // Collapse any editing card when a new payment method is selected
     if (editingOptionIndex !== null && editingOptionIndex !== selectedIndex) {
       setEditingOptionIndex(null);
     }
+    updateSelectedPaymentType(updatedPaymentMethods);
   };
+
+
+  function updateSelectedPaymentType(paymentOptions: any[]) {
+    const selectedPayment = paymentOptions.find(option => option.selected);
+    const selectedTypeId = selectedPayment ? selectedPayment.typeId : null;
+    setPaymentTypeId(selectedTypeId);
+  }
 
   const toggleAccordion = () => {
     setIsExpanded((prev) => !prev);
@@ -153,7 +163,8 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({ shopperId }) => {
       selected: false,
       index: newCardIndex,
       size: 0,
-      onChange: () => {},
+      typeId: 0,
+      onChange: () => { },
       isSavedCard: false,
       shopperSavedPayment: {
         id: 0,
@@ -169,6 +180,17 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({ shopperId }) => {
 
     setAllPaymentOptions((prevOptions) => [...prevOptions, newCard]);
     setEditingOptionIndex(newCardIndex);
+  };
+
+  const handlePlaceOrder = (paymentTypeId: number) => {
+    console.log("handle place order");
+    console.log("payment type id: " + paymentTypeId);
+    if (paymentTypeId === CLICK2PAY_PAYMENT_TYPE_ID) {
+      console.log("place order with click 2 pay");
+      // @ts-ignore
+      //TODO: remove hard-coded cardid
+      Click2PayPlaceOrder.handleCheckoutWithC2P(window.c2pInstance, "fc71ffff-201a-49de-8df7-b0323d643222");
+    }
   };
 
   return (
@@ -210,7 +232,7 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({ shopperId }) => {
           By clicking place order, you agree to the SHOP.COM Terms of Use and
           Privacy Policy.
         </div>
-        <Button label="Place Order" type="primary" />
+        <Button onClick={() => handlePlaceOrder(paymentTypeId)} label="Place Order" type="primary" />
       </div>
     </div>
   );

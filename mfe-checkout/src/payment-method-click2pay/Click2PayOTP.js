@@ -13,7 +13,6 @@ const otpSelectionContainerClass = '.js-c2p-otp-selection-container';
 const accessCardsContainer = '.js-c2p-access-cards-msg';
 
 export const initiateValidation = (c2pInstance, selectedChannel) => {
-    console.log("initiate validation");
     let initiateValidationPromise;
     if(selectedChannel){
         const params = {
@@ -25,7 +24,6 @@ export const initiateValidation = (c2pInstance, selectedChannel) => {
     }
     return initiateValidationPromise
         .then(response => {
-            console.log("initiateValidation response: " + JSON.stringify(response));
             const otpInputContainer = document.querySelector(otpInputContainerClass);
             if(otpInputContainer){
                 const otpInput = otpInputContainer.querySelector(srcOtpInput);
@@ -50,17 +48,14 @@ function addOtpModalEventListeners(c2pInstance, hasListener) {
         otpInput.setAttribute(CUSTOM_ATTRIBUTE_EVENT_LISTENER, "true");
         otpInput.addEventListener('alternateRequested', () => {
             showOTPSelectionScreen();
-            console.log("alternate requested");
         });
         otpInput.addEventListener('continue', (e) => {
             disableOTPInput();
             const otpValue = otpInput.getAttribute("data-otp-value");
             validateOTP(c2pInstance, otpValue);
-            console.log("continue");
         });
         otpInput.addEventListener('otpChanged', (event) => {
             otpInput.setAttribute("data-otp-value", event.detail);
-            console.log("otp changed");
         });
         otpInput.addEventListener('close', () => {
             closeOTPModal();
@@ -69,6 +64,8 @@ function addOtpModalEventListeners(c2pInstance, hasListener) {
 }
 
 function configureOTPChannelSelections(channelList){
+    const otpChannelSelection = document.querySelector(otpSelectionContainerClass);
+    otpChannelSelection.innerHTML = `<src-otp-channel-selection type="overlay" display-cancel-option="true" style="display: none"></src-otp-channel-selection>`;
     const srcOtpChannelSelection = document.querySelector(srcOtpSelection);
     srcOtpChannelSelection.identityValidationChannels = channelList;
 }
@@ -164,9 +161,9 @@ function validateOTPFailedHandler(error){
 
 function handleOTPResponse(cardList, c2pInstance){
     if(cardList.length){
-        Click2PayCardLoader.loadSRCCardsOnPage(cardList, c2pInstance, false, false, false);
+        Click2PayCardLoader.loadSRCCardsOnPage(cardList, c2pInstance, true, false, false);
         hideAccessCardsMessage();
-        Click2PayEventUtil.deselectAllPayments();
+        Click2PayEventUtil.triggerClick2PaySelectedCardEvent();
         //checkoutPaymentMethods.hideAllPaymentMethods();
     } else{
         //debug.log("Mastercard click2pay embedded cardlist returned empty");

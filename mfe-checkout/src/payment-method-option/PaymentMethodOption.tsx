@@ -10,6 +10,7 @@ export interface IPaymentOptionProps {
   selected: boolean;
   index: number;
   size: number;
+  typeId: number;
   isSavedCard?: boolean;
   onChange: () => void;
   shopperSavedPayment?: ShopperSavedPayments;

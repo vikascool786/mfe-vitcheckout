@@ -1,10 +1,13 @@
-import React, { useEffect, useState } from "react";
-import { GET_CLICK2PAY_DPA_ID } from "../utils/ApiConstants";
+import React, {useEffect, useState} from "react";
+import {GET_CLICK2PAY_DPA_ID} from "../utils/ApiConstants";
 import Click2PayInitializer from "./Click2PayInitializer";
 import Click2PayCards from "./Click2PayCards";
-import { initiateValidation } from "./Click2PayOTP";
+import Click2PayPlaceOrder from "./Click2PayPlaceOrder";
+import {initiateValidation} from "./Click2PayOTP";
+import "./PaymentOptionClick2Pay.scss";
+import {Add} from "../assets/icons/Add";
 
-export const PaymentOptionClick2Pay: React.FC = ({ }) => {
+export const PaymentOptionClick2Pay: React.FC = ({}) => {
     const [hasSavedCards, setHasSavedCards] = useState(false);
 
     /*TODO: need to pass c2pdata in dynamically*/
@@ -36,7 +39,6 @@ export const PaymentOptionClick2Pay: React.FC = ({ }) => {
     }, []);
 
     useEffect(() => {
-        console.log("do c2p initialization");
         const initParams = {
             srcDpaId: `${GET_CLICK2PAY_DPA_ID}`,
             dpaTransactionOptions: {
@@ -87,20 +89,35 @@ export const PaymentOptionClick2Pay: React.FC = ({ }) => {
         initiateValidation(window.c2pInstance);
     };
 
+    const addNewClick2PayCard = () => {
+        console.log("add new c2p card");
+    }
+
     return (
         <div className="checkout-method-click-to-pay">
             {hasSavedCards ? (
-                <div className="checkout-method-save-information">
-                    <div className="js-c2p-access-cards-msg">
-                        <div className="checkout-method-click-to-pay-text">
-                            Pay with your cards saved to Click to Pay for fast, secure checkout
+                    <div className="checkout-method-save-information">
+                        <div className="click-to-pay">
+                            <div className="js-c2p-access-cards-msg click-to-pay">
+                                <div className="checkout-method-click-to-pay-text">
+                                    Pay with your cards saved to Click to Pay for fast, secure checkout
+                                </div>
+                                <button className="checkout-method-click-to-pay-text click-to-pay__btn" type="button"
+                                        onClick={() => initiateOTPValidation()}>Access your cards
+                                </button>
+                            </div>
+                            <src-card-list card-brands={cardBrandsString} display-preferred-card="true"
+                                           card-selection-type="radioButton" display-sign-out="false"/>
+                            <div className="js-c2p-add-new-card click-to-pay__btn-container" style={{display: "none"}}>
+                                <Add/>
+                                <button className="click-to-pay__btn" type="button"
+                                        onClick={() => addNewClick2PayCard()}>
+                                    Add new card with Click to Pay
+                                </button>
+                            </div>
                         </div>
-                        <button onClick={() => initiateOTPValidation()}>Access your cards</button>
                     </div>
-                    <src-card-list card-brands={cardBrandsString} display-preferred-card="true"
-                                   card-selection-type="radioButton" display-sign-out="false"/>
-                </div>
-            ) :
+                ) :
                 <div className="checkout-method-save-information">
                     <div className="checkout-method-click-to-pay-text">
                         Save my information with Click to Pay
@@ -110,21 +127,21 @@ export const PaymentOptionClick2Pay: React.FC = ({ }) => {
                         <span className="learn-more">Learn more</span>
                     </div>
                     <div>+ Continue to Click to Pay</div>
-                    <src-card-list card-brands={cardBrandsString} />
+                    <src-card-list card-brands={cardBrandsString}/>
                 </div>
             }
-            <div className="js-c2p-otp-container" style={{ display: "none" }}>
+            <div className="js-c2p-otp-container" style={{display: "none"}}>
                 <src-otp-input type="overlay" data-otp-value="" display-cancel-option="true"
-                    masked-identity-value=""
-                    network-id=""
-                    hide-loader="false"
-                    display-remember-me="true"
-                    auto-submit="true" error-reason="">
+                               masked-identity-value=""
+                               network-id=""
+                               hide-loader="false"
+                               display-remember-me="true"
+                               auto-submit="true" error-reason="">
                 </src-otp-input>
             </div>
-            <div className="js-c2p-otp-selection-container" style={{ display: "none" }}>
-                <src-otp-channel-selection type="overlay" display-cancel-option="true"></src-otp-channel-selection>
+            <div className="js-c2p-otp-selection-container" style={{display: "none"}}>
             </div>
+            <iframe id="dialogClickToPay" name="c2pPaymentIframe" style={{display: "none"}}></iframe>
         </div>
     );
 };

@@ -5,16 +5,16 @@
 const Click2PayEventUtil = (function(){
     const paymentOptionContainer = '.payment-option-container';
 
-    function deselectAllPayments(){
+    function triggerClick2PaySelectedCardEvent(){
         const paymentOption = document.querySelector(paymentOptionContainer);
         if (paymentOption) {
-            const event = new CustomEvent('deselectPaymentMethods');
+            const event = new CustomEvent('c2pSelectedCard');
             document.dispatchEvent(event);
         }
     }
 
     return {
-        deselectAllPayments
+        triggerClick2PaySelectedCardEvent
     }
 })();
 
