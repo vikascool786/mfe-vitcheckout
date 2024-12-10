@@ -28,6 +28,7 @@ export const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     const fetOrderDetail = async () => {
       try {
         const response = await fetchOrderDetail(cartId);
+        // const response = ORDER_DATA;
         setOrderAtom(response);
         setError(null);
       } catch (error) {
@@ -39,10 +40,17 @@ export const CheckoutContainer: React.FC<ICheckoutContainer> = ({
       }
     };
 
-    const unsubscribe = OrderStore.sub(orderAtom, () => {
+    const unsubscribe = OrderStore.sub(orderAtom, async () => {
       const updatedOrder = OrderStore.get(orderAtom);
       if (updatedOrder) {
-        changeOrder(generateChangeStoreResponse(updatedOrder));
+        const newOrderData = await changeOrder(generateChangeStoreResponse(updatedOrder));
+        if (newOrderData.response.errors) {
+          alert(newOrderData.response.errors.message)
+          console.log(newOrderData)
+          return
+        }
+
+        console.log(newOrderData.response.success.data)
       }
     });
 

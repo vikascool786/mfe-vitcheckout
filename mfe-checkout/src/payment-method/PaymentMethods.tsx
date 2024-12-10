@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useShopperEWalletAddresses } from "../api/service/ShopperEWallet";
 import { fetchShoppersPaymentMethods } from "../api/service/ShoppersPaymentMethods";
 import { Add } from "../assets/icons/Add";
@@ -26,7 +26,7 @@ const staticPaymentMethods: IPaymentOptionProps[] = [
     selected: false,
     index: 0,
     size: 0,
-    onChange: () => { },
+    onChange: () => {},
   },
   {
     name: "PayPal",
@@ -34,7 +34,7 @@ const staticPaymentMethods: IPaymentOptionProps[] = [
     selected: false,
     index: 1,
     size: 0,
-    onChange: () => { },
+    onChange: () => {},
   },
   {
     name: "Sezzle",
@@ -42,7 +42,7 @@ const staticPaymentMethods: IPaymentOptionProps[] = [
     selected: false,
     index: 2,
     size: 0,
-    onChange: () => { },
+    onChange: () => {},
   },
 ];
 
@@ -59,69 +59,74 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({ shopperId }) => {
     null
   );
 
-  useEffect(() => {
-    const fetchShoppersSavedPayments = async (shopperId: string) => {
-      try {
-        const response = await fetchShoppersPaymentMethods(shopperId);
+  // Memoize fetched addresses to prevent unnecessary updates
+  const memoizedAddresses = useMemo(() => addresses || {}, [addresses]);
 
-        const shopperPayments: IPaymentOptionProps[] = response
-          .map((item: any, index: number) => {
-            return {
-              name: item.type,
-              image: item.imageUrl,
-              selected: item.preferred,
-              index,
-              size: 0,
-              onChange: () => { },
-              isSavedCard: true,
-              shopperSavedPayment: {
-                id: item.id,
-                expirationDate: item.expires as string | "",
-                cardMask: item.mask as string | "",
-                preferred: item.preferred as boolean,
-                type: item.type as string | "",
-                accountName: item.accountName as string | "",
-                name: item.type,
-                image: item.imageUrl,
-                address: addresses
-                  ? addresses[item.addressId]
-                  : ({} as Address),
-              },
-            };
-          })
-          .sort(
-            (a: { selected: boolean }, b: { selected: boolean }) =>
-              (b.selected ? 1 : 0) - (a.selected ? 1 : 0)
-          );
-        updatePaymentOptions(shopperPayments);
-      } catch (error) {
-        console.error("Failed to fetch shopper payment data:", error);
-      }
-    };
+  const fetchShoppersSavedPayments = async (shopperId: string) => {
+    try {
+      const response = await fetchShoppersPaymentMethods(shopperId);
 
-    const updatePaymentOptions = (shopperPayments: IPaymentOptionProps[]) => {
-      const displayedOptions = [
-        ...(shopperPayments && shopperPayments[0]
-          ? [shopperPayments[0]]
-          : [staticPaymentMethods[0]]),
-        ...(isExpanded && shopperPayments ? shopperPayments.slice(1) : []),
-        staticPaymentMethods?.[1] ?? [], // PayPal
-        staticPaymentMethods?.[2] ?? [], // Sezzle
-      ];
-
-      setAllPaymentOptions(displayedOptions as IPaymentOptionProps[]);
+      const shopperPayments: IPaymentOptionProps[] = response
+        .map((item: any, index: number) => ({
+          name: item.type,
+          image: item.imageUrl,
+          selected: item.preferred,
+          index,
+          size: 0,
+          onChange: () => {},
+          isSavedCard: true,
+          shopperSavedPayment: {
+            id: item.id,
+            expirationDate: item.expires || "",
+            cardMask: item.mask || "",
+            preferred: item.preferred,
+            type: item.type,
+            accountName: item.accountName || "",
+            name: item.type,
+            image: item.imageUrl,
+            address: memoizedAddresses[item.addressId] || ({} as Address),
+          },
+        }))
+        .sort((a, b) => (b.selected ? 1 : 0) - (a.selected ? 1 : 0));
       updatePaymentOptions(shopperPayments);
-    };
+    } catch (error) {
+      console.error("Failed to fetch shopper payment data:", error);
+    }
+  };
 
-    fetchShoppersSavedPayments(shopperId);
-  }, [isExpanded, addresses, shopperId]);
+  const updatePaymentOptions = (shopperPayments: IPaymentOptionProps[]) => {
+    const displayedOptions = [
+      ...(shopperPayments?.[0]
+        ? [shopperPayments[0]]
+        : [staticPaymentMethods[0]]),
+      ...(isExpanded ? shopperPayments.slice(1) : []),
+      staticPaymentMethods?.[1] || [],
+      staticPaymentMethods?.[2] || [],
+    ];
+    setAllPaymentOptions(displayedOptions);
+  };
+
+  useEffect(() => {
+    if (shopperId) {
+      fetchShoppersSavedPayments(shopperId);
+    }
+  }, [shopperId, isExpanded, memoizedAddresses]);
 
   useEffect(() => {
     const handleDeselectPaymentMethodsEvent = () => {
       handlePaymentMethodChange(-1);
     };
-    document.addEventListener('deselectPaymentMethods', handleDeselectPaymentMethodsEvent);
 
+    document.addEventListener(
+      "deselectPaymentMethods",
+      handleDeselectPaymentMethodsEvent
+    );
+    return () => {
+      document.removeEventListener(
+        "deselectPaymentMethods",
+        handleDeselectPaymentMethodsEvent
+      );
+    };
   }, []);
 
   const handlePaymentMethodChange = (selectedIndex: number) => {
@@ -131,31 +136,27 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({ shopperId }) => {
         selected: index === selectedIndex,
       }))
     );
-    // Collapse any editing card when a new payment method is selected
     if (editingOptionIndex !== null && editingOptionIndex !== selectedIndex) {
       setEditingOptionIndex(null);
     }
   };
 
-  // Toggle function for expanding or collapsing the card list
   const toggleAccordion = () => {
-    setIsExpanded(!isExpanded);
+    setIsExpanded((prev) => !prev);
   };
 
-  const onAddNewCard = async () => {
+  const onAddNewCard = () => {
     const newCardIndex = allPaymentOptions.length;
-
-    // Add a temporary entry for the new card in edit mode
     const newCard: IPaymentOptionProps = {
       name: "New Card",
-      image: CardOptions, // Replace with a placeholder image or icon for new cards
+      image: CardOptions,
       selected: false,
       index: newCardIndex,
       size: 0,
-      onChange: () => { },
+      onChange: () => {},
       isSavedCard: false,
       shopperSavedPayment: {
-        id: 0, // Generate an ID if necessary
+        id: 0,
         expirationDate: "",
         cardMask: "",
         preferred: false,

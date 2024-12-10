@@ -101,6 +101,16 @@ export const OrderSummary: React.FC<IOrderSummary> = () => {
             ))}
           </div>
         )}
+
+      {/* <div className="gift-card-container">
+        <div className="order-input-container">
+          <FormField value={coupon} onChange={handleCouponTextChange} />
+        </div>
+        <div className="order-apply-container">
+          <FormField value={coupon} onChange={handleCouponTextChange} />
+          <Button label="Apply" type="secondary" onClick={handleAddCoupon} />
+        </div>
+      </div> */}
       <div className="order-sub-text underlined">Apply gift card</div>
 
       <div className="order-charges-table">

@@ -9,12 +9,22 @@
   min-width: 26.596rem;
 }
 
+.gift-card-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+}
+
 .order-summary-coupon-container {
   display: flex;
   flex-direction: row;
   justify-content: center;
   gap: 10px;
   padding-top: 10px;
+
 }
 
 .order-input-container {
@@ -22,9 +32,20 @@
 }
 
 .order-apply-container {
+  display: flex;
+  flex-direction: row;
   flex: 3; // This will take 20% of the space
 }
 
+.gift-card-number {
+  display: flex;
+  flex: 7;
+}
+
+.gift-card-pin {
+  display: flex;
+  flex: 3; // This will take 20% of the space
+}
 .order-reedem-coupon-text {
   font-size: 16px;
   font-weight: 400;
@@ -189,7 +210,7 @@
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  border: 1px solid #ACA8A8;
+  border: 1px solid #aca8a8;
   border-radius: 24px;
   padding: 8px;
   gap: 0.6rem;

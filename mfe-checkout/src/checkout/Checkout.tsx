@@ -22,7 +22,8 @@ import { Address } from "../interfaces/Address";
 import { AddressHandler } from "../interfaces/AddressHandler";
 import { DropdownOption } from "../interfaces/DropdownOption";
 import "./Checkout.scss";
-import { useAtom } from "jotai";
+import { useAtom, useSetAtom } from "jotai";
+import { orderAtom } from "../store";
 
 const defaultAddress: Address = {
   id: 0,
@@ -45,6 +46,7 @@ export const Checkout: React.FC<ICheckout> = ({ shopperId }) => {
   const siteId = "260"; /*todo - need to update with dynamic siteId*/
   // State to manage whether the form is expanded or collapsed
 
+  const setOrder = useSetAtom(orderAtom);
   const [isExpanded, setIsExpanded] = useState(false);
   const [showShipAddressForm, setShowShipAddressForm] = useState(false);
   const [shopperAddressBook, setShopperAddressBook] = useState<Address[]>([]);
@@ -281,7 +283,17 @@ export const Checkout: React.FC<ICheckout> = ({ shopperId }) => {
     );
 
     setShopperAddressBook(updatedSelectedAddress);
+
+    setOrder((order) => {
+      return {
+        ...order,
+        shippingAddress: {
+          ...updatedSelectedAddress.find((address) => address.id === id),
+        },
+      };
+    });
   };
+
   return (
     <div>
       <form
