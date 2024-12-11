@@ -6,8 +6,8 @@ export const generateChangeStoreResponse = (order: Order): ChangeOrder => {
     id: order.id,
     customer_id: "",
     ufo_id: "",
-    shipping_country: order.shippingAddress.country || "USA",
-    product_country: order.billingAddress.country || "USA",
+    shipping_country: order.shippingAddress.isoalpha3Code || "USA",
+    product_country: order.billingAddress.isoalpha3Code || "USA",
     language: "ENG",
     site_type: "W",
     application: "cart",
@@ -18,7 +18,7 @@ export const generateChangeStoreResponse = (order: Order): ChangeOrder => {
       id: order.shippingAddress.id || 0,
     },
     paymentMethod: {
-      id: order.paymentMethod.typeID,
+      id: order.paymentMethod.id,
     },
     stores: Object.keys(order.stores).reduce((acc, key) => {
       const store = order.stores[key];

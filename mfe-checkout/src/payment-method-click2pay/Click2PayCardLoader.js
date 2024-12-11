@@ -5,8 +5,10 @@
 import Click2PayLogger from "./Click2PayLogger";
 const Click2PayCardLoader = (function(){
     let clickToPayCardList;
+    const CUSTOM_ATTR_SELECTED_CARD = "data-selected-card";
     const srcCardListElement = 'src-card-list';
     const addNewClick2PayCard = '.js-c2p-add-new-card';
+    const click2PayPaymentData = '.js-c2p-payment-data';
 
     function loadSRCCardsOnPage(cardList, c2pInstance, showAddNewCard, deselectCard, showSignout){
         const srcCardList = document.querySelector(srcCardListElement);
@@ -21,8 +23,27 @@ const Click2PayCardLoader = (function(){
         if(showAddNewCard){
             showCardListAddNewC2PCard();
         }
-        /*addCardListEventListeners(c2pInstance);
-        checkoutC2PPlaceOrder.addPlaceOrderEventListener(c2pInstance);*/
+        addCardListEventListeners(c2pInstance);
+    }
+
+    function addCardListEventListeners(c2pInstance) {
+        const srcCardList = document.querySelector(srcCardListElement);
+        const paymentData = document.querySelector(click2PayPaymentData);
+        if(srcCardList){
+            srcCardList.addEventListener('clickSignOutLink', event => {
+                //checkoutC2PSignOut.handleSignout(c2pInstance);
+            });
+            srcCardList.addEventListener('selectSrcDigitalCardId', event => {
+                const selectedCardId = event.detail;
+                paymentData.setAttribute(CUSTOM_ATTR_SELECTED_CARD, selectedCardId);
+                //placeOrderButton.setAttribute(CUSTOM_ATTR_SELECTED_CARD, event.detail);
+                //checkoutPaymentMethods.deselectAllExistingShopperCreditCards();
+                //checkoutPaymentMethods.deselectAllInstallmentPaymentOptions();
+                //checkoutPaymentUtil.enableC2PPlaceOrderButton();
+                //validatorUtils.hideValidationMessages();
+                //triggerSelectionChange(selectedCardId);
+            });
+        }
     }
 
     function showCardListAddNewC2PCard(){
@@ -33,7 +54,8 @@ const Click2PayCardLoader = (function(){
     }
 
     return {
-        loadSRCCardsOnPage
+        loadSRCCardsOnPage,
+        showCardListAddNewC2PCard
     }
 })();
 

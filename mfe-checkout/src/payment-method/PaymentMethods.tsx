@@ -187,9 +187,16 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({ shopperId }) => {
     console.log("payment type id: " + paymentTypeId);
     if (paymentTypeId === CLICK2PAY_PAYMENT_TYPE_ID) {
       console.log("place order with click 2 pay");
+      const digitalCardId = Click2PayPlaceOrder.getDigitalCardId();
       // @ts-ignore
-      //TODO: remove hard-coded cardid
-      Click2PayPlaceOrder.handleCheckoutWithC2P(window.c2pInstance, "fc71ffff-201a-49de-8df7-b0323d643222");
+      const c2pPlaceOrderPromise = Click2PayPlaceOrder.handleCheckoutWithC2P(window.c2pInstance, digitalCardId);
+      c2pPlaceOrderPromise
+          .then((response: any) => {
+            console.log("place order response: " + JSON.stringify(response));
+          })
+          .catch((error: { message: string; }) => {
+            console.log("c2p place order failed: " + error.message);
+          })
     }
   };
 

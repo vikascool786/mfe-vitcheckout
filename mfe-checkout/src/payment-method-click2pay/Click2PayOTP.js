@@ -11,6 +11,7 @@ const CUSTOM_ATTR_OTP_CHANNEL_ID = "data-otp-channel-id";
 const otpInputContainerClass = '.js-c2p-otp-container';
 const otpSelectionContainerClass = '.js-c2p-otp-selection-container';
 const accessCardsContainer = '.js-c2p-access-cards-msg';
+const emptyCardsContainer = '.js-c2p-empty-card-list-msg';
 
 export const initiateValidation = (c2pInstance, selectedChannel) => {
     let initiateValidationPromise;
@@ -166,10 +167,10 @@ function handleOTPResponse(cardList, c2pInstance){
         Click2PayEventUtil.triggerClick2PaySelectedCardEvent();
         //checkoutPaymentMethods.hideAllPaymentMethods();
     } else{
-        //debug.log("Mastercard click2pay embedded cardlist returned empty");
-        //hideAccessCardsMessage();
-        //checkoutClick2payUtil.showEmptyCardListMsg();
-        //checkoutC2PCardLoader.showCardListAddNewC2PCard();
+        //Click2PayLogger.logInfo("Click2pay cardlist returned empty");
+        hideAccessCardsMessage();
+        showEmptyCardListMsg();
+        Click2PayCardLoader.showCardListAddNewC2PCard();
     }
 }
 
@@ -177,5 +178,12 @@ function hideAccessCardsMessage(){
     const accessCards = document.querySelector(accessCardsContainer);
     if(accessCards){
         accessCards.style.display = "none";
+    }
+}
+
+function showEmptyCardListMsg(){
+    const emptyCardsMsg = document.querySelector(emptyCardsContainer);
+    if(emptyCardsMsg){
+        emptyCardsMsg.style.display = "block";
     }
 }

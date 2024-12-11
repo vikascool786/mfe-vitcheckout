@@ -6,6 +6,7 @@ import Click2PayPlaceOrder from "./Click2PayPlaceOrder";
 import {initiateValidation} from "./Click2PayOTP";
 import "./PaymentOptionClick2Pay.scss";
 import {Add} from "../assets/icons/Add";
+import {Warn} from "../assets/icons/Warn";
 
 export const PaymentOptionClick2Pay: React.FC = ({}) => {
     const [hasSavedCards, setHasSavedCards] = useState(false);
@@ -108,6 +109,12 @@ export const PaymentOptionClick2Pay: React.FC = ({}) => {
                             </div>
                             <src-card-list card-brands={cardBrandsString} display-preferred-card="true"
                                            card-selection-type="radioButton" display-sign-out="false"/>
+                            <div className="js-c2p-empty-card-list-msg" style={{display: "none"}}>
+                                <div className="checkout-method-click-to-pay-text click-to-pay__warn">
+                                    <Warn/>
+                                    <p className="click-to-pay__warn-text">There are no cards in your Click to Pay wallet. Add a card to check out with your Click to Pay Profile.</p>
+                                </div>
+                            </div>
                             <div className="js-c2p-add-new-card click-to-pay__btn-container" style={{display: "none"}}>
                                 <Add/>
                                 <button className="click-to-pay__btn" type="button"
@@ -123,7 +130,7 @@ export const PaymentOptionClick2Pay: React.FC = ({}) => {
                         Save my information with Click to Pay
                     </div>
                     <div className="checkout-method-click-to-pay-text">
-                        for fast, secure checkout.{" "}
+                    for fast, secure checkout.{" "}
                         <span className="learn-more">Learn more</span>
                     </div>
                     <div>+ Continue to Click to Pay</div>
@@ -141,7 +148,13 @@ export const PaymentOptionClick2Pay: React.FC = ({}) => {
             </div>
             <div className="js-c2p-otp-selection-container" style={{display: "none"}}>
             </div>
-            <iframe id="dialogClickToPay" name="c2pPaymentIframe" style={{display: "none"}}></iframe>
+            <div className="js-c2p-payment-iframe-container click-to-pay__iframe-container" role="dialog"
+                 aria-modal="true" aria-labelledby="dialogClickToPay" style={{display: "none"}}>
+                <div className="click-to-pay__iframe-modal">
+                    <iframe id="dialogClickToPay" name="c2pPaymentIframe" className="click-to-pay__iframe-content"></iframe>
+                </div>
+            </div>
+            <input className="js-c2p-payment-data" type="hidden"/>
         </div>
     );
 };

@@ -107,6 +107,7 @@ export interface IStore {
 }
 
 export interface IPaymentMethod {
+  id: number;
   typeID: number;
   type: string;
   categoryID: number;
