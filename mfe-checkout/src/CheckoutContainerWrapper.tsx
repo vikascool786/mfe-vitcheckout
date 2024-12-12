@@ -1,17 +1,23 @@
-import React from 'react'
+import React, { useEffect } from "react";
 import { Provider } from "jotai";
-import { OrderStore } from "./store";
 import { CheckoutContainer } from "./CheckoutContainer";
+import { OrderStore } from "./store";
 
-const CheckoutContainerWrapper = () => (
-  <div className="container">
-    <Provider store={OrderStore}>
-      <CheckoutContainer
-        cartId="cart_2282210204_W_USA_USA_ENG"
-        shopperId="WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz"
-      />
-    </Provider>
-  </div>
-);
+const CheckoutContainerWrapper = (appConfig: {
+  cartId: string;
+  shopperId: string;
+}) => {
+  
+  return (
+    <div className="container">
+      <Provider store={OrderStore}>
+        <CheckoutContainer
+          cartId={appConfig.cartId}
+          shopperId={appConfig.shopperId}
+        />
+      </Provider>
+    </div>
+  );
+};
 
 export default CheckoutContainerWrapper;
