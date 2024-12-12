@@ -38,6 +38,8 @@ export const generateChangeStoreResponse = (order: Order): ChangeOrder => {
       signatureRequired: order.userOptions.signatureRequired,
       oosConsolidate: order.userOptions.oosConsolidate,
       userSessionId: order.userOptions.userSessionId,
+      gcNum: order.userOptions.gcNum,
+      gcPin: order.userOptions.gcPin,
       coupons: order.userOptions?.coupons ? order.userOptions.coupons : [] as string[],
     },
   };

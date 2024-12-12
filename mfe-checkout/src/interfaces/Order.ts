@@ -73,4 +73,6 @@ export interface IUserOptions {
   oosConsolidate: boolean;
   userSessionId: string;
   coupons: string[];
+  gcNum: string[];
+  gcPin: string[];
 }

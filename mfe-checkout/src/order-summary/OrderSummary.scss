@@ -9,14 +9,6 @@
   min-width: 26.596rem;
 }
 
-.gift-card-container {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-top: 10px;
-}
 
 .order-summary-coupon-container {
   display: flex;
@@ -24,7 +16,6 @@
   justify-content: center;
   gap: 10px;
   padding-top: 10px;
-
 }
 
 .order-input-container {
@@ -214,4 +205,31 @@
   border-radius: 24px;
   padding: 8px;
   gap: 0.6rem;
+}
+
+.gift-card-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 0.4rem;
+}
+
+.gift-card-container-fields {
+  display: flex;
+  flex-direction: row;
+  gap: 0.8rem;
+  width: 100%; // Ensure it takes full width
+}
+
+.gift-card-container-field-1 {
+  flex: 7; // Allocates 70% of space
+}
+
+.gift-card-container-field-2 {
+  flex: 3; // Allocates 30% of space
+}
+
+.gift-card-apply {
+  display: flex;
+  justify-content: flex-end; // Aligns the button to the right
 }

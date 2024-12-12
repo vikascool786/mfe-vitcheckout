@@ -1,14 +1,14 @@
 import { useAtom } from "jotai";
 import React, { useState } from "react";
+import { useShopperEWallet } from "../api/service/ShopperEWallet";
 import { Cashback } from "../assets/svgs/Cashback";
+import { Close } from "../assets/svgs/Close";
 import { Button } from "../component/Button/Button";
 import { FormField } from "../component/Form/Field/FormField";
 import { FormHeading } from "../component/Form/Heading/FormHeading";
+import { orderAtom } from "../store";
 import { ApplyCashback } from "./apply-cashback/ApplyCashback";
 import "./OrderSummary.scss";
-import { useShopperEWallet } from "../api/service/ShopperEWallet";
-import { Close } from "../assets/svgs/Close";
-import { orderAtom } from "../store";
 
 interface IOrderSummary {}
 
@@ -16,13 +16,65 @@ export const OrderSummary: React.FC<IOrderSummary> = () => {
   const [order, setOrder] = useAtom(orderAtom);
   const { eWalletData, loading, error } = useShopperEWallet("2115715663");
   const [coupon, setCoupon] = useState("");
+  const [showApplyGiftCard, setShowApplyGiftCard] = useState(false);
+  const [gcPin, setGcPin] = useState<string>("");
+  const [gcNum, setGcNum] = useState<string>("");
 
   // Handle input text change for coupon
   const handleCouponTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCoupon(e.target.value);
   };
 
-  // Add coupon to the list and update order.userOptions.coupons
+  // Handle input changes for gift card fields
+  const handleGcNumChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setGcNum(e.target.value);
+  };
+
+  const handleGcPinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setGcPin(e.target.value);
+  };
+
+  const handleApplyGiftCard = () => {
+    setShowApplyGiftCard(!showApplyGiftCard);
+  };
+
+  // Remove coupon from the list and update order.userOptions.coupons
+  const handleRemoveCoupon = (couponToRemove: string) => {
+    if (order?.userOptions.coupons) {
+      const { coupons } = order.userOptions;
+
+      // Filter out the coupon to remove
+      const updatedCoupons = coupons.filter(
+        (appliedCoupon) => appliedCoupon !== couponToRemove
+      );
+
+      setOrder({
+        ...order,
+        userOptions: {
+          ...order.userOptions,
+          coupons: updatedCoupons, // Update the coupons array
+        },
+      });
+    }
+  };
+
+  // Add gift card to the order
+  const handleAddGiftCard = () => {
+    if (order?.userOptions && gcPin.trim() && gcNum.trim()) {
+      setOrder({
+        ...order,
+        userOptions: {
+          ...order.userOptions,
+          gcPin: [gcPin],
+          gcNum: [gcNum],
+        },
+      });
+
+      setGcPin("");
+      setGcNum("");
+    }
+  };
+
   const handleAddCoupon = () => {
     if (order) {
       if (order?.userOptions.coupons) {
@@ -53,28 +105,6 @@ export const OrderSummary: React.FC<IOrderSummary> = () => {
     }
   };
 
-  // Remove coupon from the list and update order.userOptions.coupons
-  const handleRemoveCoupon = (couponToRemove: string) => {
-    if (order?.userOptions.coupons) {
-      const { coupons } = order.userOptions;
-
-      // Filter out the coupon to remove
-      const updatedCoupons = coupons.filter(
-        (appliedCoupon) => appliedCoupon !== couponToRemove
-      );
-
-      setOrder({
-        ...order,
-        userOptions: {
-          ...order.userOptions,
-          coupons: updatedCoupons, // Update the coupons array
-        },
-      });
-    }
-  };
-
-  console.log(order?.userOptions);
-
   return (
     <div className="order-summary-container">
       <FormHeading title="Order Summary" />
@@ -90,28 +120,47 @@ export const OrderSummary: React.FC<IOrderSummary> = () => {
           <Button label="Apply" type="secondary" onClick={handleAddCoupon} />
         </div>
       </div>
-      {order?.userOptions.coupons?.length &&
-        order?.userOptions.coupons?.length > 0 && (
-          <div className="order-applied-coupons">
-            {order?.userOptions.coupons.map((appliedCoupon, index) => (
-              <li key={index} className="order-applied-coupon">
-                {appliedCoupon}
-                <Close onClick={() => handleRemoveCoupon(appliedCoupon)} />
-              </li>
-            ))}
-          </div>
-        )}
+      {order?.userOptions.coupons && order?.userOptions.coupons?.length > 0 && (
+        <div className="order-applied-coupons">
+          {order?.userOptions.coupons.map((appliedCoupon, index) => (
+            <li key={index} className="order-applied-coupon">
+              {appliedCoupon}
+              <Close onClick={() => handleRemoveCoupon(appliedCoupon)} />
+            </li>
+          ))}
+        </div>
+      )}
 
-      {/* <div className="gift-card-container">
-        <div className="order-input-container">
-          <FormField value={coupon} onChange={handleCouponTextChange} />
+      {showApplyGiftCard && (
+        <div className="gift-card-container">
+          <div className="gift-card-container-fields">
+            <div className="gift-card-container-field-1">
+              <FormField
+                value={gcNum}
+                onChange={handleGcNumChange}
+                placeholder="Gift Card Number"
+              />
+            </div>
+            <div className="gift-card-container-field-2">
+              <FormField
+                value={gcPin}
+                onChange={handleGcPinChange}
+                placeholder="Gift Card PIN"
+              />
+            </div>
+          </div>
+          <div className="gift-card-apply">
+            <Button
+              label="Apply Gift Card"
+              type="secondary"
+              onClick={handleAddGiftCard}
+            />
+          </div>
         </div>
-        <div className="order-apply-container">
-          <FormField value={coupon} onChange={handleCouponTextChange} />
-          <Button label="Apply" type="secondary" onClick={handleAddCoupon} />
-        </div>
-      </div> */}
-      <div className="order-sub-text underlined">Apply gift card</div>
+      )}
+      <div className="order-sub-text underlined" onClick={handleApplyGiftCard}>
+        {showApplyGiftCard ? "Hide gift card" : "Apply gift card"}
+      </div>
 
       <div className="order-charges-table">
         <div className="order-summary-row">
