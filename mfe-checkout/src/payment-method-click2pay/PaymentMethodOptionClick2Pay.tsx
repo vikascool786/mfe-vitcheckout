@@ -6,7 +6,7 @@ import Click2PayPlaceOrder from "./Click2PayPlaceOrder";
 import {initiateValidation} from "./Click2PayOTP";
 import "./PaymentOptionClick2Pay.scss";
 import {Add} from "../assets/icons/Add";
-import {Warn} from "../assets/icons/Warn";
+// import {Warn} from "../assets/icons/Warn";
 
 export const PaymentOptionClick2Pay: React.FC = ({}) => {
     const [hasSavedCards, setHasSavedCards] = useState(false);

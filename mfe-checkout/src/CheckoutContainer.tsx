@@ -1,4 +1,4 @@
-import { Provider, useSetAtom } from "jotai";
+import { useSetAtom } from "jotai";
 import React, { useEffect, useState } from "react";
 import { changeOrder, fetchOrderDetail } from "./api/service/Order";
 import "./App.scss";
@@ -7,7 +7,6 @@ import { OrderSummary } from "./order-summary/OrderSummary";
 import { PaymentMethod } from "./payment-method/PaymentMethods";
 import { ShippingMethod } from "./shipping-methods/ShippingMethod";
 import { orderAtom, OrderStore } from "./store";
-import { ORDER_DATA } from "./utils/MOCKS";
 import { generateChangeStoreResponse } from "./utils/helpers/GenerateChangeStoreResponse";
 
 interface ICheckoutContainer {

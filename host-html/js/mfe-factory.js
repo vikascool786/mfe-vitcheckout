@@ -98,10 +98,14 @@ const components = [
     componentName: "SearchContainer",
     endpoint: "https://d29q5zo2af0lw0.cloudfront.net/SearchContainer",
   },*/
+  // {
+  //   componentName: "Genealogy",
+  //   endpoint: "http://localhost:3004",
+  // },
   {
-    componentName: "Genealogy",
-    endpoint: "http://localhost:3004",
-  },
+    componentName: "Checkout",
+    endpoint: "http://localhost:3011",
+  }
 ];
 
 (async () => {

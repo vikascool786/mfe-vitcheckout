@@ -67,15 +67,11 @@ module.exports = (env, argv) => {
         name: "mfeCheckout",
         filename: "remoteEntry.js",
         remotes: {
-          mfeStore: isLocal
-            ? "mfeStore@http://localhost:3000/remoteEntry.js"
-            : "mfeStore@https://mcds-main.s3.amazonaws.com/Store/remoteEntry.js",
-          mfeSearchContainer: isLocal
-            ? "mfeSearchContainer@http://localhost:3009/remoteEntry.js"
-            : "mfeSearchContainer@https://mcds-main.s3.amazonaws.com/SearchContainer/remoteEntry.js",
+          mfeStore: "mfeStore@http://localhost:3000/remoteEntry.js"
         },
         exposes: {
-          "./CheckoutSkeleton": "./src/CheckoutContainer",
+          "./CheckoutSkeleton": "./src/CheckoutContainerWrapper",
+          "./CheckoutElement": "./src/CheckoutElement",
           "./React": "react",
           "./ReactDOM": "react-dom",
           "./ReactDOMClient": "react-dom/client",
