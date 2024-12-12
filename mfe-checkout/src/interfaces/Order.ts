@@ -54,6 +54,7 @@ export interface N101062InStock {
 }
 
 export interface IPaymentMethod2 {
+  id: number;
   typeID: number;
   type: string;
   categoryID: number;
