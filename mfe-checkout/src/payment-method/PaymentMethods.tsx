@@ -3,7 +3,6 @@ import { useShopperEWalletAddresses } from "../api/service/ShopperEWallet";
 import { fetchShoppersPaymentMethods } from "../api/service/ShoppersPaymentMethods";
 import { Add } from "../assets/icons/Add";
 import CardOptions from "../assets/images/CardOptions.png";
-import ClickToPay from "../assets/images/ClickToPay.png";
 import PayPal from "../assets/images/PayPal.png";
 import Sezzle from "../assets/images/Sezzle.png";
 import { Back } from "../assets/svgs/Back";
@@ -19,6 +18,12 @@ import "./PaymentMethods.scss";
 import { PaymentOptionClick2Pay } from "../payment-method-click2pay/PaymentMethodOptionClick2Pay";
 import { useAtom } from "jotai";
 import Click2PayPlaceOrder from "../payment-method-click2pay/Click2PayPlaceOrder";
+import { getTransactionData } from "../api/service/Click2PayTransaction";
+import Click2PayUtil from "../payment-method-click2pay/Click2PayUtil";
+
+const PAYMENT_TYPE_ID_CLICK2PAY = 60;
+const PAYMENT_TYPE_ID_SEZZLE = 56;
+const PAYMENT_TYPE_ID_PAYPAL = 48;
 
 const staticPaymentMethods: IPaymentOptionProps[] = [
   {
@@ -36,7 +41,7 @@ const staticPaymentMethods: IPaymentOptionProps[] = [
     selected: false,
     index: 1,
     size: 0,
-    typeId: 48,
+    typeId: PAYMENT_TYPE_ID_PAYPAL,
     onChange: () => { },
   },
   {
@@ -45,12 +50,10 @@ const staticPaymentMethods: IPaymentOptionProps[] = [
     selected: false,
     index: 2,
     size: 0,
-    typeId: 56,
+    typeId: PAYMENT_TYPE_ID_SEZZLE,
     onChange: () => { },
   },
 ];
-
-const CLICK2PAY_PAYMENT_TYPE_ID = 60;
 interface IPaymentMethod {
   shopperId: string;
 }
@@ -125,7 +128,7 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({ shopperId }) => {
     const handleC2PSelectedCardEvent = () => {
       //deselect radio buttons from other payment methods
       handlePaymentMethodChange(-1);
-      setPaymentTypeId(CLICK2PAY_PAYMENT_TYPE_ID);
+      setPaymentTypeId(PAYMENT_TYPE_ID_CLICK2PAY);
     };
     document.addEventListener('c2pSelectedCard', handleC2PSelectedCardEvent);
 
@@ -183,20 +186,54 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({ shopperId }) => {
   };
 
   const handlePlaceOrder = (paymentTypeId: number) => {
-    console.log("handle place order");
-    console.log("payment type id: " + paymentTypeId);
-    if (paymentTypeId === CLICK2PAY_PAYMENT_TYPE_ID) {
-      console.log("place order with click 2 pay");
-      const digitalCardId = Click2PayPlaceOrder.getDigitalCardId();
-      // @ts-ignore
-      const c2pPlaceOrderPromise = Click2PayPlaceOrder.handleCheckoutWithC2P(window.c2pInstance, digitalCardId);
-      c2pPlaceOrderPromise
-          .then((response: any) => {
-            console.log("place order response: " + JSON.stringify(response));
+    switch (paymentTypeId) {
+      case PAYMENT_TYPE_ID_CLICK2PAY:
+        handleClick2PayPlaceOrder();
+        break;
+      case PAYMENT_TYPE_ID_SEZZLE:
+        console.log("place order with Sezzle");
+        break;
+      case PAYMENT_TYPE_ID_PAYPAL:
+        console.log("place order with PayPal");
+        break;
+      default:
+        console.log("place order with regular credit card");
+        break;
+    }
+  };
+
+  const handleClick2PayPlaceOrder = () => {
+    console.log("place order with click 2 pay");
+    const digitalCardId = Click2PayPlaceOrder.getDigitalCardId();
+    // @ts-ignore
+    const c2pPlaceOrderPromise = Click2PayPlaceOrder.handleCheckoutWithC2P(window.c2pInstance, digitalCardId);
+    c2pPlaceOrderPromise
+      .then((response: any) => {
+        if (response.checkoutActionCode === 'COMPLETE') {
+          const transId = response.headers['merchant-transaction-id'];
+          const flowId = response.headers['x-src-cx-flow-id'];
+          const total = Click2PayUtil.getC2pData().transactionAmount;
+          const promiseClick2PayTransData = getClickToPayTransactionData(flowId, transId, total);
+          promiseClick2PayTransData.then((response: any) => {
+            console.log("promiseClick2PayTransData response: " + JSON.stringify(response));
+            //use response to create a temp payment id
+            //once we have the temp payment id need to update the order and place (commit)
           })
-          .catch((error: { message: string; }) => {
-            console.log("c2p place order failed: " + error.message);
-          })
+        }
+      })
+      .catch((error: { message: string; }) => {
+        console.log("c2p place order failed: " + error.message);
+      })
+  }
+
+  const getClickToPayTransactionData = async (flowId: string, transId: string, total: string) => {
+    try {
+      const response = await getTransactionData(flowId, transId, total);
+      return new Promise((resolve) => {
+        resolve(response);
+      })
+    } catch (error) {
+      console.error("Failed to fetch data:", error);
     }
   };
 

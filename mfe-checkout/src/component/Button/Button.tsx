@@ -9,7 +9,7 @@ interface IButtonProps extends React.DetailedHTMLProps<React.ButtonHTMLAttribute
 
 export const Button: React.FC<IButtonProps> = ({ label, type, ...props }) => {
   return (
-    <button className={`custom-button ${type}`} {...props}>
+    <button className={`custom-button ${type}`} {...props} type="button">
       {label}
     </button>
   );

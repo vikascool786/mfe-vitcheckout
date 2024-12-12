@@ -3,6 +3,7 @@
  */
 
 import Click2PayLogger from "./Click2PayLogger";
+import Click2PayUtil from "./Click2PayUtil";
 const Click2PayCards = (function () {
 
     function getUserCards(c2pInstance) {
@@ -38,7 +39,7 @@ const Click2PayCards = (function () {
         const params = {
             mobileNumber: {
                 countryCode: "1",
-                phoneNumber: getC2pData().mobilePhone
+                phoneNumber: Click2PayUtil.getC2pData().mobilePhone
             }
         }
         console.log("looking up by mobile");
@@ -47,7 +48,7 @@ const Click2PayCards = (function () {
 
     function lookupAccountByEmail(c2pInstance) {
         const params = {
-            email: `${getC2pData().email}`
+            email: `${Click2PayUtil.getC2pData().email}`
         }
         console.log("looking up by email");
         return lookupAccount(c2pInstance, params, false);
@@ -73,16 +74,7 @@ const Click2PayCards = (function () {
     }
 
     function hasMobilePhone() {
-        return getC2pData().mobilePhone;
-    }
-
-    function getC2pData() {
-        const c2pData = localStorage.getItem('c2pData');
-        if (c2pData) {
-            return JSON.parse(c2pData);
-        } else {
-            return {};
-        }
+        return Click2PayUtil.getC2pData().mobilePhone;
     }
 
     return {

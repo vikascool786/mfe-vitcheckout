@@ -143,6 +143,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
         data-parsley-required="true"
         value={cardInformation.accountName || ""}
         onChange={(e) => handleInputChange("accountName", e.target.value)}
+        name="name"
       />
       <FormField
         label="Card Number"
@@ -150,6 +151,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
         data-parsley-required="true"
         value={cardInformation.cardMask || ""}
         onChange={(e) => handleInputChange("cardMask", e.target.value)}
+        name="number"
       />
       <div className="form-field-container">
         <DropdownField
@@ -177,6 +179,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
               )}`,
             }))
           }
+          formName="month"
         />
         <DropdownField
           label="Expiration Year"
@@ -191,6 +194,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
               )}/${value}`,
             }))
           }
+          formName="year"
         />
       </div>
       <div className="form-field-container">
@@ -200,6 +204,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           extraLabel="3 or 4 digits"
           maxLength={4}
           // onChange={(e) => handleInputChange("cvv", e.target.value)}
+          name="cvv"
         />
         <div className="save-for-later">
           <input

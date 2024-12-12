@@ -6,12 +6,13 @@ import Click2PayLogger from "./Click2PayLogger";
 const Click2PayCardLoader = (function(){
     let clickToPayCardList;
     const CUSTOM_ATTR_SELECTED_CARD = "data-selected-card";
+    const existingC2PContainer = '.js-c2p-existing-user';
     const srcCardListElement = 'src-card-list';
     const addNewClick2PayCard = '.js-c2p-add-new-card';
     const click2PayPaymentData = '.js-c2p-payment-data';
 
     function loadSRCCardsOnPage(cardList, c2pInstance, showAddNewCard, deselectCard, showSignout){
-        const srcCardList = document.querySelector(srcCardListElement);
+        const srcCardList = document.querySelector(existingC2PContainer).querySelector(srcCardListElement);
         clickToPayCardList = Array(cardList);
         srcCardList.loadCards(cardList);
         /*if(deselectCard){
@@ -27,7 +28,7 @@ const Click2PayCardLoader = (function(){
     }
 
     function addCardListEventListeners(c2pInstance) {
-        const srcCardList = document.querySelector(srcCardListElement);
+        const srcCardList = document.querySelector(existingC2PContainer).querySelector(srcCardListElement);
         const paymentData = document.querySelector(click2PayPaymentData);
         if(srcCardList){
             srcCardList.addEventListener('clickSignOutLink', event => {
