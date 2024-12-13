@@ -71,11 +71,10 @@ module.exports = (env, argv) => {
         },
         exposes: {
           "./CheckoutSkeleton": "./src/CheckoutContainerWrapper",
-          "./CheckoutElement": "./src/CheckoutElement",
+          './CheckoutContainerElement': './src/CheckoutContainerElement',
           "./React": "react",
           "./ReactDOM": "react-dom",
           "./ReactDOMClient": "react-dom/client",
-          './CheckoutContainerElement': './src/CheckoutContainerElement',
         },
         shared: {
           ...deps,
