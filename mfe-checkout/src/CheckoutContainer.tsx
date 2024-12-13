@@ -9,6 +9,7 @@ import { ShippingMethod } from "./shipping-methods/ShippingMethod";
 import { orderAtom, OrderStore } from "./store";
 import { generateChangeStoreResponse } from "./utils/helpers/GenerateChangeStoreResponse";
 import {generateStandardOrderPayload} from "./utils/helpers/GenerateStandardOrderPayload";
+import { ORDER_DATA } from "./utils/MOCKS";
 
 interface ICheckoutContainer {
   shopperId: string;

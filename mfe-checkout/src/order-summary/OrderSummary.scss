@@ -9,7 +9,6 @@
   min-width: 26.596rem;
 }
 
-
 .order-summary-coupon-container {
   display: flex;
   flex-direction: row;
@@ -61,13 +60,23 @@
 .order-charges-table {
   display: flex;
   flex-direction: column;
-  border-top: 0.5px solid #939393; // Adds top border
-  border-bottom: 0.5px solid #939393; // Adds bottom border
   margin-top: 6px;
   margin-bottom: 6px;
-  padding-top: 10px;
-  padding-bottom: 10px;
   gap: 9px;
+
+  &-first {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-top: 0.5px solid #939393;
+    border-bottom: 0.5px solid #939393; // Adds bottom border
+    // Adds top border
+  }
+
+  &-last {
+    padding-bottom: 10px;
+    border-bottom: 0.5px solid #939393; // Adds bottom border
+    // Adds top border
+  }
 }
 
 .order-summary-row {
@@ -101,7 +110,7 @@
   font-size: 20px;
   font-weight: 500;
   line-height: 23.44px;
-  padding-bottom: 10px;
+  padding-top: 10px;
 }
 
 .order-summary-cashback-container {
@@ -232,4 +241,12 @@
 .gift-card-apply {
   display: flex;
   justify-content: flex-end; // Aligns the button to the right
+}
+
+.shipping-catolog-name {
+  font-size: 18px;
+  font-weight: bold;
+  line-height: 21.09px;
+  text-align: left;
+  color: black;
 }

@@ -9,6 +9,7 @@ import { FormHeading } from "../component/Form/Heading/FormHeading";
 import { orderAtom } from "../store";
 import { ApplyCashback } from "./apply-cashback/ApplyCashback";
 import "./OrderSummary.scss";
+import { getCatalogName } from "../utils/helpers/GetCatalog";
 
 interface IOrderSummary {}
 
@@ -105,6 +106,18 @@ export const OrderSummary: React.FC<IOrderSummary> = () => {
     }
   };
 
+  if (order?.stores) {
+    Object.entries(order?.stores).map(([key, store], index) => {
+      console.log(key, store);
+    });
+  }
+
+  const storesTotals =
+    order?.stores &&
+    Object.entries(order?.stores).map(([key, store], index) => {
+      return store;
+    });
+
   return (
     <div className="order-summary-container">
       <FormHeading title="Order Summary" />
@@ -162,28 +175,45 @@ export const OrderSummary: React.FC<IOrderSummary> = () => {
         {showApplyGiftCard ? "Hide gift card" : "Apply gift card"}
       </div>
 
-      <div className="order-charges-table">
-        <div className="order-summary-row">
-          <div>Items Subtotal</div>
-          <div>${order?.totals?.price}</div>
-        </div>
-        <div className="order-summary-row">
-          <div>Tax Total</div>
-          <div>${order?.totals.tax}</div>
-        </div>
-        {order?.userOptions?.applyCashback && eWalletData?.cashbackAvail && (
-          <div className="order-summary-row">
-            <div className="order-summary-row-bold">
-              VIFT <span className="order-summary-row-green">Cashback</span>
+      {storesTotals &&
+        storesTotals.map((store, index) => {
+          const isFirst = index === 0;
+          const isLast = index === storesTotals.length - 1; // Fix the condition for the last element
+          return (
+            <div
+              className={`order-charges-table ${
+                isFirst ? "order-charges-table-first" : ""
+              } ${isLast ? "order-charges-table-last" : ""}`}
+              key={store.id || index} // Add a key for the mapped elements
+            >
+              <div className="shipping-catolog-name">
+                {getCatalogName(store)}
+              </div>
+              <div className="order-summary-row">
+                <div>Items Subtotal</div>
+                <div>${store?.totals.price}</div>
+              </div>
+              <div className="order-summary-row">
+                <div>Tax Total</div>
+                <div>${store?.totals.tax}</div>
+              </div>
+
+              <div className="order-summary-row">
+                <div>Shipping</div>
+                <div>${store?.totals.shipping}</div>
+              </div>
             </div>
-            <div>${eWalletData.cashbackAvail}</div>
-          </div>
-        )}
+          );
+        })}
+
+      {order?.userOptions?.applyCashback && eWalletData?.cashbackAvail && (
         <div className="order-summary-row">
-          <div>Shipping</div>
-          <div>${order?.totals.shipping}</div>
+          <div className="order-summary-row-bold">
+            VIFT <span className="order-summary-row-green">Cashback</span>
+          </div>
+          <div>${eWalletData.cashbackAvail}</div>
         </div>
-      </div>
+      )}
 
       <div className="order-summary-total">
         <div>Total Due</div>
