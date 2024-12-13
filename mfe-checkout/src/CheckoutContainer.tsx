@@ -1,6 +1,6 @@
 import { useSetAtom } from "jotai";
 import React, { useEffect, useState } from "react";
-import {buildOrder, changeOrder, fetchOrderDetail} from "./api/service/Order";
+import { changeOrder, fetchOrderDetail } from "./api/service/Order";
 import "./App.scss";
 import { Checkout } from "./checkout/Checkout";
 import { OrderSummary } from "./order-summary/OrderSummary";
@@ -8,8 +8,6 @@ import { PaymentMethod } from "./payment-method/PaymentMethods";
 import { ShippingMethod } from "./shipping-methods/ShippingMethod";
 import { orderAtom, OrderStore } from "./store";
 import { generateChangeStoreResponse } from "./utils/helpers/GenerateChangeStoreResponse";
-import {generateStandardOrderPayload} from "./utils/helpers/GenerateStandardOrderPayload";
-import { ORDER_DATA } from "./utils/MOCKS";
 
 interface ICheckoutContainer {
   shopperId: string;
