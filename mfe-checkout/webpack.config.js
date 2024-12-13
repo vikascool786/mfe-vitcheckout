@@ -22,9 +22,9 @@ module.exports = (env, argv) => {
     output: {
       publicPath: isDev
         ? "http://localhost:3011/"
-        : "https://mcds-main.s3.amazonaws.com/Checkout/",
+        : "https://d29q5zo2af0lw0.cloudfront.net/CheckoutContainer",
     },
-
+    devtool: isDev ? "source-map" : false,
     resolve: {
       extensions: [".tsx", ".ts", ".jsx", ".js", ".json"],
     },
@@ -75,6 +75,7 @@ module.exports = (env, argv) => {
           "./React": "react",
           "./ReactDOM": "react-dom",
           "./ReactDOMClient": "react-dom/client",
+          './CheckoutContainerElement': './src/CheckoutContainerElement',
         },
         shared: {
           ...deps,

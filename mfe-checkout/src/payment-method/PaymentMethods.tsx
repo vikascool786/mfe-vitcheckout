@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useShopperEWalletAddresses } from "../api/service/ShopperEWallet";
-import { fetchShoppersPaymentMethods } from "../api/service/ShoppersPaymentMethods";
+import { addTempPaymentMethod, fetchShoppersPaymentMethods } from "../api/service/ShoppersPaymentMethods";
 import { Add } from "../assets/icons/Add";
 import CardOptions from "../assets/images/CardOptions.png";
 import PayPal from "../assets/images/PayPal.png";
@@ -20,6 +20,10 @@ import { useAtom } from "jotai";
 import Click2PayPlaceOrder from "../payment-method-click2pay/Click2PayPlaceOrder";
 import { getTransactionData } from "../api/service/Click2PayTransaction";
 import Click2PayUtil from "../payment-method-click2pay/Click2PayUtil";
+import {changeOrder, commitOrder} from "../api/service/Order";
+import { orderAtom } from "../store";
+import {generateChangeStoreResponse} from "../utils/helpers/GenerateChangeStoreResponse";
+import {updatePaymentMethod} from "../utils/OrderUtils";
 
 const PAYMENT_TYPE_ID_CLICK2PAY = 60;
 const PAYMENT_TYPE_ID_SEZZLE = 56;
@@ -56,9 +60,10 @@ const staticPaymentMethods: IPaymentOptionProps[] = [
 ];
 interface IPaymentMethod {
   shopperId: string;
+  cartId: string;
 }
 
-export const PaymentMethod: React.FC<IPaymentMethod> = ({ shopperId }) => {
+export const PaymentMethod: React.FC<IPaymentMethod> = ({ shopperId, cartId }) => {
   const [allPaymentOptions, setAllPaymentOptions] =
     useState<IPaymentOptionProps[]>(staticPaymentMethods);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -67,6 +72,7 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({ shopperId }) => {
     null
   );
   const [paymentTypeId, setPaymentTypeId] = useState<number>(0);
+  const [order, setOrder] = useAtom(orderAtom);
 
   // Memoize fetched addresses to prevent unnecessary updates
   const memoizedAddresses = useMemo(() => addresses || {}, [addresses]);
@@ -215,9 +221,33 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({ shopperId }) => {
           const total = Click2PayUtil.getC2pData().transactionAmount;
           const promiseClick2PayTransData = getClickToPayTransactionData(flowId, transId, total);
           promiseClick2PayTransData.then((response: any) => {
-            console.log("promiseClick2PayTransData response: " + JSON.stringify(response));
+            const paymentMethodResponse = response.data.paymentMethod;
             //use response to create a temp payment id
-            //once we have the temp payment id need to update the order and place (commit)
+            const walletData = {
+              name: paymentMethodResponse.accountName,
+              number: paymentMethodResponse.number,
+              token: paymentMethodResponse.token,
+              month: paymentMethodResponse.expMonth,
+              year: paymentMethodResponse.expYear,
+              type: paymentMethodResponse.typeID
+            }
+            const promiseTempPayment = addTempPaymentMethod(shopperId, walletData);
+            promiseTempPayment.then((response: any) => {
+              const paymentId = response.data.id;
+              if (order) {
+                let changeOrderPayload = generateChangeStoreResponse(order);
+                changeOrderPayload = updatePaymentMethod(changeOrderPayload, paymentId);
+                const changeOrderPromise = changeOrder(changeOrderPayload, cartId);
+                changeOrderPromise.then((response: any) => {
+                  //place the order
+                  const promiseCommitOrder = commitOrder(cartId);
+                  promiseCommitOrder.then((response: any) => {
+                    const orderId = response.data.response.success.data.orderId;
+                    window.location.href = `/nbts/orderconfirmation-${orderId}`;
+                  })
+                })
+              }
+            })
           })
         }
       })

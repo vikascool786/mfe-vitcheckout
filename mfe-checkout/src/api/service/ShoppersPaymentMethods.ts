@@ -39,3 +39,24 @@ export const addShoppersPaymentMethod = async (
     console.error("Unable to add method to wallet", error);
   }
 };
+
+export const addTempPaymentMethod = async (
+    shopperId: string,
+    walletData: any
+): Promise<any> => {
+  try {
+    const response = await axiosInstance(
+        `${GET_API_ENDPOINT_BASE_URL}/shoppingcart-checkouts/v1/Checkout/TempCC/${shopperId}?api_key=${API_KEY}`
+    ).post("", walletData, {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    });
+
+    console.log("Temp card added successfully: " + JSON.stringify(response));
+    return response;
+  } catch (error) {
+    console.error("Unable to add method to wallet", error);
+  }
+};
+

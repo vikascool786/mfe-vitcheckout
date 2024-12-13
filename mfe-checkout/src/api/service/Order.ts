@@ -38,6 +38,10 @@ const shopperOrderAPIEndpoint = (cartId: string) =>
 
 const shopperBuildOrderAPIEndpoint = `${GET_API_ENDPOINT_BASE_URL}/checkout-universal/v1/checkouts?api_key=${API_KEY}`;
 
+const shopperUpdateOrderEndpoint = (cartId: string) => `${GET_API_ENDPOINT_BASE_URL}/checkout-universal/v1/checkouts/id/${cartId}`
+
+const commitOrderEndpoint = (cartId: string) =>`${GET_API_ENDPOINT_BASE_URL}/checkout-universal/v1/checkouts/id/${cartId}?api_key=${API_KEY}`
+
 export const fetchOrderDetail = async (cartId: string): Promise<Order> => {
   try {
     const orderResponse = await axiosInstance(
@@ -50,16 +54,45 @@ export const fetchOrderDetail = async (cartId: string): Promise<Order> => {
   }
 };
 
-export const changeOrder = async (
-  changeStorePayload: ChangeOrder
+export const buildOrder = async (
+    orderPayload: ChangeOrder
 ): Promise<OrderResponse> => {
   try {
     const orderResponse = await axiosInstance(
-      shopperBuildOrderAPIEndpoint
-    ).post("", changeStorePayload);
+        shopperBuildOrderAPIEndpoint
+    ).post("", orderPayload);
     return orderResponse.data;
   } catch (error) {
     console.log("error", error);
     throw error;
+  }
+};
+
+export const changeOrder = async (
+  changeStorePayload: ChangeOrder,
+  cartId: string
+): Promise<OrderResponse> => {
+  try {
+    const orderResponse = await axiosInstance(
+        shopperUpdateOrderEndpoint(cartId)
+    ).put("", changeStorePayload);
+    return orderResponse.data;
+  } catch (error) {
+    console.log("error", error);
+    throw error;
+  }
+};
+
+export const commitOrder = async (
+    cartId: string,
+): Promise<any> => {
+  try {
+    const response = await axiosInstance(
+        commitOrderEndpoint(cartId)
+    ).post("", {});
+    console.log("commit order successfully: " + JSON.stringify(response));
+    return response;
+  } catch (error) {
+    console.error("Unable to commit order", error);
   }
 };
