@@ -94,7 +94,7 @@ export const PaymentOption: React.FC<
       </div>
       {isEditing && (
         <CardInformation
-          shopperId=""
+          shopperId={shopperId}
           initialData={{
             ...shopperSavedPayment,
           }}

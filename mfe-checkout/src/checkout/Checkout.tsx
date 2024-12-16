@@ -23,7 +23,7 @@ import { AddressHandler } from "../interfaces/AddressHandler";
 import { DropdownOption } from "../interfaces/DropdownOption";
 import "./Checkout.scss";
 import { useAtom, useSetAtom } from "jotai";
-import { orderAtom } from "../store";
+import { addressAtom, orderAtom } from "../store";
 
 const defaultAddress: Address = {
   id: 0,
@@ -49,7 +49,7 @@ export const Checkout: React.FC<ICheckout> = ({ shopperId }) => {
   const setOrder = useSetAtom(orderAtom);
   const [isExpanded, setIsExpanded] = useState(false);
   const [showShipAddressForm, setShowShipAddressForm] = useState(false);
-  const [shopperAddressBook, setShopperAddressBook] = useState<Address[]>([]);
+  const [shopperAddressBook, setShopperAddressBook] = useAtom(addressAtom);
   const [shippingAddress, setShippingAddress] =
     useState<Address>(defaultAddress);
   const [showAVS, setShowAVS] = useState(false);

@@ -26,7 +26,7 @@ export const ShippingMethod: React.FC = ({}) => {
             <div className="shipping-catolog-name">
               {getCatalogName(store)}
             </div>
-            {store.items.map((item, itemIndex) => (
+            {store.items && store.items.map((item, itemIndex) => (
               <div key={itemIndex}>
                 <ShippingItem item={item} />
               </div>

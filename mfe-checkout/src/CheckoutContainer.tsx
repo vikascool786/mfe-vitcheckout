@@ -8,7 +8,7 @@ import { PaymentMethod } from "./payment-method/PaymentMethods";
 import { ShippingMethod } from "./shipping-methods/ShippingMethod";
 import { orderAtom, OrderStore } from "./store";
 import { generateChangeStoreResponse } from "./utils/helpers/GenerateChangeStoreResponse";
-import {generateStandardOrderPayload} from "./utils/helpers/GenerateStandardOrderPayload";
+import { generateStandardOrderPayload } from "./utils/helpers/GenerateStandardOrderPayload";
 
 interface ICheckoutContainer {
   shopperId: string;
@@ -45,39 +45,42 @@ export const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     const unsubscribe = OrderStore.sub(orderAtom, async () => {
       const updatedOrder = OrderStore.get(orderAtom);
       if (updatedOrder) {
-        const newOrderData = await changeOrder(generateChangeStoreResponse(updatedOrder), cartId);
+        const newOrderData = await buildOrder(
+          generateChangeStoreResponse(updatedOrder)
+        );
         if (newOrderData.response.errors) {
-          alert(newOrderData.response.errors.message)
-          console.log(newOrderData)
-          return
+          alert(newOrderData.response.errors.message);
+          console.log(newOrderData);
+          return;
         }
 
-        console.log(newOrderData.response.success.data)
+        console.log(newOrderData.response.success.data);
       }
     });
 
     fetOrderDetail()
-        .then((response: any) => {
-          if(response === undefined){
-            handleBuildOrder(cartId);
-          }
-        })
-        .catch((error: { message: string; }) => {
-          console.error("fetch order failed: " + error.message);
-        })
+      .then((response: any) => {
+        if (response === undefined) {
+          handleBuildOrder(cartId);
+        }
+      })
+      .catch((error: { message: string }) => {
+        console.error("fetch order failed: " + error.message);
+      });
 
     return unsubscribe;
   }, []);
 
-
   const handleBuildOrder = async (cartId: string) => {
-    const buildOrderPromise  = buildOrder(generateStandardOrderPayload(cartId, "USA", "ENG"));
+    const buildOrderPromise = buildOrder(
+      generateStandardOrderPayload(cartId, "USA", "ENG")
+    );
     buildOrderPromise.then((response: any) => {
       console.log("build order response: " + JSON.stringify(response));
-      if(response !== undefined){
+      if (response !== undefined) {
         setOrderAtom(response);
       }
-    })
+    });
   };
 
   if (loading) return <div>Loading...</div>;
@@ -88,7 +91,7 @@ export const CheckoutContainer: React.FC<ICheckoutContainer> = ({
       <div className="checkout-sub-container">
         <Checkout shopperId={shopperId} />
         <ShippingMethod />
-        <PaymentMethod shopperId={shopperId} cartId={cartId}/>
+        <PaymentMethod shopperId={shopperId} cartId={cartId} />
       </div>
       <div>
         <OrderSummary />

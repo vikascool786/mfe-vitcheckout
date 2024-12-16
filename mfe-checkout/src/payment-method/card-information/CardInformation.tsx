@@ -1,13 +1,20 @@
+import { useAtomValue } from "jotai";
 import $ from "jquery";
 import "parsleyjs";
 import React, { useRef, useState } from "react";
-import { addShoppersPaymentMethod } from "../../api/service/ShoppersPaymentMethods";
+import {
+  addShoppersPaymentMethod,
+  generateCardToken,
+  updateShopperDetails,
+} from "../../api/service/ShoppersPaymentMethods";
 import { AddressForm } from "../../component/AddressForm";
 import { DropdownField } from "../../component/Form/Field/DropdownField";
 import { FormField } from "../../component/Form/Field/FormField";
 import { Address } from "../../interfaces/Address";
 import { ShopperSavedPayments } from "../../interfaces/ShopperSavedPayments";
+import { addressAtom } from "../../store";
 import "./CardInformation.scss";
+import { Button } from "../../component/Button/Button";
 
 interface ICardInformationProps {
   initialData?: Partial<ShopperSavedPayments>;
@@ -57,6 +64,10 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   const [address, setAddress] = useState<Address>(
     initialData?.address || defaultAddress
   );
+
+  const addressList = useAtomValue(addressAtom);
+
+  const shippingAddress = addressList.find((address) => address.isPrimary);
   const [saveAddress, setSaveAddress] = useState<boolean>(false);
   const [cardInformation, setCardInformation] = useState<ShopperSavedPayments>({
     accountName: initialData?.accountName || "",
@@ -82,7 +93,6 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   };
 
   const handleSaveAddress = async () => {
-    console.log(cardInformation.expirationDate);
     const expirationMonth = cardInformation.expirationDate?.slice(0, 2);
     const expirationYear = cardInformation.expirationDate?.slice(-4);
 
@@ -105,8 +115,10 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
       isPoBox: address.isPoBox || false,
     };
 
+    const token = await generateCardToken(cardInformation.cardMask);
+
     try {
-      await addShoppersPaymentMethod(shopperId, requestData);
+      await addShoppersPaymentMethod(shopperId, { ...requestData, token });
       console.log("Card information successfully saved.");
     } catch (error) {
       console.error("Unable to save card information:", error);
@@ -135,8 +147,23 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   const currentYear = new Date().getFullYear();
   const years = getYears(currentYear, currentYear + 10);
 
+  // function to call an API when CVV is entered to generate a payment id
+
+  const generatePaymentId = async () => {
+    const response = await updateShopperDetails(shopperId, cardInformation.id, {
+      cvv: ["999"],
+    });
+
+    console.log(response);
+  };
+
   return (
     <div className="card-information-container">
+      <Button
+        label="Generate Payment ID"
+        type="primary"
+        onClick={generatePaymentId}
+      />
       <FormField
         label="Name on Card"
         required
@@ -203,7 +230,6 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           required
           extraLabel="3 or 4 digits"
           maxLength={4}
-          // onChange={(e) => handleInputChange("cvv", e.target.value)}
           name="cvv"
         />
         <div className="save-for-later">
@@ -242,7 +268,10 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
         />
       ) : (
         <div className="checkbox-text">
-          Ruby Boyle, 1 Lower Ragsdale Dr. Monterey, CA 93430
+          {shippingAddress?.first} {shippingAddress?.last}{" "}
+          {shippingAddress?.address1}
+          {shippingAddress?.address2} {shippingAddress?.city}{" "}
+          {shippingAddress?.zip}
         </div>
       )}
     </div>
