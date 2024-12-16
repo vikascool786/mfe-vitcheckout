@@ -41,12 +41,12 @@ export const addShoppersPaymentMethod = async (
 };
 
 export const addTempPaymentMethod = async (
-    shopperId: string,
-    walletData: any
+  shopperId: string,
+  walletData: any
 ): Promise<any> => {
   try {
     const response = await axiosInstance(
-        `${GET_API_ENDPOINT_BASE_URL}/shoppingcart-checkouts/v1/Checkout/TempCC/${shopperId}?api_key=${API_KEY}`
+      `${GET_API_ENDPOINT_BASE_URL}/shoppingcart-checkouts/v1/Checkout/TempCC/${shopperId}?api_key=${API_KEY}`
     ).post("", walletData, {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -60,3 +60,21 @@ export const addTempPaymentMethod = async (
   }
 };
 
+export const updateShopperDetails = async (
+  shopperId: string,
+  id: number,
+  walletData: any
+) => {
+  try {
+    const response = await axiosInstance(
+      `${GET_API_ENDPOINT_BASE_URL}/Shopper/${shopperId}/Wallet/${id}?api_key=${API_KEY}`
+    ).put("", walletData, {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    });
+    return response
+  } catch (error) {
+    console.error("Unable to update payment details", error);
+  }
+};

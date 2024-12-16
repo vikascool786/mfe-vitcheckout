@@ -1,6 +1,6 @@
 import { useSetAtom } from "jotai";
 import React, { useEffect, useState } from "react";
-import { changeOrder, fetchOrderDetail } from "./api/service/Order";
+import { buildOrder, changeOrder, fetchOrderDetail } from "./api/service/Order";
 import "./App.scss";
 import { Checkout } from "./checkout/Checkout";
 import { OrderSummary } from "./order-summary/OrderSummary";
@@ -43,34 +43,36 @@ export const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     const unsubscribe = OrderStore.sub(orderAtom, async () => {
       const updatedOrder = OrderStore.get(orderAtom);
       if (updatedOrder) {
-        const newOrderData = await changeOrder(generateChangeStoreResponse(updatedOrder), cartId);
+        const newOrderData = await buildOrder(
+          generateChangeStoreResponse(updatedOrder)
+        );
         if (newOrderData.response.errors) {
-          alert(newOrderData.response.errors.message)
-          console.log(newOrderData)
-          return
+          alert(newOrderData.response.errors.message);
+          console.log(newOrderData);
+          return;
         }
 
-        console.log(newOrderData.response.success.data)
+        console.log(newOrderData.response.success.data);
       }
     });
 
     fetOrderDetail()
-        .then((response: any) => {
-          console.log("fetch order response: " + JSON.stringify(response));
-          if(response === undefined){
-            //TODO: do a POST build order
-            /*const buildOrderPromise = buildOrder(generateStandardOrderPayload(cartId, "USA", "ENG"));
+      .then((response: any) => {
+        console.log("fetch order response: " + JSON.stringify(response));
+        if (response === undefined) {
+          //TODO: do a POST build order
+          /*const buildOrderPromise = buildOrder(generateStandardOrderPayload(cartId, "USA", "ENG"));
             buildOrderPromise.then((response: any) => {
               console.log("build order response: " + JSON.stringify(response));
               if(response !== undefined){
                 setOrderAtom(response);
               }
             })*/
-          }
-        })
-        .catch((error: { message: string; }) => {
-          console.error("fetch order failed: " + error.message);
-        })
+        }
+      })
+      .catch((error: { message: string }) => {
+        console.error("fetch order failed: " + error.message);
+      });
 
     return unsubscribe;
   }, []);
@@ -83,7 +85,7 @@ export const CheckoutContainer: React.FC<ICheckoutContainer> = ({
       <div className="checkout-sub-container">
         <Checkout shopperId={shopperId} />
         <ShippingMethod />
-        <PaymentMethod shopperId={shopperId} cartId={cartId}/>
+        <PaymentMethod shopperId={shopperId} cartId={cartId} />
       </div>
       <div>
         <OrderSummary />
