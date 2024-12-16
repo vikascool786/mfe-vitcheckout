@@ -4,6 +4,7 @@ import "parsleyjs";
 import React, { useRef, useState } from "react";
 import {
   addShoppersPaymentMethod,
+  generateCardToken,
   updateShopperDetails,
 } from "../../api/service/ShoppersPaymentMethods";
 import { AddressForm } from "../../component/AddressForm";
@@ -114,8 +115,10 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
       isPoBox: address.isPoBox || false,
     };
 
+    const token = await generateCardToken(cardInformation.cardMask);
+
     try {
-      await addShoppersPaymentMethod(shopperId, requestData);
+      await addShoppersPaymentMethod(shopperId, { ...requestData, token });
       console.log("Card information successfully saved.");
     } catch (error) {
       console.error("Unable to save card information:", error);

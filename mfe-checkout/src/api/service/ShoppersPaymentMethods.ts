@@ -1,4 +1,8 @@
-import { API_KEY, GET_API_ENDPOINT_BASE_URL } from "../../utils/ApiConstants";
+import {
+  API_KEY,
+  GET_API_ENDPOINT_BASE_URL,
+  TOKEN_SERVICE,
+} from "../../utils/ApiConstants";
 import axiosInstance from "../axios";
 
 const shopperWalletApiEndpoint = (id: string) =>
@@ -53,7 +57,6 @@ export const addTempPaymentMethod = async (
       },
     });
 
-    console.log("Temp card added successfully: " + JSON.stringify(response));
     return response;
   } catch (error) {
     console.error("Unable to add method to wallet", error);
@@ -73,7 +76,16 @@ export const updateShopperDetails = async (
         "Content-Type": "application/x-www-form-urlencoded",
       },
     });
-    return response
+    return response;
+  } catch (error) {
+    console.error("Unable to update payment details", error);
+  }
+};
+
+export const generateCardToken = async (ccNumber: string) => {
+  try {
+    const response = await axiosInstance(`${TOKEN_SERVICE}?ccNum${ccNumber}`).get("");
+    return response;
   } catch (error) {
     console.error("Unable to update payment details", error);
   }

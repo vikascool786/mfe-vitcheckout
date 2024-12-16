@@ -10,16 +10,6 @@ export const generateStandardOrderPayload = (cartId: string, countryCode: string
         language: languageCode || "ENG",
         site_type: "W",
         application: "cart",
-        billing: {
-            id: 0,
-        },
-        shipping: {
-            id: 0,
-        },
-        paymentMethod: {
-            id: 0,
-        },
-        stores: {},
         userOptions: {
             applyCashback: false,
             applyEWallet: false,
@@ -29,10 +19,7 @@ export const generateStandardOrderPayload = (cartId: string, countryCode: string
             deliveryTime: 1,
             signatureRequired: false,
             oosConsolidate: false,
-            userSessionId: "",
-            gcNum: [] as string[],
-            gcPin: [] as string[],
-            coupons: [] as string[],
+            userSessionId: ""
         },
     };
 };
