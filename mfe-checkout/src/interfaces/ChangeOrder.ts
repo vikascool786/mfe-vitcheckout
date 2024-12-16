@@ -7,10 +7,10 @@ export interface ChangeOrder {
   language: string;
   site_type: string;
   application: string;
-  billing: Billing;
-  shipping: Shipping;
-  paymentMethod: PaymentMethod;
-  stores: Store;
+  billing?: Billing;
+  shipping?: Shipping;
+  paymentMethod?: PaymentMethod;
+  stores?: Store;
   userOptions: UserOptions;
 }
 
@@ -44,7 +44,7 @@ export interface UserOptions {
   signatureRequired: boolean;
   oosConsolidate: boolean;
   userSessionId: string;
-  gcNum: string[];
-  gcPin: string[];
-  coupons: string[];
+  gcNum?: string[];
+  gcPin?: string[];
+  coupons?: string[];
 }

@@ -53,7 +53,6 @@ export const addTempPaymentMethod = async (
       },
     });
 
-    console.log("Temp card added successfully: " + JSON.stringify(response));
     return response;
   } catch (error) {
     console.error("Unable to add method to wallet", error);

@@ -1,6 +1,6 @@
 import { useSetAtom } from "jotai";
 import React, { useEffect, useState } from "react";
-import { changeOrder, fetchOrderDetail } from "./api/service/Order";
+import { buildOrder, changeOrder, fetchOrderDetail } from "./api/service/Order";
 import "./App.scss";
 import { Checkout } from "./checkout/Checkout";
 import { OrderSummary } from "./order-summary/OrderSummary";
@@ -8,6 +8,7 @@ import { PaymentMethod } from "./payment-method/PaymentMethods";
 import { ShippingMethod } from "./shipping-methods/ShippingMethod";
 import { orderAtom, OrderStore } from "./store";
 import { generateChangeStoreResponse } from "./utils/helpers/GenerateChangeStoreResponse";
+import {generateStandardOrderPayload} from "./utils/helpers/GenerateStandardOrderPayload";
 
 interface ICheckoutContainer {
   shopperId: string;
@@ -34,6 +35,7 @@ export const CheckoutContainer: React.FC<ICheckoutContainer> = ({
       } catch (error) {
         setError("Failed to fetch data.");
         console.error("Failed to fetch data:", error);
+        handleBuildOrder(cartId);
       } finally {
         setError(null);
         setLoading(false);
@@ -56,16 +58,8 @@ export const CheckoutContainer: React.FC<ICheckoutContainer> = ({
 
     fetOrderDetail()
         .then((response: any) => {
-          console.log("fetch order response: " + JSON.stringify(response));
           if(response === undefined){
-            //TODO: do a POST build order
-            /*const buildOrderPromise = buildOrder(generateStandardOrderPayload(cartId, "USA", "ENG"));
-            buildOrderPromise.then((response: any) => {
-              console.log("build order response: " + JSON.stringify(response));
-              if(response !== undefined){
-                setOrderAtom(response);
-              }
-            })*/
+            handleBuildOrder(cartId);
           }
         })
         .catch((error: { message: string; }) => {
@@ -74,6 +68,17 @@ export const CheckoutContainer: React.FC<ICheckoutContainer> = ({
 
     return unsubscribe;
   }, []);
+
+
+  const handleBuildOrder = async (cartId: string) => {
+    const buildOrderPromise  = buildOrder(generateStandardOrderPayload(cartId, "USA", "ENG"));
+    buildOrderPromise.then((response: any) => {
+      console.log("build order response: " + JSON.stringify(response));
+      if(response !== undefined){
+        setOrderAtom(response);
+      }
+    })
+  };
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
