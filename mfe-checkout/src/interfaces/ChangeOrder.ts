@@ -1,4 +1,5 @@
 export interface ChangeOrder {
+  debug?: boolean;
   id: string;
   customer_id: string;
   ufo_id: string;

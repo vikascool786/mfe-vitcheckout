@@ -9,6 +9,43 @@ import { ShippingMethod } from "./shipping-methods/ShippingMethod";
 import { orderAtom, OrderStore } from "./store";
 import { generateChangeStoreResponse } from "./utils/helpers/GenerateChangeStoreResponse";
 import { generateStandardOrderPayload } from "./utils/helpers/GenerateStandardOrderPayload";
+import { ChangeOrder } from "./interfaces/ChangeOrder";
+
+const getInitialBuildOrderData = (cartId: string): ChangeOrder => {
+  return {
+    debug: true,
+    id: cartId,
+    customer_id: "",
+    ufo_id: "",
+    shipping_country: "USA",
+    product_country: "USA",
+    language: "ENG",
+    site_type: "W",
+    application: "cart",
+    billing: {
+      id: 0,
+    },
+    shipping: {
+      id: 0,
+    },
+    paymentMethod: {
+      id: 0,
+    },
+    stores: {},
+    userOptions: {
+      applyCashback: false,
+      applyEWallet: false,
+      isOfAge: false,
+      trackingId: "",
+      deliveryDate: "",
+      deliveryTime: 1234567890,
+      signatureRequired: false,
+      oosConsolidate: false,
+      userSessionId: "",
+      coupons: [],
+    },
+  };
+};
 
 interface ICheckoutContainer {
   shopperId: string;
@@ -24,8 +61,22 @@ export const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  let isOrderBuilt = false;
+
   useEffect(() => {
-    const fetOrderDetail = async () => {
+    const buildOrderForStore = async (data: ChangeOrder) => {
+      const orderResponse = await buildOrder(getInitialBuildOrderData(cartId));
+      const { success, errors } = orderResponse.response;
+
+      if (errors) {
+        alert(errors.message);
+        return;
+      }
+
+      setOrderAtom(success.data);
+    };
+
+    const getOrder = async () => {
       try {
         const response = await fetchOrderDetail(cartId);
         // const response = ORDER_DATA;
@@ -41,6 +92,13 @@ export const CheckoutContainer: React.FC<ICheckoutContainer> = ({
         setLoading(false);
       }
     };
+
+    if (!isOrderBuilt) {
+      buildOrderForStore(getInitialBuildOrderData(cartId));
+      isOrderBuilt = true;
+    } else {
+      getOrder();
+    }
 
     const unsubscribe = OrderStore.sub(orderAtom, async () => {
       const updatedOrder = OrderStore.get(orderAtom);
@@ -58,18 +116,8 @@ export const CheckoutContainer: React.FC<ICheckoutContainer> = ({
       }
     });
 
-    fetOrderDetail()
-      .then((response: any) => {
-        if (response === undefined) {
-          handleBuildOrder(cartId);
-        }
-      })
-      .catch((error: { message: string }) => {
-        console.error("fetch order failed: " + error.message);
-      });
-
     return unsubscribe;
-  }, []);
+  }, [isOrderBuilt]);
 
   const handleBuildOrder = async (cartId: string) => {
     const buildOrderPromise = buildOrder(
