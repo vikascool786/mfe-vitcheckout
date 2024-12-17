@@ -1,15 +1,15 @@
 import { useSetAtom } from "jotai";
 import React, { useEffect, useState } from "react";
-import { buildOrder, changeOrder, fetchOrderDetail } from "./api/service/Order";
-import "./App.scss";
-import { Checkout } from "./checkout/Checkout";
-import { OrderSummary } from "./order-summary/OrderSummary";
-import { PaymentMethod } from "./payment-method/PaymentMethods";
-import { ShippingMethod } from "./shipping-methods/ShippingMethod";
-import { orderAtom, OrderStore } from "./store";
-import { generateChangeStoreResponse } from "./utils/helpers/GenerateChangeStoreResponse";
-import { generateStandardOrderPayload } from "./utils/helpers/GenerateStandardOrderPayload";
-import { ChangeOrder } from "./interfaces/ChangeOrder";
+import { buildOrder, changeOrder, fetchOrderDetail } from "../../api/service/Order";
+import "../../App.scss";
+import { Checkout } from "../../checkout/Checkout";
+import { OrderSummary } from "../../order-summary/OrderSummary";
+import { PaymentMethod } from "../../payment-method/PaymentMethods";
+import { ShippingMethod } from "../../shipping-methods/ShippingMethod";
+import { orderAtom, OrderStore } from "../../store";
+import { generateChangeStoreResponse } from "../../utils/helpers/GenerateChangeStoreResponse";
+import { generateStandardOrderPayload } from "../../utils/helpers/GenerateStandardOrderPayload";
+import { ChangeOrder } from "../../interfaces/ChangeOrder";
 
 const getInitialBuildOrderData = (cartId: string): ChangeOrder => {
   return {
@@ -22,16 +22,6 @@ const getInitialBuildOrderData = (cartId: string): ChangeOrder => {
     language: "ENG",
     site_type: "W",
     application: "cart",
-    billing: {
-      id: 0,
-    },
-    shipping: {
-      id: 0,
-    },
-    paymentMethod: {
-      id: 0,
-    },
-    stores: {},
     userOptions: {
       applyCashback: false,
       applyEWallet: false,
@@ -93,27 +83,10 @@ export const CheckoutContainer: React.FC<ICheckoutContainer> = ({
       }
     };
 
-    if (!isOrderBuilt) {
-      buildOrderForStore(getInitialBuildOrderData(cartId));
-      isOrderBuilt = true;
-    } else {
-      getOrder();
-    }
+    buildOrderForStore(getInitialBuildOrderData(cartId));
 
     const unsubscribe = OrderStore.sub(orderAtom, async () => {
-      const updatedOrder = OrderStore.get(orderAtom);
-      if (updatedOrder) {
-        const newOrderData = await buildOrder(
-          generateChangeStoreResponse(updatedOrder)
-        );
-        if (newOrderData.response.errors) {
-          alert(newOrderData.response.errors.message);
-          console.log(newOrderData);
-          return;
-        }
-
-        console.log(newOrderData.response.success.data);
-      }
+        // condition to check if order obj is same
     });
 
     return unsubscribe;

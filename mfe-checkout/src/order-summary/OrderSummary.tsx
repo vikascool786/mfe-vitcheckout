@@ -11,9 +11,11 @@ import { ApplyCashback } from "./apply-cashback/ApplyCashback";
 import "./OrderSummary.scss";
 import { getCatalogName } from "../utils/helpers/GetCatalog";
 
-interface IOrderSummary {}
+interface IOrderSummary {
+  hideCashback?: boolean;
+}
 
-export const OrderSummary: React.FC<IOrderSummary> = () => {
+export const OrderSummary: React.FC<IOrderSummary> = ({ hideCashback }) => {
   const [order, setOrder] = useAtom(orderAtom);
   const { eWalletData, loading, error } = useShopperEWallet("2115715663");
   const [coupon, setCoupon] = useState("");
@@ -121,59 +123,71 @@ export const OrderSummary: React.FC<IOrderSummary> = () => {
   return (
     <div className="order-summary-container">
       <FormHeading title="Order Summary" />
-      {!loading && !error && eWalletData && (
-        <ApplyCashback cashbackData={eWalletData} />
-      )}
-      <div className="order-redeem-coupon-text">Redeem Coupon</div>
-      <div className="order-summary-coupon-container">
-        <div className="order-input-container">
-          <FormField value={coupon} onChange={handleCouponTextChange} />
-        </div>
-        <div className="order-apply-container">
-          <Button label="Apply" type="secondary" onClick={handleAddCoupon} />
-        </div>
-      </div>
-      {order?.userOptions.coupons && order?.userOptions.coupons?.length > 0 && (
-        <div className="order-applied-coupons">
-          {order?.userOptions.coupons.map((appliedCoupon, index) => (
-            <li key={index} className="order-applied-coupon">
-              {appliedCoupon}
-              <Close onClick={() => handleRemoveCoupon(appliedCoupon)} />
-            </li>
-          ))}
-        </div>
-      )}
-
-      {showApplyGiftCard && (
-        <div className="gift-card-container">
-          <div className="gift-card-container-fields">
-            <div className="gift-card-container-field-1">
-              <FormField
-                value={gcNum}
-                onChange={handleGcNumChange}
-                placeholder="Gift Card Number"
-              />
+      {!hideCashback && (
+        <>
+          {" "}
+          {!loading && !error && eWalletData && (
+            <ApplyCashback cashbackData={eWalletData} />
+          )}
+          <div className="order-redeem-coupon-text">Redeem Coupon</div>
+          <div className="order-summary-coupon-container">
+            <div className="order-input-container">
+              <FormField value={coupon} onChange={handleCouponTextChange} />
             </div>
-            <div className="gift-card-container-field-2">
-              <FormField
-                value={gcPin}
-                onChange={handleGcPinChange}
-                placeholder="Gift Card PIN"
+            <div className="order-apply-container">
+              <Button
+                label="Apply"
+                type="secondary"
+                onClick={handleAddCoupon}
               />
             </div>
           </div>
-          <div className="gift-card-apply">
-            <Button
-              label="Apply Gift Card"
-              type="secondary"
-              onClick={handleAddGiftCard}
-            />
+          {order?.userOptions.coupons &&
+            order?.userOptions.coupons?.length > 0 && (
+              <div className="order-applied-coupons">
+                {order?.userOptions.coupons.map((appliedCoupon, index) => (
+                  <li key={index} className="order-applied-coupon">
+                    {appliedCoupon}
+                    <Close onClick={() => handleRemoveCoupon(appliedCoupon)} />
+                  </li>
+                ))}
+              </div>
+            )}
+          {showApplyGiftCard && (
+            <div className="gift-card-container">
+              <div className="gift-card-container-fields">
+                <div className="gift-card-container-field-1">
+                  <FormField
+                    value={gcNum}
+                    onChange={handleGcNumChange}
+                    placeholder="Gift Card Number"
+                  />
+                </div>
+                <div className="gift-card-container-field-2">
+                  <FormField
+                    value={gcPin}
+                    onChange={handleGcPinChange}
+                    placeholder="Gift Card PIN"
+                  />
+                </div>
+              </div>
+              <div className="gift-card-apply">
+                <Button
+                  label="Apply Gift Card"
+                  type="secondary"
+                  onClick={handleAddGiftCard}
+                />
+              </div>
+            </div>
+          )}
+          <div
+            className="order-sub-text underlined"
+            onClick={handleApplyGiftCard}
+          >
+            {showApplyGiftCard ? "Hide gift card" : "Apply gift card"}
           </div>
-        </div>
+        </>
       )}
-      <div className="order-sub-text underlined" onClick={handleApplyGiftCard}>
-        {showApplyGiftCard ? "Hide gift card" : "Apply gift card"}
-      </div>
 
       {storesTotals &&
         storesTotals.map((store, index) => {

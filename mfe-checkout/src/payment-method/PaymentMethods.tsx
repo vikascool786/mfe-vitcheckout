@@ -80,6 +80,15 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
   );
 
   const [order, setOrder] = useAtom(orderAtom);
+
+  const confirmOrder = () => {
+    if (order) {
+      setOrder({
+        ...order,
+        orderId: 101,
+      });
+    }
+  };
   useEffect(() => {
     const fetchShoppersSavedPayments = async (shopperId: string) => {
       try {
@@ -330,7 +339,7 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
           By clicking place order, you agree to the SHOP.COM Terms of Use and
           Privacy Policy.
         </div>
-        <Button label="Place Order" type="primary" />
+        <Button label="Place Order" type="primary" onClick={confirmOrder} />
       </div>
     </div>
   );

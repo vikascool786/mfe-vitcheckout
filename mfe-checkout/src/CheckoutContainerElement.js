@@ -1,7 +1,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 // import CheckoutContainer from './CheckoutContainer';
-import { CheckoutContainer } from "./CheckoutContainer";
+import { CheckoutContainer } from "./pages/checkout/CheckoutContainer";
 
 // Registers component as a custom element
 class CheckoutContainerElement extends HTMLElement {

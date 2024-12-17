@@ -1,22 +1,41 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Provider } from "jotai";
-import { CheckoutContainer } from "./CheckoutContainer";
-import { OrderStore } from "./store";
+import { CheckoutContainer } from "./pages/checkout/CheckoutContainer";
+import { orderAtom, OrderStore } from "./store";
+import { OrderConfirmation } from "./pages/order-confirmation/OrderConfirmation";
+import { ORDER_DATA } from "./utils/MOCKS";
 
 const CheckoutContainerWrapper = (appConfig: {
   cartId: string;
   shopperId: string;
 }) => {
-  
+  const [orderconfirmation, setOrderConfirmation] = useState(false);
+  const isOrderConfirmed = OrderStore.sub(orderAtom, () => {
+    console.log(OrderStore.get(orderAtom)?.orderId )
+    if (OrderStore.get(orderAtom)?.orderId == 101) {
+      setOrderConfirmation(!orderconfirmation);
+    }
+  });
+
   return (
-    <div className="container">
-      <Provider store={OrderStore}>
+    <Provider store={OrderStore}>
+      {!orderconfirmation ? (
         <CheckoutContainer
           cartId={appConfig.cartId}
           shopperId={appConfig.shopperId}
         />
-      </Provider>
-    </div>
+      ) : (
+        <OrderConfirmation
+          products={ORDER_DATA.stores[108567].items}
+          shippingAddress={[
+            "Ruby Boyle",
+            "1 Lower Ragsdale Dr",
+            "Monterey, CA 93940",
+            "831-123-4567",
+          ]}
+        />
+      )}
+    </Provider>
   );
 };
 

@@ -161,7 +161,6 @@ export const Checkout: React.FC<ICheckout> = ({ shopperId }) => {
 
   const handleSaveAddress = async (e: React.FormEvent) => {
     e.preventDefault();
-    const shopperID = "hqwxZzYzzqpeVzhWmZzZmZpzzkxkjzmZWqqWzxzkzj";
 
     const buildAddress = (formRef: RefObject<HTMLFormElement>): Address => {
       let address: Address = {
@@ -222,13 +221,13 @@ export const Checkout: React.FC<ICheckout> = ({ shopperId }) => {
         if (validatedAddress.id > 0) {
           // Use PUT request for existing address (update)
           await updateShopperAddressBookEntry(
-            shopperID,
+            shopperId,
             validatedAddress.id,
             addressParams
           );
         } else {
           // Use POST request for new address (create)
-          await createShopperAddressBookEntry(shopperID, addressParams);
+          await createShopperAddressBookEntry(shopperId, addressParams);
         }
       } catch (error) {
         console.error("Error:", error);
@@ -272,6 +271,13 @@ export const Checkout: React.FC<ICheckout> = ({ shopperId }) => {
       [name]: value,
     };
     setShippingAddress(address);
+  };
+
+  const handlePOBoxChange = () => {
+    setShippingAddress({
+      ...shippingAddress,
+      isPoBox: !shippingAddress.isPoBox,
+    });
   };
 
   const handleAddressSelectChange = (id: number) => {
@@ -431,7 +437,7 @@ export const Checkout: React.FC<ICheckout> = ({ shopperId }) => {
                       title="This address is a PO box"
                       checked={shippingAddress.isPoBox}
                       name="isPoBox"
-                      onChange={handleInputChange}
+                      onChange={handlePOBoxChange}
                     />
                   }
                   name="zip"
@@ -465,7 +471,7 @@ export const Checkout: React.FC<ICheckout> = ({ shopperId }) => {
                     type="secondary"
                     onClick={onCancelClick}
                   />
-                  <Button label="Save & Continue" type="primary" />
+                  <Button label="Save & Continue" type="primary" onClick={handleSaveAddress} />
                 </div>
               ) : (
                 <div className="form-footer">
