@@ -6,21 +6,12 @@ export const generateChangeStoreResponse = (order: Order): ChangeOrder => {
     id: order.id,
     customer_id: "",
     ufo_id: "",
-    shipping_country: order.shippingAddress.isoalpha3Code || "USA",
-    product_country: order.billingAddress.isoalpha3Code || "USA",
+    shipping_country: order.shippingAddress?.isoalpha3Code || "USA",
+    product_country: order.billingAddress?.isoalpha3Code || "USA",
     language: "ENG",
     site_type: "W",
     application: "cart",
-    billing: {
-      id: order.billingAddress.id || 0,
-    },
-    shipping: {
-      id: order.shippingAddress.id || 0,
-    },
-    paymentMethod: {
-      id: order.paymentMethod.id,
-    },
-    stores: Object.keys(order.stores).reduce((acc, key) => {
+    stores: Object.keys(order?.stores).reduce((acc, key) => {
       const store = order.stores[key];
       acc[key] = {
         shippingMethod: store?.shippingMethod || "",
@@ -43,5 +34,19 @@ export const generateChangeStoreResponse = (order: Order): ChangeOrder => {
       coupons: order.userOptions?.coupons ? order.userOptions.coupons : [] as string[],
     },
   };
+
+    // Conditionally add properties
+    if (order.billingAddress?.id) {
+      updatedPayload.billing = { id: order.billingAddress.id };
+    }
+  
+    if (order.shippingAddress?.id) {
+      updatedPayload.shipping = { id: order.shippingAddress.id };
+    }
+  
+    if (order.paymentMethod?.id) {
+      updatedPayload.paymentMethod = { id: order.paymentMethod.id };
+    }
+  
   return updatedPayload;
 };

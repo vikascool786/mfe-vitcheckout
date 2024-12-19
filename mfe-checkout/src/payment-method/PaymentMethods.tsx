@@ -21,12 +21,13 @@ import { TextUpdates } from "../text-updates/TextUpdates";
 import "./PaymentMethods.scss";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import { updatePaymentMethod } from "../utils/OrderUtils";
-import { changeOrder, commitOrder } from "../api/service/Order";
+import { buildOrder, changeOrder, commitOrder } from "../api/service/Order";
 import Click2PayUtil from "../payment-method-click2pay/Click2PayUtil";
 import Click2PayPlaceOrder from "../payment-method-click2pay/Click2PayPlaceOrder";
 import { getTransactionData } from "../api/service/Click2PayTransaction";
 import { useAtom } from "jotai";
 import { orderAtom } from "../store";
+import { ChangeOrder } from "../interfaces/ChangeOrder";
 
 const PAYMENT_TYPE_ID_CLICK2PAY = 60;
 const PAYMENT_TYPE_ID_SEZZLE = 56;
@@ -82,13 +83,25 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
   const [order, setOrder] = useAtom(orderAtom);
 
   const confirmOrder = () => {
-    if (order) {
-      setOrder({
-        ...order,
-        orderId: 101,
-      });
-    }
+    buildOrder({} as ChangeOrder);
   };
+
+  // useEffect(() => {
+  //   const paymentOption = allPaymentOptions.find((p) => p.selected);
+  //   if (
+  //     paymentOption && order?.id &&
+  //     order?.paymentMethod.id !== paymentOption.shopperSavedPayment?.id
+  //   ) {
+  //     setOrder({
+  //       ...order,
+  //       paymentMethod: {
+  //         ...order?.paymentMethod,
+  //         id: paymentOption.shopperSavedPayment.id,
+  //       },
+  //     });
+  //   }
+  // }, []);
+
   useEffect(() => {
     const fetchShoppersSavedPayments = async (shopperId: string) => {
       try {

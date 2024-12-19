@@ -1,7 +1,7 @@
-import { useAtomValue } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import $ from "jquery";
 import "parsleyjs";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   addShoppersPaymentMethod,
   generateCardToken,
@@ -12,7 +12,7 @@ import { DropdownField } from "../../component/Form/Field/DropdownField";
 import { FormField } from "../../component/Form/Field/FormField";
 import { Address } from "../../interfaces/Address";
 import { ShopperSavedPayments } from "../../interfaces/ShopperSavedPayments";
-import { addressAtom } from "../../store";
+import { addressAtom, orderAtom } from "../../store";
 import "./CardInformation.scss";
 import { Button } from "../../component/Button/Button";
 
@@ -64,6 +64,8 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   const [address, setAddress] = useState<Address>(
     initialData?.address || defaultAddress
   );
+
+  const [order, setOrder] = useAtom(orderAtom);
 
   const addressList = useAtomValue(addressAtom);
 
@@ -150,11 +152,17 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   // function to call an API when CVV is entered to generate a payment id
 
   const generatePaymentId = async () => {
-    const response = await updateShopperDetails(shopperId, cardInformation.id, {
-      cvv: ["999"],
+    setOrder({
+      ...order,
+      paymentMethod: {
+        ...cardInformation,
+        id: cardInformation.id,
+      },
+      billingAddress: {
+        ...cardInformation.address,
+        id: cardInformation.address.id
+      }
     });
-
-    console.log(response);
   };
 
   return (

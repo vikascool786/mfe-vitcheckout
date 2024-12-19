@@ -1,7 +1,12 @@
-import React, { useState } from "react";
+import { useAtom } from "jotai";
+import React, { useEffect } from "react";
+import { buildOrder } from "../api/service/Order";
 import { RadioButton } from "../component/RadioButton/RadioButton";
+import { Order } from "../interfaces/Order";
 import { ShopperSavedPayments } from "../interfaces/ShopperSavedPayments";
 import { CardInformation } from "../payment-method/card-information/CardInformation";
+import { orderAtom } from "../store";
+import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import "./PaymentMethodOption.scss";
 
 export interface IPaymentOptionProps {
@@ -15,6 +20,7 @@ export interface IPaymentOptionProps {
   onChange: () => void;
   shopperSavedPayment?: ShopperSavedPayments;
   shopperId?: string;
+  cartId: string;
 }
 export const PaymentOption: React.FC<
   IPaymentOptionProps & {
@@ -34,10 +40,34 @@ export const PaymentOption: React.FC<
   isSavedCard = false,
   shopperSavedPayment,
   shopperId,
+  cartId,
 }) => {
   const isSelected = selected ? "selected" : "";
   const isFirst = index === 0 ? "start" : "";
   const showCardImage = isSavedCard && shopperSavedPayment;
+
+  const [order, setOrder] = useAtom(orderAtom);
+
+  useEffect(() => {
+
+    
+    const orderPayload: Order = {
+      ...order,
+      paymentMethod: {
+        ...order?.paymentMethod,
+        id: 99297419,
+      },
+    };
+
+    if (shopperSavedPayment?.address) {
+      orderPayload.billingAddress = {
+        ...order?.billingAddress,
+        id: shopperSavedPayment.address.id,
+      };
+    }
+
+    buildOrder(generateChangeStoreResponse(orderPayload));
+  }, [selected]);
 
   return (
     <div

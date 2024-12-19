@@ -1,17 +1,19 @@
-import { useSetAtom } from "jotai";
+import { useAtom } from "jotai";
+import isEqual from "lodash.isequal";
 import React, { useEffect, useState } from "react";
-import { buildOrder, changeOrder, fetchOrderDetail } from "../../api/service/Order";
+import {
+  buildOrder
+} from "../../api/service/Order";
 import "../../App.scss";
 import { Checkout } from "../../checkout/Checkout";
+import { ChangeOrder } from "../../interfaces/ChangeOrder";
 import { OrderSummary } from "../../order-summary/OrderSummary";
 import { PaymentMethod } from "../../payment-method/PaymentMethods";
 import { ShippingMethod } from "../../shipping-methods/ShippingMethod";
 import { orderAtom, OrderStore } from "../../store";
 import { generateChangeStoreResponse } from "../../utils/helpers/GenerateChangeStoreResponse";
-import { generateStandardOrderPayload } from "../../utils/helpers/GenerateStandardOrderPayload";
-import { ChangeOrder } from "../../interfaces/ChangeOrder";
 
-const getInitialBuildOrderData = (cartId: string): ChangeOrder => {
+export const getInitialBuildOrderData = (cartId: string): ChangeOrder => {
   return {
     debug: true,
     id: cartId,
@@ -46,7 +48,7 @@ export const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   shopperId,
   cartId,
 }) => {
-  const setOrderAtom = useSetAtom(orderAtom);
+  const [order, setOrderAtom] = useAtom(orderAtom);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,54 +57,41 @@ export const CheckoutContainer: React.FC<ICheckoutContainer> = ({
 
   useEffect(() => {
     const buildOrderForStore = async (data: ChangeOrder) => {
-      const orderResponse = await buildOrder(getInitialBuildOrderData(cartId));
+      const orderResponse = await buildOrder(data);
       const { success, errors } = orderResponse.response;
 
-      if (errors) {
+      if (errors || isOrderBuilt) {
         alert(errors.message);
         return;
       }
 
+      isOrderBuilt = true;
       setOrderAtom(success.data);
-    };
-
-    const getOrder = async () => {
-      try {
-        const response = await fetchOrderDetail(cartId);
-        // const response = ORDER_DATA;
-        setOrderAtom(response);
-        setError(null);
-        return response;
-      } catch (error) {
-        setError("Failed to fetch data.");
-        console.error("Failed to fetch data:", error);
-        handleBuildOrder(cartId);
-      } finally {
-        setError(null);
-        setLoading(false);
-      }
     };
 
     buildOrderForStore(getInitialBuildOrderData(cartId));
 
     const unsubscribe = OrderStore.sub(orderAtom, async () => {
-        // condition to check if order obj is same
+      // condition to check if order obj is same
+      const newOrder = OrderStore.get(orderAtom);
+      if (!newOrder) return;
+
+      if (!order) return;
+
+      if (
+        isEqual(
+          generateChangeStoreResponse(newOrder),
+          generateChangeStoreResponse(order)
+        )
+      ) {
+        return;
+      }
+
+      setOrderAtom(newOrder);
     });
 
     return unsubscribe;
   }, [isOrderBuilt]);
-
-  const handleBuildOrder = async (cartId: string) => {
-    const buildOrderPromise = buildOrder(
-      generateStandardOrderPayload(cartId, "USA", "ENG")
-    );
-    buildOrderPromise.then((response: any) => {
-      console.log("build order response: " + JSON.stringify(response));
-      if (response !== undefined) {
-        setOrderAtom(response);
-      }
-    });
-  };
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
@@ -110,9 +99,13 @@ export const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   return (
     <div className="checkout-container">
       <div className="checkout-sub-container">
-        <Checkout shopperId={shopperId} />
-        <ShippingMethod />
-        <PaymentMethod shopperId={shopperId} cartId={cartId} />
+        {order && (
+          <>
+            <Checkout shopperId={shopperId} />
+            <ShippingMethod />
+            <PaymentMethod shopperId={shopperId} cartId={cartId} />
+          </>
+        )}
       </div>
       <div>
         <OrderSummary />

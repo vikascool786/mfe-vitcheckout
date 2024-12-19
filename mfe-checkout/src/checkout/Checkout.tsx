@@ -1,3 +1,4 @@
+import { useAtom } from "jotai";
 import $ from "jquery";
 import "parsleyjs";
 import React, { RefObject, useEffect, useRef, useState } from "react";
@@ -21,9 +22,11 @@ import { FormHeading } from "../component/Form/Heading/FormHeading";
 import { Address } from "../interfaces/Address";
 import { AddressHandler } from "../interfaces/AddressHandler";
 import { DropdownOption } from "../interfaces/DropdownOption";
-import "./Checkout.scss";
-import { useAtom, useSetAtom } from "jotai";
 import { addressAtom, orderAtom } from "../store";
+import "./Checkout.scss";
+import { buildOrder } from "../api/service/Order";
+import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
+import { Order } from "../interfaces/Order";
 
 const defaultAddress: Address = {
   id: 0,
@@ -40,13 +43,14 @@ const defaultAddress: Address = {
 
 interface ICheckout {
   shopperId: string;
+  cartId: string;
 }
 
-export const Checkout: React.FC<ICheckout> = ({ shopperId }) => {
+export const Checkout: React.FC<ICheckout> = ({ shopperId, cartId }) => {
   const siteId = "260"; /*todo - need to update with dynamic siteId*/
   // State to manage whether the form is expanded or collapsed
 
-  const setOrder = useSetAtom(orderAtom);
+  const [order, setOrder] = useAtom(orderAtom);
   const [isExpanded, setIsExpanded] = useState(false);
   const [showShipAddressForm, setShowShipAddressForm] = useState(false);
   const [shopperAddressBook, setShopperAddressBook] = useAtom(addressAtom);
@@ -113,6 +117,7 @@ export const Checkout: React.FC<ICheckout> = ({ shopperId }) => {
         const addressList: Address[] =
           buildShoppersAddressBookFromResponse(response);
         setShopperAddressBook(addressList);
+
         if (addressList.length < 1) {
           setIsExpanded(!isExpanded);
         }
@@ -146,6 +151,12 @@ export const Checkout: React.FC<ICheckout> = ({ shopperId }) => {
         } as Address;
         if (newAddress.isPrimary) {
           hasPrimaryAddress = true;
+          const orderPayload: Order = {
+            ...order,
+            shippingAddress: newAddress,
+            billingAddress: newAddress,
+          };
+          buildOrder(generateChangeStoreResponse(orderPayload));
           setShippingAddress(newAddress);
         }
         filteredAddresses.push(newAddress);
@@ -289,15 +300,6 @@ export const Checkout: React.FC<ICheckout> = ({ shopperId }) => {
     );
 
     setShopperAddressBook(updatedSelectedAddress);
-
-    setOrder((order) => {
-      return {
-        ...order,
-        shippingAddress: {
-          ...updatedSelectedAddress.find((address) => address.id === id),
-        },
-      };
-    });
   };
 
   return (
@@ -471,7 +473,11 @@ export const Checkout: React.FC<ICheckout> = ({ shopperId }) => {
                     type="secondary"
                     onClick={onCancelClick}
                   />
-                  <Button label="Save & Continue" type="primary" onClick={handleSaveAddress} />
+                  <Button
+                    label="Save & Continue"
+                    type="primary"
+                    onClick={handleSaveAddress}
+                  />
                 </div>
               ) : (
                 <div className="form-footer">

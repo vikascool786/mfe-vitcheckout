@@ -123,9 +123,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({ hideCashback }) => {
   return (
     <div className="order-summary-container">
       <FormHeading title="Order Summary" />
-      {!hideCashback && (
+      {hideCashback && (
         <>
-          {" "}
           {!loading && !error && eWalletData && (
             <ApplyCashback cashbackData={eWalletData} />
           )}
