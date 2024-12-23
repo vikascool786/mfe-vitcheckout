@@ -1,3 +1,4 @@
+import { IPaymentMethod } from "../../interfaces/PaymentMethod";
 import {
   API_KEY,
   GET_API_ENDPOINT_BASE_URL,
@@ -28,7 +29,7 @@ export const fetchShoppersPaymentMethods = async (
 export const addShoppersPaymentMethod = async (
   shopperId: string,
   walletData: any
-): Promise<any> => {
+): Promise<IPaymentMethod[]> => {
   try {
     const response = await axiosInstance(
       `https://devapi2.shop.com/shopper-wallets/v1/Shopper/${shopperId}/Wallet?api_key=c7f5de6a77644516b24c68fc4ac173fc`
@@ -38,10 +39,12 @@ export const addShoppersPaymentMethod = async (
       },
     });
 
-    console.log("Card added successfully:", response.data);
+    return response.data;
   } catch (error) {
     console.error("Unable to add method to wallet", error);
   }
+
+  return [];
 };
 
 export const addTempPaymentMethod = async (
@@ -82,9 +85,17 @@ export const updateShopperDetails = async (
   }
 };
 
-export const generateCardToken = async (ccNumber: string) => {
+export const generateCardToken = async (
+  data: string,
+  shopperId: string,
+  paymentId: number
+) => {
   try {
-    const response = await axiosInstance(`${TOKEN_SERVICE}?ccNum${ccNumber}`).get("");
+    const response = await axiosInstance(
+      `https://devapi2.shop.com/shopper-wallets/v1/Shopper/${shopperId}/Wallet/${paymentId}?siteId=222&api_key=${API_KEY}`
+    ).put("", data, {
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    });
     return response;
   } catch (error) {
     console.error("Unable to update payment details", error);

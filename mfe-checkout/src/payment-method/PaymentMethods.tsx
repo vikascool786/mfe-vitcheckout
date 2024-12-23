@@ -21,13 +21,21 @@ import { TextUpdates } from "../text-updates/TextUpdates";
 import "./PaymentMethods.scss";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import { updatePaymentMethod } from "../utils/OrderUtils";
-import { buildOrder, changeOrder, commitOrder } from "../api/service/Order";
+import {
+  buildOrder,
+  changeOrder,
+  commitOrder,
+  OrderResponse,
+} from "../api/service/Order";
 import Click2PayUtil from "../payment-method-click2pay/Click2PayUtil";
 import Click2PayPlaceOrder from "../payment-method-click2pay/Click2PayPlaceOrder";
 import { getTransactionData } from "../api/service/Click2PayTransaction";
 import { useAtom } from "jotai";
 import { orderAtom } from "../store";
 import { ChangeOrder } from "../interfaces/ChangeOrder";
+import { useApi } from "../hooks/useAPI";
+import { API_KEY, GET_API_ENDPOINT_BASE_URL } from "../utils/ApiConstants";
+import { IPaymentMethod as IPM } from "../interfaces/PaymentMethod";
 
 const PAYMENT_TYPE_ID_CLICK2PAY = 60;
 const PAYMENT_TYPE_ID_SEZZLE = 56;
@@ -82,25 +90,14 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
 
   const [order, setOrder] = useAtom(orderAtom);
 
-  const confirmOrder = () => {
-    buildOrder({} as ChangeOrder);
-  };
+  const { postData } = useApi<OrderResponse>(
+    `${GET_API_ENDPOINT_BASE_URL}/checkout-universal/v1/checkouts?api_key=${API_KEY}`,
+    "POST"
+  );
 
-  // useEffect(() => {
-  //   const paymentOption = allPaymentOptions.find((p) => p.selected);
-  //   if (
-  //     paymentOption && order?.id &&
-  //     order?.paymentMethod.id !== paymentOption.shopperSavedPayment?.id
-  //   ) {
-  //     setOrder({
-  //       ...order,
-  //       paymentMethod: {
-  //         ...order?.paymentMethod,
-  //         id: paymentOption.shopperSavedPayment.id,
-  //       },
-  //     });
-  //   }
-  // }, []);
+  const confirmOrder = () => {
+    commitOrder(cartId);
+  };
 
   useEffect(() => {
     const fetchShoppersSavedPayments = async (shopperId: string) => {
@@ -265,13 +262,17 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
       });
   };
 
-  const handlePaymentMethodChange = (selectedIndex: number) => {
+  const handlePaymentMethodChange = async (selectedIndex: number) => {
+    // Update the payment options and determine the selected payment method
     setAllPaymentOptions((prevOptions) =>
-      prevOptions.map((option, index) => ({
-        ...option,
-        selected: index === selectedIndex,
-      }))
+      prevOptions.map((option, index) => {
+        if (index === selectedIndex) {
+          return { ...option, selected: true };
+        }
+        return { ...option, selected: false };
+      })
     );
+
     // Collapse any editing card when a new payment method is selected
     if (editingOptionIndex !== null && editingOptionIndex !== selectedIndex) {
       setEditingOptionIndex(null);

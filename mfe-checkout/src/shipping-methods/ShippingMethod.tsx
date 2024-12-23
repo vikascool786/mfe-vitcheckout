@@ -6,10 +6,14 @@ import { ShippingOptions } from "../shipping-options/ShippingOptions";
 import { getCatalogName } from "../utils/helpers/GetCatalog";
 import "./ShippingMethod.scss";
 import { orderAtom } from "../store";
+import { Order } from "../interfaces/Order";
 
-export const ShippingMethod: React.FC = ({}) => {
-  const [orders] = useAtom(orderAtom);
-  if (!orders) {
+interface IShippingMethodProps {
+  order: Order;
+}
+
+export const ShippingMethod: React.FC<IShippingMethodProps> = ({ order }) => {
+  if (!order) {
     return <p>Loading shipping methods...</p>;
   }
 
@@ -17,30 +21,31 @@ export const ShippingMethod: React.FC = ({}) => {
     <div className="shipping-container">
       <FormHeading title="Shipping Methods & Review Items" />
 
-      {orders?.stores && (
-  <div className="shipping-item-container">
-    {Object.entries(orders?.stores).map(([key, store], index) => {
-      return (
-        store && (
-          <div key={key}>
-            <div className="shipping-catolog-name">
-              {getCatalogName(store)}
-            </div>
-            {store.items && store.items.map((item, itemIndex) => (
-              <div key={itemIndex}>
-                <ShippingItem item={item} />
-              </div>
-            ))}
-            {/* Pass store-specific shippingSelections */}
-            {store.shippingSelections && (
-              <ShippingOptions store={store} storeKey={key} />
-            )}
-          </div>
-        )
-      );
-    })}
-  </div>
-)}
+      {order?.stores && (
+        <div className="shipping-item-container">
+          {Object.entries(order?.stores).map(([key, store], index) => {
+            return (
+              store && (
+                <div key={key}>
+                  <div className="shipping-catolog-name">
+                    {getCatalogName(store)}
+                  </div>
+                  {store.items &&
+                    store.items.map((item, itemIndex) => (
+                      <div key={itemIndex}>
+                        <ShippingItem item={item} />
+                      </div>
+                    ))}
+                  {/* Pass store-specific shippingSelections */}
+                  {store.shippingSelections && (
+                    <ShippingOptions store={store} storeKey={key} />
+                  )}
+                </div>
+              )
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };

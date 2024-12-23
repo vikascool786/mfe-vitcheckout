@@ -1,7 +1,7 @@
-import React from 'react'
+import React from "react";
 import { Provider } from "jotai";
 import HeadHelmet from "./head-helmet/HeadHelmet";
-import { CheckoutContainer } from "./pages/checkout/CheckoutContainer";
+import CheckoutContainer from "./checkout/CheckoutContainer";
 import { OrderStore } from "./store";
 
 const CheckoutContainerWrapper = (appConfig: {

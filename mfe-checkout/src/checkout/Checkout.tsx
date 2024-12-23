@@ -1,4 +1,4 @@
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import $ from "jquery";
 import "parsleyjs";
 import React, { RefObject, useEffect, useRef, useState } from "react";
@@ -7,10 +7,9 @@ import { AddressDisplay } from "../address-verification/AddressDisplay";
 import { AddressVerificationContainer } from "../address-verification/AddressVerificationContainer";
 import { fetchStatesAndCountries } from "../api/service/CountriesAndStates";
 import {
-  createShopperAddressBookEntry,
-  fetchShopperAddressBook,
-  updateShopperAddressBookEntry,
-  updateTextUpdatesForPhone,
+  useCreateShopperAddressBookEntry,
+  useUpdateShopperAddressBookEntry,
+  useUpdateTextUpdatesForPhone,
 } from "../api/service/ShopperAddressBook";
 import { fetchSiteData } from "../api/service/Site";
 import { Back } from "../assets/svgs/Back";
@@ -26,7 +25,6 @@ import { addressAtom, orderAtom } from "../store";
 import "./Checkout.scss";
 import { buildOrder } from "../api/service/Order";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
-import { Order } from "../interfaces/Order";
 
 const defaultAddress: Address = {
   id: 0,
@@ -44,27 +42,77 @@ const defaultAddress: Address = {
 interface ICheckout {
   shopperId: string;
   cartId: string;
+  addresses: any;
 }
 
-export const Checkout: React.FC<ICheckout> = ({ shopperId, cartId }) => {
+export const Checkout: React.FC<ICheckout> = ({
+  shopperId,
+  cartId,
+  addresses,
+}) => {
   const siteId = "260"; /*todo - need to update with dynamic siteId*/
   // State to manage whether the form is expanded or collapsed
 
-  const [order, setOrder] = useAtom(orderAtom);
+  const { createShopperAddressBookEntry } = useCreateShopperAddressBookEntry();
+  const { updateShopperAddressBookEntry } = useUpdateShopperAddressBookEntry();
+  const { updateTextUpdatesForPhone } = useUpdateTextUpdatesForPhone();
+
+  const [shippingAddress, setShippingAddress] =
+    useState<Address>(defaultAddress);
   const [isExpanded, setIsExpanded] = useState(false);
   const [showShipAddressForm, setShowShipAddressForm] = useState(false);
   const [shopperAddressBook, setShopperAddressBook] = useAtom(addressAtom);
-  const [shippingAddress, setShippingAddress] =
-    useState<Address>(defaultAddress);
   const [showAVS, setShowAVS] = useState(false);
   const [stateDropdownList, setStateDropdownList] = useState<DropdownOption[]>(
     []
   );
+
+  const [order, setOrder] = useAtom(orderAtom);
+
+  const buildShoppersAddressBookFromResponse = (
+    addressBookResponse: Address[]
+  ) => {
+    let filteredAddresses: Address[] = [];
+    let hasPrimaryAddress: boolean = false;
+    addressBookResponse.forEach((address: Address) => {
+      if (address.id) {
+        const newAddress: Address = {
+          id: address.id,
+          isPrimary: address.isPrimary,
+          first: address.first,
+          last: address.last,
+          address1: address.address1,
+          address2: address.address2,
+          city: address.city,
+          state: address.state,
+          zip: address.zip,
+          phone: address.phone,
+          isPoBox: address.isPoBox,
+        } as Address;
+        if (newAddress.isPrimary) {
+          hasPrimaryAddress = true;
+          setShippingAddress(newAddress);
+        }
+        filteredAddresses.push(newAddress);
+      }
+    });
+
+    if (!hasPrimaryAddress) {
+      setShippingAddress(filteredAddresses[0] ?? defaultAddress);
+    }
+    setShowShipAddressForm(filteredAddresses.length < 1);
+    return filteredAddresses;
+  };
+
   const [familyNameFirst, setFamilyNameFirst] = useState(false);
   const [isUpdateEnabled, setIsUpdateEnabled] = useState(false); // New state to track edit mode
 
   const shipFormRef = useRef<HTMLFormElement>(null);
   const childRef = useRef<AddressHandler>(null);
+
+  useEffect(() => {
+    setShopperAddressBook(buildShoppersAddressBookFromResponse(addresses));
+  }, []);
 
   // Function to toggle accordion state
   const toggleAccordion = () => {
@@ -109,66 +157,6 @@ export const Checkout: React.FC<ICheckout> = ({ shopperId, cartId }) => {
 
     fetchCountryAndStateData();
   }, []);
-
-  useEffect(() => {
-    const fetchAddressBookData = async () => {
-      try {
-        const response = await fetchShopperAddressBook(shopperId || "");
-        const addressList: Address[] =
-          buildShoppersAddressBookFromResponse(response);
-        setShopperAddressBook(addressList);
-
-        if (addressList.length < 1) {
-          setIsExpanded(!isExpanded);
-        }
-      } catch (error) {
-        console.error("Failed to fetch data:", error);
-      }
-    };
-
-    fetchAddressBookData();
-  }, [shopperId]);
-
-  const buildShoppersAddressBookFromResponse = (
-    addressBookResponse: Address[]
-  ) => {
-    let filteredAddresses: Address[] = [];
-    let hasPrimaryAddress: boolean = false;
-    addressBookResponse.forEach((address: Address) => {
-      if (address.id) {
-        const newAddress: Address = {
-          id: address.id,
-          isPrimary: address.isPrimary,
-          first: address.first,
-          last: address.last,
-          address1: address.address1,
-          address2: address.address2,
-          city: address.city,
-          state: address.state,
-          zip: address.zip,
-          phone: address.phone,
-          isPoBox: address.isPoBox,
-        } as Address;
-        if (newAddress.isPrimary) {
-          hasPrimaryAddress = true;
-          const orderPayload: Order = {
-            ...order,
-            shippingAddress: newAddress,
-            billingAddress: newAddress,
-          };
-          buildOrder(generateChangeStoreResponse(orderPayload));
-          setShippingAddress(newAddress);
-        }
-        filteredAddresses.push(newAddress);
-      }
-    });
-
-    if (!hasPrimaryAddress) {
-      setShippingAddress(filteredAddresses[0] ?? defaultAddress);
-    }
-    setShowShipAddressForm(filteredAddresses.length < 1);
-    return filteredAddresses;
-  };
 
   const handleSaveAddress = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -291,13 +279,25 @@ export const Checkout: React.FC<ICheckout> = ({ shopperId, cartId }) => {
     });
   };
 
-  const handleAddressSelectChange = (id: number) => {
+  const handleAddressSelectChange = async (id: number) => {
     const updatedSelectedAddress = shopperAddressBook.map(
       (address) =>
         address.id === id
           ? { ...address, isPrimary: 1 }
           : { ...address, isPrimary: 0 } // Reset other addresses' `isPrimary` to 0
     );
+
+    const newOrder = await buildOrder(
+      generateChangeStoreResponse({
+        ...order,
+        shippingAddress: {
+          ...order?.shippingAddress,
+          id,
+        },
+      })
+    );
+
+    setOrder(newOrder.response.success.data);
 
     setShopperAddressBook(updatedSelectedAddress);
   };

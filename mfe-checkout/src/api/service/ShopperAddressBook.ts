@@ -1,75 +1,117 @@
+import { useState, useCallback } from "react";
 import { API_KEY, GET_API_ENDPOINT_BASE_URL } from "../../utils/ApiConstants";
 import axiosInstance from "../axios";
 
-export const fetchShopperAddressBook = async (
-  shopperId: string
-): Promise<any> => {
-  try {
-    const shopperAddressBookApiEndpoint = `${GET_API_ENDPOINT_BASE_URL}/shopper-addressbooks/v1/${shopperId}/AddressBook?api_key=${API_KEY}`;
-    const addressBookResponse = await axiosInstance(
-      shopperAddressBookApiEndpoint
-    ).get("");
-    return addressBookResponse.data;
-  } catch (error) {
-    console.error(
-      `Error getting address book for shopper: ${shopperId}`,
-      error
-    );
-    throw error;
-  }
+// Hook for fetching the shopper's address book
+export const useFetchShopperAddressBook = () => {
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  const fetchShopperAddressBook = useCallback(async (shopperId: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const endpoint = `${GET_API_ENDPOINT_BASE_URL}/shopper-addressbooks/v1/${shopperId}/AddressBook?api_key=${API_KEY}`;
+      const response = await axiosInstance(endpoint).get("");
+      setData(response.data);
+      return response.data;
+    } catch (err) {
+      console.error(`Error fetching address book for shopper: ${shopperId}`, err);
+      setError(err as Error);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  return { data, loading, error, fetchShopperAddressBook };
 };
 
-export const createShopperAddressBookEntry = async (
-  shopperId: string,
-  addressData: string
-): Promise<any> => {
-  try {
-    const shopperAddressBookApiEndpoint = `${GET_API_ENDPOINT_BASE_URL}/shopper-addressbooks/v1/${shopperId}/AddressBook?api_key=${API_KEY}`;
-    const response = await axiosInstance(shopperAddressBookApiEndpoint).post(
-      "",
-      addressData,
-      { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
-    );
-    return response.data;
-  } catch (error) {
-    console.error(
-      `Error creating address book entry for shopper: ${shopperId}`,
-      error
-    );
-    throw error;
-  }
-};
+// Hook for creating a new address book entry
+export const useCreateShopperAddressBookEntry = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
-export const updateShopperAddressBookEntry = async (
-  shopperId: string,
-  addressId: number,
-  addressData: string
-): Promise<any> => {
-  try {
-    const shopperAddressBookApiEndpoint = `${GET_API_ENDPOINT_BASE_URL}/shopper-addressbooks/v1/${shopperId}/AddressBook/${addressId}?api_key=${API_KEY}`;
-    const response = await axiosInstance(shopperAddressBookApiEndpoint).put(
-      "",
-      addressData,
-      {
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+  const createShopperAddressBookEntry = useCallback(
+    async (shopperId: string, addressData: string) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const endpoint = `${GET_API_ENDPOINT_BASE_URL}/shopper-addressbooks/v1/${shopperId}/AddressBook?api_key=${API_KEY}`;
+        const response = await axiosInstance(endpoint).post(
+          "",
+          addressData,
+          { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+        );
+        return response.data;
+      } catch (err) {
+        console.error(`Error creating address book entry for shopper: ${shopperId}`, err);
+        setError(err as Error);
+        throw err;
+      } finally {
+        setLoading(false);
       }
-    );
-    return response.data;
-  } catch (error) {
-    console.error(
-      `Error updating address book entry for shopper: ${shopperId}`,
-      error
-    );
-    throw error;
-  }
+    },
+    []
+  );
+
+  return { loading, error, createShopperAddressBookEntry };
 };
 
-export const updateTextUpdatesForPhone = async (phoneNumber: string) => {
-  const endpoint = `https://devapi2.shop.com/twilio/v1/lookups?type=carrier&to=${phoneNumber}&country=USA?api_key=${API_KEY}`;
-  try {
-    const response = await axiosInstance(endpoint).get("");
-    return response.data;
-  } catch (error) {
-    console.log("Error", error);
-  }
+// Hook for updating an address book entry
+export const useUpdateShopperAddressBookEntry = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  const updateShopperAddressBookEntry = useCallback(
+    async (shopperId: string, addressId: number, addressData: string) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const endpoint = `${GET_API_ENDPOINT_BASE_URL}/shopper-addressbooks/v1/${shopperId}/AddressBook/${addressId}?api_key=${API_KEY}`;
+        const response = await axiosInstance(endpoint).put(
+          "",
+          addressData,
+          { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+        );
+        return response.data;
+      } catch (err) {
+        console.error(`Error updating address book entry for shopper: ${shopperId}`, err);
+        setError(err as Error);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
+
+  return { loading, error, updateShopperAddressBookEntry };
+};
+
+// Hook for updating text updates for phone
+export const useUpdateTextUpdatesForPhone = () => {
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  const updateTextUpdatesForPhone = useCallback(async (phoneNumber: string) => {
+    setLoading(true);
+    setError(null);
+    const endpoint = `https://devapi2.shop.com/twilio/v1/lookups?type=carrier&to=${phoneNumber}&country=USA?api_key=${API_KEY}`;
+    try {
+      const response = await axiosInstance(endpoint).get("");
+      setData(response.data);
+      return response.data;
+    } catch (err) {
+      console.error(`Error updating text updates for phone: ${phoneNumber}`, err);
+      setError(err as Error);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  return { data, loading, error, updateTextUpdatesForPhone };
 };

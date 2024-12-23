@@ -38,9 +38,11 @@ const shopperOrderAPIEndpoint = (cartId: string) =>
 
 const shopperBuildOrderAPIEndpoint = `${GET_API_ENDPOINT_BASE_URL}/checkout-universal/v1/checkouts?api_key=${API_KEY}`;
 
-const shopperUpdateOrderEndpoint = (cartId: string) => `${GET_API_ENDPOINT_BASE_URL}/checkout-universal/v1/checkouts/id/${cartId}`
+const shopperUpdateOrderEndpoint = (cartId: string) =>
+  `${GET_API_ENDPOINT_BASE_URL}/checkout-universal/v1/checkouts/id/${cartId}`;
 
-const commitOrderEndpoint = (cartId: string) =>`${GET_API_ENDPOINT_BASE_URL}/checkout-universal/v1/checkouts/id/${cartId}?api_key=${API_KEY}`
+const commitOrderEndpoint = (cartId: string) =>
+  `${GET_API_ENDPOINT_BASE_URL}/checkout-universal/v1/checkouts/id/${cartId}`;
 
 export const fetchOrderDetail = async (cartId: string): Promise<Order> => {
   try {
@@ -55,11 +57,11 @@ export const fetchOrderDetail = async (cartId: string): Promise<Order> => {
 };
 
 export const buildOrder = async (
-    orderPayload: ChangeOrder
+  orderPayload: ChangeOrder
 ): Promise<OrderResponse> => {
   try {
     const orderResponse = await axiosInstance(
-        shopperBuildOrderAPIEndpoint
+      shopperBuildOrderAPIEndpoint
     ).post("", orderPayload);
     return orderResponse.data;
   } catch (error) {
@@ -74,7 +76,7 @@ export const changeOrder = async (
 ): Promise<OrderResponse> => {
   try {
     const orderResponse = await axiosInstance(
-        shopperUpdateOrderEndpoint(cartId)
+      shopperUpdateOrderEndpoint(cartId)
     ).put("", changeStorePayload);
     return orderResponse.data;
   } catch (error) {
@@ -83,14 +85,14 @@ export const changeOrder = async (
   }
 };
 
-export const commitOrder = async (
-    cartId: string,
-): Promise<any> => {
+export const commitOrder = async (cartId: string): Promise<any> => {
   try {
-    const response = await axiosInstance(
-        commitOrderEndpoint(cartId)
-    ).post("", {});
+    const response = await axiosInstance(commitOrderEndpoint(cartId)).post(
+      "",
+      {}
+    );
     console.log("commit order successfully: " + JSON.stringify(response));
+    alert("Order Commited Successfully");
     return response;
   } catch (error) {
     console.error("Unable to commit order", error);
