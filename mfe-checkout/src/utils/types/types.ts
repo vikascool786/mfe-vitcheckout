@@ -1,0 +1,1 @@
+export type APIMODE = "localhost" | "dev" | "staging" | "prod";

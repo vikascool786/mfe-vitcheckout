@@ -1,13 +1,10 @@
 import { IPaymentMethod } from "../../interfaces/PaymentMethod";
-import {
-  API_KEY,
-  GET_API_ENDPOINT_BASE_URL,
-  TOKEN_SERVICE,
-} from "../../utils/ApiConstants";
+import { GET_API_KEY, GET_API_ENDPOINT_BASE_URL_ONLY, GET_TOKEN_SERVICE } from "../../utils/urlResolver";
 import axiosInstance from "../axios";
 
+
 const shopperWalletApiEndpoint = (id: string) =>
-  `${GET_API_ENDPOINT_BASE_URL}/shopper-wallets/v1/Shopper/${id}/Wallet?api_key=${API_KEY}`;
+  `${GET_API_ENDPOINT_BASE_URL_ONLY()}/shopper-wallets/v1/Shopper/${id}/Wallet?api_key=${GET_API_KEY()}`;
 
 export const fetchShoppersPaymentMethods = async (
   shopperId: string
@@ -53,7 +50,7 @@ export const addTempPaymentMethod = async (
 ): Promise<any> => {
   try {
     const response = await axiosInstance(
-      `${GET_API_ENDPOINT_BASE_URL}/shoppingcart-checkouts/v1/Checkout/TempCC/${shopperId}?api_key=${API_KEY}`
+      `${GET_API_ENDPOINT_BASE_URL_ONLY()}/shoppingcart-checkouts/v1/Checkout/TempCC/${shopperId}?api_key=${GET_API_KEY()}`
     ).post("", walletData, {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -73,7 +70,7 @@ export const updateShopperDetails = async (
 ) => {
   try {
     const response = await axiosInstance(
-      `${GET_API_ENDPOINT_BASE_URL}/Shopper/${shopperId}/Wallet/${id}?api_key=${API_KEY}`
+      `${GET_API_ENDPOINT_BASE_URL_ONLY()}/Shopper/${shopperId}/Wallet/${id}?api_key=${GET_API_KEY()}`
     ).put("", walletData, {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -85,19 +82,28 @@ export const updateShopperDetails = async (
   }
 };
 
-export const generateCardToken = async (
-  data: string,
-  shopperId: string,
-  paymentId: number
-) => {
+export const generateCardToken = async (ccNumber: string) => {
   try {
-    const response = await axiosInstance(
-      `https://devapi2.shop.com/shopper-wallets/v1/Shopper/${shopperId}/Wallet/${paymentId}?siteId=222&api_key=${API_KEY}`
-    ).put("", data, {
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    });
+    const response = await axiosInstance(`${GET_TOKEN_SERVICE()}?ccNum${ccNumber}`).get("");
     return response;
   } catch (error) {
     console.error("Unable to update payment details", error);
   }
 };
+
+// export const generateCardToken = async (
+//   data: string,
+//   shopperId: string,
+//   paymentId: number
+// ) => {
+//   try {
+//     const response = await axiosInstance(
+//       `https://devapi2.shop.com/shopper-wallets/v1/Shopper/${shopperId}/Wallet/${paymentId}?siteId=222&api_key=${API_KEY}`
+//     ).put("", data, {
+//       headers: { "Content-Type": "application/x-www-form-urlencoded" },
+//     });
+//     return response;
+//   } catch (error) {
+//     console.error("Unable to update payment details", error);
+//   }
+// };

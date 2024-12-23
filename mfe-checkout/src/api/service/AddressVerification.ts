@@ -1,5 +1,7 @@
-import { GET_API_ENDPOINT_BASE_URL } from "../../utils/ApiConstants";
+import { GET_API_ENDPOINT_BASE_URL_ONLY } from "../../utils/urlResolver";
 import axiosInstance from "../axios";
+
+const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 
 export const postAVS = async (
   shpAddr1: string,
@@ -9,7 +11,7 @@ export const postAVS = async (
   shpPCode: string,
   addressHash: string
 ): Promise<any> => {
-  const apiEndpoint = GET_API_ENDPOINT_BASE_URL + "/avs/v1/hash";
+  const apiEndpoint = `${apiDomain}/avs/v1/hash`;
 
   try {
     const avsResponse = await axiosInstance(apiEndpoint).post("", {

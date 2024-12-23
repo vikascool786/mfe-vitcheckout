@@ -25,6 +25,7 @@ interface ICardInformationProps {
   initialData?: Partial<ShopperSavedPayments>;
   onCancel?: () => void;
   shopperId: string;
+  showBillingSection?: boolean;
 }
 
 /**
@@ -63,6 +64,7 @@ const defaultAddress: Address = {
 export const CardInformation: React.FC<ICardInformationProps> = ({
   initialData,
   shopperId,
+  showBillingSection = true,
 }) => {
   const [sameShippingAddress, setSameShippingAddress] =
     useState<boolean>(false);
@@ -303,37 +305,41 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           <span className="shipping-text">Save card for later</span>
         </div>
       </div>
-      <div className="billing">
-        <div className="billing-address">
-          Billing Address
-          <input
-            className="checkbox"
-            type="checkbox"
-            checked={sameShippingAddress}
-            onChange={() => setSameShippingAddress(!sameShippingAddress)}
-          />
-        </div>
-        <span className="shipping-text">Same as shipping</span>
-      </div>
-      {!sameShippingAddress ? (
-        <AddressForm
-          shippingAddress={address}
-          siteId="260"
-          onAddressChange={(updatedAddress: Address) => {
-            setAddress(updatedAddress);
-            setCardInformation((prev) => ({
-              ...prev,
-              address: updatedAddress,
-            }));
-          }}
-        />
-      ) : (
-        <div className="checkbox-text">
-          {shippingAddress?.first} {shippingAddress?.last}{" "}
-          {shippingAddress?.address1}
-          {shippingAddress?.address2} {shippingAddress?.city}{" "}
-          {shippingAddress?.zip}
-        </div>
+      {showBillingSection && (
+        <>
+          <div className="billing">
+            <div className="billing-address">
+              Billing Address
+              <input
+                className="checkbox"
+                type="checkbox"
+                checked={sameShippingAddress}
+                onChange={() => setSameShippingAddress(!sameShippingAddress)}
+              />
+            </div>
+            <span className="shipping-text">Same as shipping</span>
+          </div>
+          {!sameShippingAddress ? (
+            <AddressForm
+              shippingAddress={address}
+              siteId="260"
+              onAddressChange={(updatedAddress: Address) => {
+                setAddress(updatedAddress);
+                setCardInformation((prev) => ({
+                  ...prev,
+                  address: updatedAddress,
+                }));
+              }}
+            />
+          ) : (
+            <div className="checkbox-text">
+              {shippingAddress?.first} {shippingAddress?.last}{" "}
+              {shippingAddress?.address1}
+              {shippingAddress?.address2} {shippingAddress?.city}{" "}
+              {shippingAddress?.zip}
+            </div>
+          )}
+        </>
       )}
     </div>
   );

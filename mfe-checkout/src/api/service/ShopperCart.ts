@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { IShopperCart, IShopperChangeCart } from "../../interfaces/ShopperCart";
-import { API_KEY, GET_API_ENDPOINT_BASE_URL } from "../../utils/ApiConstants";
+import { GET_API_KEY, GET_API_ENDPOINT_BASE_URL_ONLY } from "../../utils/urlResolver";
 
 interface UseGetShopperCartResult {
   data: IShopperCart | null;
@@ -211,7 +211,7 @@ export const useGetShopperCart = (
     setError(null);
     try {
       const response = await axios.get(
-        `${API_KEY}/cart-universal/v2/carts/id/${cartId}?siteId=${siteId}`
+        `${GET_API_KEY()}/cart-universal/v2/carts/id/${cartId}?siteId=${siteId}`
       );
       setData(response.data);
     } catch (err: any) {
@@ -247,7 +247,7 @@ export const useUpdateShopperCart = (
 
     try {
       await axios.put(
-        `${GET_API_ENDPOINT_BASE_URL}/checkout-universal/v1/checkouts/id/${cartId}&api_key=${API_KEY}`,
+        `${GET_API_ENDPOINT_BASE_URL_ONLY()}/checkout-universal/v1/checkouts/id/${cartId}&api_key=${GET_API_KEY()}`,
         payload
       );
       setSuccess(true);

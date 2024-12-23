@@ -1,20 +1,23 @@
 import React, { useEffect, useMemo, useRef } from "react";
-import { useAtom } from "jotai";
+import { Provider, useSetAtom, useAtom } from "jotai";
 import "../App.scss";
-import { OrderResponse } from "../api/service/Order";
+import { changeOrder, fetchOrderDetail, OrderResponse } from "../api/service/Order";
 import { withErrorBoundary } from "../hoc/withErrorBoundary";
+import { Checkout } from "./Checkout";
+import { OrderSummary } from "../order-summary/OrderSummary";
+import { PaymentMethod } from "../payment-method/PaymentMethods";
+import { ShippingMethod } from "../shipping-methods/ShippingMethod";
 import { useApi } from "../hooks/useAPI";
 import { Address } from "../interfaces/Address";
 import { ChangeOrder } from "../interfaces/ChangeOrder";
 import { Order } from "../interfaces/Order";
 import { IPaymentMethod } from "../interfaces/PaymentMethod";
-import { OrderSummary } from "../order-summary/OrderSummary";
-import { PaymentMethod } from "../payment-method/PaymentMethods";
-import { ShippingMethod } from "../shipping-methods/ShippingMethod";
-import { orderAtom } from "../store";
+import { orderAtom, OrderStore } from "../store";
+import { ORDER_DATA } from "../utils/MOCKS";
 import { API_KEY, GET_API_ENDPOINT_BASE_URL } from "../utils/ApiConstants";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
-import { Checkout } from "./Checkout";
+import HeadHelmet from "../head-helmet/HeadHelmet";
+
 
 const getInitialBuildOrderData = (cartId: string): ChangeOrder => ({
   debug: true,
@@ -43,11 +46,15 @@ const getInitialBuildOrderData = (cartId: string): ChangeOrder => ({
 interface ICheckoutContainer {
   shopperId: string;
   cartId: string;
+  pcid: string;
+  siteId: string;
 }
 
 const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   shopperId,
   cartId,
+  pcid,
+  siteId,
 }) => {
   const [orderData, setOrderData] = useAtom(orderAtom);
   const hasInitializedOrder = useRef(false); // Prevent multiple executions of updateOrder
@@ -135,11 +142,14 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
               addresses={addresses}
             />
             <ShippingMethod order={orderData} />
-            <PaymentMethod shopperId={shopperId} cartId={cartId} />
+            <PaymentMethod cartId={cartId} shopperId={shopperId} siteId={siteId} pcid={pcid} />
           </>
         )}
       </div>
-      <OrderSummary />
+      <div>
+        <OrderSummary pcid={pcid} />
+      </div>
+      <HeadHelmet />
     </div>
   );
 };

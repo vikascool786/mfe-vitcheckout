@@ -1,11 +1,15 @@
 import { useEffect, useState } from "react";
 import { Address } from "../../interfaces/Address";
 import { EWallet } from "../../interfaces/EWallet";
-import { API_KEY, GET_API_ENDPOINT_BASE_URL } from "../../utils/ApiConstants";
+import { GET_API_KEY, GET_API_ENDPOINT_BASE_URL_ONLY } from "../../utils/urlResolver";
 import axiosInstance from "../axios";
 
+const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
+const apiKey = GET_API_KEY();
+
+
 const shopperWalletApiEndpoint = (id: string) =>
-  `${GET_API_ENDPOINT_BASE_URL}/shopper-wallets/v1/Shopper/${id}/Wallet/Addresses?api_key=${API_KEY}`;
+  `${apiDomain}/shopper-wallets/v1/Shopper/${id}/Wallet/Addresses?api_key=${apiKey}`;
 
 export const useShopperEWallet = (customerId: string) => {
   const [eWalletData, setEWalletData] = useState<EWallet | null>(null);
@@ -16,7 +20,7 @@ export const useShopperEWallet = (customerId: string) => {
     const fetchShopperEWallet = async () => {
       try {
         setLoading(true);
-        const shopperEWalletApiEndpoint = `${GET_API_ENDPOINT_BASE_URL}/ewallet/v1/customer/${customerId}?merchCountry=USA&langCode=ENG&siteId=222&siteCountry=USA&siteType=SHP&api_key=${API_KEY}`;
+        const shopperEWalletApiEndpoint = `${apiDomain}/ewallet/v1/customer/${customerId}?merchCountry=USA&langCode=ENG&siteId=222&siteCountry=USA&siteType=SHP&api_key=${apiKey}`;
         const { data: eWalletResponse } = await axiosInstance(
           shopperEWalletApiEndpoint
         ).get("");
@@ -49,7 +53,7 @@ export const useShopperEWalletAddresses = (customerId: string) => {
     const fetchShopperAddresses = async () => {
       try {
         setLoading(true);
-        // const addressApiEndpoint = `${GET_API_ENDPOINT_BASE_URL}/Shopper/${customerId}/Wallet/Addresses?siteId=222&api_key=${API_KEY}`;
+        // const addressApiEndpoint = `${apiDomain}/Shopper/${customerId}/Wallet/Addresses?siteId=222&api_key=${apiKey}`;
         const { data: addressResponse } = await axiosInstance(
           shopperWalletApiEndpoint(customerId)
         ).get("");

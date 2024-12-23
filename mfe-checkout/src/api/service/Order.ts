@@ -1,7 +1,7 @@
 import { ChangeOrder } from "../../interfaces/ChangeOrder";
 import { Order } from "../../interfaces/Order";
 import { ApiResponse } from "../../interfaces/ShippingMethod";
-import { API_KEY, GET_API_ENDPOINT_BASE_URL } from "../../utils/ApiConstants";
+import { GET_API_KEY, GET_API_ENDPOINT_BASE_URL_ONLY } from "../../utils/urlResolver";
 import axiosInstance from "../axios";
 
 export interface OrderResponse {
@@ -33,16 +33,20 @@ export interface MetaData {
   status_text: string;
 }
 
-const shopperOrderAPIEndpoint = (cartId: string) =>
-  `${GET_API_ENDPOINT_BASE_URL}/checkout-universal/v1/checkouts/id/${cartId}?api_key=${API_KEY}`;
+const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
+const apiKey = GET_API_KEY();
 
-const shopperBuildOrderAPIEndpoint = `${GET_API_ENDPOINT_BASE_URL}/checkout-universal/v1/checkouts?api_key=${API_KEY}`;
+
+const shopperOrderAPIEndpoint = (cartId: string) =>
+  `${apiDomain}/checkout-universal/v1/checkouts/id/${cartId}?api_key=${apiKey}`;
+
+const shopperBuildOrderAPIEndpoint = `${apiDomain}/checkout-universal/v1/checkouts?api_key=${apiKey}`;
 
 const shopperUpdateOrderEndpoint = (cartId: string) =>
-  `${GET_API_ENDPOINT_BASE_URL}/checkout-universal/v1/checkouts/id/${cartId}`;
+  `${apiDomain}/checkout-universal/v1/checkouts/id/${cartId}`;
 
 const commitOrderEndpoint = (cartId: string) =>
-  `${GET_API_ENDPOINT_BASE_URL}/checkout-universal/v1/checkouts/id/${cartId}`;
+  `${apiDomain}/checkout-universal/v1/checkouts/id/${cartId}`;
 
 export const fetchOrderDetail = async (cartId: string): Promise<Order> => {
   try {

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { RadioButton } from "../component/RadioButton/RadioButton";
 import { ShopperSavedPayments } from "../interfaces/ShopperSavedPayments";
 import { CardInformation } from "../payment-method/card-information/CardInformation";
@@ -11,11 +11,12 @@ export interface IPaymentOptionProps {
   index: number;
   size: number;
   typeId: number;
+  siteFlagId?: number;
+  visible: boolean;
   isSavedCard?: boolean;
   onChange: () => void;
   shopperSavedPayment?: ShopperSavedPayments;
-  shopperId: string;
-  cartId: string;
+  shopperId?: string;
 }
 export const PaymentOption: React.FC<
   IPaymentOptionProps & {
@@ -35,7 +36,6 @@ export const PaymentOption: React.FC<
   isSavedCard = false,
   shopperSavedPayment,
   shopperId,
-  cartId,
 }) => {
   const isSelected = selected ? "selected" : "";
   const isFirst = index === 0 ? "start" : "";

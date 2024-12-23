@@ -92,7 +92,9 @@ const Click2PayPlaceOrder = (function () {
 
     return {
         handleCheckoutWithC2P,
-        getDigitalCardId
+        getDigitalCardId,
+        openIframe,
+        closeIFrame
     }
 })();
 

@@ -4,8 +4,9 @@
   "author": "Vikas W  <vikasw@marketamerica.com>",
   "license": "MIT",
   "scripts": {
-    "build:prod": "NODE_ENV=production webpack --mode production",
-    "build:dev": "NODE_ENV=development webpack --mode development",
+    "build:prod": "webpack --mode production",
+    "build:staging": "webpack --mode production --env staging",
+    "build:dev": "webpack --mode production --env development",
     "build:start": "cd dist && PORT=3011 npx serve",
     "start": "NODE_ENV=development webpack serve --open --mode development",
     "start:staging": "NODE_ENV=staging webpack serve --open --mode development",

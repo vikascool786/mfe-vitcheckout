@@ -5,38 +5,51 @@ import Click2PayCards from "./Click2PayCards";
 import Click2PayNewCard from "./Click2PayNewCard";
 import { initiateValidation } from "./Click2PayOTP";
 import "./PaymentOptionClick2Pay.scss";
-import { Add } from "../assets/icons/Add";
-import { Warn } from "../assets/icons/Warn";
-import { CardInformation } from "../payment-method/card-information/CardInformation";
-import { ShopperSavedPayments } from "../interfaces/ShopperSavedPayments";
-import { Button } from "../component/Button/Button";
+import {Add} from "../assets/icons/Add";
+import {Warn} from "../assets/icons/Warn";
+import {CardInformation} from "../payment-method/card-information/CardInformation";
+import {ShopperSavedPayments} from "../interfaces/ShopperSavedPayments";
+import {Button} from "../component/Button/Button";
+import $ from "jquery";
+import {fetchCustomerProfileData} from "../api/service/CustomerProfile";
+import {Click2PayData} from "./Click2PayData";
+import { orderAtom } from "../store";
+import {useAtom} from "jotai/index";
+import {CustomerProfile} from "../interfaces/CustomerProfile";
 
-export const PaymentOptionClick2Pay: React.FC = ({ }) => {
-    const [hasSavedCards, setHasSavedCards] = useState(false);
+interface IClick2PayProps {
+    pcid: string;
+}
 
-    /*TODO: need to pass c2pdata in dynamically*/
-    const c2pData = {
-        mcc: "5963",
-        //email: "staging_c2p_0307@yopmail.com",
-        //email: "test_dev_0716@yopmail.com", //no saved c2p cards
-        email: "dev_new_0216@yopmail.com",
-        transactionAmount: 38.95,
-        hasAutoship: false,
-        mobilePhone: "",
-        cardBrands: ["mastercard", "visa", "discover", "amex"],
-        address: {
-            first: "test",
-            last: "test",
-            address1: "1 lower ragsdale dr",
-            address2: "",
-            address3: "",
-            city: "monterey",
-            state: "CA",
-            zip: "93940"
-        },
-        hasInstallmentsEnabled: false,
-        hasEmbeddedC2PEnabled: true
+const customerProfileData: CustomerProfile = {
+    email: "",
+    mobilePhone: ""
+}
+
+const c2pCustomerData: Click2PayData = {
+    mcc: "5963",
+    email: "",
+    transactionAmount: 0,
+    hasAutoship: false,
+    mobilePhone: "",
+    cardBrands: ["mastercard", "visa", "discover", "amex"],
+    address: {
+        first: "",
+        last: "",
+        address1: "",
+        address2: "",
+        address3: "",
+        city: "",
+        state: "",
+        zip: ""
     }
+}
+
+export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({ pcid }) => {
+    const [hasSavedCards, setHasSavedCards] = useState(false);
+    const [c2pData, setC2pData] = useState(c2pCustomerData);
+    const [profileData, setProfileData] = useState(customerProfileData);
+    const [order] = useAtom(orderAtom);
 
     const cardBrandsString = c2pData.cardBrands.join(",");
     const shopperSavedPayment: ShopperSavedPayments = { //used to prefill address for new c2p card
@@ -51,8 +64,32 @@ export const PaymentOptionClick2Pay: React.FC = ({ }) => {
     }
 
     useEffect(() => {
+        if (order) {
+            fetchCustomerProfileData(pcid)
+                .then((response: any) => {
+                    customerProfileData.email = response.data.email_address;
+                    customerProfileData.mobilePhone = response.data.cell_phone;
+                    setProfileData(customerProfileData);
+                    updateC2pData();
+                })
+                .catch((error: { message: string; }) => {
+                    console.error("Failed to fetch shopper profile data:", error);
+                })
+        }
+    }, [order]);
+
+    const updateC2pData = () => {
+        setC2pData((prevData) => ({
+            ...prevData,
+            email: profileData.email,
+            mobilePhone: profileData.mobilePhone,
+            transactionAmount: order ? order.totals.price : 0,
+        }));
+    };
+
+    useEffect(() => {
         localStorage.setItem('c2pData', JSON.stringify(c2pData));
-    }, []);
+    }, [c2pData]);
 
     useEffect(() => {
         const waitForC2PLibrary = () => {
@@ -110,10 +147,14 @@ export const PaymentOptionClick2Pay: React.FC = ({ }) => {
                     setHasSavedCards(response.consumerPresent === true)
                 })
                 .catch((error: { message: string; }) => {
-                    console.log("getUserCards error: " + error.message);
+                    console.error("getUserCards error: " + error.message);
                 })
         };
         waitForC2PLibrary();
+    }, []);
+
+    useEffect(() => {
+        $(".js-c2p-payment-add-card-form").parsley();
     }, []);
 
     const initiateOTPValidation = () => {
@@ -130,9 +171,19 @@ export const PaymentOptionClick2Pay: React.FC = ({ }) => {
     }
 
     const saveNewCard = () => {
-        // @ts-ignore
-        Click2PayNewCard.addCardToClick2Pay(window.c2pInstance);
+        if(hasValidNewCardFormFields()){
+            // @ts-ignore
+            Click2PayNewCard.addCardToClick2Pay(window.c2pInstance);
+        }
     }
+
+    const hasValidNewCardFormFields = () => {
+        const form = document.querySelector(
+            ".js-c2p-payment-add-card-form"
+        ) as HTMLElement;
+        $(form).parsley().validate();
+        return $(form).parsley().isValid();
+    };
 
     return (
         <div className="checkout-method-click-to-pay">
@@ -189,23 +240,31 @@ export const PaymentOptionClick2Pay: React.FC = ({ }) => {
             </div>
             <div className="js-c2p-otp-selection-container" style={{ display: "none" }}>
             </div>
-            <div className="js-c2p-payment-add-card-container click-to-pay__iframe-container" role="dialog" aria-modal="true"
-                aria-labelledby="dialogClickToPayAddCard" style={{ display: "none" }}>
+            <div className="js-c2p-payment-add-card-container click-to-pay__iframe-container" role="dialog"
+                 aria-modal="true"
+                 aria-labelledby="dialogClickToPayAddCard" style={{display: "none"}}>
+                <button
+                    className="js-c2p-payment-add-card-close overlay-simple__close overlay-simple__close--dark margin-top">
+                    <span className="collapse-text">Close</span>
+                    <span className="material-icons" aria-hidden="true">close</span>
+                </button>
+                <div className="js-c2p-payment-add-card-error-container" style={{display: "none"}}>
+                </div>
                 <form id="dialogClickToPayAddCard"
-                    className="js-c2p-payment-add-card-form click-to-pay__iframe-modal click-to-pay__iframe-modal--padding click-to-pay__iframe-modal--flex
+                      className="js-c2p-payment-add-card-form click-to-pay__iframe-modal click-to-pay__iframe-modal--padding click-to-pay__iframe-modal--flex
                      click-to-pay__iframe-modal--scrollable">
                     <div className="click-to-pay__iframe-content--scrollable">
                         <div className="click-to-pay__heading">Card Information</div>
                         <div>
-                            <src-card-list card-brands={cardBrandsString} />
+                            <src-card-list card-brands={cardBrandsString}/>
                             <div className="checkout-method-click-to-pay-text">Save my information with Click to Pay for
                                 fast,
                                 secure checkout.
                             </div>
                         </div>
-                        <CardInformation shopperId="" initialData={{
+                        <CardInformation showBillingSection={false} shopperId="" initialData={{
                             ...shopperSavedPayment,
-                        }} />
+                        }}/>
                     </div>
                     <div className="form-footer form-footer__dual-button">
                         <Button
@@ -214,15 +273,15 @@ export const PaymentOptionClick2Pay: React.FC = ({ }) => {
                             onClick={closeAddCardOverlay}
                         />
                         <Button label="Save" type="primary"
-                            onClick={saveNewCard} />
+                                onClick={saveNewCard}/>
                     </div>
                 </form>
             </div>
             <div className="js-c2p-payment-iframe-container click-to-pay__iframe-container" role="dialog"
-                aria-modal="true" aria-labelledby="dialogClickToPay" style={{ display: "none" }}>
+                 aria-modal="true" aria-labelledby="dialogClickToPay" style={{display: "none"}}>
                 <div className="click-to-pay__iframe-modal">
                     <iframe id="dialogClickToPay" name="c2pPaymentIframe"
-                        className="click-to-pay__iframe-content"></iframe>
+                            className="click-to-pay__iframe-content"></iframe>
                 </div>
             </div>
             <input className="js-c2p-payment-data" type="hidden" />

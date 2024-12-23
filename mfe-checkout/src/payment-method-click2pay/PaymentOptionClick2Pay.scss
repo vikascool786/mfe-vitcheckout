@@ -73,3 +73,36 @@
     }
   }
 }
+
+.collapse-text{
+  position: absolute;
+  top: auto;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.overlay-simple__close{
+  position: relative;
+  float: right;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 23px;
+  width: 23px;
+  font-size: 0.875rem;
+  font-weight: bold;
+  text-decoration: none;
+  color: #fff;
+  background: #9597A6;
+  border: 1px solid #9597A6;
+  border-radius: 50%;
+  margin-bottom: -20px;
+  cursor: pointer;
+  &--dark{
+    color: #F0F1F7;
+    background: #202340;
+    border: 1px solid #202340;
+  }
+}

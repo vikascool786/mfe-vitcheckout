@@ -4,8 +4,11 @@
 
 import Click2PayLogger from "./Click2PayLogger";
 import Click2PayUtil from "./Click2PayUtil";
+import Click2PayPlaceOrder from "./Click2PayPlaceOrder";
 const Click2PayNewCard = (function () {
     const addCardOverlay = '.js-c2p-payment-add-card-container';
+    const errorContainer = '.js-c2p-payment-add-card-error-container';
+    const cardForm = '.js-c2p-payment-add-card-form';
 
     function closeAddCardOverlay() {
         toggleNewCardOverlay(false);
@@ -42,9 +45,9 @@ const Click2PayNewCard = (function () {
         //Click2PayLogger.logInfo("initiating encryptCard()");
         //Click2PayLogger.logResponse("encryptCard", {}, c2pInstance);
         const encryptPromise = c2pInstance.encryptCard(params);
-        /*encryptPromise
+        encryptPromise
             .then(response => encryptCardSuccessHandler(response, c2pInstance))
-            .catch(error => encryptCardFailedHandler(error))*/
+            .catch(error => encryptCardFailedHandler(error))
     }
 
     function buildEncryptCardParams(){
@@ -74,6 +77,131 @@ const Click2PayNewCard = (function () {
             parameters.billingAddress = getBillingAddress();
         }*/
         return parameters;
+    }
+
+    function encryptCardSuccessHandler(response, c2pInstance){
+        //Click2PayLogger.logResponse("encryptCard", response, c2pInstance);
+        closeAddCardOverlay();
+        Click2PayPlaceOrder.openIframe();
+        checkoutWithNewCard(c2pInstance, response);
+        //checkoutClick2payUtil.openiFrame();
+        ////checkoutC2PAddCard.checkoutWithNewCard(c2pInstance, response);
+    }
+
+    function encryptCardFailedHandler(error){
+        const errorMessage = error.message;
+        //Click2PayLogger.logInfo("encryptCard failed message: " + errorMessage);
+        const encryptErrMsg = "There has been a problem adding your a new card to your Click to Pay wallet. Please enter a different payment method or try again.";
+        displayError(encryptErrMsg);
+        //cancelNewCardOverlay();
+        //checkoutClick2payUtil.displayErrorMessage(stringReplacer.getMessage("checkout.click_to_pay.encrypt_new_card.error"));
+    }
+
+    function displayError(errorMessage){
+        const errorDiv = document.querySelector(errorContainer);
+        errorDiv.innerHTML = errorMessage;
+        errorDiv.style.display = "block";
+        hideCreditCardForm()
+    }
+
+    function hideCreditCardForm(){
+        const form = document.querySelector(cardForm);
+        if(form){
+            form.style.display = "none";
+        }
+    }
+
+    function checkoutWithNewCard(c2pInstance, encryptedCardData){
+        //checkoutClick2payUtil.hideErrorMessage();
+        const params = buildNewCardParameters(encryptedCardData);
+        //Click2PayLogger.logInfo("initiating checkoutWithNewCard()");
+        //Click2PayLogger.logResponse("checkoutWithNewCard", {}, c2pInstance);
+        const checkoutPromise = c2pInstance.checkoutWithNewCard(params);
+        checkoutPromise
+            .then(response => checkoutWithNewCardSuccessHandler(response, c2pInstance))
+            .catch(error => checkoutWithNewCardFailedHandler(error))
+    }
+
+    function buildNewCardParameters(encryptedCardData){
+        let params = {
+            encryptedCard: encryptedCardData.encryptedCard,
+            cardBrand: encryptedCardData.cardBrand,
+            consumer: {
+                emailAddress: `${Click2PayUtil.getC2pData().email}`,
+                firstName: `${Click2PayUtil.getC2pData().address.first}`,
+                lastName: `${Click2PayUtil.getC2pData().address.last}`
+            },
+            windowRef: window.frames['c2pPaymentIframe'],
+            checkoutExperience: "WITHIN_CHECKOUT",
+            dpaTransactionOptions: {
+                "dpaLocale": "en_US",
+                "threeDsPreference": "NONE",
+                "dpaBillingPreference": "FULL",
+                "consumerNameRequested": true,
+                "confirmPayment": false
+            }
+        }
+        /*if(checkoutC2PCards.hasMobilePhone()){
+            const mobilePhone = {
+                phoneNumber: getFilteredPhoneNumber(c2pData.mobilePhone),
+                countryCode: "1"
+            }
+            params.consumer.mobileNumber = mobilePhone;
+        }*/
+        return params;
+    }
+
+    function checkoutWithNewCardSuccessHandler(response, c2pInstance){
+        //Click2PayLogger.logResponse("checkoutWithNewCard", response, c2pInstance);
+        console.log("checkout with new card success: " + JSON.stringify(response));
+        if (response.checkoutActionCode === 'COMPLETE') {
+            /*const placeOrderWithC2PEmbeddedURL = checkoutClick2payUtil.getPlaceOrderURL(response);
+            c2pData.checkoutUrl = placeOrderWithC2PEmbeddedURL;
+            checkoutClick2payUtil.closeiFrame();
+            setNewCardPlaceOrderCustomAttribute(c2pInstance);*/
+            displayNewCard(response);
+
+        }else if(response.checkoutActionCode === 'CHANGE_CARD'){
+            Click2PayPlaceOrder.closeIFrame();
+            //checkoutClick2payUtil.closeiFrame();
+            //checkoutC2PCards.getCards(c2pInstance); //need to refresh the card list since new card was added
+        } else{
+            Click2PayPlaceOrder.closeIFrame();
+        }
+    }
+
+    function displayNewCard(response) {
+        console.log("display new card");
+        const cardData = response.checkoutResponseData.maskedCard;
+        const digitalCardData = cardData.digitalCardData;
+        const singleCardElement = document.createElement("src-card");
+        if (cardData.panBin) {
+            singleCardElement.setAttribute("account-bin", cardData.panBin);
+        }
+        singleCardElement.setAttribute("account-number-suffix", cardData.panLastFour);
+        singleCardElement.setAttribute("card-art", digitalCardData.artUri);
+        singleCardElement.setAttribute("descriptor-name", digitalCardData.descriptorName);
+        singleCardElement.setAttribute("card-status", digitalCardData.status);
+        singleCardElement.setAttribute("locale", "en_US");
+        /*singleCardContainer.replaceChildren(singleCardElement);
+        elementDisplayUtil.setElementVisibility(singleCardContainer, "block");
+        elementDisplayUtil.setElementVisibility(c2pEmbeddedPayment, "block");
+        elementDisplayUtil.setElementVisibility(srcCardList, "none");
+        hideAddNewCard();
+        checkoutClick2payUtil.hideEmptyCardListMsg();
+        checkoutClick2payUtil.showChangePaymentMethod();
+        hideCardListAddNewC2PCard();
+        checkoutPaymentMethods.hideAllPaymentMethods();
+        checkoutPaymentUtil.enableC2PPlaceOrderButton();
+        checkoutClick2payUtil.triggerC2PSelectionChange(C2P_TYPE_ID, cardData.panBin, cardData.panLastFour);*/
+    }
+
+    function checkoutWithNewCardFailedHandler(error){
+        const errorMessage = error.message;
+        console.log("checkoutWithNewCard() failed error message: " + errorMessage, JSON.stringify(error));
+        //Click2PayLogger.logInfo("checkoutWithNewCard failed message: " + errorMessage);
+        Click2PayPlaceOrder.closeIFrame();
+        //checkoutClick2payUtil.displayErrorMessage(stringReplacer.getMessage("checkout.click_to_pay.new_payment.error"));
     }
 
     return {

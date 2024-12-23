@@ -1,6 +1,10 @@
 import { useState, useCallback } from "react";
-import { API_KEY, GET_API_ENDPOINT_BASE_URL } from "../../utils/ApiConstants";
+import { GET_API_KEY, GET_API_ENDPOINT_BASE_URL_ONLY } from "../../utils/urlResolver";
 import axiosInstance from "../axios";
+
+const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
+const apiKey = GET_API_KEY();
+
 
 // Hook for fetching the shopper's address book
 export const useFetchShopperAddressBook = () => {
@@ -12,7 +16,7 @@ export const useFetchShopperAddressBook = () => {
     setLoading(true);
     setError(null);
     try {
-      const endpoint = `${GET_API_ENDPOINT_BASE_URL}/shopper-addressbooks/v1/${shopperId}/AddressBook?api_key=${API_KEY}`;
+      const endpoint = `${apiDomain}/shopper-addressbooks/v1/${shopperId}/AddressBook?api_key=${apiKey}`;
       const response = await axiosInstance(endpoint).get("");
       setData(response.data);
       return response.data;
@@ -38,7 +42,7 @@ export const useCreateShopperAddressBookEntry = () => {
       setLoading(true);
       setError(null);
       try {
-        const endpoint = `${GET_API_ENDPOINT_BASE_URL}/shopper-addressbooks/v1/${shopperId}/AddressBook?api_key=${API_KEY}`;
+        const endpoint = `${apiDomain}/shopper-addressbooks/v1/${shopperId}/AddressBook?api_key=${apiKey}`;
         const response = await axiosInstance(endpoint).post(
           "",
           addressData,
@@ -69,7 +73,7 @@ export const useUpdateShopperAddressBookEntry = () => {
       setLoading(true);
       setError(null);
       try {
-        const endpoint = `${GET_API_ENDPOINT_BASE_URL}/shopper-addressbooks/v1/${shopperId}/AddressBook/${addressId}?api_key=${API_KEY}`;
+        const endpoint = `${apiDomain}/shopper-addressbooks/v1/${shopperId}/AddressBook/${addressId}?api_key=${apiKey}`;
         const response = await axiosInstance(endpoint).put(
           "",
           addressData,
@@ -99,7 +103,7 @@ export const useUpdateTextUpdatesForPhone = () => {
   const updateTextUpdatesForPhone = useCallback(async (phoneNumber: string) => {
     setLoading(true);
     setError(null);
-    const endpoint = `https://devapi2.shop.com/twilio/v1/lookups?type=carrier&to=${phoneNumber}&country=USA?api_key=${API_KEY}`;
+    const endpoint = `https://devapi2.shop.com/twilio/v1/lookups?type=carrier&to=${phoneNumber}&country=USA?api_key=${apiKey}`;
     try {
       const response = await axiosInstance(endpoint).get("");
       setData(response.data);

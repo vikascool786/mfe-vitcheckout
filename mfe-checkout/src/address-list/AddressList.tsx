@@ -1,8 +1,8 @@
 import React from "react";
-import { AddressDisplay } from "../address-verification/AddressDisplay";
-import { Add } from "../assets/icons/Add";
 import { RadioButton } from "../component/RadioButton/RadioButton";
+import { AddressDisplay } from "../address-verification/AddressDisplay";
 import { Address } from "../interfaces/Address";
+import { Add } from "../assets/icons/Add";
 import "./AddressList.scss";
 
 interface AppProps {
@@ -20,8 +20,6 @@ export const AddressList: React.FC<AppProps> = ({
   onEditAddressClick,
   onAddNewAddressClick,
 }) => {
-
-  
   return (
     <div className="addresslist">
       {addressBook.map((address, index) => {

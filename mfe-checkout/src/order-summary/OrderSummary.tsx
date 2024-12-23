@@ -12,12 +12,13 @@ import "./OrderSummary.scss";
 import { getCatalogName } from "../utils/helpers/GetCatalog";
 
 interface IOrderSummary {
+  pcid: string;
   hideCashback?: boolean;
 }
 
-export const OrderSummary: React.FC<IOrderSummary> = ({ hideCashback }) => {
+export const OrderSummary: React.FC<IOrderSummary> = ({pcid, hideCashback}) => {
   const [order, setOrder] = useAtom(orderAtom);
-  const { eWalletData, loading, error } = useShopperEWallet("2115715663");
+  const { eWalletData, loading, error } = useShopperEWallet(pcid);
   const [coupon, setCoupon] = useState("");
   const [showApplyGiftCard, setShowApplyGiftCard] = useState(false);
   const [gcPin, setGcPin] = useState<string>("");
@@ -123,8 +124,9 @@ export const OrderSummary: React.FC<IOrderSummary> = ({ hideCashback }) => {
   return (
     <div className="order-summary-container">
       <FormHeading title="Order Summary" />
-      {hideCashback && (
+      {!hideCashback && (
         <>
+          {" "}
           {!loading && !error && eWalletData && (
             <ApplyCashback cashbackData={eWalletData} />
           )}
