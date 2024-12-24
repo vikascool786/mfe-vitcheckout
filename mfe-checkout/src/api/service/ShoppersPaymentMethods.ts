@@ -1,4 +1,5 @@
 import { IPaymentMethod } from "../../interfaces/PaymentMethod";
+import { API_KEY } from "../../utils/ApiConstants";
 import { GET_API_KEY, GET_API_ENDPOINT_BASE_URL_ONLY, GET_TOKEN_SERVICE } from "../../utils/urlResolver";
 import axiosInstance from "../axios";
 
@@ -91,19 +92,19 @@ export const generateCardToken = async (ccNumber: string) => {
   }
 };
 
-// export const generateCardToken = async (
-//   data: string,
-//   shopperId: string,
-//   paymentId: number
-// ) => {
-//   try {
-//     const response = await axiosInstance(
-//       `https://devapi2.shop.com/shopper-wallets/v1/Shopper/${shopperId}/Wallet/${paymentId}?siteId=222&api_key=${API_KEY}`
-//     ).put("", data, {
-//       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-//     });
-//     return response;
-//   } catch (error) {
-//     console.error("Unable to update payment details", error);
-//   }
-// };
+export const generateCardExistingToken = async (
+  data: string,
+  shopperId: string,
+  paymentId: number
+) => {
+  try {
+    const response = await axiosInstance(
+      `https://devapi2.shop.com/shopper-wallets/v1/Shopper/${shopperId}/Wallet/${paymentId}?siteId=222&api_key=${API_KEY}`
+    ).put("", data, {
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    });
+    return response;
+  } catch (error) {
+    console.error("Unable to update payment details", error);
+  }
+};

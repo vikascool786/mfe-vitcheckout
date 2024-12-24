@@ -1,25 +1,24 @@
 import { useAtom, useAtomValue } from "jotai";
 import $ from "jquery";
 import "parsleyjs";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
+import { buildOrder } from "../../api/service/Order";
 import {
   addShoppersPaymentMethod,
-  generateCardToken,
-  updateShopperDetails,
+  generateCardExistingToken,
 } from "../../api/service/ShoppersPaymentMethods";
 import { AddressForm } from "../../component/AddressForm";
+import { Button } from "../../component/Button/Button";
 import { DropdownField } from "../../component/Form/Field/DropdownField";
 import { FormField } from "../../component/Form/Field/FormField";
+import { useApi } from "../../hooks/useAPI";
 import { Address } from "../../interfaces/Address";
+import { IPaymentMethod } from "../../interfaces/PaymentMethod";
 import { ShopperSavedPayments } from "../../interfaces/ShopperSavedPayments";
 import { addressAtom, orderAtom } from "../../store";
-import "./CardInformation.scss";
-import { Button } from "../../component/Button/Button";
-import { useApi } from "../../hooks/useAPI";
-import { IPaymentMethod } from "../../interfaces/PaymentMethod";
 import { API_KEY, GET_API_ENDPOINT_BASE_URL } from "../../utils/ApiConstants";
-import { buildOrder } from "../../api/service/Order";
 import { generateChangeStoreResponse } from "../../utils/helpers/GenerateChangeStoreResponse";
+import "./CardInformation.scss";
 
 interface ICardInformationProps {
   initialData?: Partial<ShopperSavedPayments>;
@@ -216,13 +215,29 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   // function to call an API when CVV is entered to generate a payment id
 
   const generatePaymentId = async () => {
-    handleSaveAddress("TEMP");
+    const data = JSON.stringify({
+      cvv: cardInformation.cvv,
+    });
+    if (cardInformation.id) {
+      await generateCardExistingToken(data, shopperId, cardInformation.id);
+      await buildOrder(
+        generateChangeStoreResponse({
+          ...order,
+          paymentMethod: {
+            ...order?.paymentMethod,
+            id: cardInformation.id,
+          },
+        })
+      );
+    } else {
+      handleSaveAddress("TEMP");
+    }
   };
 
   return (
     <div className="card-information-container">
       <Button
-        label="Generate Payment ID"
+        label={`Generate Payment ID for ${cardInformation.accountName}`}
         type="primary"
         onClick={generatePaymentId}
       />

@@ -1,7 +1,11 @@
 import React, { useEffect, useMemo, useRef } from "react";
 import { Provider, useSetAtom, useAtom } from "jotai";
 import "../App.scss";
-import { changeOrder, fetchOrderDetail, OrderResponse } from "../api/service/Order";
+import {
+  changeOrder,
+  fetchOrderDetail,
+  OrderResponse,
+} from "../api/service/Order";
 import { withErrorBoundary } from "../hoc/withErrorBoundary";
 import { Checkout } from "./Checkout";
 import { OrderSummary } from "../order-summary/OrderSummary";
@@ -17,7 +21,6 @@ import { ORDER_DATA } from "../utils/MOCKS";
 import { API_KEY, GET_API_ENDPOINT_BASE_URL } from "../utils/ApiConstants";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import HeadHelmet from "../head-helmet/HeadHelmet";
-
 
 const getInitialBuildOrderData = (cartId: string): ChangeOrder => ({
   debug: true,
@@ -79,18 +82,20 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     data: order,
     isLoading: loadingOrder,
     postData,
-  } = useApi<OrderResponse>(checkoutUrl, "POST", getInitialBuildOrderData(cartId));
+  } = useApi<OrderResponse>(
+    checkoutUrl,
+    "POST",
+    getInitialBuildOrderData(cartId)
+  );
 
   const updateOrder = async (
     orderData: Order,
-    paymentId: number,
     billingId: number,
     shippingId: number
   ) => {
     const orderResponse = await postData(
       generateChangeStoreResponse({
         ...orderData,
-        paymentMethod: { ...orderData.paymentMethod, id: paymentId },
         billingAddress: { ...orderData.billingAddress, id: billingId },
         shippingAddress: { ...orderData.shippingAddress, id: shippingId },
       })
@@ -118,7 +123,6 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
       hasInitializedOrder.current = true; // Mark as initialized
       updateOrder(
         order?.response.success.data,
-        defaultPaymentMethod.id,
         defaultPaymentMethod.addressId,
         defaultAddress.id
       );
@@ -128,8 +132,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   if (loadingAddresses || loadingPaymentMethods || loadingOrder)
     return <div>Loading...</div>;
 
-  if (addressError || paymentError)
-    return <div>Failed to load data</div>;
+  if (addressError || paymentError) return <div>Failed to load data</div>;
 
   return (
     <div className="checkout-container">
@@ -142,7 +145,12 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
               addresses={addresses}
             />
             <ShippingMethod order={orderData} />
-            <PaymentMethod cartId={cartId} shopperId={shopperId} siteId={siteId} pcid={pcid} />
+            <PaymentMethod
+              cartId={cartId}
+              shopperId={shopperId}
+              siteId={siteId}
+              pcid={pcid}
+            />
           </>
         )}
       </div>
