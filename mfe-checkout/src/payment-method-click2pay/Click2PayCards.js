@@ -9,7 +9,6 @@ const Click2PayCards = (function () {
     function getUserCards(c2pInstance) {
         return c2pInstance.getCards()
             .then((cardsResponse) => {
-                console.log("getCards response: " + JSON.stringify(cardsResponse));
                 return new Promise((resolve) => {
                     if (cardsResponse.length < 1) {
                         resolve(doLookup(c2pInstance));
@@ -42,7 +41,6 @@ const Click2PayCards = (function () {
                 phoneNumber: Click2PayUtil.getC2pData().mobilePhone
             }
         }
-        console.log("looking up by mobile");
         return lookupAccount(c2pInstance, params, true);
     }
 
@@ -50,7 +48,6 @@ const Click2PayCards = (function () {
         const params = {
             email: `${Click2PayUtil.getC2pData().email}`
         }
-        console.log("looking up by email");
         return lookupAccount(c2pInstance, params, false);
     }
 

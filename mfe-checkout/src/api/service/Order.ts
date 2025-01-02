@@ -36,17 +36,14 @@ export interface MetaData {
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
 
-
 const shopperOrderAPIEndpoint = (cartId: string) =>
   `${apiDomain}/checkout-universal/v1/checkouts/id/${cartId}?api_key=${apiKey}`;
 
 const shopperBuildOrderAPIEndpoint = `${apiDomain}/checkout-universal/v1/checkouts?api_key=${apiKey}`;
 
-const shopperUpdateOrderEndpoint = (cartId: string) =>
-  `${apiDomain}/checkout-universal/v1/checkouts/id/${cartId}`;
+const shopperUpdateOrderEndpoint = (cartId: string) => `${GET_API_ENDPOINT_BASE_URL_ONLY()}/checkout-universal/v1/checkouts/id/${cartId}`
 
-const commitOrderEndpoint = (cartId: string) =>
-  `${apiDomain}/checkout-universal/v1/checkouts/id/${cartId}`;
+const commitOrderEndpoint = (cartId: string) =>`${GET_API_ENDPOINT_BASE_URL_ONLY()}/checkout-universal/v1/checkouts/id/${cartId}?api_key=${GET_API_KEY()}`
 
 export const fetchOrderDetail = async (cartId: string): Promise<Order> => {
   try {
@@ -61,11 +58,11 @@ export const fetchOrderDetail = async (cartId: string): Promise<Order> => {
 };
 
 export const buildOrder = async (
-  orderPayload: ChangeOrder
+    orderPayload: ChangeOrder
 ): Promise<OrderResponse> => {
   try {
     const orderResponse = await axiosInstance(
-      shopperBuildOrderAPIEndpoint
+        shopperBuildOrderAPIEndpoint
     ).post("", orderPayload);
     return orderResponse.data;
   } catch (error) {
@@ -80,7 +77,7 @@ export const changeOrder = async (
 ): Promise<OrderResponse> => {
   try {
     const orderResponse = await axiosInstance(
-      shopperUpdateOrderEndpoint(cartId)
+        shopperUpdateOrderEndpoint(cartId)
     ).put("", changeStorePayload);
     return orderResponse.data;
   } catch (error) {
@@ -89,14 +86,14 @@ export const changeOrder = async (
   }
 };
 
-export const commitOrder = async (cartId: string): Promise<any> => {
+export const commitOrder = async (
+    cartId: string,
+): Promise<any> => {
   try {
-    const response = await axiosInstance(commitOrderEndpoint(cartId)).post(
-      "",
-      {}
-    );
+    const response = await axiosInstance(
+        commitOrderEndpoint(cartId)
+    ).post("", {});
     console.log("commit order successfully: " + JSON.stringify(response));
-    alert("Order Commited Successfully");
     return response;
   } catch (error) {
     console.error("Unable to commit order", error);

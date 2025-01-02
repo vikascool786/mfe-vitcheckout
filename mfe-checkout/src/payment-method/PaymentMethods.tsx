@@ -27,12 +27,7 @@ import Click2PayPlaceOrder from "../payment-method-click2pay/Click2PayPlaceOrder
 import { getTransactionData } from "../api/service/Click2PayTransaction";
 import { useAtom } from "jotai";
 import { orderAtom } from "../store";
-import {
-  PAYPAL,
-  SEZZLE,
-  CLICK2PAY,
-  thirdPartyPaymentFlagList,
-} from "./PaymentType";
+import { PAYPAL, SEZZLE, CLICK2PAY, thirdPartyPaymentFlagList} from "./PaymentType";
 import { fetchSiteFlagData } from "../api/service/SiteFlags";
 import axios from "axios";
 
@@ -95,7 +90,16 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
   const [showClick2Pay, setShowClick2Pay] = useState(false);
 
   const [order, setOrder] = useAtom(orderAtom);
+  const [paymentTypeId, setPaymentTypeId] = useState<number>(0);
 
+  const confirmOrder = () => {
+    if (order) {
+      setOrder({
+        ...order,
+        orderId: 101,
+      });
+    }
+  };
   useEffect(() => {
     const paymentSiteFlagList = thirdPartyPaymentFlagList.join(",");
     const fetchSiteFlagInfo = async () => {
@@ -103,11 +107,9 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
         const response = await fetchSiteFlagData(siteId, paymentSiteFlagList);
         const updatedMethods = paymentMethods.map((method) => {
           const matchingResponse = response.find(
-            (item: any) => item.flagID === method.siteFlagId
+              (item: any) => item.flagID === method.siteFlagId
           );
-          const c2pSiteflag = response.find(
-            (item: any) => item.flagID === CLICK2PAY.siteflagTypeId
-          );
+          const c2pSiteflag = response.find((item: any) => item.flagID === CLICK2PAY.siteflagTypeId);
           setShowClick2Pay(c2pSiteflag ? c2pSiteflag.active : false);
 
           return {
@@ -117,6 +119,7 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
         });
 
         setPaymentMethods(updatedMethods);
+
       } catch (error) {
         console.error("Failed to fetch siteflag data:", error);
       }
@@ -124,7 +127,6 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
 
     fetchSiteFlagInfo();
   }, []);
-
   useEffect(() => {
     const fetchShoppersSavedPayments = async (shopperId: string) => {
       try {
@@ -186,9 +188,10 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
   useEffect(() => {
     const handleDeselectPaymentMethodsEvent = () => {
       handlePaymentMethodChange(-1);
+      setPaymentTypeId(CLICK2PAY.typeId);
     };
     document.addEventListener(
-      "deselectPaymentMethods",
+      "c2pSelectedCard",
       handleDeselectPaymentMethodsEvent
     );
   }, []);
@@ -224,8 +227,10 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
             console.log(error);
           });
         break;
+        break;
       default:
         console.log("place order with regular credit card");
+        confirmOrder();
         break;
     }
   };
@@ -318,6 +323,7 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
       handlePlaceOrder(PAYPAL.typeId);
       return;
     }
+
     setAllPaymentOptions((prevOptions) =>
       prevOptions.map((option, index) => ({
         ...option,
@@ -377,22 +383,21 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
           </div>
         </div>
         <div className="pm-sub-container">
-          {allPaymentOptions
-            .filter((method) => method.visible)
-            .map((paymentOption, index) => (
-              <PaymentOption
-                key={
-                  paymentOption.shopperSavedPayment?.id || paymentOption.name
-                }
-                {...{ ...paymentOption, index }}
-                isEditing={editingOptionIndex === index}
-                onEdit={() => setEditingOptionIndex(index)}
-                onCancelEdit={() => setEditingOptionIndex(null)}
-                onChange={() => handlePaymentMethodChange(index)}
-                shopperId={shopperId}
-              />
-            ))}
-          {showClick2Pay && <PaymentOptionClick2Pay pcid={pcid} />}
+          {allPaymentOptions.filter((method) => method.visible)
+              .map((paymentOption, index) => (
+            <PaymentOption
+              key={paymentOption.shopperSavedPayment?.id || paymentOption.name}
+              {...{ ...paymentOption, index }}
+              isEditing={editingOptionIndex === index}
+              onEdit={() => setEditingOptionIndex(index)}
+              onCancelEdit={() => setEditingOptionIndex(null)}
+              onChange={() => handlePaymentMethodChange(index)}
+              shopperId={shopperId}
+            />
+          ))}
+          {showClick2Pay && (
+              <PaymentOptionClick2Pay pcid={pcid}/>
+          )}
           <div className="checkout-add-card" onClick={onAddNewCard}>
             <div className="checkout-add-card-text">
               <Add /> Add New Card

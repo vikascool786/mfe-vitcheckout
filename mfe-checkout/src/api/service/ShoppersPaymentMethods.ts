@@ -1,8 +1,6 @@
 import { IPaymentMethod } from "../../interfaces/PaymentMethod";
-import { API_KEY } from "../../utils/ApiConstants";
-import { GET_API_KEY, GET_API_ENDPOINT_BASE_URL_ONLY, GET_TOKEN_SERVICE } from "../../utils/urlResolver";
+import {GET_API_KEY, GET_API_ENDPOINT_BASE_URL_ONLY, GET_TOKEN_SERVICE} from "../../utils/urlResolver";
 import axiosInstance from "../axios";
-
 
 const shopperWalletApiEndpoint = (id: string) =>
   `${GET_API_ENDPOINT_BASE_URL_ONLY()}/shopper-wallets/v1/Shopper/${id}/Wallet?api_key=${GET_API_KEY()}`;
@@ -37,11 +35,11 @@ export const addShoppersPaymentMethod = async (
       },
     });
 
+    // console.log("Card added successfully:", response.data);
     return response.data;
   } catch (error) {
     console.error("Unable to add method to wallet", error);
   }
-
   return [];
 };
 

@@ -3,27 +3,32 @@
  */
 
 import Click2PayLogger from "./Click2PayLogger";
+import Click2PayEventUtil from "./Click2PayCardEventUtil";
+import Click2PayElementUtil from "./Click2PayElementUtil";
+import Click2PaySignOut from "./Click2PaySignOut";
 const Click2PayCardLoader = (function(){
     let clickToPayCardList;
     const CUSTOM_ATTR_SELECTED_CARD = "data-selected-card";
     const existingC2PContainer = '.js-c2p-existing-user';
     const srcCardListElement = 'src-card-list';
-    const addNewClick2PayCard = '.js-c2p-add-new-card';
     const click2PayPaymentData = '.js-c2p-payment-data';
+    const accessCardsContainer = '.js-c2p-access-cards-msg';
 
     function loadSRCCardsOnPage(cardList, c2pInstance, showAddNewCard, deselectCard, showSignout){
         const srcCardList = document.querySelector(existingC2PContainer).querySelector(srcCardListElement);
         clickToPayCardList = Array(cardList);
         srcCardList.loadCards(cardList);
-        /*if(deselectCard){
-            checkoutClick2payUtil.deselectC2PCard();
-        }*/
-        /*if(showSignout){
-            srcCardList.setAttribute("display-sign-out", "true");
-        }*/
-        if(showAddNewCard){
-            showCardListAddNewC2PCard();
+        if(deselectCard){
+            //checkoutClick2payUtil.deselectC2PCard();
         }
+        if(showSignout){
+            srcCardList.setAttribute("display-sign-out", "true");
+        }
+        if(showAddNewCard){
+            Click2PayElementUtil.showCardListAddNewC2PCard();
+        }
+        hideAccessCardsMessage();
+        Click2PayEventUtil.triggerClick2PaySelectedCardEvent();
         addCardListEventListeners(c2pInstance);
     }
 
@@ -32,7 +37,7 @@ const Click2PayCardLoader = (function(){
         const paymentData = document.querySelector(click2PayPaymentData);
         if(srcCardList){
             srcCardList.addEventListener('clickSignOutLink', event => {
-                //checkoutC2PSignOut.handleSignout(c2pInstance);
+                Click2PaySignOut.handleSignout(c2pInstance);
             });
             srcCardList.addEventListener('selectSrcDigitalCardId', event => {
                 const selectedCardId = event.detail;
@@ -47,16 +52,16 @@ const Click2PayCardLoader = (function(){
         }
     }
 
-    function showCardListAddNewC2PCard(){
-        const addNew = document.querySelector(addNewClick2PayCard);
-        if(addNew){
-            addNew.style.display = "flex";
+    function hideAccessCardsMessage(){
+        const accessCards = document.querySelector(accessCardsContainer);
+        if(accessCards){
+            accessCards.style.display = "none";
         }
     }
 
     return {
         loadSRCCardsOnPage,
-        showCardListAddNewC2PCard
+        hideAccessCardsMessage
     }
 })();
 

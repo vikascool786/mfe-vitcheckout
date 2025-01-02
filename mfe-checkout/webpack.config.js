@@ -15,6 +15,11 @@ module.exports = (env, argv) => {
       ? '.env.staging'
       : '.env.development';
   const isLocal = env.local ?? false;
+  const domainEndpoint = () => {
+    if (env.development) return "d29q5zo2af0lw0.cloudfront.net";
+    if (env.staging) return "d1pba8i1pdjgdk.cloudfront.net";
+    return "d2qcfi6co0kj0v.cloudfront.net";
+  };
 
   return {
     mode: isStaging ? 'development' : mode, // Use 'development' mode for staging
@@ -22,7 +27,7 @@ module.exports = (env, argv) => {
     output: {
       publicPath: isDev
         ? "http://localhost:3011/"
-        : "https://d29q5zo2af0lw0.cloudfront.net/CheckoutContainer",
+        : `https://${domainEndpoint()}/CheckoutContainer/`,
     },
     devtool: isDev ? "source-map" : false,
     resolve: {
@@ -62,27 +67,29 @@ module.exports = (env, argv) => {
       ],
     },
 
-    plugins: [
+  plugins: [
       new ModuleFederationPlugin({
-        name: "mfeCheckout",
-        filename: "remoteEntry.js",
-        remotes: {
-          mfeStore: "mfeStore@http://localhost:3000/remoteEntry.js"
-        },
-        exposes: {
-          "./CheckoutSkeleton": "./src/CheckoutContainerWrapper",
-          './CheckoutContainerElement': './src/CheckoutContainerElement',
-          "./React": "react",
-          "./ReactDOM": "react-dom",
-          "./ReactDOMClient": "react-dom/client",
-        },
-        shared: {
-          ...deps,
-          react: { singleton: true, requiredVersion: deps.react },
-          "react-dom": { singleton: true, requiredVersion: deps["react-dom"] },
-          "react-dom/client": { singleton: true, requiredVersion: deps["react-dom"] },
-          "@fontsource/roboto": { singleton: true },
-        },
+          name: "mfeCheckoutContainer",
+          filename: "remoteEntry.js",
+          remotes: {
+              mfeStore: isLocal
+                  ? "mfeStore@http://localhost:3000/remoteEntry.js"
+                  : `mfeStore@${domainEndpoint()}/Store/remoteEntry.js`,
+          },
+          exposes: {
+              "./CheckoutSkeleton": "./src/CheckoutContainerWrapper",
+              "./React": "react",
+              "./ReactDOM": "react-dom",
+              "./ReactDOMClient": "react-dom/client",
+              './CheckoutContainerElement': './src/CheckoutContainerElement',
+          },
+          shared: {
+              ...deps,
+              react: { singleton: true, requiredVersion: deps.react },
+              "react-dom": { singleton: true, requiredVersion: deps["react-dom"] },
+              "react-dom/client": { singleton: true, requiredVersion: deps["react-dom"] },
+              "@fontsource/roboto": { singleton: true },
+          },
       }),
 
       new HtmlWebPackPlugin({ template: "./src/index.html" }),

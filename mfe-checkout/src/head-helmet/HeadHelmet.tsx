@@ -18,6 +18,8 @@ const HeadHelmet = () => {
                 rel="stylesheet"
                 href="https://src.mastercard.com/srci/integration/components/src-ui-kit/src-ui-kit.css"
             />
+            <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+            <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
         </Helmet>
     );
 };

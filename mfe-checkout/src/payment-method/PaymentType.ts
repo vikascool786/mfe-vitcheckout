@@ -1,7 +1,32 @@
 interface PaymentType {
     name: string;
     typeId: number;
-    siteflagTypeId: number;
+    siteflagTypeId?: number;
+    altName?: string;
+}
+
+const VISA: PaymentType = {
+    name: "Visa",
+    typeId: 9,
+    altName: "visa"
+}
+
+const MASTERCARD: PaymentType = {
+    name: "Mastercard",
+    typeId: 6,
+    altName: "mastercard"
+}
+
+const AMEX: PaymentType = {
+    name: "American Express",
+    typeId: 1,
+    altName: "amex"
+}
+
+const DISCOVER: PaymentType = {
+    name: "Discover",
+    typeId: 5,
+    altName: "discover"
 }
 
 export const CLICK2PAY: PaymentType = {
@@ -26,4 +51,8 @@ export const thirdPartyPaymentFlagList = [
     CLICK2PAY.siteflagTypeId,
     SEZZLE.siteflagTypeId,
     PAYPAL.siteflagTypeId,
+]
+
+export const creditCards = [
+    VISA, MASTERCARD, AMEX, DISCOVER,
 ]

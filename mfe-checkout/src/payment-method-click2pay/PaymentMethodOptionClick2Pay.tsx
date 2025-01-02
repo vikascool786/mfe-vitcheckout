@@ -16,6 +16,8 @@ import {Click2PayData} from "./Click2PayData";
 import { orderAtom } from "../store";
 import {useAtom} from "jotai/index";
 import {CustomerProfile} from "../interfaces/CustomerProfile";
+import {creditCards} from "../payment-method/PaymentType";
+import Click2PayCardLoader from "./Click2PayCardLoader";
 
 interface IClick2PayProps {
     pcid: string;
@@ -47,6 +49,7 @@ const c2pCustomerData: Click2PayData = {
 
 export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({ pcid }) => {
     const [hasSavedCards, setHasSavedCards] = useState(false);
+    const [cardData, setCardData] = useState([]);
     const [c2pData, setC2pData] = useState(c2pCustomerData);
     const [profileData, setProfileData] = useState(customerProfileData);
     const [order] = useAtom(orderAtom);
@@ -65,12 +68,18 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({ pcid }) => {
 
     useEffect(() => {
         if (order) {
+            const acceptedCreditCards = order.paymentMethods.filter((method) => method.visible);
+            const acceptedCardNameList: string[] = acceptedCreditCards
+                .map((accepted) =>
+                    creditCards.find((card) => card.typeId === accepted.typeID)?.altName
+                )
+                .filter((altName): altName is string => Boolean(altName));
             fetchCustomerProfileData(pcid)
                 .then((response: any) => {
                     customerProfileData.email = response.data.email_address;
                     customerProfileData.mobilePhone = response.data.cell_phone;
                     setProfileData(customerProfileData);
-                    updateC2pData();
+                    updateC2pData(acceptedCardNameList);
                 })
                 .catch((error: { message: string; }) => {
                     console.error("Failed to fetch shopper profile data:", error);
@@ -78,12 +87,13 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({ pcid }) => {
         }
     }, [order]);
 
-    const updateC2pData = () => {
+    const updateC2pData = (cardList: string[]) => {
         setC2pData((prevData) => ({
             ...prevData,
             email: profileData.email,
             mobilePhone: profileData.mobilePhone,
             transactionAmount: order ? order.totals.price : 0,
+            cardBrands: cardList,
         }));
     };
 
@@ -144,7 +154,11 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({ pcid }) => {
             // @ts-ignore
             Click2PayCards.getUserCards(window.c2pInstance)
                 .then((response: any) => {
-                    setHasSavedCards(response.consumerPresent === true)
+                    const hasCookiedCards = response.length > 0;
+                    setHasSavedCards(response.consumerPresent === true || hasCookiedCards);
+                    if(hasCookiedCards){
+                        setCardData(response);
+                    }
                 })
                 .catch((error: { message: string; }) => {
                     console.error("getUserCards error: " + error.message);
@@ -152,6 +166,13 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({ pcid }) => {
         };
         waitForC2PLibrary();
     }, []);
+
+    useEffect(() => {
+        if (cardData.length > 0) {
+            // @ts-ignore
+            Click2PayCardLoader.loadSRCCardsOnPage(cardData, window.c2pInstance, true, false, true);
+        }
+    }, [cardData]);
 
     useEffect(() => {
         $(".js-c2p-payment-add-card-form").parsley();
@@ -166,7 +187,8 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({ pcid }) => {
         Click2PayNewCard.openAddCardOverlay();
     }
 
-    const closeAddCardOverlay = () => {
+    const closeAddCardOverlay = (event: React.MouseEvent<HTMLButtonElement> | React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
         Click2PayNewCard.closeAddCardOverlay();
     }
 
@@ -195,28 +217,28 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({ pcid }) => {
                                 Pay with your cards saved to Click to Pay for fast, secure checkout
                             </div>
                             <button className="checkout-method-click-to-pay-text click-to-pay__btn" type="button"
-                                onClick={() => initiateOTPValidation()}>Access your cards
+                                    onClick={() => initiateOTPValidation()}>Access your cards
                             </button>
                         </div>
                         <src-card-list card-brands={cardBrandsString} display-preferred-card="true"
-                            card-selection-type="radioButton" display-sign-out="false" />
-                        <div className="js-c2p-empty-card-list-msg" style={{ display: "none" }}>
+                                       card-selection-type="radioButton" display-sign-out="false"/>
+                        <div className="js-c2p-empty-card-list-msg" style={{display: "none"}}>
                             <div className="checkout-method-click-to-pay-text click-to-pay__warn">
-                                <Warn />
+                                <Warn/>
                                 <p className="click-to-pay__warn-text">There are no cards in your Click to Pay
                                     wallet. Add a card to check out with your Click to Pay Profile.</p>
                             </div>
                         </div>
-                        <div className="js-c2p-add-new-card click-to-pay__btn-container" style={{ display: "none" }}>
-                            <Add />
+                        <div className="js-c2p-add-new-card click-to-pay__btn-container" style={{display: "none"}}>
+                            <Add/>
                             <button className="click-to-pay__btn" type="button"
-                                onClick={() => addNewClick2PayCard()}>
+                                    onClick={() => addNewClick2PayCard()}>
                                 Add new card with Click to Pay
                             </button>
                         </div>
                     </div>
                 </div>
-            ) :
+                ) :
                 <div className="checkout-method-save-information">
                     <div className="checkout-method-click-to-pay-text">
                         Save my information with Click to Pay
@@ -225,17 +247,23 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({ pcid }) => {
                         for fast, secure checkout.{" "}
                         <span className="learn-more">Learn more</span>
                     </div>
-                    <div>+ Continue to Click to Pay</div>
-                    <src-card-list card-brands={cardBrandsString} />
+                    <div className="click-to-pay__btn-container">
+                        <Add/>
+                        <button className="click-to-pay__btn" type="button"
+                                onClick={() => addNewClick2PayCard()}>
+                            Continue to Click to Pay
+                        </button>
+                    </div>
+                    <src-card-list card-brands={cardBrandsString}/>
                 </div>
             }
-            <div className="js-c2p-otp-container" style={{ display: "none" }}>
+            <div className="js-c2p-otp-container" style={{display: "none"}}>
                 <src-otp-input type="overlay" data-otp-value="" display-cancel-option="true"
-                    masked-identity-value=""
-                    network-id=""
-                    hide-loader="false"
-                    display-remember-me="true"
-                    auto-submit="true" error-reason="">
+                               masked-identity-value=""
+                               network-id=""
+                               hide-loader="false"
+                               display-remember-me="true"
+                               auto-submit="true" error-reason="">
                 </src-otp-input>
             </div>
             <div className="js-c2p-otp-selection-container" style={{ display: "none" }}>
@@ -243,37 +271,43 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({ pcid }) => {
             <div className="js-c2p-payment-add-card-container click-to-pay__iframe-container" role="dialog"
                  aria-modal="true"
                  aria-labelledby="dialogClickToPayAddCard" style={{display: "none"}}>
-                <button
-                    className="js-c2p-payment-add-card-close overlay-simple__close overlay-simple__close--dark margin-top">
-                    <span className="collapse-text">Close</span>
-                    <span className="material-icons" aria-hidden="true">close</span>
-                </button>
-                <div className="js-c2p-payment-add-card-error-container" style={{display: "none"}}>
-                </div>
                 <form id="dialogClickToPayAddCard"
                       className="js-c2p-payment-add-card-form click-to-pay__iframe-modal click-to-pay__iframe-modal--padding click-to-pay__iframe-modal--flex
                      click-to-pay__iframe-modal--scrollable">
-                    <div className="click-to-pay__iframe-content--scrollable">
-                        <div className="click-to-pay__heading">Card Information</div>
-                        <div>
-                            <src-card-list card-brands={cardBrandsString}/>
-                            <div className="checkout-method-click-to-pay-text">Save my information with Click to Pay for
-                                fast,
-                                secure checkout.
-                            </div>
-                        </div>
-                        <CardInformation showBillingSection={false} shopperId="" initialData={{
-                            ...shopperSavedPayment,
-                        }}/>
+                    <div>
+                        <button
+                            className="overlay-simple__close overlay-simple__close--dark margin-top"
+                            onClick={closeAddCardOverlay}>
+                            <span className="collapse-text">Close</span>
+                            <span className="material-icons" aria-hidden="true">close</span>
+                        </button>
                     </div>
-                    <div className="form-footer form-footer__dual-button">
-                        <Button
-                            label="Cancel"
-                            type="secondary"
-                            onClick={closeAddCardOverlay}
-                        />
-                        <Button label="Save" type="primary"
-                                onClick={saveNewCard}/>
+                    <div className="js-c2p-payment-add-card-error-container error-msg error-msg--padding" style={{display: "none"}}>
+                    </div>
+                    <div className="js-c2p-payment-add-card-form-fields">
+                        <div className="click-to-pay__iframe-content--scrollable click-to-pay__iframe-content--padding">
+                            <div className="click-to-pay__heading">Card Information</div>
+                            <div>
+                                <src-card-list card-brands={cardBrandsString}/>
+                                <div className="checkout-method-click-to-pay-text">Save my information with Click to Pay
+                                    for
+                                    fast,
+                                    secure checkout.
+                                </div>
+                            </div>
+                            <CardInformation showBillingSection={false} shopperId="" initialData={{
+                                ...shopperSavedPayment,
+                            }}/>
+                        </div>
+                        <div className="form-footer form-footer__dual-button">
+                            <Button
+                                label="Cancel"
+                                type="secondary"
+                                onClick={closeAddCardOverlay}
+                            />
+                            <Button label="Save" type="primary"
+                                    onClick={saveNewCard}/>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -284,7 +318,7 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({ pcid }) => {
                             className="click-to-pay__iframe-content"></iframe>
                 </div>
             </div>
-            <input className="js-c2p-payment-data" type="hidden" />
+            <input className="js-c2p-payment-data" type="hidden"/>
         </div>
     );
 };

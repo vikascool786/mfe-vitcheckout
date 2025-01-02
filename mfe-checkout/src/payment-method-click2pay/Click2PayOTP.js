@@ -2,15 +2,14 @@
  * Copyright (c) 2024. Market America/SHOP.com. All rights reserved.
  */
 import Click2PayLogger from "./Click2PayLogger";
-import Click2PayEventUtil from "./Click2PayCardEventUtil";
 import Click2PayCardLoader from "./Click2PayCardLoader";
+import Click2PayElementUtil from "./Click2PayElementUtil";
 const srcOtpInput = "src-otp-input";
 const srcOtpSelection = "src-otp-channel-selection";
 const CUSTOM_ATTRIBUTE_EVENT_LISTENER = "data-has-event-listener";
 const CUSTOM_ATTR_OTP_CHANNEL_ID = "data-otp-channel-id";
 const otpInputContainerClass = '.js-c2p-otp-container';
 const otpSelectionContainerClass = '.js-c2p-otp-selection-container';
-const accessCardsContainer = '.js-c2p-access-cards-msg';
 const emptyCardsContainer = '.js-c2p-empty-card-list-msg';
 
 export const initiateValidation = (c2pInstance, selectedChannel) => {
@@ -84,12 +83,10 @@ function addOtpChannelSelectionEventListeners(c2pInstance) {
             }
         });
         srcOtpChannelSelection.addEventListener('close', () => {
-            console.log("otp select close");
             closeOTPSelectionScreen();
             closeOTPModal();
         });
         srcOtpChannelSelection.addEventListener('continue', () => {
-            console.log("otp select continue");
             closeOTPSelectionScreen();
             const selectedChannel = otpChannelSelection.getAttribute(CUSTOM_ATTR_OTP_CHANNEL_ID);
             if(selectedChannel){
@@ -154,30 +151,31 @@ function validateOTPSuccessHandler(response, c2pInstance){
 }
 
 function validateOTPFailedHandler(error){
-    console.log("error: " + error.message);
+    console.error("error: " + error.message);
     //Click2PayLogger.logInfo("initiateValidation() failed error: " + error.message);
-    //updateOTPErrorReason(error.reason);
-    //enableOTPInput();
+    updateOTPErrorReason(error.reason);
+    enableOTPInput();
+}
+
+function updateOTPErrorReason(error){
+    const otpInput = document.querySelector(srcOtpInput);
+    otpInput.setAttribute("error-reason", error);
+}
+
+function enableOTPInput(){
+    const otpInput = document.querySelector(srcOtpInput);
+    otpInput.setAttribute("disable-elements", "false");
 }
 
 function handleOTPResponse(cardList, c2pInstance){
     if(cardList.length){
         Click2PayCardLoader.loadSRCCardsOnPage(cardList, c2pInstance, true, false, false);
-        hideAccessCardsMessage();
-        Click2PayEventUtil.triggerClick2PaySelectedCardEvent();
         //checkoutPaymentMethods.hideAllPaymentMethods();
     } else{
         //Click2PayLogger.logInfo("Click2pay cardlist returned empty");
-        hideAccessCardsMessage();
+        Click2PayCardLoader.hideAccessCardsMessage();
         showEmptyCardListMsg();
-        Click2PayCardLoader.showCardListAddNewC2PCard();
-    }
-}
-
-function hideAccessCardsMessage(){
-    const accessCards = document.querySelector(accessCardsContainer);
-    if(accessCards){
-        accessCards.style.display = "none";
+        Click2PayElementUtil.showCardListAddNewC2PCard();
     }
 }
 

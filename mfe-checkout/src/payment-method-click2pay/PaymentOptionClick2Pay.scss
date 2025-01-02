@@ -62,6 +62,12 @@
       overflow-y: auto;
       scrollbar-width: none; /* Firefox */
       -ms-overflow-style: none;
+      .field-item-container{
+        min-width: 0;
+      }
+    }
+    &--padding{
+      padding: 0 20px;
     }
   }
   &__warn{
@@ -104,5 +110,13 @@
     color: #F0F1F7;
     background: #202340;
     border: 1px solid #202340;
+  }
+}
+.error-msg{
+  background: #F0F1F7;
+  color: #202340;
+  border-left: 5px solid #FF1F35;
+  &--padding{
+    padding: 20px;
   }
 }

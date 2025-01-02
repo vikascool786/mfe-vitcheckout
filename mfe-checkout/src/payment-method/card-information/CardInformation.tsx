@@ -1,24 +1,20 @@
-import { useAtom, useAtomValue } from "jotai";
+import { useAtomValue } from "jotai";
 import $ from "jquery";
 import "parsleyjs";
 import React, { useRef, useState } from "react";
-import { buildOrder } from "../../api/service/Order";
 import {
   addShoppersPaymentMethod,
-  generateCardExistingToken,
+  generateCardToken,
+  updateShopperDetails,
 } from "../../api/service/ShoppersPaymentMethods";
 import { AddressForm } from "../../component/AddressForm";
-import { Button } from "../../component/Button/Button";
 import { DropdownField } from "../../component/Form/Field/DropdownField";
 import { FormField } from "../../component/Form/Field/FormField";
-import { useApi } from "../../hooks/useAPI";
 import { Address } from "../../interfaces/Address";
-import { IPaymentMethod } from "../../interfaces/PaymentMethod";
 import { ShopperSavedPayments } from "../../interfaces/ShopperSavedPayments";
-import { addressAtom, orderAtom } from "../../store";
-import { API_KEY, GET_API_ENDPOINT_BASE_URL } from "../../utils/ApiConstants";
-import { generateChangeStoreResponse } from "../../utils/helpers/GenerateChangeStoreResponse";
+import { addressAtom } from "../../store";
 import "./CardInformation.scss";
+import { Button } from "../../component/Button/Button";
 
 interface ICardInformationProps {
   initialData?: Partial<ShopperSavedPayments>;
@@ -71,20 +67,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
     initialData?.address || defaultAddress
   );
 
-  const tempPaymentUrl = `${GET_API_ENDPOINT_BASE_URL}/shoppingcart-checkouts/v1/Checkout/TempCC/${shopperId}?api_key=${API_KEY}`;
-  const { postData: addTempPaymentMethod } = useApi<IPaymentMethod>(
-    tempPaymentUrl,
-    "POST",
-    undefined,
-    {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-    }
-  );
-
   const addressList = useAtomValue(addressAtom);
-  const [order, setOrder] = useAtom(orderAtom);
 
   const shippingAddress = addressList.find((address) => address.isPrimary);
   const [saveAddress, setSaveAddress] = useState<boolean>(false);
@@ -111,7 +94,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
     setCardInformation({ ...cardInformationRef.current });
   };
 
-  const handleSaveAddress = async (type: "TEMP" | "WALLET") => {
+  const handleSaveAddress = async () => {
     const expirationMonth = cardInformation.expirationDate?.slice(0, 2);
     const expirationYear = cardInformation.expirationDate?.slice(-4);
 
@@ -121,7 +104,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
       month: expirationMonth ? parseInt(expirationMonth, 10) : undefined,
       year: expirationYear ? parseInt(expirationYear, 10) : undefined,
       type: cardInformation.type,
-      preferred: true,
+      preferred: cardInformation.preferred,
       first: address.first,
       last: address.last,
       address1: address.address1,
@@ -132,61 +115,15 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
       country: "USA", // Replace with dynamic data if available
       phone: address.phone,
       isPoBox: address.isPoBox || false,
-      cvv: cardInformation.cvv,
     };
 
-    if (type === "WALLET") {
-      setSaveAddress(!saveAddress);
-      try {
-        const response = await addShoppersPaymentMethod(shopperId, {
-          ...requestData,
-        });
-        const paymentMethod = response.find((pm) => pm.preferred);
+    const token = await generateCardToken(cardInformation.cardMask);
 
-        if (order && paymentMethod) {
-          buildOrder(
-            generateChangeStoreResponse({
-              ...order,
-              paymentMethod: {
-                ...order?.paymentMethod,
-                id: paymentMethod.id,
-              },
-            })
-          ).then((orderResponse) => {
-            setOrder(orderResponse.response.success.data);
-          });
-        }
-        console.log("Card information successfully saved.");
-      } catch (error) {
-        console.error("Unable to save card information:", error);
-      }
-    } else {
-      const formData = new URLSearchParams();
-      formData.append("name", requestData.name);
-      formData.append("number", requestData.number);
-      formData.append("month", requestData.month);
-      formData.append("year", requestData.year);
-      formData.append("type", requestData.type);
-
-      const paymentMethod = await addTempPaymentMethod(formData.toString(), {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      });
-
-      if (order && paymentMethod) {
-        buildOrder(
-          generateChangeStoreResponse({
-            ...order,
-            paymentMethod: {
-              ...order?.paymentMethod,
-              id: paymentMethod.id,
-            },
-          })
-        ).then((orderResponse) => {
-          setOrder(orderResponse.response.success.data);
-        });
-      }
+    try {
+      await addShoppersPaymentMethod(shopperId, { ...requestData, token });
+      console.log("Card information successfully saved.");
+    } catch (error) {
+      console.error("Unable to save card information:", error);
     }
   };
 
@@ -215,29 +152,17 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   // function to call an API when CVV is entered to generate a payment id
 
   const generatePaymentId = async () => {
-    const data = JSON.stringify({
-      cvv: cardInformation.cvv,
+    const response = await updateShopperDetails(shopperId, cardInformation.id, {
+      cvv: ["999"],
     });
-    if (cardInformation.id) {
-      await generateCardExistingToken(data, shopperId, cardInformation.id);
-      await buildOrder(
-        generateChangeStoreResponse({
-          ...order,
-          paymentMethod: {
-            ...order?.paymentMethod,
-            id: cardInformation.id,
-          },
-        })
-      );
-    } else {
-      handleSaveAddress("TEMP");
-    }
+
+    console.log(response);
   };
 
   return (
     <div className="card-information-container">
       <Button
-        label={`Generate Payment ID for ${cardInformation.accountName}`}
+        label="Generate Payment ID"
         type="primary"
         onClick={generatePaymentId}
       />
@@ -308,54 +233,53 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           extraLabel="3 or 4 digits"
           maxLength={4}
           name="cvv"
-          onChange={(e) => handleInputChange("cvv", e.target.value)}
         />
         <div className="save-for-later">
           <input
             className="checkbox"
             type="checkbox"
             checked={saveAddress}
-            onChange={() => handleSaveAddress("WALLET")}
+            onChange={handleSaveAddress}
           />
           <span className="shipping-text">Save card for later</span>
         </div>
       </div>
-      {showBillingSection && (
-        <>
-          <div className="billing">
-            <div className="billing-address">
-              Billing Address
-              <input
-                className="checkbox"
-                type="checkbox"
-                checked={sameShippingAddress}
-                onChange={() => setSameShippingAddress(!sameShippingAddress)}
-              />
+        {showBillingSection && (
+            <>
+            <div className="billing">
+                <div className="billing-address">
+                    Billing Address
+                    <input
+                        className="checkbox"
+                        type="checkbox"
+                        checked={sameShippingAddress}
+                        onChange={() => setSameShippingAddress(!sameShippingAddress)}
+                    />
+                </div>
+                <span className="shipping-text">Same as shipping</span>
             </div>
-            <span className="shipping-text">Same as shipping</span>
-          </div>
-          {!sameShippingAddress ? (
-            <AddressForm
-              shippingAddress={address}
-              siteId="260"
-              onAddressChange={(updatedAddress: Address) => {
-                setAddress(updatedAddress);
-                setCardInformation((prev) => ({
-                  ...prev,
-                  address: updatedAddress,
-                }));
-              }}
-            />
-          ) : (
-            <div className="checkbox-text">
-              {shippingAddress?.first} {shippingAddress?.last}{" "}
-              {shippingAddress?.address1}
-              {shippingAddress?.address2} {shippingAddress?.city}{" "}
-              {shippingAddress?.zip}
-            </div>
-          )}
+            {!sameShippingAddress ? (
+                <AddressForm
+                    shippingAddress={address}
+                    siteId="260"
+                    onAddressChange={(updatedAddress: Address) => {
+                        setAddress(updatedAddress);
+                        setCardInformation((prev) => ({
+                            ...prev,
+                            address: updatedAddress,
+                        }));
+                    }}
+                />
+            ) : (
+                <div className="checkbox-text">
+                    {shippingAddress?.first} {shippingAddress?.last}{" "}
+                    {shippingAddress?.address1}
+                    {shippingAddress?.address2} {shippingAddress?.city}{" "}
+                    {shippingAddress?.zip}
+                </div>
+            )}
         </>
-      )}
+        )}
     </div>
   );
 };

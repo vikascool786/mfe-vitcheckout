@@ -3,6 +3,7 @@
  */
 
 import Click2PayLogger from "./Click2PayLogger";
+import Click2PaySignOut from "./Click2PaySignOut";
 const Click2PayPlaceOrder = (function () {
     const CUSTOM_ATTR_SELECTED_CARD = "data-selected-card";
     const c2pIframe = '.js-c2p-payment-iframe-container';
@@ -42,8 +43,7 @@ const Click2PayPlaceOrder = (function () {
             window.location.href = placeOrderWithC2PEmbeddedURL;*/
         } else if(response.checkoutActionCode === 'SWITCH_CONSUMER'){
             closeIFrame();
-            //checkoutClick2payUtil.closeiFrame();
-            //checkoutC2PSignOut.handleSignout(c2pInstance);
+            Click2PaySignOut.handleSignout(c2pInstance);
         } else{
             closeIFrame();
             if(response.network.toUpperCase() === 'VISA'){ //work around Mastercard suggested for when shopper cancels

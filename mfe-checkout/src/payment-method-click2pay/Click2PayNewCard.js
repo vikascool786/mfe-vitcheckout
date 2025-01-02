@@ -5,10 +5,14 @@
 import Click2PayLogger from "./Click2PayLogger";
 import Click2PayUtil from "./Click2PayUtil";
 import Click2PayPlaceOrder from "./Click2PayPlaceOrder";
+import Click2PayEventUtil from "./Click2PayCardEventUtil";
+import Click2PayElementUtil from "./Click2PayElementUtil";
+import Click2PayCards from "./Click2PayCards";
+import Click2PayCardLoader from "./Click2PayCardLoader";
 const Click2PayNewCard = (function () {
     const addCardOverlay = '.js-c2p-payment-add-card-container';
     const errorContainer = '.js-c2p-payment-add-card-error-container';
-    const cardForm = '.js-c2p-payment-add-card-form';
+    const cardFormFields = '.js-c2p-payment-add-card-form-fields';
 
     function closeAddCardOverlay() {
         toggleNewCardOverlay(false);
@@ -16,6 +20,8 @@ const Click2PayNewCard = (function () {
 
     function openAddCardOverlay() {
         toggleNewCardOverlay(true);
+        const overlay = document.querySelector(addCardOverlay);
+        overlay.querySelector("button").focus();
     }
 
     function toggleNewCardOverlay(showOverlay){
@@ -60,8 +66,8 @@ const Click2PayNewCard = (function () {
             panExpirationMonth: data.month,
             panExpirationYear: data.year.substring(2),
             cardSecurityCode: data.cvv,
-            cardholderFirstName: `${Click2PayUtil.getC2pData().address.first}`,
-            cardholderLastName: `${Click2PayUtil.getC2pData().address.last}`
+            cardholderFirstName: data.name,
+            cardholderLastName: ""
         }
         /*let expMonth = newCardPaymentInfo.cardExpMonth.value.length < 2 ?
             "0".concat(newCardPaymentInfo.cardExpMonth.value) : newCardPaymentInfo.cardExpMonth.value;
@@ -105,7 +111,7 @@ const Click2PayNewCard = (function () {
     }
 
     function hideCreditCardForm(){
-        const form = document.querySelector(cardForm);
+        const form = document.querySelector(cardFormFields);
         if(form){
             form.style.display = "none";
         }
@@ -159,41 +165,22 @@ const Click2PayNewCard = (function () {
             c2pData.checkoutUrl = placeOrderWithC2PEmbeddedURL;
             checkoutClick2payUtil.closeiFrame();
             setNewCardPlaceOrderCustomAttribute(c2pInstance);*/
-            displayNewCard(response);
-
+            Click2PayPlaceOrder.closeIFrame();
+            refreshCardList(c2pInstance);
         }else if(response.checkoutActionCode === 'CHANGE_CARD'){
             Click2PayPlaceOrder.closeIFrame();
-            //checkoutClick2payUtil.closeiFrame();
-            //checkoutC2PCards.getCards(c2pInstance); //need to refresh the card list since new card was added
+            refreshCardList(c2pInstance);
         } else{
             Click2PayPlaceOrder.closeIFrame();
         }
     }
 
-    function displayNewCard(response) {
-        console.log("display new card");
-        const cardData = response.checkoutResponseData.maskedCard;
-        const digitalCardData = cardData.digitalCardData;
-        const singleCardElement = document.createElement("src-card");
-        if (cardData.panBin) {
-            singleCardElement.setAttribute("account-bin", cardData.panBin);
-        }
-        singleCardElement.setAttribute("account-number-suffix", cardData.panLastFour);
-        singleCardElement.setAttribute("card-art", digitalCardData.artUri);
-        singleCardElement.setAttribute("descriptor-name", digitalCardData.descriptorName);
-        singleCardElement.setAttribute("card-status", digitalCardData.status);
-        singleCardElement.setAttribute("locale", "en_US");
-        /*singleCardContainer.replaceChildren(singleCardElement);
-        elementDisplayUtil.setElementVisibility(singleCardContainer, "block");
-        elementDisplayUtil.setElementVisibility(c2pEmbeddedPayment, "block");
-        elementDisplayUtil.setElementVisibility(srcCardList, "none");
-        hideAddNewCard();
-        checkoutClick2payUtil.hideEmptyCardListMsg();
-        checkoutClick2payUtil.showChangePaymentMethod();
-        hideCardListAddNewC2PCard();
-        checkoutPaymentMethods.hideAllPaymentMethods();
-        checkoutPaymentUtil.enableC2PPlaceOrderButton();
-        checkoutClick2payUtil.triggerC2PSelectionChange(C2P_TYPE_ID, cardData.panBin, cardData.panLastFour);*/
+    function refreshCardList(c2pInstance){
+        const cardsPromise = Click2PayCards.getUserCards(c2pInstance);
+        cardsPromise.then(cardsResponse => {
+                Click2PayCardLoader.loadSRCCardsOnPage(cardsResponse, window.c2pInstance, true, false, false)
+            }
+        )
     }
 
     function checkoutWithNewCardFailedHandler(error){
@@ -201,7 +188,9 @@ const Click2PayNewCard = (function () {
         console.log("checkoutWithNewCard() failed error message: " + errorMessage, JSON.stringify(error));
         //Click2PayLogger.logInfo("checkoutWithNewCard failed message: " + errorMessage);
         Click2PayPlaceOrder.closeIFrame();
-        //checkoutClick2payUtil.displayErrorMessage(stringReplacer.getMessage("checkout.click_to_pay.new_payment.error"));
+        const failedMessage = "There has been a problem adding your a new card to your Click to Pay wallet. Please try again.";
+        displayError(failedMessage);
+        openAddCardOverlay(); // error message will display in add card overlay
     }
 
     return {
