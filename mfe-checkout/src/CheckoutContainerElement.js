@@ -22,7 +22,7 @@ class CheckoutContainerElement extends HTMLElement {
         };
     
         this.root = createRoot(this.mountPoint);
-        this.root.render(React.createElement(CheckoutContainer, props));
+        this.root.render(React.createElement(CheckoutContainerWrapper, props));
     }
 
     disconnectedCallback() {
