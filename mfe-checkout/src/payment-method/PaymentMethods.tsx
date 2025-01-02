@@ -96,10 +96,6 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
 
   const [order, setOrder] = useAtom(orderAtom);
 
-  const confirmOrder = () => {
-    commitOrder(cartId);
-  };
-
   useEffect(() => {
     const paymentSiteFlagList = thirdPartyPaymentFlagList.join(",");
     const fetchSiteFlagInfo = async () => {
@@ -408,13 +404,6 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
         </div>
       </div>
       <TextUpdates />
-      <div className="checkout-place-order">
-        <div className="checkout-place-order-text">
-          By clicking place order, you agree to the SHOP.COM Terms of Use and
-          Privacy Policy.
-        </div>
-        <Button label="Place Order" type="primary" onClick={confirmOrder} />
-      </div>
     </div>
   );
 };

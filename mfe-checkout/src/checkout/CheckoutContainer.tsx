@@ -3,6 +3,7 @@ import { Provider, useSetAtom, useAtom } from "jotai";
 import "../App.scss";
 import {
   changeOrder,
+  commitOrder,
   fetchOrderDetail,
   OrderResponse,
 } from "../api/service/Order";
@@ -17,10 +18,12 @@ import { ChangeOrder } from "../interfaces/ChangeOrder";
 import { Order } from "../interfaces/Order";
 import { IPaymentMethod } from "../interfaces/PaymentMethod";
 import { orderAtom, OrderStore } from "../store";
-import { ORDER_DATA } from "../utils/MOCKS";
+import { ADDRESS_BOOK, ORDER_DATA, WALLET_DATA } from "../utils/MOCKS";
 import { API_KEY, GET_API_ENDPOINT_BASE_URL } from "../utils/ApiConstants";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import HeadHelmet from "../head-helmet/HeadHelmet";
+import { Button } from "../component/Button/Button";
+import { PlaceOrder } from "../payment-method/place-order/PlaceOrder";
 
 const getInitialBuildOrderData = (cartId: string): ChangeOrder => ({
   debug: true,
@@ -59,24 +62,29 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   pcid,
   siteId,
 }) => {
-  const [orderData, setOrderData] = useAtom(orderAtom);
+  // const [orderData, setOrderData] = useAtom(orderAtom);
+  const orderData = ORDER_DATA;
   const hasInitializedOrder = useRef(false); // Prevent multiple executions of updateOrder
 
   const addressUrl = `${GET_API_ENDPOINT_BASE_URL}/shopper-addressbooks/v1/${shopperId}/AddressBook?api_key=${API_KEY}`;
   const paymentUrl = `${GET_API_ENDPOINT_BASE_URL}/shopper-wallets/v1/Shopper/${shopperId}/Wallet?api_key=${API_KEY}`;
   const checkoutUrl = `${GET_API_ENDPOINT_BASE_URL}/checkout-universal/v1/checkouts?api_key=${API_KEY}`;
 
-  const {
-    data: addresses,
-    isLoading: loadingAddresses,
-    error: addressError,
-  } = useApi<Address[]>(addressUrl, "GET");
+  // const {
+  //   data: addresses,
+  //   isLoading: loadingAddresses,
+  //   error: addressError,
+  // } = useApi<Address[]>(addressUrl, "GET");
 
-  const {
-    data: paymentMethods,
-    isLoading: loadingPaymentMethods,
-    error: paymentError,
-  } = useApi<IPaymentMethod[]>(paymentUrl, "GET");
+  const addresses = ADDRESS_BOOK;
+
+  // const {
+  //   data: paymentMethods,
+  //   isLoading: loadingPaymentMethods,
+  //   error: paymentError,
+  // } = useApi<IPaymentMethod[]>(paymentUrl, "GET");
+
+  const paymentMethods = WALLET_DATA;
 
   const {
     data: order,
@@ -113,32 +121,36 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     [paymentMethods]
   );
 
-  useEffect(() => {
-    if (
-      !hasInitializedOrder.current &&
-      defaultAddress &&
-      defaultPaymentMethod &&
-      order?.response.success.data
-    ) {
-      hasInitializedOrder.current = true; // Mark as initialized
-      updateOrder(
-        order?.response.success.data,
-        defaultPaymentMethod.addressId,
-        defaultAddress.id
-      );
-    }
-  }, [defaultAddress, defaultPaymentMethod, order?.response.success.data]);
+  const confirmOrder = () => {
+    commitOrder(cartId);
+  };
 
-  if (loadingAddresses || loadingPaymentMethods || loadingOrder)
-    return <div>Loading...</div>;
+  // useEffect(() => {
+  //   if (
+  //     !hasInitializedOrder.current &&
+  //     defaultAddress &&
+  //     defaultPaymentMethod &&
+  //     order?.response.success.data
+  //   ) {
+  //     hasInitializedOrder.current = true; // Mark as initialized
+  //     updateOrder(
+  //       order?.response.success.data,
+  //       defaultPaymentMethod.addressId,
+  //       defaultAddress.id
+  //     );
+  //   }
+  // }, [defaultAddress, defaultPaymentMethod, order?.response.success.data]);
 
-  if (addressError || paymentError) return <div>Failed to load data</div>;
+  // if (loadingAddresses || loadingPaymentMethods || loadingOrder)
+  //   return <div>Loading...</div>;
+
+  // if (addressError || paymentError) return <div>Failed to load data</div>;
 
   return (
     <div className="checkout-container">
-      <div className="checkout-sub-container">
-        {orderData && (
-          <>
+      {orderData && (
+        <>
+          <div className="left-column">
             <Checkout
               shopperId={shopperId}
               cartId={cartId}
@@ -151,11 +163,14 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
               siteId={siteId}
               pcid={pcid}
             />
-          </>
-        )}
-      </div>
-      <div>
-        <OrderSummary pcid={pcid} />
+          </div>
+          <div className="right-column">
+            <OrderSummary pcid={pcid} />
+          </div>
+        </>
+      )}
+      <div className="place-order">
+        <PlaceOrder confirmOrder={confirmOrder} />
       </div>
       <HeadHelmet />
     </div>
@@ -163,3 +178,4 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
 };
 
 export default withErrorBoundary(CheckoutContainer);
+

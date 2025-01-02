@@ -1,37 +1,93 @@
+/* General Reset for HTML and Body */
+html,
 body {
-  font-family: "Roboto", "Inter", Arial, Helvetica, sans-serif;
-}
-.container {
-  display: flex;
-}
-
-.checkout-container {
-  display: flex;
-  justify-content: center;
-  column-gap: 38px;
-  width: 100%;
-  margin-top: 31px;
-}
-
-.checkout-sub-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 38px;
-}
-
-.parsley-errors-list{
-  background-color: #d71d1d;
-  color: #fff;
   margin: 0;
-  li{
-    border-radius: 2px;
-    font-size: 12px;
-    font-weight: bold;
-    padding: 5px;
-    margin-bottom: 5px;
-    margin-top: 2px;
-    list-style-type: none;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  font-family: "Roboto", "Inter", Arial, Helvetica, sans-serif;
+  box-sizing: border-box; /* Ensure consistent sizing */
+}
+
+/* Container Styling */
+.container {
+  background-color: #f6f6f6;
+}
+
+/* Container Styling */
+.checkout-container {
+  display: grid;
+  gap: 2rem; /* Default gap between columns */
+  margin: 31px auto 0; /* Center horizontally */
+  padding: 0 1rem; /* Add horizontal padding for responsiveness */
+  height: 100%; /* Make sure it takes up full height */
+  position: relative; /* Allow absolute positioning inside */
+}
+
+@media (min-width: 600px) {
+  .checkout-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Both columns have equal width */
+    grid-template-areas: "left right"; /* Define areas */
+    gap: 2rem; /* Gap between columns */
+    align-items: start; /* Align columns based on their content's height */
+    max-width: 76rem;
+  }
+}
+
+/* Single-Column Layout for Smaller Screens */
+@media (max-width: 1024px) {
+  .checkout-container {
+    grid-template-columns: 1fr; /* Single column layout */
+    padding: 0;
+    grid-template-areas:
+      "left"
+      "right"; /* Stack columns vertically */
+    gap: 2rem; /* Adjust gap for vertical stacking */
+    position: relative;
+    width: 100%; /* Allow absolute positioning inside */
+  }
+}
+
+/* Styling for Left Column */
+.checkout-container .left-column {
+  max-width: 34rem; /* Limit the maximum width */
+  margin: 0 auto; /* Center the column horizontally */
+  display: grid;
+  gap: 1rem; /* Default gap between elements */
+  width: 100%; /* Allow column to expand to its max-width */
+}
+
+/* Styling for Right Column */
+.checkout-container .right-column {
+  max-width: 34rem; /* Limit the maximum width */
+  margin: 0 auto; /* Center the column horizontally */
+  display: grid;
+  gap: 1rem; /* Default gap between elements */
+  width: 100%; /* Allow column to expand to its max-width */
+  align-items: center; /* Prevent vertical stretching */
+  padding: 0 1rem; /* Add padding to avoid overflow */
+  position: relative; /* Ensure correct stacking of components */
+}
+
+/* For Items Inside the Right Column */
+.checkout-container .right-column > * {
+  justify-self: center; /* Center content horizontally inside the grid cell */
+  align-self: center; /* Center content vertically inside the grid cell */
+  width: auto; /* Prevent stretching horizontally */
+  height: auto; /* Prevent stretching vertically */
+}
+
+/* Make sure PlaceOrder is always at the bottom on mobile */
+@media (max-width: 600px) {
+  .left-column {
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* Ensure the column takes full height */
   }
 
+  /* Position PlaceOrder component at the bottom */
+  .left-column .place-order {
+    margin-top: auto; /* Push it to the bottom of the column */
+  }
 }
