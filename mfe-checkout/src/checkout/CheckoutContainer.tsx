@@ -62,29 +62,25 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   pcid,
   siteId,
 }) => {
-  // const [orderData, setOrderData] = useAtom(orderAtom);
-  const orderData = ORDER_DATA;
+  const [orderData, setOrderData] = useAtom(orderAtom);
+  // const orderData = ORDER_DATA;
   const hasInitializedOrder = useRef(false); // Prevent multiple executions of updateOrder
 
   const addressUrl = `${GET_API_ENDPOINT_BASE_URL}/shopper-addressbooks/v1/${shopperId}/AddressBook?api_key=${API_KEY}`;
   const paymentUrl = `${GET_API_ENDPOINT_BASE_URL}/shopper-wallets/v1/Shopper/${shopperId}/Wallet?api_key=${API_KEY}`;
   const checkoutUrl = `${GET_API_ENDPOINT_BASE_URL}/checkout-universal/v1/checkouts?api_key=${API_KEY}`;
 
-  // const {
-  //   data: addresses,
-  //   isLoading: loadingAddresses,
-  //   error: addressError,
-  // } = useApi<Address[]>(addressUrl, "GET");
+  const {
+    data: addresses,
+    isLoading: loadingAddresses,
+    error: addressError,
+  } = useApi<Address[]>(addressUrl, "GET");
 
-  const addresses = ADDRESS_BOOK;
-
-  // const {
-  //   data: paymentMethods,
-  //   isLoading: loadingPaymentMethods,
-  //   error: paymentError,
-  // } = useApi<IPaymentMethod[]>(paymentUrl, "GET");
-
-  const paymentMethods = WALLET_DATA;
+  const {
+    data: paymentMethods,
+    isLoading: loadingPaymentMethods,
+    error: paymentError,
+  } = useApi<IPaymentMethod[]>(paymentUrl, "GET");
 
   const {
     data: order,
@@ -125,26 +121,26 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     commitOrder(cartId);
   };
 
-  // useEffect(() => {
-  //   if (
-  //     !hasInitializedOrder.current &&
-  //     defaultAddress &&
-  //     defaultPaymentMethod &&
-  //     order?.response.success.data
-  //   ) {
-  //     hasInitializedOrder.current = true; // Mark as initialized
-  //     updateOrder(
-  //       order?.response.success.data,
-  //       defaultPaymentMethod.addressId,
-  //       defaultAddress.id
-  //     );
-  //   }
-  // }, [defaultAddress, defaultPaymentMethod, order?.response.success.data]);
+  useEffect(() => {
+    if (
+      !hasInitializedOrder.current &&
+      defaultAddress &&
+      defaultPaymentMethod &&
+      order?.response.success.data
+    ) {
+      hasInitializedOrder.current = true; // Mark as initialized
+      updateOrder(
+        order?.response.success.data,
+        defaultPaymentMethod.addressId,
+        defaultAddress.id
+      );
+    }
+  }, [defaultAddress, defaultPaymentMethod, order?.response.success.data]);
 
-  // if (loadingAddresses || loadingPaymentMethods || loadingOrder)
-  //   return <div>Loading...</div>;
+  if (loadingAddresses || loadingPaymentMethods || loadingOrder)
+    return <div>Loading...</div>;
 
-  // if (addressError || paymentError) return <div>Failed to load data</div>;
+  if (addressError || paymentError) return <div>Failed to load data</div>;
 
   return (
     <div className="checkout-container">
@@ -178,4 +174,3 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
 };
 
 export default withErrorBoundary(CheckoutContainer);
-
