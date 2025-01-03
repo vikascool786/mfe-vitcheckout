@@ -18,12 +18,14 @@ import { ChangeOrder } from "../interfaces/ChangeOrder";
 import { Order } from "../interfaces/Order";
 import { IPaymentMethod } from "../interfaces/PaymentMethod";
 import { orderAtom, OrderStore } from "../store";
-import { ADDRESS_BOOK, ORDER_DATA, WALLET_DATA } from "../utils/MOCKS";
-import { API_KEY, GET_API_ENDPOINT_BASE_URL } from "../utils/ApiConstants";
+
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import HeadHelmet from "../head-helmet/HeadHelmet";
-import { Button } from "../component/Button/Button";
 import { PlaceOrder } from "../payment-method/place-order/PlaceOrder";
+import {GET_API_ENDPOINT_BASE_URL_ONLY, GET_API_KEY} from "../utils/urlResolver";
+
+const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
+const apiKey = GET_API_KEY();
 
 const getInitialBuildOrderData = (cartId: string): ChangeOrder => ({
   debug: true,
@@ -66,9 +68,9 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   // const orderData = ORDER_DATA;
   const hasInitializedOrder = useRef(false); // Prevent multiple executions of updateOrder
 
-  const addressUrl = `${GET_API_ENDPOINT_BASE_URL}/shopper-addressbooks/v1/${shopperId}/AddressBook?api_key=${API_KEY}`;
-  const paymentUrl = `${GET_API_ENDPOINT_BASE_URL}/shopper-wallets/v1/Shopper/${shopperId}/Wallet?api_key=${API_KEY}`;
-  const checkoutUrl = `${GET_API_ENDPOINT_BASE_URL}/checkout-universal/v1/checkouts?api_key=${API_KEY}`;
+  const addressUrl = `${apiDomain}/shopper-addressbooks/v1/${shopperId}/AddressBook?api_key=${apiKey}`;
+  const paymentUrl = `${apiDomain}/shopper-wallets/v1/Shopper/${shopperId}/Wallet?api_key=${apiKey}`;
+  const checkoutUrl = `${apiDomain}/checkout-universal/v1/checkouts?api_key=${apiKey}`;
 
   const {
     data: addresses,

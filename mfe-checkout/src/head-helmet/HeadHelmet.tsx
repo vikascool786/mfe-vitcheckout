@@ -1,13 +1,13 @@
 import React from 'react';
 import { Helmet } from 'react-helmet';
-import { GET_CLICK2PAY_DPA_ID, GET_CLICK2PAY_JS_LIB } from "../utils/ApiConstants";
+import {GET_C2P_DPAID, GET_C2P_LIB} from "../utils/urlResolver";
 
 const HeadHelmet = () => {
     return (
         <Helmet>
             {/*TODO: Load these c2p files conditionally (only US and when siteflag is on)*/}
             <script
-                src={`${GET_CLICK2PAY_JS_LIB}?srcDpaId=${GET_CLICK2PAY_DPA_ID}&locale=en_US`}
+                src={`${GET_C2P_LIB()}?srcDpaId=${GET_C2P_DPAID()}&locale=en_US`}
                 async
             ></script>
             <script

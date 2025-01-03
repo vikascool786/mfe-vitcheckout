@@ -103,3 +103,27 @@ export const GET_API_KEY = () => {
         return "";
     }
 }
+
+export const GET_C2P_LIB = () => {
+  switch (GET_API_MODE()) {
+    case "localhost":
+    case "dev":
+    case "staging":
+      return "https://sandbox.src.mastercard.com/srci/integration/2/lib.js";
+    case "prod":
+    default:
+      return "https://src.mastercard.com/srci/integration/2/lib.js";
+  }
+}
+
+export const GET_C2P_DPAID= () => {
+  switch (GET_API_MODE()) {
+    case "localhost":
+    case "dev":
+    case "staging":
+      return "3a4f6132-0259-4609-b078-5e5ad3fa3f4f";
+    case "prod":
+    default:
+      return "493af363-de55-4eb5-9141-7ee7c35b50cd";
+  }
+}
