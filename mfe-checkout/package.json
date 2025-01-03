@@ -45,6 +45,7 @@
     "@babel/preset-typescript": "^7.25.7",
     "@babel/runtime": "^7.13.10",
     "@fontsource/roboto": "^5.0.13",
+    "@paypal/react-paypal-js": "^8.7.0",
     "@types/node": "^20.14.5",
     "@types/react-dom": "^18.3.0",
     "axios": "^1.7.7",
