@@ -34,10 +34,12 @@ import {
   thirdPartyPaymentFlagList,
 } from "./PaymentType";
 import { fetchSiteFlagData } from "../api/service/SiteFlags";
-import axios, { AxiosRequestConfig } from "axios";
-import { PayPalScriptProvider } from "@paypal/react-paypal-js";
-import { PayPalButtons, usePayPalScriptReducer } from "@paypal/react-paypal-js";
-import { Spinner } from "react-bootstrap";
+import { loadScript } from "@paypal/paypal-js";
+import { GET_PAYPAL_CLIENT_ID } from "../utils/urlResolver";
+import { useApi } from "../hooks/useAPI";
+
+const PAYPAL_TOKEN_URL = (shopperId: string) =>
+  `http://dev-services.shop.com:8085/ShoppingCart/Checkout/Paypal/${shopperId}/Token?creditFlow=false&hideShipping=false&markFlow=false&returnURL=http://localhost:3011&cancelURL=http://localhost:3011&siteId=66`;
 
 const staticPaymentMethods: IPaymentOptionProps[] = [
   {
@@ -100,26 +102,32 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
   const [order, setOrder] = useAtom(orderAtom);
   const [paymentTypeId, setPaymentTypeId] = useState<number>(0);
 
-  const [{ options, isPending }, dispatch] = usePayPalScriptReducer();
+  const { data: paypalToken } = useApi(PAYPAL_TOKEN_URL(shopperId), "GET");
 
-  const onCreateOrder = (data, actions) => {
-    return actions.order.create({
-      purchase_units: [
-        {
-          amount: {
-            value: "8.99",
-          },
-        },
-      ],
-    });
-  };
+  useEffect(() => {
+    // Function to parse query parameters from the URL
+    const getQueryParams = () => {
+      const params = new URLSearchParams(window.location.search);
+      return {
+        token: params.get("token"),
+        payerId: params.get("PayerID"),
+      };
+    };
 
-  const onApproveOrder = (data, actions) => {
-    return actions.order.capture().then((details) => {
-      const name = details.payer.name.given_name;
-      alert(`Transaction completed by ${name}`);
-    });
-  };
+    const { token, payerId } = getQueryParams();
+
+    if (token && payerId) {
+      console.log("PayPal Transaction Details:", { token, payerId });
+
+      // Mark PayPal as the selected payment method
+      setAllPaymentOptions((prevOptions) =>
+        prevOptions.map((option) => ({
+          ...option,
+          selected: option.name === PAYPAL.name,
+        }))
+      );
+    }
+  }, []);
 
   const confirmOrder = () => {
     if (order) {
@@ -226,7 +234,7 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
     );
   }, []);
 
-  const handlePlaceOrder = (paymentTypeId: number) => {
+  const handlePlaceOrder = async (paymentTypeId: number) => {
     switch (paymentTypeId) {
       case CLICK2PAY.typeId:
         handleClick2PayPlaceOrder();
@@ -235,28 +243,29 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
         console.log("place order with Sezzle");
         break;
       case PAYPAL.typeId:
-        let config: AxiosRequestConfig = {
-          method: "GET",
-          maxBodyLength: Infinity,
-          url: "https://dev.shop.com/ajaxaction/checkout/Paypal?isCreditFlow=false&isGuest=false&&ajax=1&onlytoken=1&_=1735790216112",
-          headers: {
-            Host: "dev.shop.com",
-            Referer:
-              "https://dev.shop.com/nbts/checkout/payment?creditFlow=false",
-            Cookie:
-              'AMID=4265199322; _tt_enable_cookie=1; _ga=GA1.1.36821456.1729000583; PORTAL_NAME=""; _dvp=0:m41bv29d:V0wjRURzPTXj2By5Tz7_PBPUdodNWiua; CATALOGCITY_NCID=WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz; CC_DISTID=""; CO_VIEW=; _ttp=aKD-k3aAuKhOf_9uohbTpr4I_m5.tt.1; LAST_CCSYN_SRC=FAMOS; DEV_SHOPMF_NS_ID=022; CATALOGCITY_SSNDEV222=3006645208; CC_SRCID=17; SHOPLOCAL_PROMO_SEEN=0; COUNTRY_MATCH=false; PROMO_ACQUISITION_ELIGIBLE=false; GLOBAL_REDIRECT=Y; SHOPMF_NS_ID=011; CATALOGCITY_SSNLIVE260=4307366054; cf_clearance=oemIl94nv6zO.vhf4HAjTVmfj2d8KkHCJtUZh5WoDxQ-1735704389-1.2.1.1-934ub0TG5iDfqy6dANf2jnweB359Kd7M_84B3iU27lvaXaoXXiU0ye8vAN8hOkfcYxU5J0la.KZWc2VIEexr4zakLcXiDmqB4JDGDRNimTDgVcrMN3dCNoHvzFr9ya.jXNxPISEOlpV7ANG.S70jcCTUSjibGhKEUrK1OgbP1Y5zRGh5v0A6__aWtsWD1iIaCL6t7kURR5_OaipZSJsHMzpMnp_AVqO0AgHfkBOJmYtIltZUzLtXuDFagsdTrS.4CXzIr4lhenrOlE5Gs7qFvzA9qifgFmDFfm7dc5Tfyj8zAIVsgwzKGtJePMY4rXV4u.CzNJVK1YHW7IyJw9mdcfj7qGTiHxFeFWBkBw2od1cuKflKIY087r8knY4z7Jh0_ffeUb0uxm1U50BRi_c62vhs1DAQKk4kbvBluuRvhT0hhs9Xa9ws_4qqpo9pud4mdsCbu.TuFYjScR0uiU0QJg; tkrCookie=s16770; ftr_ncd=6; LAST_CCSYN=222; _ga_HWXLMG1NZE=GS1.1.1735704390.4.1.1735704478.45.0.0; NCID=WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz; __cf_bm=V4uAvojFo2r9Kg7.cwAJNARxzI_Ao1HTzSb6IvuHxr0-1735790004-1.0.1.1-BHRe9uqg28xLd7u5BUV1yLh5KUZNnsfIMAlej6HQmZyyPfx3LvWYKccY3tS_zShA67FL_Tifj0osXRUM2JveIA; JSESSIONID=769ECCE08C06BCAD5E2DF09282794BF1; _dvs=0:m5esk3ov:ATTYs9kx56oFf3NuiSQCmLvCOnxwgNKO; SSRMC=ZGV2X3Rlc3RfbmV3MDUxMiU0MHlvcG1haWwuY29tOjE3MzY5OTk2Nzc4OTA6OTIzM2Q0YWJlMmRjODU1YjIyZDE1MTdjMzdlYzQ2NDg; AMOS_SID=dev%3DZNLHzWxx%252Eh~UjVwkmXXzZkkmzhjZhzpXXVzkjmXkVehxVXZzekwh%26_dev_ticks%3D1735790071701; CART_COUNT=4; fs_lua=1.1735790289556; utag_main=_sn:10$_se:11%3Bexp-session$_ss:0%3Bexp-session$_st:1735792505237%3Bexp-session$ses_id:1735790013524%3Bexp-session$_pn:11%3Bexp-session; _uetsid=c2ec0ef0c7f511efba231faf5c6cd889|h2mgsi|2|fs8|0|1827; _uetvid=42d80da08afd11ef98d981c11b0c4088|vb1egs|1735790706407|12|1|bat.bing.com/p/insights/c/z; fs_uid=#13M37F#5233045301047296:8798207394049705353:::#44bd1580#/1760536715; forterToken=8b2f7837b04745a3a85aae2f9b5ba1fe_1735790704686_1457_UDF43-m4_21ck_; _ga_M4XSTTYQVD=GS1.1.1735790015.10.1.1735790709.0.0.0; AMID=3006645209; CATALOGCITY_SSNDEV222=3006645209; CC_SRCID=17; DEV_SHOPMF_NS_ID=022; LAST_CCSYN=222; LAST_CCSYN_SRC=FAMOS; PROMO_ACQUISITION_ELIGIBLE=false; PROMO_ACQUISITION_SHOWN=false; SHOPLOCAL_PROMO_SEEN=0; COUNTRY_MATCH=false; JSESSIONID=07DDDC83514A1610FC50B646A978EBDA',
-          },
-        };
+        // fetch paypal site flags
+        const siteFlags = await fetchSiteFlagData(siteId, "393");
+        const data = JSON.parse(siteFlags[0].auxDataText);
 
-        axios
-          .request(config)
-          .then((response) => {
-            console.log(JSON.stringify(response.data));
+        // loading paypal sdk
+        loadScript({
+          clientId: GET_PAYPAL_CLIENT_ID(), // Your PayPal Client ID
+          merchantId: data.merchantId, // Optional: Specify merchant ID
+          environment: data.environment, // Use "sandbox" or "production"
+          currency: "USD", // Set your currency
+          intent: "capture", // "capture" for immediate payment
+          components: "buttons",
+        })
+          .then((paypal) => {
+            if (!paypal) {
+              console.error("PayPal SDK failed to load correctly");
+              return;
+            }
+            console.log("PayPal SDK loaded:", paypal);
           })
-          .catch((error) => {
-            console.log(error);
-          });
-        break;
+          .catch((error) => console.error("PayPal SDK failed to load", error));
+        const url = `https://www.sandbox.paypal.com/checkoutnow?token=${paypalToken.tokenId}`;
+        window.open(url, "_blank");
         break;
       default:
         console.log("place order with regular credit card");
@@ -403,63 +412,43 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
   };
 
   return (
-    <PayPalScriptProvider
-      options={{
-        clientId: "",
-        currency: "USD",
-        intent: "capture",
-      }}
-    >
-      {isPending ? (
-        <Spinner />
-      ) : (
-        <div className="pm-main-container">
-          <div className="pm-container">
-            <div className="pm-title-container">
-              <FormHeading title="Payment Method" />
-              <div className="pm-show-card" onClick={toggleAccordion}>
-                <div>{isExpanded ? "Hide other cards" : "See other cards"}</div>
-                <Back
-                  className={`accordion ${isExpanded ? "open" : "close"}`}
-                />
-              </div>
-            </div>
-            <div className="pm-sub-container">
-              {allPaymentOptions
-                .filter((method) => method.visible)
-                .map((paymentOption, index) => (
-                  <PaymentOption
-                    key={
-                      paymentOption.shopperSavedPayment?.id ||
-                      paymentOption.name
-                    }
-                    {...{ ...paymentOption, index }}
-                    isEditing={editingOptionIndex === index}
-                    onEdit={() => setEditingOptionIndex(index)}
-                    onCancelEdit={() => setEditingOptionIndex(null)}
-                    onChange={() => handlePaymentMethodChange(index)}
-                    shopperId={shopperId}
-                  />
-                ))}
-              <PayPalButtons
-                style={{ layout: "vertical" }}
-                createOrder={(data, actions) => onCreateOrder(data, actions)}
-                onApprove={(data, actions) => onApproveOrder(data, actions)}
+    <div className="pm-main-container">
+      <div className="pm-container">
+        <div className="pm-title-container">
+          <FormHeading title="Payment Method" />
+          <div className="pm-show-card" onClick={toggleAccordion}>
+            <div>{isExpanded ? "Hide other cards" : "See other cards"}</div>
+            <Back className={`accordion ${isExpanded ? "open" : "close"}`} />
+          </div>
+        </div>
+        <div className="pm-sub-container">
+          {allPaymentOptions
+            .filter((method) => method.visible)
+            .map((paymentOption, index) => (
+              <PaymentOption
+                key={
+                  paymentOption.shopperSavedPayment?.id || paymentOption.name
+                }
+                {...{ ...paymentOption, index }}
+                isEditing={editingOptionIndex === index}
+                onEdit={() => setEditingOptionIndex(index)}
+                onCancelEdit={() => setEditingOptionIndex(null)}
+                onChange={() => handlePaymentMethodChange(index)}
+                shopperId={shopperId}
               />
-              {showClick2Pay && <PaymentOptionClick2Pay pcid={pcid} />}
-              <div className="checkout-add-card" onClick={onAddNewCard}>
-                <div className="checkout-add-card-text">
-                  <Add /> Add New Card
-                </div>
-                <div>
-                  <img src={CardOptions} />
-                </div>
-              </div>
+            ))}
+          {showClick2Pay && <PaymentOptionClick2Pay pcid={pcid} />}
+          <div className="checkout-add-card" onClick={onAddNewCard}>
+            <div className="checkout-add-card-text">
+              <Add /> Add New Card
+            </div>
+            <div>
+              <img src={CardOptions} />
             </div>
           </div>
-          <TextUpdates />
         </div>
-      )}
-    </PayPalScriptProvider>
+      </div>
+      <TextUpdates />
+    </div>
   );
 };

@@ -62,6 +62,20 @@ export const GET_API_ENDPOINT_BASE_URL_ONLY = () => {
   }
 };
 
+export const GET_PAYPAL_CLIENT_ID = () => {
+  switch (GET_API_MODE()) {
+    case "localhost":
+    case "dev":
+      return "AdKcUB21vu4saO5O4Hcyzw0gytZyJ-R0Nq16Uci9W4NAYKRCPD_ITB7ppw5xZkOOCg4JKjIB-Uwn0Eqc";
+    case "staging":
+      return "ARxYpxURBvfOG4_8UoCf8686KdIHB_1Vg6L_9E_oK8PycqgRHQnwpx46MS3Ej7dzZiv9r0Kui72LeEVw";
+    case "prod":
+      return "Abo_jiuNTioAiXEbJJKFn4iUqiFDxGLO9_Sv5M_6ljwWFfgAnQt5kBb1fmUB1AqdT1Uv1E4wuAlxi9-6";
+    default:
+      return "AdKcUB21vu4saO5O4Hcyzw0gytZyJ-R0Nq16Uci9W4NAYKRCPD_ITB7ppw5xZkOOCg4JKjIB-Uwn0Eqc";
+  }
+};
+
 export const GET_APM_URL = () => {
   switch (GET_API_MODE()) {
     case "localhost":
@@ -87,19 +101,19 @@ export const GET_API_KEY = () => {
     default:
       return "";
   }
-}
+};
 
-  export const GET_TOKEN_SERVICE = () => {
-    switch (GET_API_MODE()) {
-      case "localhost":
-        return "https://devccsoa.marketamerica.com/TokenService/GetToken";
-      case "dev":
-        return "https://devccsoa.marketamerica.com/TokenService/GetToken";
-      case "staging":
-        return "https://stagingccsoa.marketamerica.com/TokenService/GetToken";
-      case "prod":
-        return "https://ccsoa.marketamerica.com/TokenService/GetToken";
-      default:
-        return "";
-    }
-}
+export const GET_TOKEN_SERVICE = () => {
+  switch (GET_API_MODE()) {
+    case "localhost":
+      return "https://devccsoa.marketamerica.com/TokenService/GetToken";
+    case "dev":
+      return "https://devccsoa.marketamerica.com/TokenService/GetToken";
+    case "staging":
+      return "https://stagingccsoa.marketamerica.com/TokenService/GetToken";
+    case "prod":
+      return "https://ccsoa.marketamerica.com/TokenService/GetToken";
+    default:
+      return "";
+  }
+};
