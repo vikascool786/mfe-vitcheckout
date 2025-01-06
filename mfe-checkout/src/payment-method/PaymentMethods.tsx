@@ -107,7 +107,14 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
   const [order, setOrder] = useAtom(orderAtom);
   const [paymentTypeId, setPaymentTypeId] = useState<number>(0);
 
-  const { data: paypalToken } = useApi(PAYPAL_TOKEN_URL(shopperId), "GET");
+  const { data: paypalToken, error } = useApi(
+    PAYPAL_TOKEN_URL(shopperId),
+    "GET"
+  );
+
+  if (error) {
+    alert("Failed to fetch PayPal token");
+  }
 
   useEffect(() => {
     // Function to parse query parameters from the URL
@@ -323,6 +330,12 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
             console.log("PayPal SDK loaded:", paypal);
           })
           .catch((error) => console.error("PayPal SDK failed to load", error));
+
+        if (!paypalToken) {
+          alert("Failed to fetch PayPal token, check console for message");
+          console.log(error)
+          return;
+        }
         const url = `https://www.sandbox.paypal.com/checkoutnow?token=${paypalToken.tokenId}`;
         window.open(url, "_self");
         break;
@@ -443,11 +456,11 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
 
   // Toggle function for expanding or collapsing the card list
   const toggleAccordion = () => {
-    setAllPaymentOptions(prevMethods => 
+    setAllPaymentOptions((prevMethods) =>
       getUpdatedPaymentMethods(prevMethods, !isExpanded)
     );
 
-    console.log(getUpdatedPaymentMethods(allPaymentOptions, !isExpanded))
+    console.log(getUpdatedPaymentMethods(allPaymentOptions, !isExpanded));
     setIsExpanded(!isExpanded);
   };
 
