@@ -11,8 +11,6 @@ import Click2PayCards from "./Click2PayCards";
 import Click2PayCardLoader from "./Click2PayCardLoader";
 const Click2PayNewCard = (function () {
     const addCardOverlay = '.js-c2p-payment-add-card-container';
-    const errorContainer = '.js-c2p-payment-add-card-error-container';
-    const cardFormFields = '.js-c2p-payment-add-card-form-fields';
 
     function closeAddCardOverlay() {
         toggleNewCardOverlay(false);
@@ -98,23 +96,8 @@ const Click2PayNewCard = (function () {
         const errorMessage = error.message;
         //Click2PayLogger.logInfo("encryptCard failed message: " + errorMessage);
         const encryptErrMsg = "There has been a problem adding your a new card to your Click to Pay wallet. Please enter a different payment method or try again.";
-        displayError(encryptErrMsg);
-        //cancelNewCardOverlay();
-        //checkoutClick2payUtil.displayErrorMessage(stringReplacer.getMessage("checkout.click_to_pay.encrypt_new_card.error"));
-    }
-
-    function displayError(errorMessage){
-        const errorDiv = document.querySelector(errorContainer);
-        errorDiv.innerHTML = errorMessage;
-        errorDiv.style.display = "block";
-        hideCreditCardForm()
-    }
-
-    function hideCreditCardForm(){
-        const form = document.querySelector(cardFormFields);
-        if(form){
-            form.style.display = "none";
-        }
+        Click2PayEventUtil.triggerClick2PayErrorEvent(encryptErrMsg);
+        closeAddCardOverlay();
     }
 
     function checkoutWithNewCard(c2pInstance, encryptedCardData){
@@ -189,8 +172,7 @@ const Click2PayNewCard = (function () {
         //Click2PayLogger.logInfo("checkoutWithNewCard failed message: " + errorMessage);
         Click2PayPlaceOrder.closeIFrame();
         const failedMessage = "There has been a problem adding your a new card to your Click to Pay wallet. Please try again.";
-        displayError(failedMessage);
-        openAddCardOverlay(); // error message will display in add card overlay
+        Click2PayEventUtil.triggerClick2PayErrorEvent(failedMessage);
     }
 
     return {

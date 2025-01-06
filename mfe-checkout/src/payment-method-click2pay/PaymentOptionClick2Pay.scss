@@ -53,6 +53,9 @@
       scrollbar-width: none; /* Firefox */
       -ms-overflow-style: none;
     }
+    &--error{
+      height: auto;
+    }
   }
   &__iframe-content{
     width: 100%;
@@ -110,13 +113,5 @@
     color: #F0F1F7;
     background: #202340;
     border: 1px solid #202340;
-  }
-}
-.error-msg{
-  background: #F0F1F7;
-  color: #202340;
-  border-left: 5px solid #FF1F35;
-  &--padding{
-    padding: 20px;
   }
 }

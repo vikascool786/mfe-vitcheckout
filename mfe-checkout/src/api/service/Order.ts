@@ -3,6 +3,7 @@ import { Order } from "../../interfaces/Order";
 import { ApiResponse } from "../../interfaces/ShippingMethod";
 import { GET_API_KEY, GET_API_ENDPOINT_BASE_URL_ONLY } from "../../utils/urlResolver";
 import axiosInstance from "../axios";
+import axios from "axios";
 
 export interface OrderResponse {
   response: Response;
@@ -96,6 +97,16 @@ export const commitOrder = async (
     console.log("commit order successfully: " + JSON.stringify(response));
     return response;
   } catch (error) {
-    console.error("Unable to commit order", error);
+    if (axios.isAxiosError(error)) {
+      if(error.response?.data.errors.length){
+        throw new Error(error.response?.data.errors[0].message);
+      } else{
+        throw error;
+      }
+
+    } else {
+      console.error("Unexpected error:", error);
+      throw error;
+    }
   }
 };

@@ -4,6 +4,7 @@
 import Click2PayLogger from "./Click2PayLogger";
 import Click2PayCardLoader from "./Click2PayCardLoader";
 import Click2PayElementUtil from "./Click2PayElementUtil";
+import Click2PayEventUtil from "./Click2PayCardEventUtil";
 const srcOtpInput = "src-otp-input";
 const srcOtpSelection = "src-otp-channel-selection";
 const CUSTOM_ATTRIBUTE_EVENT_LISTENER = "data-has-event-listener";
@@ -39,6 +40,7 @@ export const initiateValidation = (c2pInstance, selectedChannel) => {
         .catch(error => {
             //Click2PayLogger.logInfo("initiateValidation() failed error: " + error.message);
             console.log("error: " + error.message);
+            Click2PayEventUtil.triggerClick2PayErrorEvent(error.message);
         })
 };
 

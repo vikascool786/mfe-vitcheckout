@@ -39,8 +39,7 @@ const Click2PayPlaceOrder = (function () {
         console.log("checkoutWithCard() SUCCESS");
         //Click2PayLogger.logResponse("checkoutWithCard", response, c2pInstance);
         if (response.checkoutActionCode === 'COMPLETE') {
-            /*const placeOrderWithC2PEmbeddedURL = checkoutClick2payUtil.getPlaceOrderURL(response);
-            window.location.href = placeOrderWithC2PEmbeddedURL;*/
+            closeIFrame();
         } else if(response.checkoutActionCode === 'SWITCH_CONSUMER'){
             closeIFrame();
             Click2PaySignOut.handleSignout(c2pInstance);

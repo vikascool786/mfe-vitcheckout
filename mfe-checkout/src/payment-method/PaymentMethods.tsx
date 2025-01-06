@@ -9,7 +9,6 @@ import CardOptions from "../assets/images/CardOptions.png";
 import PayPal from "../assets/images/PayPal.png";
 import Sezzle from "../assets/images/Sezzle.png";
 import { Back } from "../assets/svgs/Back";
-import { Button } from "../component/Button/Button";
 import { FormHeading } from "../component/Form/Heading/FormHeading";
 import { Address } from "../interfaces/Address";
 import { PaymentOptionClick2Pay } from "../payment-method-click2pay/PaymentMethodOptionClick2Pay";
@@ -19,21 +18,11 @@ import {
 } from "../payment-method-option/PaymentMethodOption";
 import { TextUpdates } from "../text-updates/TextUpdates";
 import "./PaymentMethods.scss";
-import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
-import { updatePaymentMethod } from "../utils/OrderUtils";
-import { changeOrder, commitOrder } from "../api/service/Order";
-import Click2PayUtil from "../payment-method-click2pay/Click2PayUtil";
-import Click2PayPlaceOrder from "../payment-method-click2pay/Click2PayPlaceOrder";
-import { getTransactionData } from "../api/service/Click2PayTransaction";
 import { useAtom } from "jotai";
 import { orderAtom } from "../store";
-import {
-  PAYPAL,
-  SEZZLE,
-  CLICK2PAY,
-  thirdPartyPaymentFlagList,
-} from "./PaymentType";
+import { PAYPAL, SEZZLE, CLICK2PAY, thirdPartyPaymentFlagList } from "./PaymentType";
 import { fetchSiteFlagData } from "../api/service/SiteFlags";
+import axios from "axios";
 import { loadScript } from "@paypal/paypal-js";
 import {
   GET_PAYPAL_CLIENT_ID,
@@ -46,6 +35,7 @@ const PAYPAL_TOKEN_URL = (shopperId: string) =>
   // TODO: PICK THIS UP FROM ENVIORNMENT VARIABLES
   `http://dev-services.shop.com:8085/ShoppingCart/Checkout/Paypal/${shopperId}/Token?creditFlow=false&hideShipping=false&markFlow=false&returnURL=${GET_PAYPAL_RETURN_URL()}&cancelURL=${GET_PAYPAL_RETURN_URL()}/checkout/v2/special&siteId=66`;
 
+
 const staticPaymentMethods: IPaymentOptionProps[] = [
   {
     name: "Credit or Debit Card",
@@ -55,7 +45,7 @@ const staticPaymentMethods: IPaymentOptionProps[] = [
     size: 0,
     typeId: 1,
     visible: true,
-    onChange: () => {},
+    onChange: () => { },
   },
   {
     name: PAYPAL.name,
@@ -66,7 +56,7 @@ const staticPaymentMethods: IPaymentOptionProps[] = [
     typeId: PAYPAL.typeId,
     siteFlagId: 393,
     visible: false,
-    onChange: () => {},
+    onChange: () => { },
   },
   {
     name: SEZZLE.name,
@@ -77,7 +67,7 @@ const staticPaymentMethods: IPaymentOptionProps[] = [
     typeId: SEZZLE.typeId,
     siteFlagId: 568,
     visible: false,
-    onChange: () => {},
+    onChange: () => { },
   },
 ];
 
@@ -86,6 +76,7 @@ interface IPaymentMethod {
   cartId: string;
   siteId: string;
   pcid: string;
+  updatePaymentTypeId: (newValue: number) => void;
 }
 
 export const PaymentMethod: React.FC<IPaymentMethod> = ({
@@ -93,6 +84,7 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
   cartId,
   siteId,
   pcid,
+  updatePaymentTypeId
 }) => {
   const [allPaymentOptions, setAllPaymentOptions] =
     useState<IPaymentOptionProps[]>(staticPaymentMethods);
@@ -153,9 +145,7 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
           const matchingResponse = response.find(
             (item: any) => item.flagID === method.siteFlagId
           );
-          const c2pSiteflag = response.find(
-            (item: any) => item.flagID === CLICK2PAY.siteflagTypeId
-          );
+          const c2pSiteflag = response.find((item: any) => item.flagID === CLICK2PAY.siteflagTypeId);
           setShowClick2Pay(c2pSiteflag ? c2pSiteflag.active : false);
 
           return {
@@ -165,6 +155,7 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
         });
 
         setPaymentMethods(updatedMethods);
+
       } catch (error) {
         console.error("Failed to fetch siteflag data:", error);
       }
@@ -204,20 +195,20 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
         ...(hasPayPal
           ? []
           : [
-              {
-                ...staticPaymentMethods[1], // PayPal
-                visible: true,
-                selected: isPayPalSuccess, // Selected only if not a PayPal success
-              },
-            ]),
+            {
+              ...staticPaymentMethods[1], // PayPal
+              visible: true,
+              selected: isPayPalSuccess, // Selected only if not a PayPal success
+            },
+          ]),
         ...(hasSezzle
           ? []
           : [
-              {
-                ...staticPaymentMethods[2], // Sezzle
-                visible: true,
-              },
-            ]),
+            {
+              ...staticPaymentMethods[2], // Sezzle
+              visible: true,
+            },
+          ]),
       ] as IPaymentOptionProps[];
     }
 
@@ -230,24 +221,25 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
       ...(hasPayPal
         ? []
         : [
-            {
-              ...staticPaymentMethods[1], // PayPal
-              visible: true,
-              selected: isPayPalSuccess, // Selected only if not a PayPal success
-            },
-          ]),
+          {
+            ...staticPaymentMethods[1], // PayPal
+            visible: true,
+            selected: isPayPalSuccess, // Selected only if not a PayPal success
+          },
+        ]),
       ...(hasSezzle
         ? []
         : [
-            {
-              ...staticPaymentMethods[2], // Sezzle
-              visible: true,
-            },
-          ]),
+          {
+            ...staticPaymentMethods[2], // Sezzle
+            visible: true,
+          },
+        ]),
     ];
 
     return updatedOptions as IPaymentOptionProps[];
   };
+
 
   useEffect(() => {
     const fetchShoppersSavedPayments = async (shopperId: string) => {
@@ -262,7 +254,7 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
             index,
             size: 0,
             visible: item.preferred,
-            onChange: () => {},
+            onChange: () => { },
             isSavedCard: true,
             shopperSavedPayment: {
               id: item.id,
@@ -292,7 +284,7 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
   useEffect(() => {
     const handleDeselectPaymentMethodsEvent = () => {
       handlePaymentMethodChange(-1);
-      setPaymentTypeId(CLICK2PAY.typeId);
+      updatePaymentTypeId(CLICK2PAY.typeId);
     };
     document.addEventListener(
       "c2pSelectedCard",
@@ -302,12 +294,6 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
 
   const handlePlaceOrder = async (paymentTypeId: number) => {
     switch (paymentTypeId) {
-      case CLICK2PAY.typeId:
-        handleClick2PayPlaceOrder();
-        break;
-      case SEZZLE.typeId:
-        console.log("place order with Sezzle");
-        break;
       case PAYPAL.typeId:
         // fetch paypal site flags
         const siteFlags = await fetchSiteFlagData(siteId, "393");
@@ -344,85 +330,6 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
         confirmOrder();
         break;
     }
-  };
-
-  const getClickToPayTransactionData = async (
-    flowId: string,
-    transId: string,
-    total: string
-  ) => {
-    try {
-      const response = await getTransactionData(flowId, transId, total);
-      return new Promise((resolve) => {
-        resolve(response);
-      });
-    } catch (error) {
-      console.error("Failed to fetch data:", error);
-    }
-  };
-
-  const handleClick2PayPlaceOrder = () => {
-    console.log("place order with click 2 pay");
-    const digitalCardId = Click2PayPlaceOrder.getDigitalCardId();
-    const c2pPlaceOrderPromise = Click2PayPlaceOrder.handleCheckoutWithC2P(
-      // @ts-ignore
-      window.c2pInstance,
-      digitalCardId
-    );
-    c2pPlaceOrderPromise
-      .then((response: any) => {
-        if (response.checkoutActionCode === "COMPLETE") {
-          const transId = response.headers["merchant-transaction-id"];
-          const flowId = response.headers["x-src-cx-flow-id"];
-          const total = Click2PayUtil.getC2pData().transactionAmount;
-          const promiseClick2PayTransData = getClickToPayTransactionData(
-            flowId,
-            transId,
-            total
-          );
-          promiseClick2PayTransData.then((response: any) => {
-            const paymentMethodResponse = response.data.paymentMethod;
-            //use response to create a temp payment id
-            const walletData = {
-              name: paymentMethodResponse.accountName,
-              number: paymentMethodResponse.number,
-              token: paymentMethodResponse.token,
-              month: paymentMethodResponse.expMonth,
-              year: paymentMethodResponse.expYear,
-              type: paymentMethodResponse.typeID,
-            };
-            const promiseTempPayment = addTempPaymentMethod(
-              shopperId,
-              walletData
-            );
-            promiseTempPayment.then((response: any) => {
-              const paymentId = response.data.id;
-              if (order) {
-                let changeOrderPayload = generateChangeStoreResponse(order);
-                changeOrderPayload = updatePaymentMethod(
-                  changeOrderPayload,
-                  paymentId
-                );
-                const changeOrderPromise = changeOrder(
-                  changeOrderPayload,
-                  cartId
-                );
-                changeOrderPromise.then((response: any) => {
-                  //place the order
-                  const promiseCommitOrder = commitOrder(cartId);
-                  promiseCommitOrder.then((response: any) => {
-                    const orderId = response.data.response.success.data.orderId;
-                    window.location.href = `/nbts/orderconfirmation-${orderId}`;
-                  });
-                });
-              }
-            });
-          });
-        }
-      })
-      .catch((error: { message: string }) => {
-        console.log("c2p place order failed: " + error.message);
-      });
   };
 
   const handlePaymentMethodChange = (selectedIndex: number) => {
@@ -474,7 +381,7 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
       selected: false,
       index: newCardIndex,
       size: 0,
-      onChange: () => {},
+      onChange: () => { },
       isSavedCard: false,
       typeId: 9,
       visible: true,
@@ -506,13 +413,10 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
           </div>
         </div>
         <div className="pm-sub-container">
-          {allPaymentOptions
-            .filter((method) => method.visible)
+          {allPaymentOptions.filter((method) => method.visible)
             .map((paymentOption, index) => (
               <PaymentOption
-                key={
-                  paymentOption.shopperSavedPayment?.id || paymentOption.name
-                }
+                key={paymentOption.shopperSavedPayment?.id || paymentOption.name}
                 {...{ ...paymentOption, index }}
                 isEditing={editingOptionIndex === index}
                 onEdit={() => setEditingOptionIndex(index)}
@@ -521,7 +425,9 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
                 shopperId={shopperId}
               />
             ))}
-          {showClick2Pay && <PaymentOptionClick2Pay pcid={pcid} />}
+          {showClick2Pay && (
+            <PaymentOptionClick2Pay pcid={pcid} />
+          )}
           <div className="checkout-add-card" onClick={onAddNewCard}>
             <div className="checkout-add-card-text">
               <Add /> Add New Card

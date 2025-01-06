@@ -13,8 +13,16 @@ const Click2PayEventUtil = (function(){
         }
     }
 
+    function triggerClick2PayErrorEvent(errorMessage){
+        const event = new CustomEvent("c2pError", {
+            detail: { message: errorMessage },
+        });
+        document.dispatchEvent(event);
+    }
+
     return {
-        triggerClick2PaySelectedCardEvent
+        triggerClick2PaySelectedCardEvent,
+        triggerClick2PayErrorEvent
     }
 })();
 

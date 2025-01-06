@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef } from "react";
+import React, {useEffect, useMemo, useRef, useState} from "react";
 import { Provider, useSetAtom, useAtom } from "jotai";
 import "../App.scss";
 import {
@@ -22,10 +22,7 @@ import { orderAtom, OrderStore } from "../store";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import HeadHelmet from "../head-helmet/HeadHelmet";
 import { PlaceOrder } from "../payment-method/place-order/PlaceOrder";
-import {
-  GET_API_ENDPOINT_BASE_URL_ONLY,
-  GET_API_KEY,
-} from "../utils/urlResolver";
+import {GET_API_ENDPOINT_BASE_URL_ONLY, GET_API_KEY} from "../utils/urlResolver";
 
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
@@ -68,6 +65,8 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   siteId,
 }) => {
   const [orderData, setOrderData] = useAtom(orderAtom);
+  const [orderErrorMessage, setOrderErrorMessage] = useState("");
+  const [paymentTypeId, setPaymentTypeId] = useState(0);
   // const orderData = ORDER_DATA;
   const hasInitializedOrder = useRef(false); // Prevent multiple executions of updateOrder
 
@@ -123,10 +122,23 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   );
 
   const confirmOrder = () => {
-    commitOrder(cartId).then(
-      (response) =>
-        response.status === "committed" && alert("Order has been placed")
-    );
+    const commitPromise = commitOrder(cartId);
+    commitPromise
+        .then((response: any) => {
+              const isSuccessful = response.data.response.success;
+              if(isSuccessful){
+                const orderId = response.data.response.success.data.orderId;
+                window.location.href = `/nbts/orderconfirmation-${orderId}`;
+              }else{
+                const errorMessage = response.data.response.errors.message;
+                const errorCode = response.data.response.errors.code;
+                setOrderErrorMessage("Detail: " + errorMessage + " code: " + errorCode);
+              }
+          }
+        )
+        .catch((error: { message: any; }) => {
+          setOrderErrorMessage("Detail: " + error);
+        })
   };
 
   useEffect(() => {
@@ -166,6 +178,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
               shopperId={shopperId}
               siteId={siteId}
               pcid={pcid}
+              updatePaymentTypeId={setPaymentTypeId}
             />
           </div>
           <div className="right-column">
@@ -174,7 +187,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
         </>
       )}
       <div className="place-order">
-        <PlaceOrder confirmOrder={confirmOrder} />
+        <PlaceOrder confirmOrder={confirmOrder} errorMessage={orderErrorMessage} paymentTypeId={paymentTypeId} shopperId={shopperId} cartId={cartId}/>
       </div>
       <HeadHelmet />
     </div>

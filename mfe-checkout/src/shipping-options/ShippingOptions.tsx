@@ -68,7 +68,7 @@ export const ShippingOptions: React.FC<IShippingOptions> = ({
           shippingOption={shippingOption}
           index={index}
           size={shippingSelections.length - 1}
-          isSelected={shippingOption.isSelected || false}
+          isSelected={shippingOption?.isSelected || false}
           onChange={() => handleChange(shippingOption.method)}
         />
       ))}

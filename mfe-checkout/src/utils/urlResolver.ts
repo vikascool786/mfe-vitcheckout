@@ -62,6 +62,7 @@ export const GET_API_ENDPOINT_BASE_URL_ONLY = () => {
   }
 };
 
+
 export const GET_PAYPAL_RETURN_URL = () => {
   const mode = GET_API_MODE();
   switch (mode) {
@@ -91,6 +92,7 @@ export const GET_PAYPAL_CLIENT_ID = () => {
   }
 };
 
+
 export const GET_APM_URL = () => {
   switch (GET_API_MODE()) {
     case "localhost":
@@ -116,23 +118,22 @@ export const GET_API_KEY = () => {
     default:
       return "";
   }
-};
+}
 
-export const GET_TOKEN_SERVICE = () => {
-  switch (GET_API_MODE()) {
-    case "localhost":
-      return "https://devccsoa.marketamerica.com/TokenService/GetToken";
-    case "dev":
-      return "https://devccsoa.marketamerica.com/TokenService/GetToken";
-    case "staging":
-      return "https://stagingccsoa.marketamerica.com/TokenService/GetToken";
-    case "prod":
-      return "https://ccsoa.marketamerica.com/TokenService/GetToken";
-    default:
-      return "";
-  }
-};
-
+  export const GET_TOKEN_SERVICE = () => {
+    switch (GET_API_MODE()) {
+      case "localhost":
+        return "https://devccsoa.marketamerica.com/TokenService/GetToken";
+      case "dev":
+        return "https://devccsoa.marketamerica.com/TokenService/GetToken";
+      case "staging":
+        return "https://stagingccsoa.marketamerica.com/TokenService/GetToken";
+      case "prod":
+        return "https://ccsoa.marketamerica.com/TokenService/GetToken";
+      default:
+        return "";
+    }
+}
 
 export const GET_C2P_LIB = () => {
   switch (GET_API_MODE()) {
