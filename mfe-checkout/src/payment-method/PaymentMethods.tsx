@@ -162,8 +162,26 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
         console.error("Failed to fetch siteflag data:", error);
       }
     };
-
     fetchSiteFlagInfo();
+
+    // loading paypal sdk
+    loadScript({
+      "client-id":
+        "AdKcUB21vu4saO5O4Hcyzw0gytZyJ-R0Nq16Uci9W4NAYKRCPD_ITB7ppw5xZkOOCg4JKjIB-Uwn0Eqc", // Your PayPal Client ID
+      "merchant-id": "PXYTEVSGBQMLQ", // Optional: Specify merchant ID
+      environment: "sandbox", // Use "sandbox" or "production"
+      currency: "USD", // Set your currency
+      intent: "capture", // "capture" for immediate payment
+      components: "buttons",
+    })
+      .then((paypal) => {
+        if (!paypal) {
+          console.error("PayPal SDK failed to load correctly");
+          return;
+        }
+        console.log("PayPal SDK loaded:", paypal);
+      })
+      .catch((error) => console.error("PayPal SDK failed to load", error));
   }, []);
 
   const getUpdatedPaymentMethods = (
@@ -408,7 +426,9 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
 
   // Toggle function for expanding or collapsing the card list
   const toggleAccordion = () => {
-    setAllPaymentOptions(getUpdatedPaymentMethods(allPaymentOptions));
+    setAllPaymentOptions(
+      getUpdatedPaymentMethods(allPaymentOptions, !isExpanded)
+    );
     setIsExpanded(!isExpanded);
   };
 
@@ -477,6 +497,39 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
             <div>
               <img src={CardOptions} />
             </div>
+          </div>
+
+          <div>
+            {token ? (
+              <PayPalScriptProvider
+                options={{
+                  "client-id":
+                    "AdKcUB21vu4saO5O4Hcyzw0gytZyJ-R0Nq16Uci9W4NAYKRCPD_ITB7ppw5xZkOOCg4JKjIB-Uwn0Eqc",
+                  "merchant-id": "PXYTEVSGBQMLQ",
+                  "data-environment": "sandbox",
+                  currency: "USD",
+                }}
+              >
+                <PayPalButtons
+                  createOrder={(data, actions) => {
+                    return actions.order.create({
+                      purchase_units: [
+                        {
+                          amount: {
+                            value: "5.00", // Replace with the actual amount
+                          },
+                          reference_id: token, // Pass the token to reference the payment
+                        },
+                      ],
+                    });
+                  }}
+                  onApprove={handleApprove}
+                  onError={(error) => console.error("PayPal Error:", error)}
+                />
+              </PayPalScriptProvider>
+            ) : (
+              <p>Loading PayPal...</p>
+            )}
           </div>
         </div>
       </div>

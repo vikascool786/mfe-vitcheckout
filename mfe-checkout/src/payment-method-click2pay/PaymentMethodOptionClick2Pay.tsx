@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { GET_CLICK2PAY_DPA_ID } from "../utils/ApiConstants";
 import Click2PayInitializer from "./Click2PayInitializer";
 import Click2PayCards from "./Click2PayCards";
 import Click2PayNewCard from "./Click2PayNewCard";
@@ -18,6 +17,7 @@ import {useAtom} from "jotai/index";
 import {CustomerProfile} from "../interfaces/CustomerProfile";
 import {creditCards} from "../payment-method/PaymentType";
 import Click2PayCardLoader from "./Click2PayCardLoader";
+import {GET_C2P_DPAID} from "../utils/urlResolver";
 
 interface IClick2PayProps {
     pcid: string;
@@ -119,7 +119,7 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({ pcid }) => {
         });
 
         const initParams = {
-            srcDpaId: `${GET_CLICK2PAY_DPA_ID}`,
+            srcDpaId: `${GET_C2P_DPAID()}`,
             dpaTransactionOptions: {
                 "dpaLocale": "en_US",
                 "transactionAmount": {
