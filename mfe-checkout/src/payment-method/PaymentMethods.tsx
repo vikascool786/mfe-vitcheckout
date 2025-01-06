@@ -35,11 +35,16 @@ import {
 } from "./PaymentType";
 import { fetchSiteFlagData } from "../api/service/SiteFlags";
 import { loadScript } from "@paypal/paypal-js";
-import { GET_PAYPAL_CLIENT_ID } from "../utils/urlResolver";
+import {
+  GET_PAYPAL_CLIENT_ID,
+  GET_PAYPAL_RETURN_URL,
+} from "../utils/urlResolver";
 import { useApi } from "../hooks/useAPI";
 
 const PAYPAL_TOKEN_URL = (shopperId: string) =>
-  `http://dev-services.shop.com:8085/ShoppingCart/Checkout/Paypal/${shopperId}/Token?creditFlow=false&hideShipping=false&markFlow=false&returnURL=http://localhost:3011&cancelURL=http://localhost:3011&siteId=66`;
+  // make the return url and cancel url dynamic
+  // TODO: PICK THIS UP FROM ENVIORNMENT VARIABLES
+  `http://dev-services.shop.com:8085/ShoppingCart/Checkout/Paypal/${shopperId}/Token?creditFlow=false&hideShipping=false&markFlow=false&returnURL=${GET_PAYPAL_RETURN_URL()}&cancelURL=${GET_PAYPAL_RETURN_URL()}/checkout/v2/special&siteId=66`;
 
 const staticPaymentMethods: IPaymentOptionProps[] = [
   {
@@ -118,13 +123,8 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
 
     if (token && payerId) {
       console.log("PayPal Transaction Details:", { token, payerId });
-
-      // Mark PayPal as the selected payment method
-      setAllPaymentOptions((prevOptions) =>
-        prevOptions.map((option) => ({
-          ...option,
-          selected: option.name === PAYPAL.name,
-        }))
+      handlePaymentMethodChange(
+        allPaymentOptions.findIndex((option) => option.name === PAYPAL.name)
       );
     }
   }, []);
@@ -165,63 +165,94 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
 
     fetchSiteFlagInfo();
   }, []);
+
+  const getUpdatedPaymentMethods = (
+    shopperPayments: IPaymentOptionProps[],
+    isExpanded: boolean
+  ): IPaymentOptionProps[] => {
+    const searchParams = new URLSearchParams(location.search);
+    const token = searchParams.get("token");
+    const payerID = searchParams.get("PayerID");
+    const isPayPalSuccess = payerID && token;
+
+    if (isExpanded) {
+      return [
+        ...shopperPayments.map((item) => ({
+          ...item,
+          selected: isPayPalSuccess ? false : item.selected,
+          visible: true,
+        })),
+        {
+          ...staticPaymentMethods[1], // PayPal
+          visible: true,
+          selected: isPayPalSuccess, // Selected only if not a PayPal success
+        },
+        {
+          ...staticPaymentMethods[2], // Sezzle
+          visible: true,
+        },
+      ] as IPaymentOptionProps[];
+    }
+
+    const updatedOptions = [
+      ...shopperPayments.map((item) => ({
+        ...item,
+        selected: isPayPalSuccess ? false : item.selected,
+        visible: isPayPalSuccess ? false : item.selected,
+      })),
+      {
+        ...staticPaymentMethods[1], // PayPal
+        visible: true,
+        selected: isPayPalSuccess, // Selected only if not a PayPal success
+      },
+      {
+        ...staticPaymentMethods[2], // Sezzle
+        visible: true,
+      },
+    ];
+
+    return updatedOptions as IPaymentOptionProps[];
+  };
+
   useEffect(() => {
     const fetchShoppersSavedPayments = async (shopperId: string) => {
       try {
         const response = await fetchShoppersPaymentMethods(shopperId);
 
         const shopperPayments: IPaymentOptionProps[] = response
-          .map((item: any, index: number) => {
-            return {
+          .map((item: any, index: number) => ({
+            name: item.type,
+            image: item.imageUrl,
+            selected: item.preferred,
+            index,
+            size: 0,
+            visible: item.preferred,
+            onChange: () => {},
+            isSavedCard: true,
+            shopperSavedPayment: {
+              id: item.id,
+              expirationDate: item.expires as string | "",
+              cardMask: item.mask as string | "",
+              preferred: item.preferred as boolean,
+              type: item.type as string | "",
+              accountName: item.accountName as string | "",
               name: item.type,
               image: item.imageUrl,
-              selected: item.preferred,
-              index,
-              size: 0,
-              visible: true,
-              onChange: () => {},
-              isSavedCard: true,
-              shopperSavedPayment: {
-                id: item.id,
-                expirationDate: item.expires as string | "",
-                cardMask: item.mask as string | "",
-                preferred: item.preferred as boolean,
-                type: item.type as string | "",
-                accountName: item.accountName as string | "",
-                name: item.type,
-                image: item.imageUrl,
-                address: addresses
-                  ? addresses[item.addressId]
-                  : ({} as Address),
-              },
-            };
-          })
-          .sort(
-            (a: { selected: boolean }, b: { selected: boolean }) =>
-              (b.selected ? 1 : 0) - (a.selected ? 1 : 0)
-          );
-        updatePaymentOptions(shopperPayments);
+              address: addresses ? addresses[item.addressId] : ({} as Address),
+            },
+          }))
+          .sort((a, b) => (b.selected ? 1 : 0) - (a.selected ? 1 : 0));
+
+        setAllPaymentOptions(
+          getUpdatedPaymentMethods(shopperPayments, isExpanded)
+        );
       } catch (error) {
         console.error("Failed to fetch shopper payment data:", error);
       }
     };
 
-    const updatePaymentOptions = (shopperPayments: IPaymentOptionProps[]) => {
-      const displayedOptions = [
-        ...(shopperPayments && shopperPayments[0]
-          ? [shopperPayments[0]]
-          : [paymentMethods[0]]),
-        ...(isExpanded && shopperPayments ? shopperPayments.slice(1) : []),
-        paymentMethods?.[1] ?? [], // PayPal
-        paymentMethods?.[2] ?? [], // Sezzle
-      ];
-
-      setAllPaymentOptions(displayedOptions as IPaymentOptionProps[]);
-      updatePaymentOptions(shopperPayments);
-    };
-
     fetchShoppersSavedPayments(shopperId);
-  }, [isExpanded, addresses, shopperId]);
+  }, [shopperId, addresses]);
 
   useEffect(() => {
     const handleDeselectPaymentMethodsEvent = () => {
@@ -265,7 +296,7 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
           })
           .catch((error) => console.error("PayPal SDK failed to load", error));
         const url = `https://www.sandbox.paypal.com/checkoutnow?token=${paypalToken.tokenId}`;
-        window.open(url, "_blank");
+        window.open(url, "_self");
         break;
       default:
         console.log("place order with regular credit card");
@@ -358,17 +389,17 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
       (option, index) => index === selectedIndex
     )?.name;
 
-    if (isPaypal === PAYPAL.name) {
-      handlePlaceOrder(PAYPAL.typeId);
-      return;
-    }
-
     setAllPaymentOptions((prevOptions) =>
       prevOptions.map((option, index) => ({
         ...option,
         selected: index === selectedIndex,
       }))
     );
+
+    if (isPaypal === PAYPAL.name) {
+      handlePlaceOrder(PAYPAL.typeId);
+      return;
+    }
     // Collapse any editing card when a new payment method is selected
     if (editingOptionIndex !== null && editingOptionIndex !== selectedIndex) {
       setEditingOptionIndex(null);
@@ -377,6 +408,7 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
 
   // Toggle function for expanding or collapsing the card list
   const toggleAccordion = () => {
+    setAllPaymentOptions(getUpdatedPaymentMethods(allPaymentOptions));
     setIsExpanded(!isExpanded);
   };
 

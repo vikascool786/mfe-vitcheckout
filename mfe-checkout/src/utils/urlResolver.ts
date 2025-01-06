@@ -62,6 +62,21 @@ export const GET_API_ENDPOINT_BASE_URL_ONLY = () => {
   }
 };
 
+export const GET_PAYPAL_RETURN_URL = () => {
+  const mode = GET_API_MODE();
+  switch (mode) {
+    case "localhost":
+      return "http://localhost:3011/nbts/checkout/v2/special";
+    case "dev":
+      return "https://dev.shop.com/nbts/checkout/v2/special";
+    case "staging":
+      return "https://staging.shop.com/nbts/checkout/v2/special";
+    case "prod":
+    default:
+      return "https://shop.com/nbts/checkout/v2/special";
+  }
+};
+
 export const GET_PAYPAL_CLIENT_ID = () => {
   switch (GET_API_MODE()) {
     case "localhost":
