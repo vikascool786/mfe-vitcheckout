@@ -5,6 +5,8 @@ import { ShippingOptionItem } from "../shipping-option-item/ShippingOptionItem";
 import { OrderStore } from "../interfaces/Order";
 import { useAtom, useAtomValue } from "jotai";
 import { orderAtom } from "../store";
+import { changeOrder } from "../api/service/Order";
+import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 
 interface IShippingOptions {
   store: OrderStore;
@@ -39,16 +41,22 @@ export const ShippingOptions: React.FC<IShippingOptions> = ({
     // Set updated shipping options locally
     setShipping(updatedOptions);
 
-    // Update the correct store in the global OrderStores object
-    setOrder({
-      ...order, // Spread other stores
-      stores: {
-        ...order.stores,
-        [storeKey]: {
-          ...store,
-          shippingMethod: method,
+    changeOrder(
+      generateChangeStoreResponse({
+        ...order, // Spread other stores
+        stores: {
+          ...order.stores,
+          [storeKey]: {
+            ...store,
+            shippingMethod: method,
+          },
         },
-      },
+      }),
+      order.id
+    ).then((response) => {
+      if (response) {
+        setOrder(response.response.success.data);
+      }
     });
   };
 

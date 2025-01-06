@@ -12,9 +12,11 @@ import { DropdownField } from "../../component/Form/Field/DropdownField";
 import { FormField } from "../../component/Form/Field/FormField";
 import { Address } from "../../interfaces/Address";
 import { ShopperSavedPayments } from "../../interfaces/ShopperSavedPayments";
-import { addressAtom } from "../../store";
+import { addressAtom, orderAtom } from "../../store";
 import "./CardInformation.scss";
 import { Button } from "../../component/Button/Button";
+import { buildOrder, changeOrder } from "../../api/service/Order";
+import { generateChangeStoreResponse } from "../../utils/helpers/GenerateChangeStoreResponse";
 
 interface ICardInformationProps {
   initialData?: Partial<ShopperSavedPayments>;
@@ -68,6 +70,8 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   );
 
   const addressList = useAtomValue(addressAtom);
+
+  const order = useAtomValue(orderAtom);
 
   const shippingAddress = addressList.find((address) => address.isPrimary);
   const [saveAddress, setSaveAddress] = useState<boolean>(false);
@@ -156,7 +160,16 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
       cvv: ["999"],
     });
 
-    console.log(response);
+    changeOrder(
+      generateChangeStoreResponse({
+        ...order,
+        paymentMethod: {
+          ...cardInformation,
+          id: cardInformation.id,
+        },
+      }),
+      order?.id
+    );
   };
 
   return (
@@ -244,42 +257,42 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           <span className="shipping-text">Save card for later</span>
         </div>
       </div>
-        {showBillingSection && (
-            <>
-            <div className="billing">
-                <div className="billing-address">
-                    Billing Address
-                    <input
-                        className="checkbox"
-                        type="checkbox"
-                        checked={sameShippingAddress}
-                        onChange={() => setSameShippingAddress(!sameShippingAddress)}
-                    />
-                </div>
-                <span className="shipping-text">Same as shipping</span>
+      {showBillingSection && (
+        <>
+          <div className="billing">
+            <div className="billing-address">
+              Billing Address
+              <input
+                className="checkbox"
+                type="checkbox"
+                checked={sameShippingAddress}
+                onChange={() => setSameShippingAddress(!sameShippingAddress)}
+              />
             </div>
-            {!sameShippingAddress ? (
-                <AddressForm
-                    shippingAddress={address}
-                    siteId="260"
-                    onAddressChange={(updatedAddress: Address) => {
-                        setAddress(updatedAddress);
-                        setCardInformation((prev) => ({
-                            ...prev,
-                            address: updatedAddress,
-                        }));
-                    }}
-                />
-            ) : (
-                <div className="checkbox-text">
-                    {shippingAddress?.first} {shippingAddress?.last}{" "}
-                    {shippingAddress?.address1}
-                    {shippingAddress?.address2} {shippingAddress?.city}{" "}
-                    {shippingAddress?.zip}
-                </div>
-            )}
+            <span className="shipping-text">Same as shipping</span>
+          </div>
+          {!sameShippingAddress ? (
+            <AddressForm
+              shippingAddress={address}
+              siteId="260"
+              onAddressChange={(updatedAddress: Address) => {
+                setAddress(updatedAddress);
+                setCardInformation((prev) => ({
+                  ...prev,
+                  address: updatedAddress,
+                }));
+              }}
+            />
+          ) : (
+            <div className="checkbox-text">
+              {shippingAddress?.first} {shippingAddress?.last}{" "}
+              {shippingAddress?.address1}
+              {shippingAddress?.address2} {shippingAddress?.city}{" "}
+              {shippingAddress?.zip}
+            </div>
+          )}
         </>
-        )}
+      )}
     </div>
   );
 };

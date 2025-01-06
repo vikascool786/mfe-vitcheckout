@@ -22,7 +22,10 @@ import { orderAtom, OrderStore } from "../store";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import HeadHelmet from "../head-helmet/HeadHelmet";
 import { PlaceOrder } from "../payment-method/place-order/PlaceOrder";
-import {GET_API_ENDPOINT_BASE_URL_ONLY, GET_API_KEY} from "../utils/urlResolver";
+import {
+  GET_API_ENDPOINT_BASE_URL_ONLY,
+  GET_API_KEY,
+} from "../utils/urlResolver";
 
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
@@ -120,7 +123,10 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   );
 
   const confirmOrder = () => {
-    commitOrder(cartId);
+    commitOrder(cartId).then(
+      (response) =>
+        response.status === "committed" && alert("Order has been placed")
+    );
   };
 
   useEffect(() => {

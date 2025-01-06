@@ -69,7 +69,7 @@ export const updateShopperDetails = async (
 ) => {
   try {
     const response = await axiosInstance(
-      `${GET_API_ENDPOINT_BASE_URL_ONLY()}/Shopper/${shopperId}/Wallet/${id}?api_key=${GET_API_KEY()}`
+      `${GET_API_ENDPOINT_BASE_URL_ONLY()}/shopper-wallets/v1/Shopper/${shopperId}/Wallet/${id}?api_key=${GET_API_KEY()}`
     ).put("", walletData, {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",

@@ -162,26 +162,8 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
         console.error("Failed to fetch siteflag data:", error);
       }
     };
-    fetchSiteFlagInfo();
 
-    // loading paypal sdk
-    loadScript({
-      "client-id":
-        "AdKcUB21vu4saO5O4Hcyzw0gytZyJ-R0Nq16Uci9W4NAYKRCPD_ITB7ppw5xZkOOCg4JKjIB-Uwn0Eqc", // Your PayPal Client ID
-      "merchant-id": "PXYTEVSGBQMLQ", // Optional: Specify merchant ID
-      environment: "sandbox", // Use "sandbox" or "production"
-      currency: "USD", // Set your currency
-      intent: "capture", // "capture" for immediate payment
-      components: "buttons",
-    })
-      .then((paypal) => {
-        if (!paypal) {
-          console.error("PayPal SDK failed to load correctly");
-          return;
-        }
-        console.log("PayPal SDK loaded:", paypal);
-      })
-      .catch((error) => console.error("PayPal SDK failed to load", error));
+    fetchSiteFlagInfo();
   }, []);
 
   const getUpdatedPaymentMethods = (
@@ -191,7 +173,19 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
     const searchParams = new URLSearchParams(location.search);
     const token = searchParams.get("token");
     const payerID = searchParams.get("PayerID");
-    const isPayPalSuccess = payerID && token;
+    const isPayPalSuccess = !!payerID && !!token;
+
+    const hasPayPal = shopperPayments.some(
+      (item) => item.name === "Paypal" // Check if PayPal already exists
+    );
+    const hasSezzle = shopperPayments.some(
+      (item) => item.name === "Sezzle" // Check if Sezzle already exists
+    );
+
+    console.log("hasPayPal", hasPayPal);
+    console.log("hasSezzle", isPayPalSuccess);
+
+    console.log("isExpanded", isExpanded);
 
     if (isExpanded) {
       return [
@@ -200,15 +194,23 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
           selected: isPayPalSuccess ? false : item.selected,
           visible: true,
         })),
-        {
-          ...staticPaymentMethods[1], // PayPal
-          visible: true,
-          selected: isPayPalSuccess, // Selected only if not a PayPal success
-        },
-        {
-          ...staticPaymentMethods[2], // Sezzle
-          visible: true,
-        },
+        ...(hasPayPal
+          ? []
+          : [
+              {
+                ...staticPaymentMethods[1], // PayPal
+                visible: true,
+                selected: isPayPalSuccess, // Selected only if not a PayPal success
+              },
+            ]),
+        ...(hasSezzle
+          ? []
+          : [
+              {
+                ...staticPaymentMethods[2], // Sezzle
+                visible: true,
+              },
+            ]),
       ] as IPaymentOptionProps[];
     }
 
@@ -216,17 +218,25 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
       ...shopperPayments.map((item) => ({
         ...item,
         selected: isPayPalSuccess ? false : item.selected,
-        visible: isPayPalSuccess ? false : item.selected,
+        visible: item.shopperSavedPayment?.preferred,
       })),
-      {
-        ...staticPaymentMethods[1], // PayPal
-        visible: true,
-        selected: isPayPalSuccess, // Selected only if not a PayPal success
-      },
-      {
-        ...staticPaymentMethods[2], // Sezzle
-        visible: true,
-      },
+      ...(hasPayPal
+        ? []
+        : [
+            {
+              ...staticPaymentMethods[1], // PayPal
+              visible: true,
+              selected: isPayPalSuccess, // Selected only if not a PayPal success
+            },
+          ]),
+      ...(hasSezzle
+        ? []
+        : [
+            {
+              ...staticPaymentMethods[2], // Sezzle
+              visible: true,
+            },
+          ]),
     ];
 
     return updatedOptions as IPaymentOptionProps[];
@@ -403,15 +413,22 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
   };
 
   const handlePaymentMethodChange = (selectedIndex: number) => {
-    const isPaypal = allPaymentOptions.find(
-      (option, index) => index === selectedIndex
-    )?.name;
+    console.log(
+      "Selected Payment Method Index:",
+      selectedIndex,
+      allPaymentOptions
+    );
+    const isPaypal = allPaymentOptions
+      .filter((option) => option.visible)
+      .find((option, index) => index === selectedIndex)?.name;
 
     setAllPaymentOptions((prevOptions) =>
-      prevOptions.map((option, index) => ({
-        ...option,
-        selected: index === selectedIndex,
-      }))
+      prevOptions
+        .filter((option) => option.visible)
+        .map((option, index) => ({
+          ...option,
+          selected: index === selectedIndex,
+        }))
     );
 
     if (isPaypal === PAYPAL.name) {
@@ -426,9 +443,11 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
 
   // Toggle function for expanding or collapsing the card list
   const toggleAccordion = () => {
-    setAllPaymentOptions(
-      getUpdatedPaymentMethods(allPaymentOptions, !isExpanded)
+    setAllPaymentOptions(prevMethods => 
+      getUpdatedPaymentMethods(prevMethods, !isExpanded)
     );
+
+    console.log(getUpdatedPaymentMethods(allPaymentOptions, !isExpanded))
     setIsExpanded(!isExpanded);
   };
 
@@ -497,39 +516,6 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
             <div>
               <img src={CardOptions} />
             </div>
-          </div>
-
-          <div>
-            {token ? (
-              <PayPalScriptProvider
-                options={{
-                  "client-id":
-                    "AdKcUB21vu4saO5O4Hcyzw0gytZyJ-R0Nq16Uci9W4NAYKRCPD_ITB7ppw5xZkOOCg4JKjIB-Uwn0Eqc",
-                  "merchant-id": "PXYTEVSGBQMLQ",
-                  "data-environment": "sandbox",
-                  currency: "USD",
-                }}
-              >
-                <PayPalButtons
-                  createOrder={(data, actions) => {
-                    return actions.order.create({
-                      purchase_units: [
-                        {
-                          amount: {
-                            value: "5.00", // Replace with the actual amount
-                          },
-                          reference_id: token, // Pass the token to reference the payment
-                        },
-                      ],
-                    });
-                  }}
-                  onApprove={handleApprove}
-                  onError={(error) => console.error("PayPal Error:", error)}
-                />
-              </PayPalScriptProvider>
-            ) : (
-              <p>Loading PayPal...</p>
-            )}
           </div>
         </div>
       </div>
