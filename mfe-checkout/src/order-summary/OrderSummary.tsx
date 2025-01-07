@@ -10,6 +10,8 @@ import { orderAtom } from "../store";
 import { ApplyCashback } from "./apply-cashback/ApplyCashback";
 import "./OrderSummary.scss";
 import { getCatalogName } from "../utils/helpers/GetCatalog";
+import { changeOrder } from "../api/service/Order";
+import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 
 interface IOrderSummary {
   pcid: string;
@@ -68,17 +70,34 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
   // Add gift card to the order
   const handleAddGiftCard = () => {
     if (order?.userOptions && gcPin.trim() && gcNum.trim()) {
-      setOrder({
-        ...order,
-        userOptions: {
-          ...order.userOptions,
-          gcPin: [gcPin],
-          gcNum: [gcNum],
-        },
+      changeOrder(
+        generateChangeStoreResponse({
+          ...order,
+          userOptions: {
+            ...order.userOptions,
+            gcPin: [gcPin],
+            gcNum: [gcNum],
+          },
+        }),
+        order.id
+      ).then((response) => {
+        if (response.response.success?.notifications) {
+          alert("Error for the gift card");
+          console.warn(response.response.success.notifications);
+          return;
+        }
+
+        if (response) {
+          setOrder(response.response.success.data);
+        }
       });
 
+      // Reset the gift card fields
       setGcPin("");
       setGcNum("");
+
+      // Hide the gift card fields
+      setShowApplyGiftCard(false);
     }
   };
 
@@ -90,23 +109,37 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
 
         // Add coupon if not empty and not already present
         if (trimmedCoupon && !coupons.includes(trimmedCoupon)) {
-          setOrder({
-            ...order,
-            userOptions: {
-              ...order.userOptions,
-              coupons: [...coupons, coupon],
-            },
+          changeOrder(
+            generateChangeStoreResponse({
+              ...order,
+              userOptions: {
+                ...order.userOptions,
+                coupons: [...coupons, coupon],
+              },
+            }),
+            order.id
+          ).then((response) => {
+            if (response) {
+              setOrder(response.response.success.data);
+            }
           });
 
           setCoupon("");
         }
       } else {
-        setOrder({
-          ...order,
-          userOptions: {
-            ...order.userOptions,
-            coupons: [coupon],
-          },
+        changeOrder(
+          generateChangeStoreResponse({
+            ...order,
+            userOptions: {
+              ...order.userOptions,
+              coupons: [coupon],
+            },
+          }),
+          order.id
+        ).then((response) => {
+          if (response) {
+            setOrder(response.response.success.data);
+          }
         });
       }
     }

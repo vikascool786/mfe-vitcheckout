@@ -9,7 +9,7 @@ export const TextUpdates = () => {
     <div className="tm-container">
       <FormHeading title="Text Updates for this Order" />
       <div className="tm-form-container">
-        <FormField label="Mobile Phone" extraLabel="10 digits" required/>
+        <FormField label="Mobile Phone" extraLabel="10 digits" required />
         <div className="save-for-later">
           <input className="checkbox" type="checkbox" />
           <span className="shipping-text">Send order updates</span>

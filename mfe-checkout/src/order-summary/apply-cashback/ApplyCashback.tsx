@@ -3,6 +3,8 @@ import React from "react";
 import { EWallet } from "../../interfaces/EWallet";
 import "../OrderSummary.scss";
 import { orderAtom } from "../../store";
+import { changeOrder } from "../../api/service/Order";
+import { generateChangeStoreResponse } from "../../utils/helpers/GenerateChangeStoreResponse";
 
 interface IApplyCashbackContainer {
   cashbackData: EWallet;
@@ -19,12 +21,19 @@ export const ApplyCashback: React.FC<IApplyCashbackContainer> = ({
     if (order) {
       const isCashbackApplied = !order?.userOptions.applyCashback;
 
-      setOrder({
-        ...order,
-        userOptions: {
-          ...order.userOptions,
-          applyCashback: isCashbackApplied,
-        },
+      changeOrder(
+        generateChangeStoreResponse({
+          ...order,
+          userOptions: {
+            ...order.userOptions,
+            applyCashback: isCashbackApplied,
+          },
+        }),
+        order.id
+      ).then((response) => {
+        if (response) {
+          setOrder(response.response.success.data);
+        }
       });
     }
   };

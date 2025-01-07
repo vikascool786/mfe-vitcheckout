@@ -42,7 +42,6 @@ export const PaymentOption: React.FC<
   const isFirst = index === 0 ? "start" : "";
   const showCardImage = isSavedCard && shopperSavedPayment;
 
-
   return (
     <div
       className={`payment-option-container ${isSelected} ${isFirst}`}
@@ -97,18 +96,7 @@ export const PaymentOption: React.FC<
         ) : null}
       </div>
 
-      {isEditing && (
-        <CardInformation
-          shopperId={shopperId}
-          initialData={{
-            ...shopperSavedPayment,
-          }}
-          onCancel={onCancelEdit}
-        />
-      )}
-
-      {/* Always show CardInformation if name is "New Card" */}
-      {name === "New Card" && (
+      {(isEditing || name === "New Card") && (
         <CardInformation
           shopperId={shopperId}
           initialData={{
