@@ -1,22 +1,22 @@
-import { useAtom } from "jotai";
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useAtom } from "jotai";
 import "../App.scss";
 import { commitOrder, OrderResponse } from "../api/service/Order";
 import { withErrorBoundary } from "../hoc/withErrorBoundary";
+import { Checkout } from "./Checkout";
+import { OrderSummary } from "../order-summary/OrderSummary";
+import { PaymentMethod } from "../payment-method/PaymentMethods";
+import { ShippingMethod } from "../shipping-methods/ShippingMethod";
 import { useApi } from "../hooks/useAPI";
 import { Address } from "../interfaces/Address";
 import { ChangeOrder } from "../interfaces/ChangeOrder";
 import { Order } from "../interfaces/Order";
 import { IPaymentMethod } from "../interfaces/PaymentMethod";
-import { OrderSummary } from "../order-summary/OrderSummary";
-import { PaymentMethod } from "../payment-method/PaymentMethods";
-import { ShippingMethod } from "../shipping-methods/ShippingMethod";
 import { orderAtom } from "../store";
-import { Checkout } from "./Checkout";
 
+import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import HeadHelmet from "../head-helmet/HeadHelmet";
 import PlaceOrder from "../payment-method/place-order/PlaceOrder";
-import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import {
   GET_API_ENDPOINT_BASE_URL_ONLY,
   GET_API_KEY,

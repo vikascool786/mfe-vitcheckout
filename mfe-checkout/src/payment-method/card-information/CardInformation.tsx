@@ -25,6 +25,7 @@ interface ICardInformationProps {
   initialData?: Partial<ShopperSavedPayments>;
   onCancel?: () => void;
   shopperId: string;
+  showBillingSection?: boolean;
 }
 
 /**
@@ -63,6 +64,7 @@ const defaultAddress: Address = {
 export const CardInformation: React.FC<ICardInformationProps> = ({
   initialData,
   shopperId,
+  showBillingSection = true,
 }) => {
   const [sameShippingAddress, setSameShippingAddress] =
     useState<boolean>(false);
@@ -120,7 +122,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
       month: expirationMonth ? parseInt(expirationMonth, 10) : undefined,
       year: expirationYear ? parseInt(expirationYear, 10) : undefined,
       type: cardInformation.type,
-      preferred: true,
+      preferred: cardInformation.preferred,
       first: address.first,
       last: address.last,
       address1: address.address1,

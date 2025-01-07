@@ -215,135 +215,140 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({ pcid }) => {
     };
 
     return (
-        <div className="checkout-method-click-to-pay">
-            {hasSavedCards ? (
-                    <div className="checkout-method-save-information">
-                        <div className="js-c2p-existing-user click-to-pay">
-                            <div className="js-c2p-access-cards-msg click-to-pay">
-                                <div className="checkout-method-click-to-pay-text">
-                                    Pay with your cards saved to Click to Pay for fast, secure checkout
+        <div className="payment-option-container">
+            <div className="js-payment-promo-c2p"></div>
+            <div className="checkout-method-click-to-pay">
+                {hasSavedCards ? (
+                        <div className="checkout-method-save-information">
+                            <div className="js-c2p-existing-user click-to-pay">
+                                <div className="js-c2p-access-cards-msg click-to-pay">
+                                    <div className="checkout-method-click-to-pay-text">
+                                        Pay with your cards saved to Click to Pay for fast, secure checkout
+                                    </div>
+                                    <button className="checkout-method-click-to-pay-text click-to-pay__btn" type="button"
+                                            onClick={() => initiateOTPValidation()}>Access your cards
+                                    </button>
                                 </div>
-                                <button className="checkout-method-click-to-pay-text click-to-pay__btn" type="button"
-                                        onClick={() => initiateOTPValidation()}>Access your cards
-                                </button>
-                            </div>
-                            <src-card-list card-brands={cardBrandsString} display-preferred-card="true"
-                                           card-selection-type="radioButton" display-sign-out="false"/>
-                            <div className="js-c2p-empty-card-list-msg" style={{display: "none"}}>
-                                <div className="checkout-method-click-to-pay-text click-to-pay__warn">
-                                    <Warn/>
-                                    <p className="click-to-pay__warn-text">There are no cards in your Click to Pay
-                                        wallet. Add a card to check out with your Click to Pay Profile.</p>
+                                <src-card-list card-brands={cardBrandsString} display-preferred-card="true"
+                                               card-selection-type="radioButton" display-sign-out="false"/>
+                                <div className="js-c2p-empty-card-list-msg" style={{display: "none"}}>
+                                    <div className="checkout-method-click-to-pay-text click-to-pay__warn">
+                                        <Warn/>
+                                        <p className="click-to-pay__warn-text">There are no cards in your Click to Pay
+                                            wallet. Add a card to check out with your Click to Pay Profile.</p>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="js-c2p-add-new-card click-to-pay__btn-container" style={{display: "none"}}>
-                                <Add/>
-                                <button className="click-to-pay__btn" type="button"
-                                        onClick={() => addNewClick2PayCard()}>
-                                    Add new card with Click to Pay
-                                </button>
+                                <div className="js-c2p-add-new-card click-to-pay__btn-container" style={{display: "none"}}>
+                                    <Add/>
+                                    <button className="click-to-pay__btn" type="button"
+                                            onClick={() => addNewClick2PayCard()}>
+                                        Add new card with Click to Pay
+                                    </button>
+                                </div>
                             </div>
                         </div>
+                    ) :
+                    <div className="checkout-method-save-information">
+                        <div className="checkout-method-click-to-pay-text">
+                            Save my information with Click to Pay
+                        </div>
+                        <div className="checkout-method-click-to-pay-text">
+                            for fast, secure checkout.{" "}
+                            <span className="learn-more">Learn more</span>
+                        </div>
+                        <div className="click-to-pay__btn-container">
+                            <Add/>
+                            <button className="click-to-pay__btn" type="button"
+                                    onClick={() => addNewClick2PayCard()}>
+                                Continue to Click to Pay
+                            </button>
+                        </div>
+                        <src-card-list card-brands={cardBrandsString}/>
                     </div>
-                ) :
-                <div className="checkout-method-save-information">
-                    <div className="checkout-method-click-to-pay-text">
-                        Save my information with Click to Pay
-                    </div>
-                    <div className="checkout-method-click-to-pay-text">
-                        for fast, secure checkout.{" "}
-                        <span className="learn-more">Learn more</span>
-                    </div>
-                    <div className="click-to-pay__btn-container">
-                        <Add/>
-                        <button className="click-to-pay__btn" type="button"
-                                onClick={() => addNewClick2PayCard()}>
-                            Continue to Click to Pay
-                        </button>
-                    </div>
-                    <src-card-list card-brands={cardBrandsString}/>
+                }
+                <div className="js-c2p-otp-container" style={{display: "none"}}>
+                    <src-otp-input type="overlay" data-otp-value="" display-cancel-option="true"
+                                   masked-identity-value=""
+                                   network-id=""
+                                   hide-loader="false"
+                                   display-remember-me="true"
+                                   auto-submit="true" error-reason="">
+                    </src-otp-input>
                 </div>
-            }
-            <div className="js-c2p-otp-container" style={{display: "none"}}>
-                <src-otp-input type="overlay" data-otp-value="" display-cancel-option="true"
-                               masked-identity-value=""
-                               network-id=""
-                               hide-loader="false"
-                               display-remember-me="true"
-                               auto-submit="true" error-reason="">
-                </src-otp-input>
-            </div>
-            <div className="js-c2p-otp-selection-container" style={{display: "none"}}>
-            </div>
-            {errorMessage.length > 0 && (
-                <div className="click-to-pay__iframe-container" role="dialog"
-                     aria-modal="true"
-                     aria-labelledby="dialogClickToPayAddCard">
-                    <div className="click-to-pay__iframe-modal click-to-pay__iframe-modal--padding click-to-pay__iframe-modal--flex
+                <div className="js-c2p-otp-selection-container" style={{display: "none"}}>
+                </div>
+                {errorMessage.length > 0 && (
+                    <div className="click-to-pay__iframe-container" role="dialog"
+                         aria-modal="true"
+                         aria-labelledby="dialogClickToPayAddCard">
+                        <div className="click-to-pay__iframe-modal click-to-pay__iframe-modal--padding click-to-pay__iframe-modal--flex
                     click-to-pay__iframe-modal--error
+                     click-to-pay__iframe-modal--scrollable">
+                            <div>
+                                <button
+                                    className="overlay-simple__close overlay-simple__close--dark margin-top"
+                                    onClick={handleCloseErrorMessage}>
+                                    <span className="collapse-text">Close</span>
+                                    <span className="material-icons" aria-hidden="true">close</span>
+                                </button>
+                            </div>
+                            <div className="error-msg error-msg--padding">{errorMessage}</div>
+                        </div>
+
+                    </div>
+                )}
+                <div className="js-c2p-payment-add-card-container click-to-pay__iframe-container" role="dialog"
+                     aria-modal="true"
+                     aria-labelledby="dialogClickToPayAddCard" style={{display: "none"}}>
+                    <form id="dialogClickToPayAddCard"
+                          className="js-c2p-payment-add-card-form click-to-pay__iframe-modal click-to-pay__iframe-modal--padding click-to-pay__iframe-modal--flex
                      click-to-pay__iframe-modal--scrollable">
                         <div>
                             <button
                                 className="overlay-simple__close overlay-simple__close--dark margin-top"
-                                onClick={handleCloseErrorMessage}>
+                                onClick={closeAddCardOverlay}>
                                 <span className="collapse-text">Close</span>
                                 <span className="material-icons" aria-hidden="true">close</span>
                             </button>
                         </div>
-                        <div className="error-msg error-msg--padding">{errorMessage}</div>
-                    </div>
-
-                </div>
-            )}
-            <div className="js-c2p-payment-add-card-container click-to-pay__iframe-container" role="dialog"
-                 aria-modal="true"
-                 aria-labelledby="dialogClickToPayAddCard" style={{display: "none"}}>
-                <form id="dialogClickToPayAddCard"
-                      className="js-c2p-payment-add-card-form click-to-pay__iframe-modal click-to-pay__iframe-modal--padding click-to-pay__iframe-modal--flex
-                     click-to-pay__iframe-modal--scrollable">
-                    <div>
-                        <button
-                            className="overlay-simple__close overlay-simple__close--dark margin-top"
-                            onClick={closeAddCardOverlay}>
-                            <span className="collapse-text">Close</span>
-                            <span className="material-icons" aria-hidden="true">close</span>
-                        </button>
-                    </div>
-                    <div>
-                        <div className="click-to-pay__iframe-content--scrollable click-to-pay__iframe-content--padding">
-                            <div className="click-to-pay__heading">Card Information</div>
-                            <div>
-                                <src-card-list card-brands={cardBrandsString}/>
-                                <div className="checkout-method-click-to-pay-text">Save my information with Click to Pay
-                                    for
-                                    fast,
-                                    secure checkout.
+                        <div>
+                            <div
+                                className="click-to-pay__iframe-content--scrollable click-to-pay__iframe-content--padding">
+                                <div className="click-to-pay__heading">Card Information</div>
+                                <div>
+                                    <src-card-list card-brands={cardBrandsString}/>
+                                    <div className="checkout-method-click-to-pay-text">Save my information with Click to
+                                        Pay
+                                        for
+                                        fast,
+                                        secure checkout.
+                                    </div>
                                 </div>
+                                <CardInformation showBillingSection={false} shopperId="" initialData={{
+                                    ...shopperSavedPayment,
+                                }}/>
                             </div>
-                            <CardInformation showBillingSection={false} shopperId="" initialData={{
-                                ...shopperSavedPayment,
-                            }}/>
+                            <div className="form-footer form-footer__dual-button">
+                                <Button
+                                    label="Cancel"
+                                    type="secondary"
+                                    onClick={closeAddCardOverlay}
+                                />
+                                <Button label="Save" type="primary"
+                                        onClick={saveNewCard}/>
+                            </div>
                         </div>
-                        <div className="form-footer form-footer__dual-button">
-                            <Button
-                                label="Cancel"
-                                type="secondary"
-                                onClick={closeAddCardOverlay}
-                            />
-                            <Button label="Save" type="primary"
-                                    onClick={saveNewCard}/>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div className="js-c2p-payment-iframe-container click-to-pay__iframe-container" role="dialog"
-                 aria-modal="true" aria-labelledby="dialogClickToPay" style={{display: "none"}}>
-                <div className="click-to-pay__iframe-modal">
-                    <iframe id="dialogClickToPay" name="c2pPaymentIframe"
-                            className="click-to-pay__iframe-content"></iframe>
+                    </form>
                 </div>
+                <div className="js-c2p-payment-iframe-container click-to-pay__iframe-container" role="dialog"
+                     aria-modal="true" aria-labelledby="dialogClickToPay" style={{display: "none"}}>
+                    <div className="click-to-pay__iframe-modal">
+                        <iframe id="dialogClickToPay" name="c2pPaymentIframe"
+                                className="click-to-pay__iframe-content"></iframe>
+                    </div>
+                </div>
+                <input className="js-c2p-payment-data" type="hidden"/>
             </div>
-            <input className="js-c2p-payment-data" type="hidden"/>
         </div>
     );
 };
