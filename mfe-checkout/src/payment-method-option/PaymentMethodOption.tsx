@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { RadioButton } from "../component/RadioButton/RadioButton";
 import { ShopperSavedPayments } from "../interfaces/ShopperSavedPayments";
 import { CardInformation } from "../payment-method/card-information/CardInformation";
@@ -18,6 +18,7 @@ export interface IPaymentOptionProps {
   shopperSavedPayment?: ShopperSavedPayments;
   shopperId?: string;
 }
+
 export const PaymentOption: React.FC<
   IPaymentOptionProps & {
     isEditing: boolean;
@@ -40,6 +41,7 @@ export const PaymentOption: React.FC<
   const isSelected = selected ? "selected" : "";
   const isFirst = index === 0 ? "start" : "";
   const showCardImage = isSavedCard && shopperSavedPayment;
+
 
   return (
     <div
@@ -94,7 +96,19 @@ export const PaymentOption: React.FC<
           </div>
         ) : null}
       </div>
+
       {isEditing && (
+        <CardInformation
+          shopperId={shopperId}
+          initialData={{
+            ...shopperSavedPayment,
+          }}
+          onCancel={onCancelEdit}
+        />
+      )}
+
+      {/* Always show CardInformation if name is "New Card" */}
+      {name === "New Card" && (
         <CardInformation
           shopperId={shopperId}
           initialData={{

@@ -16,7 +16,10 @@ interface IOrderSummary {
   hideCashback?: boolean;
 }
 
-export const OrderSummary: React.FC<IOrderSummary> = ({pcid, hideCashback}) => {
+export const OrderSummary: React.FC<IOrderSummary> = ({
+  pcid,
+  hideCashback,
+}) => {
   const [order, setOrder] = useAtom(orderAtom);
   const { eWalletData, loading, error } = useShopperEWallet(pcid);
   const [coupon, setCoupon] = useState("");
@@ -194,6 +197,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({pcid, hideCashback}) => {
         storesTotals.map((store, index) => {
           const isFirst = index === 0;
           const isLast = index === storesTotals.length - 1; // Fix the condition for the last element
+          if (!store.totals) return null;
           return (
             <div
               className={`order-charges-table ${
@@ -206,16 +210,16 @@ export const OrderSummary: React.FC<IOrderSummary> = ({pcid, hideCashback}) => {
               </div>
               <div className="order-summary-row">
                 <div>Items Subtotal</div>
-                <div>${store?.totals.price}</div>
+                <div>${store?.totals?.price}</div>
               </div>
               <div className="order-summary-row">
                 <div>Tax Total</div>
-                <div>${store?.totals.tax}</div>
+                <div>${store?.totals?.tax}</div>
               </div>
 
               <div className="order-summary-row">
                 <div>Shipping</div>
-                <div>${store?.totals.shipping}</div>
+                <div>${store?.totals?.shipping}</div>
               </div>
             </div>
           );

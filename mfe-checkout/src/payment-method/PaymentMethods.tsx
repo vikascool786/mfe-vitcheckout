@@ -1,9 +1,8 @@
+import { useAtom } from "jotai";
 import React, { useEffect, useState } from "react";
 import { useShopperEWalletAddresses } from "../api/service/ShopperEWallet";
-import {
-  addTempPaymentMethod,
-  fetchShoppersPaymentMethods,
-} from "../api/service/ShoppersPaymentMethods";
+import { fetchShoppersPaymentMethods } from "../api/service/ShoppersPaymentMethods";
+import { fetchSiteFlagData } from "../api/service/SiteFlags";
 import { Add } from "../assets/icons/Add";
 import CardOptions from "../assets/images/CardOptions.png";
 import PayPal from "../assets/images/PayPal.png";
@@ -16,29 +15,17 @@ import {
   IPaymentOptionProps,
   PaymentOption,
 } from "../payment-method-option/PaymentMethodOption";
+import { orderAtom } from "../store";
 import { TextUpdates } from "../text-updates/TextUpdates";
 import "./PaymentMethods.scss";
-import { useAtom } from "jotai";
-import { orderAtom } from "../store";
 import {
+  CLICK2PAY,
   PAYPAL,
   SEZZLE,
-  CLICK2PAY,
   thirdPartyPaymentFlagList,
 } from "./PaymentType";
-import { fetchSiteFlagData } from "../api/service/SiteFlags";
-import axios from "axios";
-import { loadScript } from "@paypal/paypal-js";
-import {
-  GET_PAYPAL_CLIENT_ID,
-  GET_PAYPAL_RETURN_URL,
-} from "../utils/urlResolver";
-import { useApi } from "../hooks/useAPI";
-
-const PAYPAL_TOKEN_URL = (shopperId: string) =>
-  // make the return url and cancel url dynamic
-  // TODO: PICK THIS UP FROM ENVIORNMENT VARIABLES
-  `http://dev-services.shop.com:8085/ShoppingCart/Checkout/Paypal/${shopperId}/Token?creditFlow=false&hideShipping=false&markFlow=false&returnURL=${GET_PAYPAL_RETURN_URL()}&cancelURL=${GET_PAYPAL_RETURN_URL()}/checkout/v2/special&siteId=66`;
+import { changeOrder } from "../api/service/Order";
+import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 
 const staticPaymentMethods: IPaymentOptionProps[] = [
   {
@@ -101,32 +88,6 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
   const [showClick2Pay, setShowClick2Pay] = useState(false);
 
   const [order, setOrder] = useAtom(orderAtom);
-  const [paymentTypeId, setPaymentTypeId] = useState<number>(0);
-
-  const { data: paypalToken, error } = useApi(
-    PAYPAL_TOKEN_URL(shopperId),
-    "GET"
-  );
-
-  useEffect(() => {
-    // Function to parse query parameters from the URL
-    const getQueryParams = () => {
-      const params = new URLSearchParams(window.location.search);
-      return {
-        token: params.get("token"),
-        payerId: params.get("PayerID"),
-      };
-    };
-
-    const { token, payerId } = getQueryParams();
-
-    if (token && payerId) {
-      console.log("PayPal Transaction Details:", { token, payerId });
-      handlePaymentMethodChange(
-        allPaymentOptions.findIndex((option) => option.name === PAYPAL.name)
-      );
-    }
-  }, []);
 
   const confirmOrder = () => {
     if (order) {
@@ -136,6 +97,7 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
       });
     }
   };
+
   useEffect(() => {
     const paymentSiteFlagList = thirdPartyPaymentFlagList.join(",");
     const fetchSiteFlagInfo = async () => {
@@ -294,37 +256,6 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
 
   const handlePlaceOrder = async (paymentTypeId: number) => {
     switch (paymentTypeId) {
-      case PAYPAL.typeId:
-        // fetch paypal site flags
-        const siteFlags = await fetchSiteFlagData(siteId, "393");
-        const data = JSON.parse(siteFlags[0].auxDataText);
-
-        // loading paypal sdk
-        loadScript({
-          clientId: GET_PAYPAL_CLIENT_ID(), // Your PayPal Client ID
-          merchantId: data.merchantId, // Optional: Specify merchant ID
-          environment: data.environment, // Use "sandbox" or "production"
-          currency: "USD", // Set your currency
-          intent: "capture", // "capture" for immediate payment
-          components: "buttons",
-        })
-          .then((paypal) => {
-            if (!paypal) {
-              console.error("PayPal SDK failed to load correctly");
-              return;
-            }
-            console.log("PayPal SDK loaded:", paypal);
-          })
-          .catch((error) => console.error("PayPal SDK failed to load", error));
-
-        if (!paypalToken) {
-          alert("Failed to fetch PayPal token, check console for message");
-          console.log(error);
-          return;
-        }
-        const url = `https://www.sandbox.paypal.com/checkoutnow?token=${paypalToken.tokenId}`;
-        window.open(url, "_self");
-        break;
       default:
         console.log("place order with regular credit card");
         confirmOrder();
@@ -333,11 +264,6 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
   };
 
   const handlePaymentMethodChange = (selectedIndex: number) => {
-    console.log(
-      "Selected Payment Method Index:",
-      selectedIndex,
-      allPaymentOptions
-    );
     const isPaypal = allPaymentOptions
       .filter((option) => option.visible)
       .find((option, index) => index === selectedIndex)?.name;
@@ -351,9 +277,24 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
         }))
     );
 
+    const option = allPaymentOptions.filter((option) => option.visible)[
+      selectedIndex
+    ];
+
+    if (option) {
+      changeOrder(
+        generateChangeStoreResponse({
+          ...order,
+          paymentMethod: {
+            ...option.shopperSavedPayment,
+          },
+        }),
+        order?.id
+      );
+    }
+
     if (isPaypal === PAYPAL.name) {
-      handlePlaceOrder(PAYPAL.typeId);
-      return;
+      updatePaymentTypeId(PAYPAL.typeId);
     }
     // Collapse any editing card when a new payment method is selected
     if (editingOptionIndex !== null && editingOptionIndex !== selectedIndex) {
@@ -372,22 +313,20 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
   };
 
   const onAddNewCard = async () => {
-    const newCardIndex = allPaymentOptions.length;
-
-    // Add a temporary entry for the new card in edit mode
+    // Create the new card
     const newCard: IPaymentOptionProps = {
       name: "New Card",
-      image: CardOptions, // Replace with a placeholder image or icon for new cards
-      selected: false,
-      index: newCardIndex,
+      image: CardOptions,
+      selected: true, // Set the new card as selected
+      index: allPaymentOptions.length, // Use current length as new index
       size: 0,
       onChange: () => {},
-      isSavedCard: false,
+      isSavedCard: false, // Indicate that it's a new card
       typeId: 9,
       visible: true,
       shopperId: "",
       shopperSavedPayment: {
-        id: 0, // Generate an ID if necessary
+        id: 0,
         expirationDate: "",
         cardMask: "",
         preferred: false,
@@ -398,8 +337,21 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
       },
     };
 
-    setAllPaymentOptions((prevOptions) => [...prevOptions, newCard]);
-    setEditingOptionIndex(newCardIndex);
+    // Deselect other cards and update the payment options
+    setAllPaymentOptions((prevOptions) =>
+      prevOptions.map((option) => ({
+        ...option,
+        selected: false, // Deselect existing cards
+      }))
+    );
+
+    // Add the new card after the previous state update completes
+    setTimeout(() => {
+      setAllPaymentOptions((prevOptions) => [...prevOptions, newCard]);
+      setEditingOptionIndex(
+        allPaymentOptions.filter((option) => option.visible).length
+      ); // Set editing index safely
+    }, 0);
   };
 
   return (
@@ -416,17 +368,20 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
           {allPaymentOptions
             .filter((method) => method.visible)
             .map((paymentOption, index) => (
-              <PaymentOption
-                key={
-                  paymentOption.shopperSavedPayment?.id || paymentOption.name
-                }
-                {...{ ...paymentOption, index }}
-                isEditing={editingOptionIndex === index}
-                onEdit={() => setEditingOptionIndex(index)}
-                onCancelEdit={() => setEditingOptionIndex(null)}
-                onChange={() => handlePaymentMethodChange(index)}
-                shopperId={shopperId}
-              />
+              <>
+                {console.log("paymentOption", editingOptionIndex, index)}
+                <PaymentOption
+                  key={
+                    paymentOption.shopperSavedPayment?.id || paymentOption.name
+                  }
+                  {...{ ...paymentOption, index }}
+                  isEditing={editingOptionIndex === index}
+                  onEdit={() => setEditingOptionIndex(index)}
+                  onCancelEdit={() => setEditingOptionIndex(null)}
+                  onChange={() => handlePaymentMethodChange(index)}
+                  shopperId={shopperId}
+                />
+              </>
             ))}
           {showClick2Pay && <PaymentOptionClick2Pay pcid={pcid} />}
           <div className="checkout-add-card" onClick={onAddNewCard}>

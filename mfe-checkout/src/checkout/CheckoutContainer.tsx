@@ -1,28 +1,26 @@
-import React, {useEffect, useMemo, useRef, useState} from "react";
-import { Provider, useSetAtom, useAtom } from "jotai";
+import { useAtom } from "jotai";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import "../App.scss";
-import {
-  changeOrder,
-  commitOrder,
-  fetchOrderDetail,
-  OrderResponse,
-} from "../api/service/Order";
+import { commitOrder, OrderResponse } from "../api/service/Order";
 import { withErrorBoundary } from "../hoc/withErrorBoundary";
-import { Checkout } from "./Checkout";
-import { OrderSummary } from "../order-summary/OrderSummary";
-import { PaymentMethod } from "../payment-method/PaymentMethods";
-import { ShippingMethod } from "../shipping-methods/ShippingMethod";
 import { useApi } from "../hooks/useAPI";
 import { Address } from "../interfaces/Address";
 import { ChangeOrder } from "../interfaces/ChangeOrder";
 import { Order } from "../interfaces/Order";
 import { IPaymentMethod } from "../interfaces/PaymentMethod";
-import { orderAtom, OrderStore } from "../store";
+import { OrderSummary } from "../order-summary/OrderSummary";
+import { PaymentMethod } from "../payment-method/PaymentMethods";
+import { ShippingMethod } from "../shipping-methods/ShippingMethod";
+import { orderAtom } from "../store";
+import { Checkout } from "./Checkout";
 
-import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import HeadHelmet from "../head-helmet/HeadHelmet";
-import { PlaceOrder } from "../payment-method/place-order/PlaceOrder";
-import {GET_API_ENDPOINT_BASE_URL_ONLY, GET_API_KEY} from "../utils/urlResolver";
+import PlaceOrder from "../payment-method/place-order/PlaceOrder";
+import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
+import {
+  GET_API_ENDPOINT_BASE_URL_ONLY,
+  GET_API_KEY,
+} from "../utils/urlResolver";
 
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
@@ -124,21 +122,22 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   const confirmOrder = () => {
     const commitPromise = commitOrder(cartId);
     commitPromise
-        .then((response: any) => {
-              const isSuccessful = response.data.response.success;
-              if(isSuccessful){
-                const orderId = response.data.response.success.data.orderId;
-                window.location.href = `/nbts/orderconfirmation-${orderId}`;
-              }else{
-                const errorMessage = response.data.response.errors.message;
-                const errorCode = response.data.response.errors.code;
-                setOrderErrorMessage("Detail: " + errorMessage + " code: " + errorCode);
-              }
-          }
-        )
-        .catch((error: { message: any; }) => {
-          setOrderErrorMessage("Detail: " + error);
-        })
+      .then((response: any) => {
+        const isSuccessful = response.data.response.success;
+        if (isSuccessful) {
+          const orderId = response.data.response.success.data.orderId;
+          window.location.href = `/nbts/orderconfirmation-${orderId}`;
+        } else {
+          const errorMessage = response.data.response.errors.message;
+          const errorCode = response.data.response.errors.code;
+          setOrderErrorMessage(
+            "Detail: " + errorMessage + " code: " + errorCode
+          );
+        }
+      })
+      .catch((error: { message: any }) => {
+        setOrderErrorMessage("Detail: " + error);
+      });
   };
 
   useEffect(() => {
@@ -187,7 +186,13 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
         </>
       )}
       <div className="place-order">
-        <PlaceOrder confirmOrder={confirmOrder} errorMessage={orderErrorMessage} paymentTypeId={paymentTypeId} shopperId={shopperId} cartId={cartId}/>
+        <PlaceOrder
+          confirmOrder={confirmOrder}
+          errorMessage={orderErrorMessage}
+          paymentTypeId={paymentTypeId}
+          shopperId={shopperId}
+          siteId={siteId}
+        />
       </div>
       <HeadHelmet />
     </div>
