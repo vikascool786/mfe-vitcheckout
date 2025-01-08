@@ -242,16 +242,16 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               </div>
               <div className="order-summary-row">
                 <div>Items Subtotal</div>
-                <div>${store?.totals?.price}</div>
+                <div>{store?.totals?.priceStr}</div>
               </div>
               <div className="order-summary-row">
                 <div>Tax Total</div>
-                <div>${store?.totals?.tax}</div>
+                <div>{store?.totals?.taxStr}</div>
               </div>
 
               <div className="order-summary-row">
                 <div>Shipping</div>
-                <div>${store?.totals?.shipping}</div>
+                <div>{store?.totals?.shippingStr}</div>
               </div>
             </div>
           );

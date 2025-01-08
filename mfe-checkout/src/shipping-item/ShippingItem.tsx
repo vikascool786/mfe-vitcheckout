@@ -16,16 +16,27 @@ interface IProduct {
 
 interface IShippingItemProps {
   item: Item;
+  onRemove: () => void;
 }
 
-export const ShippingItem: React.FC<IShippingItemProps> = ({ item }) => {
+export const ShippingItem: React.FC<IShippingItemProps> = ({
+  item,
+  onRemove,
+}) => {
   const { image, caption, catalogName, totals, quantity } = item;
+
+  function decodeHtml(html: any) {
+    const txt = document.createElement("textarea");
+    txt.innerHTML = html;
+    return txt.value;
+  }
+
   return (
     <div className="item-container">
       <div className="item-detail-container">
         <img className="item-image" src={image.url} />
         <div className="item-info">
-          <div className="item-name">{caption}</div>
+          <div className="item-name">{decodeHtml(caption)}</div>
           <div>{catalogName}</div>
           <div className="item-cashback">
             <div className="item-cashback-value">+ ${totals?.cashBack}</div>
@@ -35,7 +46,7 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({ item }) => {
           <div>${totals?.price}</div>
         </div>
       </div>
-      <div className="item-cancel">
+      <div className="item-cancel" onClick={onRemove}>
         <Close />
         Quantity: {quantity}
       </div>

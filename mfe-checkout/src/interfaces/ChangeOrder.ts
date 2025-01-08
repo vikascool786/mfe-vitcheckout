@@ -48,4 +48,5 @@ export interface UserOptions {
   gcNum?: string[];
   gcPin?: string[];
   coupons?: string[];
+  smsPhone?: string;
 }

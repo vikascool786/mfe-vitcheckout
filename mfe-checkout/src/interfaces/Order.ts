@@ -75,4 +75,5 @@ export interface IUserOptions {
   coupons: string[];
   gcNum: string[];
   gcPin: string[];
+  smsPhone: string;
 }

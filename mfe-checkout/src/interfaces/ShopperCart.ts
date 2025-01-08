@@ -18,17 +18,20 @@ export interface IStoreQuantity {
 
 export interface ITotal {
   cashBack: number;
-  ibvOnlyCampaign: number;
   bv: number;
-  price: number;
-  ibvStandardCampaign: number;
   ibv: number;
-  ibvStandard: number;
-  ibvOnly: number;
-  vat: number;
-  customerIncentivePoints: number;
-  tax: number;
+  cashBackApplied: number;
+  walletApplied: number;
+  price: number;
   shipping: number;
+  tax: number;
+  priceStr: string;
+  cashBackStr: string;
+  taxStr: string;
+  shippingStr: string;
+  cashBackAppliedStr: string;
+  walletAppliedStr: string;
+  couponsStr: string;
 }
 
 export interface IItem {

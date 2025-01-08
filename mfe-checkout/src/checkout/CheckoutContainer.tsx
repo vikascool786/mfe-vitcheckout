@@ -21,6 +21,7 @@ import {
   GET_API_ENDPOINT_BASE_URL_ONLY,
   GET_API_KEY,
 } from "../utils/urlResolver";
+import ErrorMessage from "../component/Error";
 
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
@@ -65,7 +66,6 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   const [orderData, setOrderData] = useAtom(orderAtom);
   const [orderErrorMessage, setOrderErrorMessage] = useState("");
   const [paymentTypeId, setPaymentTypeId] = useState(0);
-  // const orderData = ORDER_DATA;
   const hasInitializedOrder = useRef(false); // Prevent multiple executions of updateOrder
 
   const addressUrl = `${apiDomain}/shopper-addressbooks/v1/${shopperId}/AddressBook?api_key=${apiKey}`;
@@ -73,21 +73,22 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   const checkoutUrl = `${apiDomain}/checkout-universal/v1/checkouts?api_key=${apiKey}`;
 
   const {
-    data: addresses,
+    data: addresses = [],
     isLoading: loadingAddresses,
     error: addressError,
-  } = useApi<Address[]>(addressUrl, "GET");
+  } = useApi<Address[] | null>(addressUrl, "GET");
 
   const {
-    data: paymentMethods,
+    data: paymentMethods = [],
     isLoading: loadingPaymentMethods,
     error: paymentError,
-  } = useApi<IPaymentMethod[]>(paymentUrl, "GET");
+  } = useApi<IPaymentMethod[] | null>(paymentUrl, "GET");
 
   const {
     data: order,
     isLoading: loadingOrder,
     postData,
+    error: orderError,
   } = useApi<OrderResponse>(
     checkoutUrl,
     "POST",
@@ -106,55 +107,61 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
         shippingAddress: { ...orderData.shippingAddress, id: shippingId },
       })
     );
-    setOrderData(orderResponse?.response.success.data);
+    setOrderData(orderResponse?.response.success?.data || null);
   };
 
   const defaultAddress = useMemo(
-    () => addresses?.find((address) => address.isPrimary === 1),
+    () => addresses?.find((address) => address?.isPrimary === 1),
     [addresses]
   );
 
   const defaultPaymentMethod = useMemo(
-    () => paymentMethods?.find((payment) => payment.preferred),
+    () =>
+      paymentMethods
+        ? paymentMethods?.find((payment) => payment?.preferred)
+        : [],
     [paymentMethods]
   );
 
   const confirmOrder = () => {
-    const commitPromise = commitOrder(cartId);
-    commitPromise
+    commitOrder(cartId)
       .then((response: any) => {
-        const isSuccessful = response.data.response.success;
+        const isSuccessful = response?.data?.response?.success;
         if (isSuccessful) {
           const orderId = response.data.response.success.data.orderId;
           window.location.href = `/nbts/orderconfirmation-${orderId}`;
         } else {
           const errorMessage = response.data.response.errors.message;
           const errorCode = response.data.response.errors.code;
-          setOrderErrorMessage(
-            "Detail: " + errorMessage + " code: " + errorCode
-          );
+          setOrderErrorMessage(`Detail: ${errorMessage} code: ${errorCode}`);
         }
       })
-      .catch((error: { message: any }) => {
-        setOrderErrorMessage("Detail: " + error);
+      .catch((error) => {
+        setOrderErrorMessage(`Detail: ${error?.message || error}`);
       });
   };
 
   useEffect(() => {
+    console.log("defaultAddress", defaultAddress);
+    console.log("defaultPaymentMethod", defaultPaymentMethod);
+    console.log(
+      "order?.response?.success?.data",
+      order?.response?.success?.data
+    );
+
     if (
       !hasInitializedOrder.current &&
       defaultAddress &&
-      defaultPaymentMethod &&
-      order?.response.success.data
+      order?.response?.success?.data
     ) {
-      hasInitializedOrder.current = true; // Mark as initialized
+      hasInitializedOrder.current = true;
       updateOrder(
-        order?.response.success.data,
-        defaultPaymentMethod.addressId,
+        order.response.success.data,
+        defaultPaymentMethod?.addressId || "",
         defaultAddress.id
       );
     }
-  }, [defaultAddress, defaultPaymentMethod, order?.response.success.data]);
+  }, [defaultAddress, defaultPaymentMethod, order?.response?.success?.data]);
 
   if (loadingAddresses || loadingPaymentMethods || loadingOrder)
     return <div>Loading...</div>;
@@ -163,13 +170,13 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
 
   return (
     <div className="checkout-container">
-      {orderData && (
+      {orderData ? (
         <>
           <div className="left-column">
             <Checkout
               shopperId={shopperId}
               cartId={cartId}
-              addresses={addresses}
+              addresses={addresses || []}
             />
             <ShippingMethod order={orderData} />
             <PaymentMethod
@@ -183,19 +190,23 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
           <div className="right-column">
             <OrderSummary pcid={pcid} />
           </div>
+          <div className="place-order">
+            <PlaceOrder
+              confirmOrder={confirmOrder}
+              errorMessage={orderErrorMessage}
+              paymentTypeId={paymentTypeId}
+              shopperId={shopperId}
+              siteId={siteId}
+              order={orderData}
+            />
+          </div>
+          <HeadHelmet />
         </>
-      )}
-      <div className="place-order">
-        <PlaceOrder
-          confirmOrder={confirmOrder}
-          errorMessage={orderErrorMessage}
-          paymentTypeId={paymentTypeId}
-          shopperId={shopperId}
-          siteId={siteId}
-          order={orderData}
+      ) : (
+        <ErrorMessage
+          errorMessage={orderError && orderError.response.errors.message}
         />
-      </div>
-      <HeadHelmet />
+      )}
     </div>
   );
 };
