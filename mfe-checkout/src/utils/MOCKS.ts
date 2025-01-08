@@ -260,7 +260,7 @@ export const ORDER_DATA = {
     applyCashback: false,
     applyEWallet: false,
     isOfAge: false,
-    trackingId: "",
+    trackingID: "",
     deliveryDate: "",
     deliveryTime: 1234567890,
     signatureRequired: false,

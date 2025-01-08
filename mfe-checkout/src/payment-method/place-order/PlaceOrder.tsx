@@ -7,15 +7,16 @@ import Click2PayPlaceOrder from "../../payment-method-click2pay/Click2PayPlaceOr
 import { addTempPaymentMethod } from "../../api/service/ShoppersPaymentMethods";
 import { generateChangeStoreResponse } from "../../utils/helpers/GenerateChangeStoreResponse";
 import { loadScript } from "@paypal/paypal-js";
-import { useAtom } from "jotai/index";
-import { orderAtom } from "../../store";
 import { buildOrder } from "../../api/service/Order";
 import { fetchSiteFlagData } from "../../api/service/SiteFlags";
 import { useApi } from "../../hooks/useAPI";
 import {
+    GET_API_ENDPOINT_BASE_URL_ONLY, GET_API_KEY,
     GET_PAYPAL_CLIENT_ID,
     GET_PAYPAL_RETURN_URL,
 } from "../../utils/urlResolver";
+import {Order} from "../../interfaces/Order";
+import {generateOrderTrackingId} from "../../utils/helpers/GenerateOrderTrackingId";
 
 interface IPlaceOrder {
     confirmOrder: () => void;
@@ -23,12 +24,13 @@ interface IPlaceOrder {
     paymentTypeId: number;
     shopperId: string;
     siteId: string;
+    order?: Order;
 }
 
 const PAYPAL_TOKEN_URL = (shopperId: string) =>
     // make the return url and cancel url dynamic
     // TODO: PICK THIS UP FROM ENVIORNMENT VARIABLES
-    `http://dev-services.shop.com:8085/ShoppingCart/Checkout/Paypal/${shopperId}/Token?creditFlow=false&hideShipping=false&markFlow=false&returnURL=${GET_PAYPAL_RETURN_URL()}&cancelURL=${GET_PAYPAL_RETURN_URL()}/checkout/v2/special&siteId=66`;
+    `${GET_API_ENDPOINT_BASE_URL_ONLY()}/shoppingcart-checkouts/v1/Checkout/Paypal/${shopperId}/Token?creditFlow=false&hideShipping=false&markFlow=false&returnURL=${GET_PAYPAL_RETURN_URL()}&cancelURL=${GET_PAYPAL_RETURN_URL()}&api_key=${GET_API_KEY()}`;
 
 const PlaceOrder: React.FC<IPlaceOrder> = ({
     confirmOrder,
@@ -36,9 +38,10 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     paymentTypeId,
     shopperId,
     siteId,
+    order,
 }) => {
     const [isLoading, setIsLoading] = useState(false);
-    const [order] = useAtom(orderAtom);
+    const trackingData = new Map<string, string>();
 
     const { data: paypalToken, error } = useApi<{ tokenId: string }>(
         PAYPAL_TOKEN_URL(shopperId),
@@ -52,6 +55,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             switch (paymentTypeId) {
                 case CLICK2PAY.typeId:
                     await handleClick2PayOrderUpdate();
+                    confirmOrder();
                     break;
                 case SEZZLE.typeId:
                     console.log("place order with Sezzle");
@@ -130,6 +134,8 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                         const transId = response.headers["merchant-transaction-id"];
                         const flowId = response.headers["x-src-cx-flow-id"];
                         const total = order ? order.totals.price.toString() : "0";
+                        trackingData.set("transactionId", transId);
+                        trackingData.set("flowId", flowId);
 
                         return getClickToPayTransactionData(flowId, transId, total);
                     } else {
@@ -151,13 +157,19 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                 })
                 .then((response: any) => {
                     const paymentId = response.data.id;
+                    console.log("update order, tracking data: " + JSON.stringify(trackingData));
                     if (order) {
+                        console.log("c2p updating order...");
                         return buildOrder(
                             generateChangeStoreResponse({
                                 ...order,
                                 paymentMethod: {
                                     ...order.paymentMethod,
                                     id: paymentId,
+                                },
+                                userOptions: {
+                                    ...order.userOptions,
+                                    trackingID: generateOrderTrackingId(trackingData)
                                 },
                             })
                         );

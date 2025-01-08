@@ -39,7 +39,7 @@ const getInitialBuildOrderData = (cartId: string): ChangeOrder => ({
     applyCashback: false,
     applyEWallet: false,
     isOfAge: false,
-    trackingId: "",
+    trackingID: "",
     deliveryDate: "",
     deliveryTime: 1234567890,
     signatureRequired: false,
@@ -192,6 +192,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
           paymentTypeId={paymentTypeId}
           shopperId={shopperId}
           siteId={siteId}
+          order={orderData}
         />
       </div>
       <HeadHelmet />

@@ -66,7 +66,7 @@ export interface IUserOptions {
   applyCashback: boolean;
   applyEWallet: boolean;
   isOfAge: boolean;
-  trackingId: string;
+  trackingID: string;
   deliveryDate: string;
   deliveryTime: number;
   signatureRequired: boolean;

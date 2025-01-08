@@ -12,15 +12,14 @@ import {Button} from "../component/Button/Button";
 import $ from "jquery";
 import {fetchCustomerProfileData} from "../api/service/CustomerProfile";
 import {Click2PayData} from "./Click2PayData";
-import { orderAtom } from "../store";
-import {useAtom} from "jotai/index";
-import {CustomerProfile} from "../interfaces/CustomerProfile";
 import {creditCards} from "../payment-method/PaymentType";
 import Click2PayCardLoader from "./Click2PayCardLoader";
 import {GET_C2P_DPAID} from "../utils/urlResolver";
+import {Order} from "../interfaces/Order";
 
 interface IClick2PayProps {
     pcid: string;
+    order?: Order;
 }
 
 const c2pCustomerData: Click2PayData = {
@@ -42,12 +41,11 @@ const c2pCustomerData: Click2PayData = {
     }
 }
 
-export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({ pcid }) => {
+export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({ pcid, order }) => {
     const [errorMessage, setErrorMessage] = useState("");
     const [hasSavedCards, setHasSavedCards] = useState(false);
     const [cardData, setCardData] = useState([]);
     const [c2pData, setC2pData] = useState(c2pCustomerData);
-    const [order] = useAtom(orderAtom);
 
     const cardBrandsString = c2pData.cardBrands.join(",");
     const shopperSavedPayment: ShopperSavedPayments = { //used to prefill address for new c2p card
@@ -63,6 +61,7 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({ pcid }) => {
 
     useEffect(() => {
         if (order) {
+            console.log("filter payment methods");
             const acceptedCreditCards = order.paymentMethods.filter((method) => method.visible);
             const acceptedCardNameList: string[] = acceptedCreditCards
                 .map((accepted) =>

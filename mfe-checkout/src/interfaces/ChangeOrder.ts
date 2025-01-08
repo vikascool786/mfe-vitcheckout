@@ -39,7 +39,7 @@ export interface UserOptions {
   applyCashback: boolean;
   applyEWallet: boolean;
   isOfAge: boolean;
-  trackingId: string;
+  trackingID: string;
   deliveryDate: string;
   deliveryTime: number;
   signatureRequired: boolean;

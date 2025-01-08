@@ -253,15 +253,6 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
     );
   }, []);
 
-  const handlePlaceOrder = async (paymentTypeId: number) => {
-    switch (paymentTypeId) {
-      default:
-        console.log("place order with regular credit card");
-        confirmOrder();
-        break;
-    }
-  };
-
   const handlePaymentMethodChange = (selectedIndex: number) => {
     const isPaypal = allPaymentOptions
       .filter((option) => option.visible)
@@ -377,7 +368,7 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
               />
             ))}
           {showClick2Pay && (
-            <PaymentOptionClick2Pay pcid={pcid} />
+            <PaymentOptionClick2Pay pcid={pcid} order={order}/>
           )}
           <div className="checkout-add-card" onClick={onAddNewCard}>
             <div className="checkout-add-card-text">

@@ -23,7 +23,7 @@ export const generateChangeStoreResponse = (order: Order): ChangeOrder => {
       applyCashback: order.userOptions.applyCashback,
       applyEWallet: order.userOptions.applyEWallet,
       isOfAge: order.userOptions.isOfAge,
-      trackingId: order.userOptions.trackingId,
+      trackingID: order.userOptions.trackingID,
       deliveryDate: order.userOptions.deliveryDate,
       deliveryTime: order.userOptions.deliveryTime,
       signatureRequired: order.userOptions.signatureRequired,
