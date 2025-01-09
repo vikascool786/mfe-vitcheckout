@@ -160,7 +160,6 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
             setOrder(orderResponse.response.success.data);
           });
         }
-        console.log("Card information successfully saved.");
       } catch (error) {
         console.error("Unable to save card information:", error);
       }

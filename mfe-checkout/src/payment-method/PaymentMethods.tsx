@@ -159,9 +159,22 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
       }));
     }
 
-    // In collapsed view, only show visible cards, PayPal, and Sezzle
-    const visibleCards = shopperPayments.filter((item) => item.visible);
-    return [...visibleCards, ...additionalMethods];
+    // In collapsed view, set only the selected card as visible along with PayPal and Sezzle
+
+    return [
+      ...shopperPayments.map((item) => ({
+        ...item,
+        visible:
+          item.selected ||
+          item.name === "Paypal" ||
+          item.name === "Sezzle" ||
+          false,
+      })),
+      ...additionalMethods.map((item) => ({
+        ...item,
+        visible: true,
+      })),
+    ];
   };
 
   useEffect(() => {
@@ -194,11 +207,6 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
           .sort((a, b) => (b.selected ? 1 : 0) - (a.selected ? 1 : 0));
 
         setAllPaymentOptions(
-          getUpdatedPaymentMethods(shopperPayments, isExpanded)
-        );
-
-        console.log(
-          "HERE",
           getUpdatedPaymentMethods(shopperPayments, isExpanded)
         );
       } catch (error) {
@@ -261,6 +269,7 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
 
   // Toggle function for expanding or collapsing the card list
   const toggleAccordion = () => {
+    console.log(getUpdatedPaymentMethods(allPaymentOptions, !isExpanded));
     setAllPaymentOptions((prevMethods) =>
       getUpdatedPaymentMethods(prevMethods, !isExpanded)
     );
@@ -314,7 +323,7 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
       <div className="pm-container">
         <div className="pm-title-container">
           <FormHeading title="Payment Method" />
-          {allPaymentOptions.length > 4 && (
+          {allPaymentOptions.length >= 3 && (
             <div className="pm-show-card" onClick={toggleAccordion}>
               <div>{isExpanded ? "Hide other cards" : "See other cards"}</div>
               <Back className={`accordion ${isExpanded ? "open" : "close"}`} />
@@ -332,8 +341,37 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
                 {...{ ...paymentOption, index }}
                 isEditing={editingOptionIndex === index}
                 onEdit={() => setEditingOptionIndex(index)}
-                onCancelEdit={() => setEditingOptionIndex(null)}
-                onSaveTempCard={(card) => {}}
+                onCancelEdit={() => {
+                  // set the selected card back to the original card
+                  // if it is an new card, remove that from the list
+                  const updatedOptions = allPaymentOptions.filter(
+                    (option, i) => option.name !== "New Card"
+                  );
+
+                  setAllPaymentOptions(updatedOptions);
+
+                  setEditingOptionIndex(null);
+                }}
+                onSaveTempCard={(card) => {
+                  const newOptions = [
+                    ...allPaymentOptions,
+                    {
+                      ...card,
+                      name: card.accountName,
+                      index: allPaymentOptions.length,
+                      isSavedCard: false,
+                      image:
+                        "https://img.shop.com/Image/local/images/cc/visa.jpg",
+                      shopperSavedPayment: card,
+                      selected: true,
+                      visible: true,
+                    },
+                  ];
+
+                  setAllPaymentOptions(
+                    newOptions.filter((option) => option.name !== "New Card")
+                  );
+                }}
                 onChange={() => handlePaymentMethodChange(index)}
                 shopperId={shopperId}
               />

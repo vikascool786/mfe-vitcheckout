@@ -12,8 +12,8 @@ const App: React.FC<AppProps> = () => {
     <div className="container">
       <Provider store={OrderStore}>
         <CheckoutContainer
-          cartId="cart_1813568675_W_USA_USA_ENG"
-          shopperId="eWVjzkZWzkzpzzhqkwzqVpwzhmjxkjjhepkwzxmjjh"
+          cartId="cart_2282210204_W_USA_USA_ENG"
+          shopperId="WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz"
           pcid="2282210204"
           siteId="260"
         />

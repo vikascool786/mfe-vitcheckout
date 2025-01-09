@@ -142,13 +142,6 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   };
 
   useEffect(() => {
-    console.log("defaultAddress", defaultAddress);
-    console.log("defaultPaymentMethod", defaultPaymentMethod);
-    console.log(
-      "order?.response?.success?.data",
-      order?.response?.success?.data
-    );
-
     if (
       !hasInitializedOrder.current &&
       defaultAddress &&

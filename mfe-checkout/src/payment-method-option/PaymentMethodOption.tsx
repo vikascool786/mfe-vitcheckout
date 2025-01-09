@@ -98,7 +98,7 @@ export const PaymentOption: React.FC<
           ) : null}
         </div>
 
-        {(isEditing || name === "New Card") && (
+        {(isEditing && name === "New Card") && (
           <CardInformation
             shopperId={shopperId}
             initialData={{
