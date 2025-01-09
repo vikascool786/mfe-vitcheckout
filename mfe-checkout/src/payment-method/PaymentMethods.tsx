@@ -36,7 +36,7 @@ const staticPaymentMethods: IPaymentOptionProps[] = [
     size: 0,
     typeId: 1,
     visible: true,
-    onChange: () => {},
+    onChange: () => { },
   },
   {
     name: PAYPAL.name,
@@ -47,7 +47,7 @@ const staticPaymentMethods: IPaymentOptionProps[] = [
     typeId: PAYPAL.typeId,
     siteFlagId: 393,
     visible: false,
-    onChange: () => {},
+    onChange: () => { },
   },
   {
     name: SEZZLE.name,
@@ -58,7 +58,7 @@ const staticPaymentMethods: IPaymentOptionProps[] = [
     typeId: SEZZLE.typeId,
     siteFlagId: 568,
     visible: false,
-    onChange: () => {},
+    onChange: () => { },
   },
 ];
 
@@ -171,7 +171,7 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
             index,
             size: 0,
             visible: item.preferred,
-            onChange: () => {},
+            onChange: () => { },
             isSavedCard: true,
             shopperSavedPayment: {
               id: item.id,
@@ -271,7 +271,7 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
       selected: true, // Set the new card as selected
       index: allPaymentOptions.length, // Use current length as new index
       size: 0,
-      onChange: () => {},
+      onChange: () => { },
       isSavedCard: false, // Indicate that it's a new card
       typeId: 9,
       visible: true,

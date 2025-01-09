@@ -9,7 +9,7 @@ import { orderAtom } from "../store";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import { changeOrder } from "../api/service/Order";
 
-export const ShippingMethod: React.FC = ({}) => {
+export const ShippingMethod: React.FC = ({ }) => {
   const [orders, setOrder] = useAtom(orderAtom);
   if (!orders) {
     return <p>Loading shipping methods...</p>;
