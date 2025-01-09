@@ -18,6 +18,7 @@ export interface IPaymentOptionProps {
   shopperSavedPayment?: ShopperSavedPayments;
   shopperId?: string;
   onSaveTempCard: (card: ShopperSavedPayments) => void;
+  isSaved?: boolean;
 }
 
 export const PaymentOption: React.FC<
@@ -38,76 +39,79 @@ export const PaymentOption: React.FC<
   isSavedCard = false,
   shopperSavedPayment,
   shopperId,
+  isSaved,
   onSaveTempCard,
 }) => {
-    const isSelected = selected ? "selected" : "";
-    const isFirst = index === 0 ? "start" : "";
-    const showCardImage = isSavedCard && shopperSavedPayment;
+  const isSelected = selected ? "selected" : "";
+  const isFirst = index === 0 ? "start" : "";
+  const showCardImage = isSavedCard && shopperSavedPayment;
 
-    return (
-      <div
-        className={`payment-option-container ${isSelected} ${isFirst}`}
-        onClick={onChange}
-      >
-        <div className="payment-option-select-container">
-          <div className="payment-option-sub-container">
-            <RadioButton
-              id={shopperSavedPayment?.id?.toString() || name}
-              onChange={onChange}
-              checked={selected}
-            />
-            {!showCardImage && <div className="payment-option-name">{name}</div>}
-            {showCardImage && !isEditing && (
-              <div className="payment-option-container__card">
-                <div className="payment-option-container__card-details">
-                  <img
-                    className="payment-option-container__card-img"
-                    src={image}
-                    alt={name}
-                  />
-                  <div>*{shopperSavedPayment.cardMask}</div>
-                </div>
-                <div className="payment-option-container__card-expiration">
-                  Expires {shopperSavedPayment.expirationDate}
-                </div>
+  console.log("PaymentOption", isSaved);
+  return (
+    <div
+      className={`payment-option-container ${isSelected} ${isFirst}`}
+      onClick={onChange}
+    >
+      <div className="payment-option-select-container">
+        <div className="payment-option-sub-container">
+          <RadioButton
+            id={shopperSavedPayment?.id?.toString() || name}
+            onChange={onChange}
+            checked={selected}
+          />
+          {!showCardImage && <div className="payment-option-name">{name}</div>}
+          {showCardImage && !isEditing && (
+            <div className="payment-option-container__card">
+              <div className="payment-option-container__card-details">
+                <img
+                  className="payment-option-container__card-img"
+                  src={image}
+                  alt={name}
+                />
+                <div>*{shopperSavedPayment.cardMask}</div>
+              </div>
+              <div className="payment-option-container__card-expiration">
+                Expires {shopperSavedPayment.expirationDate}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {!showCardImage && <img src={image} alt={name} />}
+        {showCardImage ? (
+          <div className="payment-option-container__card-cvv-container">
+            {isSelected && !isEditing && (
+              <div className="payment-option-container__card-cvv">
+                <div>CVV</div>
+                <input className="payment-option-container__card-cvv-form" />
+              </div>
+            )}
+            {!isEditing && (
+              <div
+                className="payment-option-container__card-cvv-edit"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit();
+                }}
+              >
+                edit
               </div>
             )}
           </div>
-
-          {!showCardImage && <img src={image} alt={name} />}
-          {showCardImage ? (
-            <div className="payment-option-container__card-cvv-container">
-              {isSelected && !isEditing && (
-                <div className="payment-option-container__card-cvv">
-                  <div>CVV</div>
-                  <input className="payment-option-container__card-cvv-form" />
-                </div>
-              )}
-              {!isEditing && (
-                <div
-                  className="payment-option-container__card-cvv-edit"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onEdit();
-                  }}
-                >
-                  edit
-                </div>
-              )}
-            </div>
-          ) : null}
-        </div>
-
-        {(isEditing && name === "New Card") && (
-          <CardInformation
-            shopperId={shopperId}
-            initialData={{
-              ...shopperSavedPayment,
-            }}
-            onSaveTempCard={onSaveTempCard}
-            onCancel={onCancelEdit}
-          />
-        )}
+        ) : null}
       </div>
-    );
-  };
+
+      {(isEditing || name === "New Card") && (
+        <CardInformation
+          shopperId={shopperId}
+          initialData={{
+            ...shopperSavedPayment,
+          }}
+          showSavedCard={isSaved}
+          onSaveTempCard={onSaveTempCard}
+        onCancel={onCancelEdit}
+        />
+      )}
+    </div>
+  );
+};

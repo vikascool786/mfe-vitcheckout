@@ -27,6 +27,8 @@ interface ICardInformationProps {
   shopperId: string;
   showBillingSection?: boolean;
   onSaveTempCard: (card: ShopperSavedPayments) => void;
+  isSavedCard?: boolean;
+  showSavedCard: boolean;
 }
 
 /**
@@ -67,6 +69,8 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   shopperId,
   onCancel,
   onSaveTempCard,
+  isSavedCard,
+  showSavedCard,
   showBillingSection = true,
 }) => {
   const [sameShippingAddress, setSameShippingAddress] =
@@ -91,7 +95,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   const [order, setOrder] = useAtom(orderAtom);
 
   const shippingAddress = addressList.find((address) => address.isPrimary);
-  const [saveAddress, setSaveAddress] = useState<boolean>(false);
+  const [saveAddress, setSaveAddress] = useState<boolean>(showSavedCard || false);
   const [cardInformation, setCardInformation] = useState<ShopperSavedPayments>({
     accountName: initialData?.accountName || "",
     address: initialData?.address || defaultAddress,
@@ -284,12 +288,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           onChange={(e) => handleInputChange("cvv", e.target.value)}
         />
         <div className="save-for-later">
-          <input
-            className="checkbox"
-            type="checkbox"
-            checked={saveAddress}
-            onChange={() => handleSaveAddress("WALLET")}
-          />
+          <input className="checkbox" type="checkbox" checked={saveAddress} />
           <span className="shipping-text">Save card for later</span>
         </div>
       </div>
@@ -330,7 +329,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
         <Button
           btnType="primary"
           label="Save"
-          onClick={() => handleSaveAddress("TEMP")}
+          onClick={() => handleSaveAddress(saveAddress ? "WALLET" : "TEMP")}
         />
       </div>
     </div>

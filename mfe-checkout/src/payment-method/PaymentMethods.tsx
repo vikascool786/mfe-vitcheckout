@@ -318,6 +318,8 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
     }, 0);
   };
 
+  console.log(allPaymentOptions)
+
   return (
     <div className="pm-main-container">
       <div className="pm-container">
@@ -352,6 +354,7 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
 
                   setEditingOptionIndex(null);
                 }}
+                isSaved={paymentOption.isSavedCard}
                 onSaveTempCard={(card) => {
                   const newOptions = [
                     ...allPaymentOptions,
