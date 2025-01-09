@@ -130,3 +130,11 @@
   font-size: 16;
   font-weight: 400;
 }
+
+.button-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-top: 20px;
+  gap: 0.8rem;
+}

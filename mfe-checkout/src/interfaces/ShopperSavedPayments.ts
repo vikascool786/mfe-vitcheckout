@@ -9,4 +9,5 @@ export interface ShopperSavedPayments {
   type: number;
   address: Address;
   accountName: string;
+  cvv?: string;
 }

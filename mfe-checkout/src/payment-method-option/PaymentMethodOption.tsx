@@ -17,6 +17,7 @@ export interface IPaymentOptionProps {
   onChange: () => void;
   shopperSavedPayment?: ShopperSavedPayments;
   shopperId?: string;
+  onSaveTempCard: (card: ShopperSavedPayments) => void;
 }
 
 export const PaymentOption: React.FC<
@@ -37,6 +38,7 @@ export const PaymentOption: React.FC<
   isSavedCard = false,
   shopperSavedPayment,
   shopperId,
+  onSaveTempCard,
 }) => {
     const isSelected = selected ? "selected" : "";
     const isFirst = index === 0 ? "start" : "";
@@ -102,6 +104,7 @@ export const PaymentOption: React.FC<
             initialData={{
               ...shopperSavedPayment,
             }}
+            onSaveTempCard={onSaveTempCard}
             onCancel={onCancelEdit}
           />
         )}

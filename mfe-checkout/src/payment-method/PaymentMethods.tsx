@@ -36,7 +36,7 @@ const staticPaymentMethods: IPaymentOptionProps[] = [
     size: 0,
     typeId: 1,
     visible: true,
-    onChange: () => { },
+    onChange: () => {},
   },
   {
     name: PAYPAL.name,
@@ -47,7 +47,7 @@ const staticPaymentMethods: IPaymentOptionProps[] = [
     typeId: PAYPAL.typeId,
     siteFlagId: 393,
     visible: false,
-    onChange: () => { },
+    onChange: () => {},
   },
   {
     name: SEZZLE.name,
@@ -58,7 +58,7 @@ const staticPaymentMethods: IPaymentOptionProps[] = [
     typeId: SEZZLE.typeId,
     siteFlagId: 568,
     visible: false,
-    onChange: () => { },
+    onChange: () => {},
   },
 ];
 
@@ -130,18 +130,24 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
     shopperPayments: IPaymentOptionProps[],
     isExpanded: boolean
   ): IPaymentOptionProps[] => {
-
     const searchParams = new URLSearchParams(location.search);
     const token = searchParams.get("token");
     const payerID = searchParams.get("PayerID");
     const isPayPalSuccess = !!payerID && !!token;
 
-
     const hasPayPal = shopperPayments.some((item) => item.name === PAYPAL.name);
     const hasSezzle = shopperPayments.some((item) => item.name === SEZZLE.name);
 
     const additionalMethods = [
-      ...(hasPayPal ? [] : [{ ...staticPaymentMethods[1], visible: true, selected: isPayPalSuccess }]), // Add PayPal if missing
+      ...(hasPayPal
+        ? []
+        : [
+            {
+              ...staticPaymentMethods[1],
+              visible: true,
+              selected: isPayPalSuccess,
+            },
+          ]), // Add PayPal if missing
       ...(hasSezzle ? [] : [{ ...staticPaymentMethods[2], visible: true }]), // Add Sezzle if missing
     ];
 
@@ -171,7 +177,7 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
             index,
             size: 0,
             visible: item.preferred,
-            onChange: () => { },
+            onChange: () => {},
             isSavedCard: true,
             shopperSavedPayment: {
               id: item.id,
@@ -196,9 +202,7 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
           getUpdatedPaymentMethods(shopperPayments, isExpanded)
         );
       } catch (error) {
-        setAllPaymentOptions(
-          getUpdatedPaymentMethods([], isExpanded)
-        );
+        setAllPaymentOptions(getUpdatedPaymentMethods([], isExpanded));
       }
     };
 
@@ -271,7 +275,7 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
       selected: true, // Set the new card as selected
       index: allPaymentOptions.length, // Use current length as new index
       size: 0,
-      onChange: () => { },
+      onChange: () => {},
       isSavedCard: false, // Indicate that it's a new card
       typeId: 9,
       visible: true,
@@ -310,10 +314,12 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
       <div className="pm-container">
         <div className="pm-title-container">
           <FormHeading title="Payment Method" />
-          <div className="pm-show-card" onClick={toggleAccordion}>
-            <div>{isExpanded ? "Hide other cards" : "See other cards"}</div>
-            <Back className={`accordion ${isExpanded ? "open" : "close"}`} />
-          </div>
+          {allPaymentOptions.length > 4 && (
+            <div className="pm-show-card" onClick={toggleAccordion}>
+              <div>{isExpanded ? "Hide other cards" : "See other cards"}</div>
+              <Back className={`accordion ${isExpanded ? "open" : "close"}`} />
+            </div>
+          )}
         </div>
         <div className="pm-sub-container">
           {allPaymentOptions
@@ -327,6 +333,7 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
                 isEditing={editingOptionIndex === index}
                 onEdit={() => setEditingOptionIndex(index)}
                 onCancelEdit={() => setEditingOptionIndex(null)}
+                onSaveTempCard={(card) => {}}
                 onChange={() => handlePaymentMethodChange(index)}
                 shopperId={shopperId}
               />

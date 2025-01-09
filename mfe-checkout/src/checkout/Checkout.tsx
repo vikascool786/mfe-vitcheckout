@@ -1,11 +1,14 @@
-import { useAtom, useAtomValue } from "jotai";
+import { Field, Form, Formik, FormikErrors } from "formik";
+import { useAtom } from "jotai";
 import $ from "jquery";
 import "parsleyjs";
 import React, { RefObject, useEffect, useRef, useState } from "react";
+import * as Yup from "yup";
 import { AddressList } from "../address-list/AddressList";
 import { AddressDisplay } from "../address-verification/AddressDisplay";
 import { AddressVerificationContainer } from "../address-verification/AddressVerificationContainer";
 import { fetchStatesAndCountries } from "../api/service/CountriesAndStates";
+import { buildOrder } from "../api/service/Order";
 import {
   useCreateShopperAddressBookEntry,
   useUpdateShopperAddressBookEntry,
@@ -22,9 +25,8 @@ import { Address } from "../interfaces/Address";
 import { AddressHandler } from "../interfaces/AddressHandler";
 import { DropdownOption } from "../interfaces/DropdownOption";
 import { addressAtom, orderAtom } from "../store";
-import "./Checkout.scss";
-import { buildOrder } from "../api/service/Order";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
+import "./Checkout.scss";
 
 const defaultAddress: Address = {
   id: 0,
@@ -257,7 +259,7 @@ export const Checkout: React.FC<ICheckout> = ({
     setShowShipAddressForm(!showShipAddressForm);
     setShippingAddress(
       shopperAddressBook.find((address) => address.isPrimary === 1) ||
-      shippingAddress
+        shippingAddress
     );
     setIsExpanded(!isExpanded);
   };
@@ -302,13 +304,47 @@ export const Checkout: React.FC<ICheckout> = ({
     setShopperAddressBook(updatedSelectedAddress);
   };
 
+  const initialValues = {
+    first: shippingAddress.first || "",
+    last: shippingAddress.last || "",
+    address1: shippingAddress.address1 || "",
+    address2: shippingAddress.address2 || "",
+    city: shippingAddress.city || "",
+    state: shippingAddress.state || "",
+    zip: shippingAddress.zip || "",
+    phone: shippingAddress.phone || "",
+    isPoBox: shippingAddress.isPoBox || false,
+    isUpdateEnabled: isUpdateEnabled || false,
+  };
+
+  const validationSchema = Yup.object().shape({
+    first: Yup.string().required("First name is required"),
+    last: Yup.string().required("Last name is required"),
+    address1: Yup.string().required("Address Line 1 is required"),
+    city: Yup.string().required("City is required"),
+    state: Yup.string().required("State/Province is required"),
+    zip: Yup.string().required("Zip code is required"),
+    phone: Yup.string().required("Phone number is required"),
+  });
+
+  const onSubmitAddress = (values: {
+    first: string;
+    last: string;
+    address1: string;
+    address2: string;
+    city: string;
+    state: string;
+    zip: string;
+    phone: string;
+    isPoBox: boolean;
+    isUpdateEnabled: boolean;
+  }) => {
+    // handleSaveAddress(values); // Update your existing save function
+  };
+
   return (
     <div>
-      <form
-        className="shipping-address-form"
-        ref={shipFormRef}
-        onSubmit={handleSaveAddress}
-      >
+      <form className="shipping-address-form">
         <div
           className={`${!showAVS ? "form-container" : "form-container__hide"}`}
         >
@@ -343,151 +379,182 @@ export const Checkout: React.FC<ICheckout> = ({
 
           {/* Conditionally render form fields based on accordion state */}
           {showShipAddressForm && (
-            /*some countries display family name before first name (TWN/HKG/SGP)*/
-            <>
-              {familyNameFirst ? (
-                <div className="form-field-container">
-                  <FormField
-                    label="Last Name"
-                    required
-                    name="last"
-                    data-parsley-required="true"
-                    value={shippingAddress.last}
-                    onChange={handleInputChange}
-                  />
-                  <FormField
-                    label="First Name"
-                    required
-                    name="first"
-                    data-parsley-required="true"
-                    value={shippingAddress.first}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              ) : (
-                <div className="form-field-container">
-                  <FormField
-                    label="First Name"
-                    required
-                    name="first"
-                    data-parsley-required="true"
-                    value={shippingAddress.first}
-                    onChange={handleInputChange}
-                  />
-                  <FormField
-                    label="Last Name"
-                    required
-                    name="last"
-                    data-parsley-required="true"
-                    value={shippingAddress.last}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              )}
+            /* Some countries display family name before first name (TWN/HKG/SGP) */
+            <Formik
+              initialValues={initialValues}
+              validationSchema={validationSchema}
+              onSubmit={() => {
+                console.log("Form submitted");
+              }}
+            >
+              {({
+                values,
+                handleChange,
+                setFieldValue,
+                errors,
+                touched,
+                handleBlur,
+                submitForm,
+              }) => (
+                <Form>
+                  {familyNameFirst ? (
+                    <div className="form-field-container">
+                      <FormField
+                        name="last"
+                        label="Last Name"
+                        required
+                        value={values.last}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        errorMessage={touched.last && errors.last}
+                      />
+                      <FormField
+                        name="first"
+                        label="First Name"
+                        required
+                        value={values.first}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        errorMessage={touched.first && errors.first}
+                      />
+                    </div>
+                  ) : (
+                    <div className="form-field-container">
+                      <FormField
+                        name="first"
+                        label="First Name"
+                        required
+                        value={values.first}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        errorMessage={touched.first && errors.first}
+                      />
+                      <FormField
+                        name="last"
+                        label="Last Name"
+                        required
+                        value={values.last}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        errorMessage={touched.last && errors.last}
+                      />
+                    </div>
+                  )}
 
-              <div className="form-field-container-full">
-                <FormField
-                  label="Address Line 1"
-                  required
-                  name="address1"
-                  data-parsley-required="true"
-                  value={shippingAddress.address1}
-                  onChange={handleInputChange}
-                />
-              </div>
-
-              <div className="form-field-container-full">
-                <FormField
-                  label="Address Line 2"
-                  name="address2"
-                  value={shippingAddress.address2}
-                  onChange={handleInputChange}
-                />
-              </div>
-
-              <div className="form-field-container">
-                <FormField
-                  label="City"
-                  required
-                  name="city"
-                  data-parsley-required="true"
-                  value={shippingAddress.city}
-                  onChange={handleInputChange}
-                />
-                <DropdownField
-                  options={stateDropdownList}
-                  label="State/Province"
-                  required
-                  selectedValue={shippingAddress.state}
-                  formName="state"
-                  onChange={(value) => {
-                    const address = {
-                      ...shippingAddress,
-                      state: value,
-                    };
-                    setShippingAddress(address);
-                  }}
-                />
-              </div>
-
-              <div className="form-field-container">
-                <FormField
-                  label="Zip Code"
-                  required
-                  renderCheckBox={
-                    <Checkbox
-                      title="This address is a PO box"
-                      checked={shippingAddress.isPoBox}
-                      name="isPoBox"
-                      onChange={handlePOBoxChange}
+                  <div className="form-field-container-full">
+                    <FormField
+                      name="address1"
+                      label="Address Line 1"
+                      required
+                      value={values.address1}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      errorMessage={touched.address1 && errors.address1}
                     />
-                  }
-                  name="zip"
-                  data-parsley-required="true"
-                  value={shippingAddress.zip}
-                  onChange={handleInputChange}
-                />
-                <FormField
-                  label="Phone"
-                  required
-                  extraLabel="10 digits"
-                  data-parsley-required="true"
-                  name="phone"
-                  value={shippingAddress.phone}
-                  onChange={handleInputChange}
-                  renderCheckBox={
-                    <Checkbox
-                      title="Get Text Updates for this Order"
-                      subtitle="Messaging data rates may apply."
-                      checked={isUpdateEnabled}
-                      onChange={handlePhoneShippingUpdates}
-                    />
-                  }
-                />
-              </div>
+                  </div>
 
-              {shopperAddressBook.length > 0 ? (
-                <div className="form-footer form-footer__dual-button">
-                  <Button
-                    label="Cancel"
-                    type="secondary"
-                    onClick={onCancelClick}
-                  />
-                  <Button
-                    label="Save & Continue"
-                    type="primary"
-                    onClick={handleSaveAddress}
-                  />
-                </div>
-              ) : (
-                <div className="form-footer">
-                  <Button
-                    label="Save Shipping Address & Continue"
-                    type="primary"
-                  />
-                </div>
+                  <div className="form-field-container-full">
+                    <FormField
+                      name="address2"
+                      label="Address Line 2"
+                      value={values.address2}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      errorMessage={touched.address2 && errors.address2}
+                    />
+                  </div>
+
+                  <div className="form-field-container">
+                    <FormField
+                      name="city"
+                      label="City"
+                      required
+                      value={values.city}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      errorMessage={touched.city && errors.city}
+                    />
+                    <DropdownField
+                      options={stateDropdownList}
+                      label="State/Province"
+                      required
+                      selectedValue={values.state}
+                      formName="state"
+                      onBlur={handleBlur}
+                      onChange={(value) => setFieldValue("state", value)}
+                    />
+                  </div>
+
+                  <div className="form-field-container">
+                    <FormField
+                      name="zip"
+                      label="Zip Code"
+                      required
+                      value={values.zip}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      renderCheckBox={
+                        <Checkbox
+                          title="This address is a PO box"
+                          checked={values.isPoBox}
+                          name="isPoBox"
+                          onChange={() =>
+                            setFieldValue("isPoBox", !values.isPoBox)
+                          }
+                        />
+                      }
+                      errorMessage={touched.zip && !!errors.zip}
+                    />
+                    <FormField
+                      name="phone"
+                      label="Phone"
+                      required
+                      extraLabel="10 digits"
+                      value={values.phone}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      renderCheckBox={
+                        <Checkbox
+                          title="Get Text Updates for this Order"
+                          subtitle="Messaging data rates may apply."
+                          checked={values.isUpdateEnabled}
+                          onChange={() =>
+                            setFieldValue(
+                              "isUpdateEnabled",
+                              !values.isUpdateEnabled
+                            )
+                          }
+                        />
+                      }
+                      errorMessage={touched.phone && !!errors.phone}
+                    />
+                  </div>
+
+                  {shopperAddressBook.length > 0 ? (
+                    <div className="form-footer form-footer__dual-button">
+                      <Button
+                        label="Cancel"
+                        btnType="secondary"
+                        onClick={onCancelClick}
+                      />
+                      <Button
+                        label="Save & Continue"
+                        btnType="primary"
+                        onClick={submitForm}
+                      />
+                    </div>
+                  ) : (
+                    <div className="form-footer">
+                      <Button
+                        label="Save Shipping Address & Continue"
+                        btnType="primary"
+                        onClick={submitForm}
+                      />
+                    </div>
+                  )}
+                </Form>
               )}
-            </>
+            </Formik>
           )}
         </div>
       </form>

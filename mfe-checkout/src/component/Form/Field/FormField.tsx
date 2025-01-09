@@ -7,12 +7,14 @@ interface IFormFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   renderCheckBox?: ReactNode;
   required?: boolean;
   extraLabel?: string;
+  errorMessage?: boolean;
 }
 
 export const FormField: React.FC<IFormFieldProps> = ({
   label,
   required,
   extraLabel,
+  errorMessage,
   renderCheckBox,
   name,
   ...props
@@ -21,6 +23,9 @@ export const FormField: React.FC<IFormFieldProps> = ({
     <div className="field-item-container">
       {label && <div className={required ? "required-field" : ""}>{label}</div>}
       <input className="input-container" name={name} {...props} />
+      {errorMessage && (
+        <div className="error-message">This field is required</div>
+      )}
       {extraLabel && <div className="field-extra-label">{extraLabel}</div>}
       {renderCheckBox}
     </div>

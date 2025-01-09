@@ -1,7 +1,10 @@
 import { ChangeOrder } from "../../interfaces/ChangeOrder";
 import { Order } from "../../interfaces/Order";
 import { ApiResponse } from "../../interfaces/ShippingMethod";
-import { GET_API_KEY, GET_API_ENDPOINT_BASE_URL_ONLY } from "../../utils/urlResolver";
+import {
+  GET_API_KEY,
+  GET_API_ENDPOINT_BASE_URL_ONLY,
+} from "../../utils/urlResolver";
 import axiosInstance from "../axios";
 import axios from "axios";
 
@@ -15,6 +18,11 @@ export interface Response {
   success: Success;
 }
 
+export interface Notification {
+  reason: string;
+  errorCode: string;
+}
+
 export interface Errors {
   message: string;
   collection_name: string;
@@ -24,6 +32,7 @@ export interface Errors {
 
 export interface Success {
   data: Order;
+  notifications: Notification[];
 }
 
 export interface Data {}
@@ -42,9 +51,11 @@ const shopperOrderAPIEndpoint = (cartId: string) =>
 
 const shopperBuildOrderAPIEndpoint = `${apiDomain}/checkout-universal/v1/checkouts?api_key=${apiKey}`;
 
-const shopperUpdateOrderEndpoint = (cartId: string) => `${GET_API_ENDPOINT_BASE_URL_ONLY()}/checkout-universal/v1/checkouts/id/${cartId}`
+const shopperUpdateOrderEndpoint = (cartId: string) =>
+  `${GET_API_ENDPOINT_BASE_URL_ONLY()}/checkout-universal/v1/checkouts/id/${cartId}`;
 
-const commitOrderEndpoint = (cartId: string) =>`${GET_API_ENDPOINT_BASE_URL_ONLY()}/checkout-universal/v1/checkouts/id/${cartId}?api_key=${GET_API_KEY()}`
+const commitOrderEndpoint = (cartId: string) =>
+  `${GET_API_ENDPOINT_BASE_URL_ONLY()}/checkout-universal/v1/checkouts/id/${cartId}?api_key=${GET_API_KEY()}`;
 
 export const fetchOrderDetail = async (cartId: string): Promise<Order> => {
   try {
@@ -59,11 +70,11 @@ export const fetchOrderDetail = async (cartId: string): Promise<Order> => {
 };
 
 export const buildOrder = async (
-    orderPayload: ChangeOrder
+  orderPayload: ChangeOrder
 ): Promise<OrderResponse> => {
   try {
     const orderResponse = await axiosInstance(
-        shopperBuildOrderAPIEndpoint
+      shopperBuildOrderAPIEndpoint
     ).post("", orderPayload);
     return orderResponse.data;
   } catch (error) {
@@ -78,7 +89,7 @@ export const changeOrder = async (
 ): Promise<OrderResponse> => {
   try {
     const orderResponse = await axiosInstance(
-        shopperUpdateOrderEndpoint(cartId)
+      shopperUpdateOrderEndpoint(cartId)
     ).put("", changeStorePayload);
     return orderResponse.data;
   } catch (error) {
@@ -87,23 +98,21 @@ export const changeOrder = async (
   }
 };
 
-export const commitOrder = async (
-    cartId: string,
-): Promise<any> => {
+export const commitOrder = async (cartId: string): Promise<any> => {
   try {
-    const response = await axiosInstance(
-        commitOrderEndpoint(cartId)
-    ).post("", {});
+    const response = await axiosInstance(commitOrderEndpoint(cartId)).post(
+      "",
+      {}
+    );
     console.log("commit order successfully: " + JSON.stringify(response));
     return response;
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      if(error.response?.data.errors.length){
+      if (error.response?.data.errors.length) {
         throw new Error(error.response?.data.errors[0].message);
-      } else{
+      } else {
         throw error;
       }
-
     } else {
       console.error("Unexpected error:", error);
       throw error;

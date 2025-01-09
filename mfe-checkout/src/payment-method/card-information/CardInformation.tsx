@@ -26,6 +26,7 @@ interface ICardInformationProps {
   onCancel?: () => void;
   shopperId: string;
   showBillingSection?: boolean;
+  onSaveTempCard: (card: ShopperSavedPayments) => void;
 }
 
 /**
@@ -64,6 +65,8 @@ const defaultAddress: Address = {
 export const CardInformation: React.FC<ICardInformationProps> = ({
   initialData,
   shopperId,
+  onCancel,
+  onSaveTempCard,
   showBillingSection = true,
 }) => {
   const [sameShippingAddress, setSameShippingAddress] =
@@ -165,15 +168,16 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
       const formData = new URLSearchParams();
       formData.append("name", requestData.name);
       formData.append("number", requestData.number);
-      formData.append("month", requestData.month);
-      formData.append("year", requestData.year);
-      formData.append("type", requestData.type);
+      formData.append("month", requestData.month?.toString() || "");
+      formData.append("year", requestData.year?.toString() || "");
+      formData.append("type", requestData.type.toLocaleString());
 
       const paymentMethod = await addTempPaymentMethod(formData.toString(), {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
       });
+      onSaveTempCard(paymentMethod);
 
       if (order && paymentMethod) {
         buildOrder(
@@ -209,19 +213,8 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   const currentYear = new Date().getFullYear();
   const years = getYears(currentYear, currentYear + 10);
 
-  // function to call an API when CVV is entered to generate a payment id
-
-  const generatePaymentId = async () => {
-    handleSaveAddress("TEMP");
-  };
-
   return (
     <div className="card-information-container">
-      <Button
-        label="Generate Payment ID"
-        type="primary"
-        onClick={generatePaymentId}
-      />
       <FormField
         label="Name on Card"
         required
@@ -333,6 +326,14 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           {shippingAddress?.zip}
         </div>
       )}
+      <div className="button-container">
+        <Button btnType="secondary" label="Cancel" onClick={onCancel} />
+        <Button
+          btnType="primary"
+          label="Save"
+          onClick={() => handleSaveAddress("TEMP")}
+        />
+      </div>
     </div>
   );
 };
