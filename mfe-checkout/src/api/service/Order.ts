@@ -119,3 +119,19 @@ export const commitOrder = async (cartId: string): Promise<any> => {
     }
   }
 };
+
+export const removeProductFromCart = async (
+  cartId: string,
+  productHash: string
+): Promise<any> => {
+  const API_ENDPOINT = `${GET_API_ENDPOINT_BASE_URL_ONLY()}/cart-universal/v2/carts/id/${cartId}/product_hash/${productHash}?api_key=c7f5de6a77644516b24c68fc4ac173fc`;
+
+  try {
+    const response = await axiosInstance(API_ENDPOINT).delete("");
+
+    console.log(response);
+  } catch (error) {
+    console.error("Error removing product from cart", error);
+    throw error;
+  }
+};

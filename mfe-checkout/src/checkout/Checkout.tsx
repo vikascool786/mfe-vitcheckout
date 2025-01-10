@@ -453,7 +453,6 @@ export const Checkout: React.FC<ICheckout> = ({
                       required
                       selectedValue={values.state}
                       formName="state"
-                      onBlur={handleBlur}
                       onChange={(value) => setFieldValue("state", value)}
                     />
                   </div>

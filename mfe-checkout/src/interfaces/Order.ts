@@ -29,6 +29,7 @@ export interface Item {
   prodId: string;
   image: Image;
   caption: string;
+  product_hash: string;
   catalogSku: string;
   catalogName: string;
   specialFormula: string;

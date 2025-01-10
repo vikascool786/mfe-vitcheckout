@@ -7,9 +7,14 @@ import { getCatalogName } from "../utils/helpers/GetCatalog";
 import "./ShippingMethod.scss";
 import { orderAtom } from "../store";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
-import { changeOrder } from "../api/service/Order";
+import { changeOrder, removeProductFromCart } from "../api/service/Order";
+import { useApi } from "../hooks/useAPI";
+import {
+  GET_API_ENDPOINT_BASE_URL,
+  GET_API_ENDPOINT_BASE_URL_ONLY,
+} from "../utils/urlResolver";
 
-export const ShippingMethod: React.FC = ({ }) => {
+export const ShippingMethod: React.FC = ({}) => {
   const [orders, setOrder] = useAtom(orderAtom);
   if (!orders) {
     return <p>Loading shipping methods...</p>;
@@ -22,7 +27,7 @@ export const ShippingMethod: React.FC = ({ }) => {
       return;
     }
     updatedStores[storeKey].items = updatedStores[storeKey].items.filter(
-      (item) => item.caption !== itemKey
+      (item) => item.product_hash !== itemKey
     );
 
     // Update the order atom, if the store is empty, remove the store
@@ -35,21 +40,7 @@ export const ShippingMethod: React.FC = ({ }) => {
       stores: updatedStores,
     });
 
-    changeOrder(
-      generateChangeStoreResponse({
-        ...orders,
-        stores: updatedStores,
-      }),
-      orders.id
-    )
-      .then((resonse) => {
-        if (!resonse.response.errors) {
-          setOrder(resonse.response.success.data);
-        }
-      })
-      .catch((error) => {
-        console.error("Error removing product from order", error);
-      });
+    removeProductFromCart(orders.id, itemKey);
   };
 
   return (
@@ -71,7 +62,7 @@ export const ShippingMethod: React.FC = ({ }) => {
                         <ShippingItem
                           item={item}
                           onRemove={() =>
-                            handleRemoveProduct(key, item.caption)
+                            handleRemoveProduct(key, item.product_hash)
                           }
                         />
                       </div>
