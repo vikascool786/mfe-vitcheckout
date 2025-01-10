@@ -95,7 +95,9 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   const [order, setOrder] = useAtom(orderAtom);
 
   const shippingAddress = addressList.find((address) => address.isPrimary);
-  const [saveAddress, setSaveAddress] = useState<boolean>(showSavedCard || false);
+  const [saveAddress, setSaveAddress] = useState<boolean>(
+    showSavedCard || false
+  );
   const [cardInformation, setCardInformation] = useState<ShopperSavedPayments>({
     accountName: initialData?.accountName || "",
     address: initialData?.address || defaultAddress,
@@ -106,6 +108,11 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
     preferred: initialData?.preferred || false,
     type: 9,
   });
+
+  const updateCardInformation = (data: Partial<ShopperSavedPayments>) => {
+    setCardInformation((prev) => ({ ...prev, ...data }));
+    updateShopperDetails(shopperId, data.id || 0, data);
+  };
 
   const cardInformationRef = useRef(cardInformation);
 
@@ -288,7 +295,12 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           onChange={(e) => handleInputChange("cvv", e.target.value)}
         />
         <div className="save-for-later">
-          <input className="checkbox" type="checkbox" checked={saveAddress} />
+          <input
+            className="checkbox"
+            type="checkbox"
+            checked={saveAddress}
+            onClick={() => setSaveAddress(!saveAddress)}
+          />
           <span className="shipping-text">Save card for later</span>
         </div>
       </div>
@@ -328,8 +340,12 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
         <Button btnType="secondary" label="Cancel" onClick={onCancel} />
         <Button
           btnType="primary"
-          label="Save"
-          onClick={() => handleSaveAddress(saveAddress ? "WALLET" : "TEMP")}
+          label={showSavedCard ? "Update" : "Save"}
+          onClick={() =>
+            showSavedCard
+              ? updateCardInformation(cardInformation)
+              : handleSaveAddress(saveAddress ? "WALLET" : "TEMP")
+          }
         />
       </div>
     </div>

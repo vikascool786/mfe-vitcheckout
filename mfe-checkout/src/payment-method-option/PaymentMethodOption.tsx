@@ -15,10 +15,7 @@ export interface IPaymentOptionProps {
   visible: boolean;
   isSavedCard?: boolean;
   onChange: () => void;
-  shopperSavedPayment?: ShopperSavedPayments;
-  shopperId?: string;
-  onSaveTempCard: (card: ShopperSavedPayments) => void;
-  isSaved?: boolean;
+  shopperSavedPayment: ShopperSavedPayments;
 }
 
 export const PaymentOption: React.FC<

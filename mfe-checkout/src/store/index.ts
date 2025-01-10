@@ -6,6 +6,8 @@ export const orderAtom = atom<Order>();
 
 export const addressAtom = atom<Address[]>([]);
 
+export const cardsAtom = atom([]);
+
 export const OrderStore = createStore();
 
 
