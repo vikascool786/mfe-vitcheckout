@@ -6,6 +6,7 @@ import { Button } from "../component/Button/Button";
 import { AddressVerificationAddressList } from "./AddressVerificationAddressList";
 import { Address } from "../interfaces/Address";
 import { AddressDisplay } from "./AddressDisplay";
+import { AddressList } from "../address-list/AddressList";
 
 interface AppProps {
   addressList: Address[];
@@ -22,6 +23,7 @@ export const AddressVerification: React.FC<AppProps> = ({
   handleEditClick,
   handleUseSelectedAddress,
 }) => {
+
   return (
     <div>
       <div className="form-header">
@@ -41,10 +43,14 @@ export const AddressVerification: React.FC<AppProps> = ({
           <div className="form-footer form-footer__dual-button">
             <Button
               label="Edit Address"
-              type="secondary"
+              btnType="secondary"
               onClick={handleEditClick}
             />
-            <Button label="Use Address Entered" type="primary" onClick={handleUseSelectedAddress} />
+            <Button
+              label="Use Address Entered"
+              btnType="primary"
+              onClick={handleUseSelectedAddress}
+            />
           </div>
         </div>
       ) : (
@@ -63,12 +69,12 @@ export const AddressVerification: React.FC<AppProps> = ({
           <div className="form-footer form-footer__dual-button">
             <Button
               label="Edit Address"
-              type="secondary"
+              btnType="secondary"
               onClick={handleEditClick}
             />
             <Button
               label="Use Selected Address"
-              type="primary"
+              btnType="primary"
               onClick={handleUseSelectedAddress}
             />
           </div>

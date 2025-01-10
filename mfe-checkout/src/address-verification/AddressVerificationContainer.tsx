@@ -65,7 +65,7 @@ export const AddressVerificationContainer = forwardRef<
     } catch (err) {
       console.log(err);
     } finally {
-      console.log("done");
+      setAddressToVerify(addressEntered);
     }
     return isValidAddress;
   };

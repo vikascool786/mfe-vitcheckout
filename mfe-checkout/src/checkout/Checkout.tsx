@@ -160,46 +160,29 @@ export const Checkout: React.FC<ICheckout> = ({
     fetchCountryAndStateData();
   }, []);
 
-  const handleSaveAddress = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const buildAddress = (formRef: RefObject<HTMLFormElement>): Address => {
-      let address: Address = {
-        ...defaultAddress, // Spread defaults for optional fields
-      };
-
-      if (formRef.current) {
-        const formData = new FormData(formRef.current);
-        const data = Object.fromEntries(formData.entries());
-
-        // Assign values for mandatory fields
-        address.id = Number(data.id) || shippingAddress.id;
-        address.first = (data.first as string) || "";
-        address.last = (data.last as string) || "";
-        address.address1 = (data.address1 as string) || "";
-        address.address2 = (data.address2 as string) || "";
-        address.zip = (data.zip as string) || "";
-        address.city = (data.city as string) || "";
-        address.state = (data.state as string) || "";
-        address.phone = (data.phone as string) || "";
-        address.isPoBox =
-          Boolean(data.isPoBox === "on" ? true : false) || false;
-        address.isPrimary = Number(data.isPrimary) || 1;
-
-        // Assign optional fields if they are available
-        address.country = (data.country as string) || "USA";
-      }
-      return address;
+  const handleSaveAddress = async (address: {
+    first: string;
+    last: string;
+    address1: string;
+    address2: string;
+    city: string;
+    state: string;
+    zip: string;
+    phone: string;
+    isPoBox: boolean;
+    isUpdateEnabled: boolean;
+  }) => {
+    const addressEntered = {
+      ...defaultAddress,
+      ...address,
+      country: "USA",
     };
 
     if (childRef.current) {
-      const addressEntered = buildAddress(shipFormRef);
-      childRef.current.setAddressToVerify(addressEntered);
-
       try {
-        const isValidAddress = await childRef.current.verifyAddress(
-          addressEntered
-        );
+        const isValidAddress = await childRef.current.verifyAddress({
+          ...addressEntered,
+        });
         const validatedAddress = { ...addressEntered };
 
         setShippingAddress(validatedAddress);
@@ -219,7 +202,7 @@ export const Checkout: React.FC<ICheckout> = ({
           Object.entries(validatedAddress as Address)
         ).toString();
 
-        if (validatedAddress.id > 0) {
+        if (validatedAddress?.id && validatedAddress.id > 0) {
           // Use PUT request for existing address (update)
           await updateShopperAddressBookEntry(
             shopperId,
@@ -327,21 +310,6 @@ export const Checkout: React.FC<ICheckout> = ({
     phone: Yup.string().required("Phone number is required"),
   });
 
-  const onSubmitAddress = (values: {
-    first: string;
-    last: string;
-    address1: string;
-    address2: string;
-    city: string;
-    state: string;
-    zip: string;
-    phone: string;
-    isPoBox: boolean;
-    isUpdateEnabled: boolean;
-  }) => {
-    // handleSaveAddress(values); // Update your existing save function
-  };
-
   return (
     <div>
       <form className="shipping-address-form">
@@ -383,8 +351,8 @@ export const Checkout: React.FC<ICheckout> = ({
             <Formik
               initialValues={initialValues}
               validationSchema={validationSchema}
-              onSubmit={() => {
-                console.log("Form submitted");
+              onSubmit={(values) => {
+                handleSaveAddress(values);
               }}
             >
               {({

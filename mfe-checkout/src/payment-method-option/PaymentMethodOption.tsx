@@ -44,9 +44,8 @@ export const PaymentOption: React.FC<
 }) => {
   const isSelected = selected ? "selected" : "";
   const isFirst = index === 0 ? "start" : "";
-  const showCardImage = isSavedCard && shopperSavedPayment;
+  const showCardImage = shopperSavedPayment;
 
-  console.log("PaymentOption", isSaved);
   return (
     <div
       className={`payment-option-container ${isSelected} ${isFirst}`}
@@ -109,7 +108,7 @@ export const PaymentOption: React.FC<
           }}
           showSavedCard={isSaved}
           onSaveTempCard={onSaveTempCard}
-        onCancel={onCancelEdit}
+          onCancel={onCancelEdit}
         />
       )}
     </div>
