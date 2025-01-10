@@ -175,8 +175,11 @@ export const Checkout: React.FC<ICheckout> = ({
     const addressEntered = {
       ...defaultAddress,
       ...address,
+      id: shippingAddress.id || 0,
       country: "USA",
     };
+
+    console.log(defaultAddress, address);
 
     if (childRef.current) {
       try {
@@ -201,6 +204,8 @@ export const Checkout: React.FC<ICheckout> = ({
         const addressParams = new URLSearchParams(
           Object.entries(validatedAddress as Address)
         ).toString();
+
+        console.log(validatedAddress);
 
         if (validatedAddress?.id && validatedAddress.id > 0) {
           // Use PUT request for existing address (update)
