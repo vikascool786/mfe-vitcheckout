@@ -277,6 +277,11 @@ export const Checkout: React.FC<ICheckout> = ({
           : { ...address, isPrimary: 0 } // Reset other addresses' `isPrimary` to 0
     );
 
+    setShippingAddress(
+      updatedSelectedAddress.find((p) => p.isPrimary)
+    ) as Address;
+    setShopperAddressBook(updatedSelectedAddress);
+
     const newOrder = await buildOrder(
       generateChangeStoreResponse({
         ...order,
@@ -288,8 +293,6 @@ export const Checkout: React.FC<ICheckout> = ({
     );
 
     setOrder(newOrder.response.success.data);
-
-    setShopperAddressBook(updatedSelectedAddress);
   };
 
   const initialValues = {

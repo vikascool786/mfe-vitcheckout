@@ -10,12 +10,14 @@ export interface IPaymentOptionProps {
   paymentOption: IPaymentOption;
   shopperId: string;
   index: number;
+  removeCard: () => void;
 }
 
 export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   index,
   shopperId,
   paymentOption,
+  removeCard,
 }) => {
   const { paymentMethod, paymentAddress } = paymentOption;
   const [paymentMethods, setPaymentMethods] = useAtom(paymentMethodsAtom);
@@ -91,9 +93,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                 <input
                   onClick={() => setIsEditing(!isEditing)}
                   className="payment-option-container__card-cvv-form"
-                  value={paymentMethod.cvv === 1 ? "" : paymentMethod.cvv
-                    
-                  }
+                  value={paymentMethod.cvv === 1 ? "***" : paymentMethod.cvv}
                 />
               </div>
             )}
@@ -119,6 +119,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
           shopperId={shopperId}
           onCancel={() => {
             setIsEditing(false);
+            removeCard();
           }}
         />
       )}

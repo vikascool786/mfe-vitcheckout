@@ -139,7 +139,10 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
         const updatedPaymentMethods = [
           ...paymentMethods,
           {
-            paymentMethod: response.at(-1),
+            paymentMethod: {
+              ...response.at(-1),
+              cvv: requestData.cvv,
+            },
             paymentAddress: sameShippingAddress
               ? shippingAddress
               : ({} as Address),
@@ -149,13 +152,14 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
         ].filter((pm) => pm.paymentMethod?.id !== 0);
 
         setPaymentMethods(updatedPaymentMethods);
+        onCancel();
 
         if (order && paymentMethod) {
           const updatedOrder = generateChangeStoreResponse({
             ...order,
             paymentMethod: {
-              ...order.paymentMethod,
-              id: cardInformation.paymentMethod.id,
+              ...updatedPaymentMethod,
+              cvv: requestData.cvv,
             },
           });
           const orderResponse = await buildOrder(updatedOrder);
@@ -174,7 +178,10 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           const updatedPaymentMethods = [
             ...paymentMethods,
             {
-              paymentMethod: updatedPaymentMethod,
+              paymentMethod: {
+                ...updatedPaymentMethod,
+                cvv: requestData.cvv,
+              },
               paymentAddress: {} as Address,
               isSelected: true,
               isVisible: true,
@@ -252,6 +259,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
         label="CVV"
         required
         value={cardInformation.paymentMethod.cvv || ""}
+        type="password"
         onChange={(e) => handleInputChange("cvv", e.target.value)}
       />
       <div className="save-for-later">

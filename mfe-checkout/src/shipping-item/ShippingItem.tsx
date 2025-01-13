@@ -39,11 +39,11 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
           <div className="item-name">{decodeHtml(caption)}</div>
           <div>{catalogName}</div>
           <div className="item-cashback">
-            <div className="item-cashback-value">+ ${totals?.cashBack}</div>
+            <div className="item-cashback-value">+ {totals?.cashBackStr}</div>
             <Cashback viewBox="0 -2 24 22" />
             Cashback
           </div>
-          <div>${totals?.price}</div>
+          <div>{totals?.priceStr}</div>
         </div>
       </div>
       <div className="item-cancel" onClick={onRemove}>

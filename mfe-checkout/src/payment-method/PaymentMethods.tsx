@@ -151,7 +151,7 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
     setIsExpanded(!isExpanded);
   };
 
-  const onAddNewCard = async () => {
+  const onAddNewCard = () => {
     // Check if a card with id 0 is already present
     const hasTemporaryCard = paymentMethods.some(
       (paymentOption) => paymentOption.paymentMethod.id === 0
@@ -187,7 +187,21 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
     ]);
   };
 
-  console.log(paymentMethods);
+  const removeCard = () => {
+    const updatedPayments = paymentMethods
+      .filter((pm) => pm.paymentMethod.id !== 0)
+      .map((po) => {
+        if (po.paymentMethod.preferred) {
+          return { ...po, isSelected: true, isVisible: true };
+        }
+
+        return po;
+      });
+
+    setTimeout(() => {
+      setPaymentMethods(updatedPayments);
+    }, 300);
+  };
 
   return (
     <div className="pm-main-container">
@@ -210,6 +224,7 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
                 paymentOption={paymentOption}
                 index={index}
                 shopperId={shopperId}
+                removeCard={removeCard}
               />
             ))}
           {showClick2Pay && (
