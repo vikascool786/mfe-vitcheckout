@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useAtom } from "jotai";
 import "../App.scss";
-import { commitOrder, OrderResponse } from "../api/service/Order";
+import { buildOrder, commitOrder, OrderResponse } from "../api/service/Order";
 import { withErrorBoundary } from "../hoc/withErrorBoundary";
 import { Checkout } from "./Checkout";
 import { OrderSummary } from "../order-summary/OrderSummary";
@@ -22,6 +22,9 @@ import {
   GET_API_KEY,
 } from "../utils/urlResolver";
 import ErrorMessage from "../component/Error";
+import {checkoutSezzle} from "../api/ajaxaction/Sezzle";
+import {handleSezzleCheckout} from "../utils/helpers/SezzleHelper";
+import {Spinner} from "../component/Spinner/Spinner";
 
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
@@ -67,10 +70,23 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   const [orderErrorMessage, setOrderErrorMessage] = useState("");
   const [paymentTypeId, setPaymentTypeId] = useState(0);
   const hasInitializedOrder = useRef(false); // Prevent multiple executions of updateOrder
+  const [loadingOrderConfirmation, setLoadingOrderConfirmation] = useState(false);
 
   const addressUrl = `${apiDomain}/shopper-addressbooks/v1/${shopperId}/AddressBook?api_key=${apiKey}`;
   const paymentUrl = `${apiDomain}/shopper-wallets/v1/Shopper/${shopperId}/Wallet?api_key=${apiKey}`;
   const checkoutUrl = `${apiDomain}/checkout-universal/v1/checkouts?api_key=${apiKey}`;
+
+  useEffect(() => {
+    handleSezzleCheckout(
+        location.search,
+        orderData,
+        checkoutSezzle,
+        buildOrder,
+        generateChangeStoreResponse,
+        setLoadingOrderConfirmation,
+        confirmOrder
+    );
+  }, [location.search]);
 
   const {
     data: addresses = [],
@@ -126,6 +142,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   const confirmOrder = () => {
     commitOrder(cartId)
       .then((response: any) => {
+        setLoadingOrderConfirmation(false);
         const isSuccessful = response?.data?.response?.success;
         if (isSuccessful) {
           const orderId = response.data.response.success.data.orderId;
@@ -137,11 +154,19 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
         }
       })
       .catch((error) => {
+        setLoadingOrderConfirmation(false);
         setOrderErrorMessage(`Detail: ${error?.message || error}`);
       });
   };
 
   useEffect(() => {
+    console.log("defaultAddress", defaultAddress);
+    console.log("defaultPaymentMethod", defaultPaymentMethod);
+    console.log(
+      "order?.response?.success?.data",
+      order?.response?.success?.data
+    );
+
     if (
       !hasInitializedOrder.current &&
       defaultAddress &&
@@ -156,10 +181,21 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     }
   }, [defaultAddress, defaultPaymentMethod, order?.response?.success?.data]);
 
+  const handlePlaceOrderUpdate = (value: boolean) => {
+    setLoadingOrderConfirmation(value);
+  };
+
   if (loadingAddresses || loadingPaymentMethods || loadingOrder)
     return <div>Loading...</div>;
 
   if (addressError || paymentError) return <div>Failed to load data</div>;
+
+  if (loadingOrderConfirmation) return (
+      <div className="loading-order-conf">
+        <div>Please wait while your order is being placed</div>
+        <Spinner/>
+      </div>
+  )
 
   return (
     <div className="checkout-container">
@@ -168,7 +204,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
           <div className="left-column">
             <Checkout
               shopperId={shopperId}
-              cartId={cartId}
+              siteId={siteId}
               addresses={addresses || []}
             />
             <ShippingMethod order={orderData} />

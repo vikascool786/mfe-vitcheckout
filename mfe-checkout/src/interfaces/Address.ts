@@ -12,7 +12,7 @@ export interface Address {
   last: string
   company?: string
   address1: string
-  address2: string
+  address2?: string
   city: string
   state: string
   region?: string

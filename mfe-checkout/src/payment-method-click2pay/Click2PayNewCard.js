@@ -168,7 +168,7 @@ const Click2PayNewCard = (function () {
 
     function checkoutWithNewCardFailedHandler(error){
         const errorMessage = error.message;
-        console.log("checkoutWithNewCard() failed error message: " + errorMessage, JSON.stringify(error));
+        console.error("checkoutWithNewCard() failed error message: " + errorMessage, JSON.stringify(error));
         //Click2PayLogger.logInfo("checkoutWithNewCard failed message: " + errorMessage);
         Click2PayPlaceOrder.closeIFrame();
         const failedMessage = "There has been a problem adding your a new card to your Click to Pay wallet. Please try again.";

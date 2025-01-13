@@ -36,14 +36,14 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     const updatedPaymentOptions = paymentMethods.map((method) =>
       method.paymentMethod.id === paymentOption.paymentMethod.id
         ? {
-            ...method,
-            isSelected: true,
-            isVisible: true,
-          }
+          ...method,
+          isSelected: true,
+          isVisible: true,
+        }
         : {
-            ...method,
-            isSelected: false,
-          }
+          ...method,
+          isSelected: false,
+        }
     );
 
     setPaymentMethods(updatedPaymentOptions);
@@ -94,7 +94,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                 <input
                   onClick={() => setIsEditing(!isEditing)}
                   className="payment-option-container__card-cvv-form"
-                  value={order?.paymentMethod.id ? "***" : ""}
+                  value={order?.paymentMethod?.id ? "***" : ""}
                 />
               </div>
             )}

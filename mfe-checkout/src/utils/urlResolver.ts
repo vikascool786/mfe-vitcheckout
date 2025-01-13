@@ -158,3 +158,21 @@ export const GET_C2P_DPAID= () => {
       return "493af363-de55-4eb5-9141-7ee7c35b50cd";
   }
 }
+
+export const GET_AJAX_ENDPOINT_BASE_URL = () => {
+  const mode = GET_API_MODE();
+  switch (mode) {
+    case "localhost":
+      return "https://localhostapi.shop.com{{path}}";
+    case "dev":
+    case "staging":
+    case "prod":
+    default:
+      return `${GET_BASE_URL}{{path}}`;
+  }
+};
+
+export const GET_BASE_URL =
+    window.location.href.match(
+        /^(https:\/\/)?(www\.)?([a-zA-Z0-9-]+(\.[a-zA-Z]+)+)/
+    )?.[0] || "https://shop.com";
