@@ -1,93 +1,101 @@
-import React from "react";
+import { useAtom } from "jotai";
+import React, { useState } from "react";
 import { RadioButton } from "../component/RadioButton/RadioButton";
-import { ShopperSavedPayments } from "../interfaces/ShopperSavedPayments";
 import { CardInformation } from "../payment-method/card-information/CardInformation";
+import { PAYPAL, SEZZLE } from "../payment-method/PaymentType";
+import { IPaymentOption, paymentMethodsAtom } from "../store";
 import "./PaymentMethodOption.scss";
 
 export interface IPaymentOptionProps {
-  name: string;
-  image: string;
-  selected: boolean;
+  paymentOption: IPaymentOption;
   index: number;
-  size: number;
-  typeId: number;
-  siteFlagId?: number;
-  visible: boolean;
-  isSavedCard?: boolean;
-  onChange: () => void;
-  shopperSavedPayment: ShopperSavedPayments;
 }
 
-export const PaymentOption: React.FC<
-  IPaymentOptionProps & {
-    isEditing: boolean;
-    onEdit: () => void;
-    onCancelEdit: () => void;
-  }
-> = ({
-  name,
-  image,
-  selected,
-  onChange,
+export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   index,
-  isEditing,
-  onEdit,
-  onCancelEdit,
-  isSavedCard = false,
-  shopperSavedPayment,
-  shopperId,
-  isSaved,
-  onSaveTempCard,
+  paymentOption,
 }) => {
-  const isSelected = selected ? "selected" : "";
+  const [paymentMethods, setPaymentMethods] = useAtom(paymentMethodsAtom);
+
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+
+  const { paymentMethod, paymentAddress } = paymentOption;
+
+  const isSelected = paymentOption.isSelected ? "selected" : "";
   const isFirst = index === 0 ? "start" : "";
-  const showCardImage = shopperSavedPayment;
+  const isCard =
+    paymentMethod.accountName !== PAYPAL.name &&
+    paymentMethod.accountName !== SEZZLE.name;
+
+  const onChangePaymentMethod = () => {
+    // set the selected
+    const updatedPaymentOptions = paymentMethods.map((method) =>
+      method.paymentMethod.id === paymentOption.paymentMethod.id
+        ? {
+            ...method,
+            isSelected: true,
+            isVisible: true,
+          }
+        : {
+            ...method,
+            isSelected: false,
+          }
+    );
+
+    setPaymentMethods(updatedPaymentOptions);
+  };
 
   return (
     <div
       className={`payment-option-container ${isSelected} ${isFirst}`}
-      onClick={onChange}
+      onClick={onChangePaymentMethod}
     >
       <div className="payment-option-select-container">
         <div className="payment-option-sub-container">
           <RadioButton
-            id={shopperSavedPayment?.id?.toString() || name}
-            onChange={onChange}
-            checked={selected}
+            id={paymentMethod.accountName}
+            onChange={onChangePaymentMethod}
+            checked={paymentOption.isSelected}
           />
-          {!showCardImage && <div className="payment-option-name">{name}</div>}
-          {showCardImage && !isEditing && (
+          {!isCard && (
+            <div className="payment-option-name">
+              {paymentMethod.accountName}
+            </div>
+          )}
+          {isCard && (
             <div className="payment-option-container__card">
               <div className="payment-option-container__card-details">
                 <img
                   className="payment-option-container__card-img"
-                  src={image}
-                  alt={name}
+                  src={paymentMethod.imageUrl}
+                  alt={paymentMethod.accountName}
                 />
-                <div>*{shopperSavedPayment.cardMask}</div>
+                <div>{paymentMethod.number}</div>
               </div>
               <div className="payment-option-container__card-expiration">
-                Expires {shopperSavedPayment.expirationDate}
+                Expires {paymentMethod.expires}
               </div>
             </div>
           )}
         </div>
 
-        {!showCardImage && <img src={image} alt={name} />}
-        {showCardImage ? (
+        {!isCard && (
+          <img src={paymentMethod.imageUrl} alt={paymentMethod.accountName} />
+        )}
+        {isCard ? (
           <div className="payment-option-container__card-cvv-container">
-            {isSelected && !isEditing && (
+            {isSelected && (
               <div className="payment-option-container__card-cvv">
                 <div>CVV</div>
                 <input className="payment-option-container__card-cvv-form" />
               </div>
             )}
-            {!isEditing && (
+            {isSelected && isCard && (
               <div
                 className="payment-option-container__card-cvv-edit"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onEdit();
+                  setIsEditing(!isEditing);
                 }}
               >
                 edit
@@ -97,15 +105,13 @@ export const PaymentOption: React.FC<
         ) : null}
       </div>
 
-      {(isEditing || name === "New Card") && (
+      {isEditing && (
         <CardInformation
-          shopperId={shopperId}
-          initialData={{
-            ...shopperSavedPayment,
+          paymentMethod={paymentMethod}
+          address={paymentAddress}
+          onCancel={() => {
+            setIsEditing(false);
           }}
-          showSavedCard={isSaved}
-          onSaveTempCard={onSaveTempCard}
-          onCancel={onCancelEdit}
         />
       )}
     </div>

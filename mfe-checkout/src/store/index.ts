@@ -1,14 +1,48 @@
 import { atom, createStore } from "jotai";
-import { Order } from "../interfaces/Order";
+import PaypalIcon from "../assets/images/PayPal.png";
+import SezzleIcon from "../assets/images/Sezzle.png";
 import { Address } from "../interfaces/Address";
+import { Order } from "../interfaces/Order";
+import { IPaymentMethod } from "../interfaces/PaymentMethod";
+import { PAYPAL, SEZZLE } from "../payment-method/PaymentType";
+import { createPaymentMethod } from "../utils/helpers/GeneratePaymentMethod";
+
+export interface IPaymentOption {
+  paymentMethod: IPaymentMethod;
+  paymentAddress: Address;
+  isVisible: boolean;
+  isSelected: boolean;
+}
+
+const initialPaymentMethods: IPaymentOption[] = [
+  {
+    paymentMethod: createPaymentMethod({
+      accountName: PAYPAL.name,
+      typeID: PAYPAL.typeId,
+      imageUrl: PaypalIcon,
+      id: -1001,
+    }),
+    paymentAddress: {} as Address,
+    isSelected: false,
+    isVisible: true,
+  },
+  {
+    paymentMethod: createPaymentMethod({
+      accountName: SEZZLE.name,
+      typeID: SEZZLE.typeId,
+      imageUrl: SezzleIcon,
+      id: -1002,
+    }),
+    paymentAddress: {} as Address,
+    isSelected: false,
+    isVisible: true,
+  },
+];
 
 export const orderAtom = atom<Order>();
 
 export const addressAtom = atom<Address[]>([]);
 
-export const cardsAtom = atom([]);
+export const paymentMethodsAtom = atom<IPaymentOption[]>(initialPaymentMethods);
 
 export const OrderStore = createStore();
-
-
-

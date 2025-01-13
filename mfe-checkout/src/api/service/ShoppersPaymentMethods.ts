@@ -1,5 +1,10 @@
 import { IPaymentMethod } from "../../interfaces/PaymentMethod";
-import {GET_API_KEY, GET_API_ENDPOINT_BASE_URL_ONLY, GET_TOKEN_SERVICE} from "../../utils/urlResolver";
+import { API_KEY } from "../../utils/ApiConstants";
+import {
+  GET_API_KEY,
+  GET_API_ENDPOINT_BASE_URL_ONLY,
+  GET_TOKEN_SERVICE,
+} from "../../utils/urlResolver";
 import axiosInstance from "../axios";
 
 const shopperWalletApiEndpoint = (id: string) =>
@@ -7,7 +12,7 @@ const shopperWalletApiEndpoint = (id: string) =>
 
 export const fetchShoppersPaymentMethods = async (
   shopperId: string
-): Promise<any> => {
+): Promise<IPaymentMethod[]> => {
   try {
     const walletResponse = await axiosInstance(
       shopperWalletApiEndpoint(shopperId)
@@ -83,7 +88,9 @@ export const updateShopperDetails = async (
 
 export const generateCardToken = async (ccNumber: string) => {
   try {
-    const response = await axiosInstance(`${GET_TOKEN_SERVICE()}?ccNum${ccNumber}`).get("");
+    const response = await axiosInstance(
+      `${GET_TOKEN_SERVICE()}?ccNum${ccNumber}`
+    ).get("");
     return response;
   } catch (error) {
     console.error("Unable to update payment details", error);
