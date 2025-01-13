@@ -203,7 +203,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             {isLoading ? (
                 <div>Processing Order...</div>
             ) : (
-                <Button label="Place Order" type="primary" onClick={handlePlaceOrder} />
+                <Button label="Place Order" btnType="primary" onClick={handlePlaceOrder} />
             )}
         </div>
     );

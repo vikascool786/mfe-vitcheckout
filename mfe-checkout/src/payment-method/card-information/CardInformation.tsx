@@ -60,7 +60,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
     paymentMethod: IPaymentMethod;
     address: Address;
   }>({
-    paymentMethod,
+    paymentMethod: { ...paymentMethod, cvv: "" },
     address,
   });
   const cardInformationRef = useRef(cardInformation.paymentMethod);
@@ -258,7 +258,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
       <FormField
         label="CVV"
         required
-        value={cardInformation.paymentMethod.cvv || ""}
+        value={cardInformation.paymentMethod.cvv}
         type="password"
         onChange={(e) => handleInputChange("cvv", e.target.value)}
       />

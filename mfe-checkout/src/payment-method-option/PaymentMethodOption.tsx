@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { RadioButton } from "../component/RadioButton/RadioButton";
 import { CardInformation } from "../payment-method/card-information/CardInformation";
 import { PAYPAL, SEZZLE } from "../payment-method/PaymentType";
-import { IPaymentOption, paymentMethodsAtom } from "../store";
+import { IPaymentOption, orderAtom, paymentMethodsAtom } from "../store";
 import "./PaymentMethodOption.scss";
 
 export interface IPaymentOptionProps {
@@ -19,6 +19,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   paymentOption,
   removeCard,
 }) => {
+  const [order] = useAtom(orderAtom);
   const { paymentMethod, paymentAddress } = paymentOption;
   const [paymentMethods, setPaymentMethods] = useAtom(paymentMethodsAtom);
 
@@ -93,7 +94,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                 <input
                   onClick={() => setIsEditing(!isEditing)}
                   className="payment-option-container__card-cvv-form"
-                  value={paymentMethod.cvv === 1 ? "***" : paymentMethod.cvv}
+                  value={order?.paymentMethod.id ? "***" : ""}
                 />
               </div>
             )}
