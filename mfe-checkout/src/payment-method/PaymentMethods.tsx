@@ -107,34 +107,42 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
   }, []);
 
   const toggleAccordion = () => {
+    // Find the selected payment method
+    const selectedPaymentMethod = paymentMethods.find(
+      (method) => method.isSelected
+    );
+  
+    // Filter out the selected payment method from the rest of the list
+    const otherPaymentMethods = paymentMethods.filter(
+      (method) => !method.isSelected
+    );
+  
     if (isExpanded) {
       // Collapse: Only show preferred, PayPal, and Sezzle
-      const updatedPaymentMethods = paymentMethods.map((paymentMethod) => {
-        return {
-          ...paymentMethod,
-          isVisible:
-            paymentMethod.paymentMethod.preferred ||
-            ["Paypal", "Sezzle"].includes(
-              paymentMethod.paymentMethod.accountName
-            ),
-        };
-      });
-
-      setTimeout(() => {
-        setPaymentMethods([...updatedPaymentMethods]);
-      }, 300);
-      console.log("isExpanded", updatedPaymentMethods);
+      const updatedPaymentMethods = otherPaymentMethods.map((paymentMethod) => ({
+        ...paymentMethod,
+        isVisible:
+          paymentMethod.paymentMethod.preferred ||
+          ["Paypal", "Sezzle"].includes(paymentMethod.paymentMethod.accountName),
+      }));
+  
+      setPaymentMethods([
+        ...(selectedPaymentMethod ? [selectedPaymentMethod] : []),
+        ...updatedPaymentMethods,
+      ]);
     } else {
       // Expand: Show all items
-      const updatedPaymentMethods = paymentMethods.map((paymentMethod) => ({
+      const updatedPaymentMethods = otherPaymentMethods.map((paymentMethod) => ({
         ...paymentMethod,
         isVisible: true,
       }));
-
-      setPaymentMethods([...updatedPaymentMethods]);
-      console.log("Show all items", updatedPaymentMethods);
+  
+      setPaymentMethods([
+        ...(selectedPaymentMethod ? [selectedPaymentMethod] : []),
+        ...updatedPaymentMethods,
+      ]);
     }
-
+  
     // Toggle the state
     setIsExpanded(!isExpanded);
   };
