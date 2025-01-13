@@ -7,15 +7,14 @@ import { Back } from "../assets/svgs/Back";
 import { FormHeading } from "../component/Form/Heading/FormHeading";
 import { Address } from "../interfaces/Address";
 import { PaymentOptionClick2Pay } from "../payment-method-click2pay/PaymentMethodOptionClick2Pay";
-import {
-  PaymentOption
-} from "../payment-method-option/PaymentMethodOption";
+import { PaymentOption } from "../payment-method-option/PaymentMethodOption";
 import { IPaymentOption, orderAtom, paymentMethodsAtom } from "../store";
 import { TextUpdates } from "../text-updates/TextUpdates";
 import { createPaymentMethod } from "../utils/helpers/GeneratePaymentMethod";
 import { SHOPPER_WALLET_ADDRESS, WALLET_DATA } from "../utils/MOCKS";
 import "./PaymentMethods.scss";
 import { CLICK2PAY, thirdPartyPaymentFlagList } from "./PaymentType";
+import { useShopperEWalletAddresses } from "../api/service/ShopperEWallet";
 
 interface IPaymentMethod {
   shopperId: string;
@@ -34,8 +33,7 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
 }) => {
   const [paymentMethods, setPaymentMethods] = useAtom(paymentMethodsAtom);
   const [isExpanded, setIsExpanded] = useState(false);
-  // const { addresses } = useShopperEWalletAddresses(shopperId || "");
-  const addresses = SHOPPER_WALLET_ADDRESS;
+  const { addresses } = useShopperEWalletAddresses(shopperId || "");
 
   const [showClick2Pay, setShowClick2Pay] = useState(false);
 
@@ -108,16 +106,68 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
     );
   }, []);
 
-  // Toggle function for expanding or collapsing the card list
   const toggleAccordion = () => {
+    // Find the selected payment method
+    const selectedPaymentMethod = paymentMethods.find(
+      (method) => method.isSelected
+    );
+
+    // Filter out the selected payment method from the rest of the list
+    const otherPaymentMethods = paymentMethods.filter(
+      (method) => !method.isSelected
+    );
+
+    if (isExpanded) {
+      // Collapse: Only show preferred, PayPal, and Sezzle
+      const updatedPaymentMethods = otherPaymentMethods.map(
+        (paymentMethod) => ({
+          ...paymentMethod,
+          isVisible:
+            paymentMethod.paymentMethod.preferred ||
+            ["Paypal", "Sezzle"].includes(paymentMethod.paymentMethod.name),
+        })
+      );
+
+      setPaymentMethods([
+        ...(selectedPaymentMethod ? [selectedPaymentMethod] : []),
+        ...updatedPaymentMethods,
+      ]);
+    } else {
+      // Expand: Show all items
+      const updatedPaymentMethods = otherPaymentMethods.map(
+        (paymentMethod) => ({
+          ...paymentMethod,
+          isVisible: true,
+        })
+      );
+
+      setPaymentMethods([
+        ...(selectedPaymentMethod ? [selectedPaymentMethod] : []),
+        ...updatedPaymentMethods,
+      ]);
+    }
+
+    // Toggle the state
     setIsExpanded(!isExpanded);
   };
 
   const onAddNewCard = async () => {
+    // Check if a card with id 0 is already present
+    const hasTemporaryCard = paymentMethods.some(
+      (paymentOption) => paymentOption.paymentMethod.id === 0
+    );
+
+    if (hasTemporaryCard) {
+      // If a card with id 0 already exists, do not update payment methods
+      console.warn("Temporary card already exists. Cannot add a new one.");
+      return;
+    }
+
     // Create the new card
     const newCard = createPaymentMethod({
-      accountName: "New Card",
+      accountName: "",
       imageUrl: CardOptions,
+      id: 0,
       typeID: 9,
     });
 
@@ -136,6 +186,8 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
       },
     ]);
   };
+
+  console.log(paymentMethods);
 
   return (
     <div className="pm-main-container">
@@ -157,6 +209,7 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
                 key={index}
                 paymentOption={paymentOption}
                 index={index}
+                shopperId={shopperId}
               />
             ))}
           {showClick2Pay && (

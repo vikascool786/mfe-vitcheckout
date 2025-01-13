@@ -8,18 +8,19 @@ import "./PaymentMethodOption.scss";
 
 export interface IPaymentOptionProps {
   paymentOption: IPaymentOption;
+  shopperId: string;
   index: number;
 }
 
 export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   index,
+  shopperId,
   paymentOption,
 }) => {
+  const { paymentMethod, paymentAddress } = paymentOption;
   const [paymentMethods, setPaymentMethods] = useAtom(paymentMethodsAtom);
 
-  const [isEditing, setIsEditing] = useState<boolean>(false);
-
-  const { paymentMethod, paymentAddress } = paymentOption;
+  const [isEditing, setIsEditing] = useState<boolean>(paymentMethod.id === 0);
 
   const isSelected = paymentOption.isSelected ? "selected" : "";
   const isFirst = index === 0 ? "start" : "";
@@ -62,7 +63,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
               {paymentMethod.accountName}
             </div>
           )}
-          {isCard && (
+          {!isEditing && isCard && (
             <div className="payment-option-container__card">
               <div className="payment-option-container__card-details">
                 <img
@@ -82,12 +83,18 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
         {!isCard && (
           <img src={paymentMethod.imageUrl} alt={paymentMethod.accountName} />
         )}
-        {isCard ? (
+        {!isEditing && isCard ? (
           <div className="payment-option-container__card-cvv-container">
             {isSelected && (
               <div className="payment-option-container__card-cvv">
                 <div>CVV</div>
-                <input className="payment-option-container__card-cvv-form" />
+                <input
+                  onClick={() => setIsEditing(!isEditing)}
+                  className="payment-option-container__card-cvv-form"
+                  value={paymentMethod.cvv === 1 ? "" : paymentMethod.cvv
+                    
+                  }
+                />
               </div>
             )}
             {isSelected && isCard && (
@@ -109,6 +116,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
         <CardInformation
           paymentMethod={paymentMethod}
           address={paymentAddress}
+          shopperId={shopperId}
           onCancel={() => {
             setIsEditing(false);
           }}

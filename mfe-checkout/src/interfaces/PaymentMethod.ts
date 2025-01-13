@@ -1,3 +1,5 @@
+import { Address } from "./Address";
+
 export interface IPaymentMethod {
   id: number;
   number: string;
