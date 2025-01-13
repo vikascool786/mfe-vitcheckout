@@ -9,13 +9,14 @@ import Click2PaySignOut from "./Click2PaySignOut";
 const Click2PayCardLoader = (function(){
     let clickToPayCardList;
     const CUSTOM_ATTR_SELECTED_CARD = "data-selected-card";
-    const existingC2PContainer = '.js-c2p-existing-user';
+    const c2pContainer = '.js-c2p-container';
     const srcCardListElement = 'src-card-list';
     const click2PayPaymentData = '.js-c2p-payment-data';
     const accessCardsContainer = '.js-c2p-access-cards-msg';
+    const saveCardContainer = '.js-c2p-save-card-msg';
 
     function loadSRCCardsOnPage(cardList, c2pInstance, showAddNewCard, deselectCard, showSignout){
-        const srcCardList = document.querySelector(existingC2PContainer).querySelector(srcCardListElement);
+        const srcCardList = document.querySelector(c2pContainer).querySelector(srcCardListElement);
         clickToPayCardList = Array(cardList);
         srcCardList.loadCards(cardList);
         if(deselectCard){
@@ -28,12 +29,13 @@ const Click2PayCardLoader = (function(){
             Click2PayElementUtil.showCardListAddNewC2PCard();
         }
         hideAccessCardsMessage();
+        hideSaveCardMessage();
         Click2PayEventUtil.triggerClick2PaySelectedCardEvent();
         addCardListEventListeners(c2pInstance);
     }
 
     function addCardListEventListeners(c2pInstance) {
-        const srcCardList = document.querySelector(existingC2PContainer).querySelector(srcCardListElement);
+        const srcCardList = document.querySelector(c2pContainer).querySelector(srcCardListElement);
         const paymentData = document.querySelector(click2PayPaymentData);
         if(srcCardList){
             srcCardList.addEventListener('clickSignOutLink', event => {
@@ -56,6 +58,13 @@ const Click2PayCardLoader = (function(){
         const accessCards = document.querySelector(accessCardsContainer);
         if(accessCards){
             accessCards.style.display = "none";
+        }
+    }
+
+    function hideSaveCardMessage(){
+        const saveCard = document.querySelector(saveCardContainer);
+        if(saveCard){
+            saveCard.style.display = "none";
         }
     }
 

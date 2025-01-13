@@ -19,14 +19,14 @@ export const ApplyCashback: React.FC<IApplyCashbackContainer> = ({
     // Determine if cashback is being applied or removed
 
     if (order) {
-      const isCashbackApplied = !order?.userOptions.applyEWallet;
+      const isCashbackApplied = !order?.userOptions.applyCashback;
 
       changeOrder(
         generateChangeStoreResponse({
           ...order,
           userOptions: {
             ...order.userOptions,
-            applyEWallet: isCashbackApplied,
+            applyCashback: isCashbackApplied,
           },
         }),
         order.id
@@ -50,7 +50,7 @@ export const ApplyCashback: React.FC<IApplyCashbackContainer> = ({
         <input
           className="checkbox"
           type="checkbox"
-          checked={order?.userOptions?.applyEWallet}
+          checked={order?.userOptions?.applyCashback}
           onChange={handleAddApplyCashback}
         />
         {`$${cashbackData.cashbackAvail} - Use VIFT Cashback on this order`}

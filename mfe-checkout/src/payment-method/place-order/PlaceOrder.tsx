@@ -17,6 +17,10 @@ import {
 } from "../../utils/urlResolver";
 import {Order} from "../../interfaces/Order";
 import {generateOrderTrackingId} from "../../utils/helpers/GenerateOrderTrackingId";
+import {Address} from "../../interfaces/Address";
+import {useAtom} from "jotai/index";
+import {siteApiData} from "../../checkout/siteAtom";
+import {fetchSezzleUrl} from "../../api/ajaxaction/Sezzle";
 
 interface IPlaceOrder {
     confirmOrder: () => void;
@@ -42,6 +46,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
 }) => {
     const [isLoading, setIsLoading] = useState(false);
     const trackingData = new Map<string, string>();
+    const [siteData] = useAtom(siteApiData(siteId));
 
     const { data: paypalToken, error } = useApi<{ tokenId: string }>(
         PAYPAL_TOKEN_URL(shopperId),
@@ -59,6 +64,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                     break;
                 case SEZZLE.typeId:
                     console.log("place order with Sezzle");
+                    await handleSezzleOrder();
                     break;
                 case PAYPAL.typeId:
                     // fetch paypal site flags
@@ -121,6 +127,9 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
 
     const handleClick2PayOrderUpdate = (): Promise<void> => {
         return new Promise((resolve, reject) => {
+            let c2pBillingAddress: Address = {
+                first: "", last: "", address1: "", city: "", state: "", zip: "",
+            };
             const digitalCardId = Click2PayPlaceOrder.getDigitalCardId();
             const c2pPlaceOrderPromise = Click2PayPlaceOrder.handleCheckoutWithC2P(
                 // @ts-ignore
@@ -153,13 +162,14 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                         type: paymentMethodResponse.typeID,
                     };
 
+                    c2pBillingAddress = response.data.billing;
+                    c2pBillingAddress.country = siteData.siteCountryCode;
+
                     return addTempPaymentMethod(shopperId, walletData);
                 })
                 .then((response: any) => {
                     const paymentId = response.data.id;
-                    console.log("update order, tracking data: " + JSON.stringify(trackingData));
                     if (order) {
-                        console.log("c2p updating order...");
                         return buildOrder(
                             generateChangeStoreResponse({
                                 ...order,
@@ -167,6 +177,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                                     ...order.paymentMethod,
                                     id: paymentId,
                                 },
+                                billingAddress: c2pBillingAddress,
                                 userOptions: {
                                     ...order.userOptions,
                                     trackingID: generateOrderTrackingId(trackingData)
@@ -184,6 +195,17 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                     reject(error); // Reject the outer promise
                 });
         });
+    };
+
+    const handleSezzleOrder = async () => {
+        //const total = order ? order.totals.price.toString() : "0";
+        const total = "33.44"; //TODO update when totals come back correctly again
+        const sezzleResponse = await fetchSezzleUrl(total);
+        if (typeof sezzleResponse.url != 'undefined') {
+            window.location = sezzleResponse.url;
+        } else{
+            throw new Error("Error connecting with Sezzle");
+        }
     };
 
     return (

@@ -16,7 +16,12 @@ export interface ChangeOrder {
 }
 
 export interface Billing {
-  id: number;
+  id?: number;
+  address1?: string;
+  city?: string;
+  state?: string;
+  zip?: string;
+  country?: string;
 }
 
 export interface Shipping {

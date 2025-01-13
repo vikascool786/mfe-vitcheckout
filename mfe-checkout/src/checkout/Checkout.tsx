@@ -8,14 +8,13 @@ import { AddressList } from "../address-list/AddressList";
 import { AddressDisplay } from "../address-verification/AddressDisplay";
 import { AddressVerificationContainer } from "../address-verification/AddressVerificationContainer";
 import { fetchStatesAndCountries } from "../api/service/CountriesAndStates";
-import { buildOrder } from "../api/service/Order";
 import {
   useCreateShopperAddressBookEntry,
   useUpdateShopperAddressBookEntry,
   useUpdateTextUpdatesForPhone,
 } from "../api/service/ShopperAddressBook";
-import { fetchSiteData } from "../api/service/Site";
 import { Back } from "../assets/svgs/Back";
+import { fetchSiteData } from "../api/service/Site";
 import { Button } from "../component/Button/Button";
 import { Checkbox } from "../component/Form/Checkbox/Checkbox";
 import { DropdownField } from "../component/Form/Field/DropdownField";
@@ -25,8 +24,11 @@ import { Address } from "../interfaces/Address";
 import { AddressHandler } from "../interfaces/AddressHandler";
 import { DropdownOption } from "../interfaces/DropdownOption";
 import { addressAtom, orderAtom } from "../store";
-import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import "./Checkout.scss";
+import { buildOrder } from "../api/service/Order";
+import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
+import { siteApiData } from "./siteAtom";
+import { Site } from "../interfaces/Site";
 
 const defaultAddress: Address = {
   id: 0,
@@ -43,16 +45,15 @@ const defaultAddress: Address = {
 
 interface ICheckout {
   shopperId: string;
-  cartId: string;
+  siteId: string;
   addresses: any;
 }
 
 export const Checkout: React.FC<ICheckout> = ({
   shopperId,
-  cartId,
+  siteId,
   addresses,
 }) => {
-  const siteId = "260"; /*todo - need to update with dynamic siteId*/
   // State to manage whether the form is expanded or collapsed
 
   const { createShopperAddressBookEntry } = useCreateShopperAddressBookEntry();
@@ -70,6 +71,7 @@ export const Checkout: React.FC<ICheckout> = ({
   );
 
   const [order, setOrder] = useAtom(orderAtom);
+  const [siteData] = useAtom(siteApiData(siteId));
 
   const buildShoppersAddressBookFromResponse = (
     addressBookResponse: Address[]
@@ -105,6 +107,7 @@ export const Checkout: React.FC<ICheckout> = ({
     setShowShipAddressForm(filteredAddresses.length < 1);
     return filteredAddresses;
   };
+
 
   const [familyNameFirst, setFamilyNameFirst] = useState(false);
   const [isUpdateEnabled, setIsUpdateEnabled] = useState(false); // New state to track edit mode
@@ -223,6 +226,7 @@ export const Checkout: React.FC<ICheckout> = ({
       }
     }
   };
+
   const handleEditClick = () => {
     setShowAVS(false);
     setShowShipAddressForm(true);
@@ -247,7 +251,7 @@ export const Checkout: React.FC<ICheckout> = ({
     setShowShipAddressForm(!showShipAddressForm);
     setShippingAddress(
       shopperAddressBook.find((address) => address.isPrimary === 1) ||
-        shippingAddress
+      shippingAddress
     );
     setIsExpanded(!isExpanded);
   };
@@ -294,7 +298,7 @@ export const Checkout: React.FC<ICheckout> = ({
 
     setOrder(newOrder.response.success.data);
   };
-
+  
   const initialValues = {
     first: shippingAddress.first || "",
     last: shippingAddress.last || "",
