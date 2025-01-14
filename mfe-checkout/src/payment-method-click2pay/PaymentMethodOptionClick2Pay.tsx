@@ -335,17 +335,17 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({ pcid, order 
                                         secure checkout.
                                     </div>
                                 </div>
-                                <CardInformation showBillingSection={false} shopperId="" initialData={{
+                                {/* <CardInformation showBillingSection={false} shopperId="" initialData={{
                                     ...shopperSavedPayment,
-                                }}/>
+                                }}/> */}
                             </div>
                             <div className="form-footer form-footer__dual-button">
                                 <Button
                                     label="Cancel"
-                                    type="secondary"
+                                    btnType="secondary"
                                     onClick={closeAddCardOverlay}
                                 />
-                                <Button label="Save" type="primary"
+                                <Button label="Save" btnType="primary"
                                         onClick={saveNewCard}/>
                             </div>
                         </div>

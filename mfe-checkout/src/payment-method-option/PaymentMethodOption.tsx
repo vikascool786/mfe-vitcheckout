@@ -94,7 +94,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                 <input
                   onClick={() => setIsEditing(!isEditing)}
                   className="payment-option-container__card-cvv-form"
-                  value={order?.paymentMethod.id ? "***" : ""}
+                  value={order?.paymentMethod?.id ? "***" : ""}
                 />
               </div>
             )}
