@@ -24,12 +24,13 @@ export const TextUpdates = () => {
     phone: string;
     boxChecked: boolean;
   }) => {
+    console.log(values);
     changeOrder(
       {
         ...order,
         userOptions: {
           ...order.userOptions,
-          smsPhone: values.phone,
+          smsPhone: !values.boxChecked ? values.phone : "",
         },
       } as ChangeOrder,
       order.id
@@ -71,7 +72,7 @@ export const TextUpdates = () => {
                 className="checkbox"
                 as="input"
                 disabled={!values.phone.match(/^\d{10}$/)}
-                onClick={() => submitForm()}
+                onClick={() => handleSendOrderUpdates(values)}
               />
               <span className="shipping-text">Send order updates</span>
             </div>
