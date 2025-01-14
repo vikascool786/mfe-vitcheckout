@@ -168,7 +168,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                     return addTempPaymentMethod(shopperId, walletData);
                 })
                 .then((response: any) => {
-                    const paymentId = response.data.id;
+                    const paymentId = response.id;
                     if (order) {
                         return buildOrder(
                             generateChangeStoreResponse({

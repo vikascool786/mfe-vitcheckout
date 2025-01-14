@@ -342,10 +342,10 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({ pcid, order 
                             <div className="form-footer form-footer__dual-button">
                                 <Button
                                     label="Cancel"
-                                    type="secondary"
+                                    btnType="secondary"
                                     onClick={closeAddCardOverlay}
                                 />
-                                <Button label="Save" type="primary"
+                                <Button label="Save" btnType="primary"
                                         onClick={saveNewCard}/>
                             </div>
                         </div>
