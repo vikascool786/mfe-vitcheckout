@@ -147,12 +147,6 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
     }
   };
 
-  if (order?.stores) {
-    Object.entries(order?.stores).map(([key, store], index) => {
-      console.log(key, store);
-    });
-  }
-
   const storesTotals =
     order?.stores &&
     Object.entries(order?.stores).map(([key, store], index) => {

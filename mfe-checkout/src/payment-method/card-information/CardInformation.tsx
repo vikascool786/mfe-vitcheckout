@@ -14,7 +14,12 @@ import { DropdownField } from "../../component/Form/Field/DropdownField";
 import { FormField } from "../../component/Form/Field/FormField";
 import { Address } from "../../interfaces/Address";
 import { IPaymentMethod } from "../../interfaces/PaymentMethod";
-import { addressAtom, orderAtom, paymentMethodsAtom } from "../../store";
+import {
+  addressAtom,
+  IPaymentOption,
+  orderAtom,
+  paymentMethodsAtom,
+} from "../../store";
 import { generateChangeStoreResponse } from "../../utils/helpers/GenerateChangeStoreResponse";
 import "./CardInformation.scss";
 import { on } from "events";
@@ -134,8 +139,6 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
 
         const response = await addShoppersPaymentMethod(shopperId, requestData);
 
-        console.log("On ADD card", response.at(-1));
-
         const updatedPaymentMethods = [
           ...paymentMethods,
           {
@@ -151,23 +154,26 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           },
         ].filter((pm) => pm.paymentMethod?.id !== 0);
 
-        setPaymentMethods(updatedPaymentMethods);
+        setTimeout(
+          () => setPaymentMethods(updatedPaymentMethods as IPaymentOption[]),
+          300
+        );
+
         onCancel();
 
         if (order && paymentMethod) {
           const updatedOrder = generateChangeStoreResponse({
             ...order,
             paymentMethod: {
-              ...updatedPaymentMethod,
-              cvv: requestData.cvv,
+              ...order.paymentMethod,
+              id: response.at(-1)?.id as number,
             },
           });
           const orderResponse = await buildOrder(updatedOrder);
           setOrder(orderResponse.response.success.data);
         }
-
-        onCancel();
       } else if (type === "TEMP") {
+        onCancel();
         const response = await addTempPaymentMethod(shopperId, requestData);
 
         if (response) {
@@ -188,7 +194,6 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
             },
           ].filter((pm) => pm.paymentMethod.id !== 0);
 
-          console.log(order, response.id);
           if (order && response.id) {
             const updatedOrder = generateChangeStoreResponse({
               ...order,
@@ -200,13 +205,34 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
             const orderResponse = await buildOrder(updatedOrder);
             setOrder(orderResponse.response.success.data);
           }
-          setPaymentMethods(updatedPaymentMethods);
-          onCancel();
+
+          setTimeout(() => setPaymentMethods(updatedPaymentMethods));
         }
       }
     } catch (error) {
       console.error("Error saving card information:", error);
     }
+  };
+
+  const handleCancelNewCard = () => {
+    const isCancelWhileAddingNewCard = cardInformation.paymentMethod.id === 0;
+
+    if (!isCancelWhileAddingNewCard) return;
+
+    setTimeout(() => {
+      setPaymentMethods(
+        paymentMethods
+          .filter((paymentMethod) => paymentMethod.paymentMethod.id !== 0)
+          .map((paymentOption) =>
+            paymentOption.paymentMethod.preferred
+              ? {
+                  ...paymentOption,
+                  isSelected: true,
+                }
+              : paymentOption
+          )
+      );
+    }, 100);
   };
 
   const getYears = (startYear: number, endYear: number) =>
@@ -217,8 +243,6 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
 
   const currentYear = new Date().getFullYear();
   const years = getYears(currentYear, currentYear + 10);
-
-  console.log(cardInformation);
 
   return (
     <div className="card-information-container">
@@ -300,7 +324,14 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
         </div>
       )}
       <div className="button-container">
-        <Button btnType="secondary" label="Cancel" onClick={onCancel} />
+        <Button
+          btnType="secondary"
+          label="Cancel"
+          onClick={() => {
+            onCancel();
+            handleCancelNewCard();
+          }}
+        />
         <Button
           btnType="primary"
           label={isCardSavedInWallet ? "Update" : "Save"}

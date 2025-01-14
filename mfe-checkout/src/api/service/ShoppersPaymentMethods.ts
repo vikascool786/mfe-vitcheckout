@@ -113,3 +113,19 @@ export const generateCardExistingToken = async (
     console.error("Unable to update payment details", error);
   }
 };
+
+export const generatePayPalTransactionDetails = async (
+  shopperId: string,
+  token: string,
+  hideShipping: boolean,
+  isRecurring: boolean
+) => {
+  try {
+    const response = await axiosInstance(
+      `https://devapi2.shop.com/shoppingcart-checkouts/v1/Checkout/Paypal/${shopperId}/Token/${token}?api_key=${GET_API_KEY()}&hideShipping=${hideShipping}&isRecurring=${isRecurring}`
+    ).get("");
+    return response.data;
+  } catch (error) {
+    console.error(error);
+  }
+};

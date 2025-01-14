@@ -15,7 +15,10 @@ import { SHOPPER_WALLET_ADDRESS, WALLET_DATA } from "../utils/MOCKS";
 import "./PaymentMethods.scss";
 import { CLICK2PAY, PAYPAL, thirdPartyPaymentFlagList } from "./PaymentType";
 import { useShopperEWalletAddresses } from "../api/service/ShopperEWallet";
-import { fetchShoppersPaymentMethods } from "../api/service/ShoppersPaymentMethods";
+import {
+  fetchShoppersPaymentMethods,
+  generatePayPalTransactionDetails,
+} from "../api/service/ShoppersPaymentMethods";
 
 interface IPaymentMethod {
   shopperId: string;
@@ -98,6 +101,13 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
         let updatedPaymentOptions = [...paymentOptions, ...paymentMethods];
 
         if (isPaypalOrderSuccess) {
+          const paypalDetails = await generatePayPalTransactionDetails(
+            shopperId,
+            token,
+            true,
+            false
+          );
+
           updatedPaymentOptions = updatedPaymentOptions.map((paymentOption) => {
             if (paymentOption.paymentMethod.typeID === PAYPAL.typeId) {
               return {
@@ -115,8 +125,9 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
         }
         setPaymentMethods(updatedPaymentOptions);
       } catch (error) {
-        console.log("Error while fetching payments");
         if (isPaypalOrderSuccess) {
+          await generatePayPalTransactionDetails(shopperId, token, true, false);
+
           const updatedPaymentOptions = paymentMethods.map((paymentOption) => {
             if (paymentOption.paymentMethod.typeID === PAYPAL.typeId) {
               return {

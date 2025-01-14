@@ -36,14 +36,14 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     const updatedPaymentOptions = paymentMethods.map((method) =>
       method.paymentMethod.id === paymentOption.paymentMethod.id
         ? {
-          ...method,
-          isSelected: true,
-          isVisible: true,
-        }
+            ...method,
+            isSelected: true,
+            isVisible: true,
+          }
         : {
-          ...method,
-          isSelected: false,
-        }
+            ...method,
+            isSelected: false,
+          }
     );
 
     setPaymentMethods(updatedPaymentOptions);
@@ -120,7 +120,6 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
           shopperId={shopperId}
           onCancel={() => {
             setIsEditing(false);
-            removeCard();
           }}
         />
       )}

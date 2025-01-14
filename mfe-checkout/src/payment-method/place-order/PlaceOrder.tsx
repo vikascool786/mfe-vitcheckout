@@ -60,10 +60,28 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   );
 
   const handlePlaceOrder = async () => {
+    const getQueryParams = () => {
+      const params = new URLSearchParams(window.location.search);
+      return {
+        token: params.get("token"),
+        payerId: params.get("PayerID"),
+      };
+    };
+
+    const { token, payerId } = getQueryParams();
+
+    const isPaypalOrderSuccess = token && payerId;
+
+    if (isPaypalOrderSuccess) {
+      confirmOrder();
+      return;
+    }
+
     try {
       setIsLoading(true);
       paymentTypeId =
         selectedPaymentMethod?.paymentMethod.typeID || paymentTypeId;
+
       switch (paymentTypeId) {
         case CLICK2PAY.typeId:
           await handleClick2PayOrderUpdate();
