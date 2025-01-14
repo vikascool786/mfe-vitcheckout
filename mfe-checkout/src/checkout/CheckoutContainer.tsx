@@ -128,7 +128,10 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   };
 
   const defaultAddress = useMemo(
-    () => addresses?.find((address) => address?.isPrimary === 1),
+    () =>
+      addresses
+        ?.filter((ad) => ad.hasAddress !== 0)
+        .find((address) => address?.isPrimary === 1),
     [addresses]
   );
 
@@ -161,16 +164,12 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   };
 
   useEffect(() => {
-    if (
-      !hasInitializedOrder.current &&
-      defaultAddress &&
-      order?.response?.success?.data
-    ) {
+    if (!hasInitializedOrder.current && order?.response?.success?.data) {
       hasInitializedOrder.current = true;
       updateOrder(
         order.response.success.data,
-        defaultPaymentMethod?.addressId || "",
-        defaultAddress.id
+        defaultPaymentMethod?.addressId || defaultAddress?.id,
+        defaultAddress?.id || ""
       );
     }
   }, [defaultAddress, defaultPaymentMethod, order?.response?.success?.data]);

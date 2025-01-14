@@ -31,29 +31,24 @@ export const generateChangeStoreResponse = (order: Order): ChangeOrder => {
       userSessionId: order.userOptions.userSessionId,
       gcNum: order.userOptions.gcNum,
       gcPin: order.userOptions.gcPin,
-      coupons: order.userOptions?.coupons ? order.userOptions.coupons : [] as string[],
+      coupons: order.userOptions?.coupons
+        ? order.userOptions.coupons
+        : ([] as string[]),
     },
   };
 
-    // Conditionally add properties
-    if (order.billingAddress?.id) {
-      updatedPayload.billing = { id: order.billingAddress.id };
-    } else if (order.billingAddress) {
-      updatedPayload.billing = updatedPayload.billing ?? {};
-      updatedPayload.billing.address1 = order.billingAddress.address1;
-      updatedPayload.billing.city = order.billingAddress.city;
-      updatedPayload.billing.state = order.billingAddress.state;
-      updatedPayload.billing.zip = order.billingAddress.zip;
-      updatedPayload.billing.country = order.billingAddress.country;
-    }
-  
-    if (order.shippingAddress?.id) {
-      updatedPayload.shipping = { id: order.shippingAddress.id };
-    }
-  
-    if (order.paymentMethod?.id) {
-      updatedPayload.paymentMethod = { id: order.paymentMethod.id };
-    }
-  
+  // Conditionally add properties
+  if (order.billingAddress?.id) {
+    updatedPayload.billing = { id: order.billingAddress.id };
+  }
+
+  if (order.shippingAddress?.id) {
+    updatedPayload.shipping = { id: order.shippingAddress.id };
+  }
+
+  if (order.paymentMethod?.id) {
+    updatedPayload.paymentMethod = { id: order.paymentMethod.id };
+  }
+
   return updatedPayload;
 };

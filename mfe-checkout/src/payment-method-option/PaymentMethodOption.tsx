@@ -5,6 +5,8 @@ import { CardInformation } from "../payment-method/card-information/CardInformat
 import { PAYPAL, SEZZLE } from "../payment-method/PaymentType";
 import { IPaymentOption, orderAtom, paymentMethodsAtom } from "../store";
 import "./PaymentMethodOption.scss";
+import { changeOrder } from "../api/service/Order";
+import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 
 export interface IPaymentOptionProps {
   paymentOption: IPaymentOption;
@@ -17,7 +19,6 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   index,
   shopperId,
   paymentOption,
-  removeCard,
 }) => {
   const [order] = useAtom(orderAtom);
   const { paymentMethod, paymentAddress } = paymentOption;
@@ -32,7 +33,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     paymentMethod.accountName !== SEZZLE.name;
 
   const onChangePaymentMethod = () => {
-    // set the selected
+    // Update payment methods with the selected method
     const updatedPaymentOptions = paymentMethods.map((method) =>
       method.paymentMethod.id === paymentOption.paymentMethod.id
         ? {
@@ -46,7 +47,19 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
           }
     );
 
+    // Set updated payment methods to state
     setPaymentMethods(updatedPaymentOptions);
+
+    // Trigger side effect to update order with the new payment method
+    changeOrder(
+      generateChangeStoreResponse({
+        ...order,
+        paymentMethod: {
+          id: paymentOption.paymentMethod.id,
+        },
+      }),
+      order?.id
+    );
   };
 
   return (
