@@ -2,59 +2,82 @@ import React from "react";
 import "./TextUpdates.scss";
 import { FormHeading } from "../component/Form/Heading/FormHeading";
 import { FormField } from "../component/Form/Field/FormField";
-import { Checkbox } from "../component/Form/Checkbox/Checkbox";
 import { useAtom } from "jotai";
 import { orderAtom } from "../store";
 import { changeOrder } from "../api/service/Order";
+import { Formik, Form, Field } from "formik";
+import * as Yup from "yup";
+import { ChangeOrder } from "../interfaces/ChangeOrder";
+
+// Validation schema
+const TextUpdatesSchema = Yup.object().shape({
+  phone: Yup.string()
+    .matches(/^\d{10}$/, "Phone number must be exactly 10 digits")
+    .required("Mobile Phone is required"),
+  boxChecked: Yup.boolean().oneOf([true]),
+});
 
 export const TextUpdates = () => {
   const [order, setOrder] = useAtom(orderAtom);
-  const [phone, setPhone] = React.useState<string>("");
-  const [boxChecked, setBoxChecked] = React.useState<boolean>(false);
 
-  const handleTextUpdates = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPhone(e.target.value);
-  };
-
-  const handleSendOrderUpdates = () => {
-    setBoxChecked(!boxChecked);
-    if (phone.length > 9 && order) {
-      setPhone(phone.slice(0, 10));
-      changeOrder(
-        {
-          ...order,
-          userOptions: {
-            ...order.userOptions,
-            smsPhone: phone,
-          },
+  const handleSendOrderUpdates = (values: {
+    phone: string;
+    boxChecked: boolean;
+  }) => {
+    changeOrder(
+      {
+        ...order,
+        userOptions: {
+          ...order.userOptions,
+          smsPhone: values.phone,
         },
-        order.id
-      ).then((response) => {
-        if (!response.response.errors) {
-          setOrder(response.response.success.data);
-        }
-      });
-    }
+      } as ChangeOrder,
+      order.id
+    ).then((response) => {
+      if (!response.response.errors) {
+        setOrder(response.response.success.data);
+      }
+    });
   };
+
   return (
     <div className="tm-container">
       <FormHeading title="Text Updates for this Order" />
-      <div className="tm-form-container">
-        <FormField
-          label="Mobile Phone"
-          extraLabel="10 digits"
-          required={boxChecked}
-          onChange={handleTextUpdates}
-        />
-        <div className="save-for-later">
-          <input
-            className="checkbox"
-            type="checkbox"
-            onClick={handleSendOrderUpdates}
-          />
-          <span className="shipping-text">Send order updates</span>
-        </div>
-      </div>
+      <Formik
+        initialValues={{ phone: "", boxChecked: false }}
+        validationSchema={TextUpdatesSchema}
+        onSubmit={handleSendOrderUpdates}
+      >
+        {({ errors, touched, values, submitForm }) => (
+          <Form className="tm-form-container">
+            <div>
+              <Field
+                name="phone"
+                render={({ field }: any) => (
+                  <FormField
+                    {...field}
+                    label="Mobile Phone"
+                    extraLabel="10 digits"
+                    required={values.boxChecked}
+                    errorMessage={touched.phone && errors.phone}
+                  />
+                )}
+              />
+            </div>
+            <div className="save-for-later">
+              <Field
+                name="boxChecked"
+                type="checkbox"
+                className="checkbox"
+                as="input"
+                disabled={!values.phone.match(/^\d{10}$/)}
+                onClick={() => submitForm()}
+              />
+              <span className="shipping-text">Send order updates</span>
+            </div>
+          </Form>
+        )}
+      </Formik>
       <div className="tm-rates">Message and data rates may apply.</div>
     </div>
   );

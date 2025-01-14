@@ -97,7 +97,10 @@ export const Checkout: React.FC<ICheckout> = ({
           hasPrimaryAddress = true;
           setShippingAddress(newAddress);
         }
-        filteredAddresses.push(newAddress);
+
+        if (address.hasAddress !== 0) {
+          filteredAddresses.push(newAddress);
+        }
       }
     });
 
@@ -107,7 +110,6 @@ export const Checkout: React.FC<ICheckout> = ({
     setShowShipAddressForm(filteredAddresses.length < 1);
     return filteredAddresses;
   };
-
 
   const [familyNameFirst, setFamilyNameFirst] = useState(false);
   const [isUpdateEnabled, setIsUpdateEnabled] = useState(false); // New state to track edit mode
@@ -251,7 +253,7 @@ export const Checkout: React.FC<ICheckout> = ({
     setShowShipAddressForm(!showShipAddressForm);
     setShippingAddress(
       shopperAddressBook.find((address) => address.isPrimary === 1) ||
-      shippingAddress
+        shippingAddress
     );
     setIsExpanded(!isExpanded);
   };
@@ -298,7 +300,7 @@ export const Checkout: React.FC<ICheckout> = ({
 
     setOrder(newOrder.response.success.data);
   };
-  
+
   const initialValues = {
     first: shippingAddress.first || "",
     last: shippingAddress.last || "",

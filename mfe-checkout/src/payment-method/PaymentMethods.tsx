@@ -13,8 +13,9 @@ import { TextUpdates } from "../text-updates/TextUpdates";
 import { createPaymentMethod } from "../utils/helpers/GeneratePaymentMethod";
 import { SHOPPER_WALLET_ADDRESS, WALLET_DATA } from "../utils/MOCKS";
 import "./PaymentMethods.scss";
-import { CLICK2PAY, thirdPartyPaymentFlagList } from "./PaymentType";
+import { CLICK2PAY, PAYPAL, thirdPartyPaymentFlagList } from "./PaymentType";
 import { useShopperEWalletAddresses } from "../api/service/ShopperEWallet";
+import { fetchShoppersPaymentMethods } from "../api/service/ShoppersPaymentMethods";
 
 interface IPaymentMethod {
   shopperId: string;
@@ -63,16 +64,26 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
       shopperId: string,
       addresses: Address[]
     ) => {
-      console.log(addresses);
+      const getQueryParams = () => {
+        const params = new URLSearchParams(window.location.search);
+        return {
+          token: params.get("token"),
+          payerId: params.get("PayerID"),
+        };
+      };
+
+      const { token, payerId } = getQueryParams();
+
+      const isPaypalOrderSuccess = token && payerId;
       const addressMap = new Map<string, Address>();
 
       Object.keys(addresses).map((id) =>
         addressMap.set(id, addresses[parseInt(id)] as Address)
       );
       try {
-        // const response = await fetchShoppersPaymentMethods(shopperId);
+        const response = await fetchShoppersPaymentMethods(shopperId);
         // const addressMap = addresses?.map()
-        const paymentOptions = WALLET_DATA.map(
+        const paymentOptions = response.map(
           (paymentMethod) =>
             ({
               paymentMethod,
@@ -84,9 +95,45 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
             } as IPaymentOption)
         );
 
-        setPaymentMethods([...paymentOptions, ...paymentMethods]);
+        let updatedPaymentOptions = [...paymentOptions, ...paymentMethods];
+
+        if (isPaypalOrderSuccess) {
+          updatedPaymentOptions = updatedPaymentOptions.map((paymentOption) => {
+            if (paymentOption.paymentMethod.typeID === PAYPAL.typeId) {
+              return {
+                ...paymentOption,
+                isSelected: true,
+              };
+            } else {
+              return {
+                ...paymentOption,
+                isSelected: false,
+                isVisible: paymentOption.isVisible,
+              };
+            }
+          });
+        }
+        setPaymentMethods(updatedPaymentOptions);
       } catch (error) {
         console.log("Error while fetching payments");
+        if (isPaypalOrderSuccess) {
+          const updatedPaymentOptions = paymentMethods.map((paymentOption) => {
+            if (paymentOption.paymentMethod.typeID === PAYPAL.typeId) {
+              return {
+                ...paymentOption,
+                isSelected: true,
+              };
+            } else {
+              return {
+                ...paymentOption,
+                isSelected: false,
+                isVisible: paymentOption.isVisible,
+              };
+            }
+          });
+
+          setPaymentMethods(updatedPaymentOptions);
+        }
       }
     };
 
@@ -111,38 +158,44 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
     const selectedPaymentMethod = paymentMethods.find(
       (method) => method.isSelected
     );
-  
+
     // Filter out the selected payment method from the rest of the list
     const otherPaymentMethods = paymentMethods.filter(
       (method) => !method.isSelected
     );
-  
+
     if (isExpanded) {
       // Collapse: Only show preferred, PayPal, and Sezzle
-      const updatedPaymentMethods = otherPaymentMethods.map((paymentMethod) => ({
-        ...paymentMethod,
-        isVisible:
-          paymentMethod.paymentMethod.preferred ||
-          ["Paypal", "Sezzle"].includes(paymentMethod.paymentMethod.accountName),
-      }));
-  
+      const updatedPaymentMethods = otherPaymentMethods.map(
+        (paymentMethod) => ({
+          ...paymentMethod,
+          isVisible:
+            paymentMethod.paymentMethod.preferred ||
+            ["Paypal", "Sezzle"].includes(
+              paymentMethod.paymentMethod.accountName
+            ),
+        })
+      );
+
       setPaymentMethods([
         ...(selectedPaymentMethod ? [selectedPaymentMethod] : []),
         ...updatedPaymentMethods,
       ]);
     } else {
       // Expand: Show all items
-      const updatedPaymentMethods = otherPaymentMethods.map((paymentMethod) => ({
-        ...paymentMethod,
-        isVisible: true,
-      }));
-  
+      const updatedPaymentMethods = otherPaymentMethods.map(
+        (paymentMethod) => ({
+          ...paymentMethod,
+          isVisible: true,
+        })
+      );
+
       setPaymentMethods([
         ...(selectedPaymentMethod ? [selectedPaymentMethod] : []),
         ...updatedPaymentMethods,
       ]);
     }
-  
+
     // Toggle the state
     setIsExpanded(!isExpanded);
   };
