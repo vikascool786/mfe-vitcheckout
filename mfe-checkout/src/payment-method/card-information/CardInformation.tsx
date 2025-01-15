@@ -210,9 +210,9 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           .map((paymentOption) =>
             paymentOption.paymentMethod.preferred
               ? {
-                  ...paymentOption,
-                  isSelected: true,
-                }
+                ...paymentOption,
+                isSelected: true,
+              }
               : paymentOption
           )
       );

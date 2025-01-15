@@ -42,14 +42,14 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     const updatedPaymentOptions = paymentMethods.map((method) =>
       method.paymentMethod.id === paymentOption.paymentMethod.id
         ? {
-            ...method,
-            isSelected: true,
-            isVisible: true,
-          }
+          ...method,
+          isSelected: true,
+          isVisible: true,
+        }
         : {
-            ...method,
-            isSelected: false,
-          }
+          ...method,
+          isSelected: false,
+        }
     );
 
     // Set updated payment methods to state

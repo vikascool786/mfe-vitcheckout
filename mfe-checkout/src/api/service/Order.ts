@@ -35,7 +35,7 @@ export interface Success {
   notifications: Notification[];
 }
 
-export interface Data {}
+export interface Data { }
 
 export interface MetaData {
   status: string;

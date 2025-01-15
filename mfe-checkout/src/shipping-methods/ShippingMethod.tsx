@@ -14,7 +14,7 @@ import {
   GET_API_ENDPOINT_BASE_URL_ONLY,
 } from "../utils/urlResolver";
 
-export const ShippingMethod: React.FC = ({}) => {
+export const ShippingMethod: React.FC = ({ }) => {
   const [orders, setOrder] = useAtom(orderAtom);
   if (!orders) {
     return <p>Loading shipping methods...</p>;
