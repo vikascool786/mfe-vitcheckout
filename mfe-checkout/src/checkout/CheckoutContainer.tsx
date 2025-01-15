@@ -189,6 +189,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
       </div>
   )
 
+  console.log(orderError)
   return (
     <div className="checkout-container">
       {orderData ? (
@@ -225,7 +226,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
         </>
       ) : (
         <ErrorMessage
-          errorMessage={orderError && orderError.response.errors.message}
+          errorMessage={orderError && orderError.errors.message}
         />
       )}
     </div>

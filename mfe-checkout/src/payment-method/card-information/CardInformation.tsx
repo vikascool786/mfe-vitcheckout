@@ -59,7 +59,10 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   const validationSchema = Yup.object().shape({
     accountName: Yup.string().required("Name on Card is required"),
     number: Yup.string()
-      .matches(/^[0-9]{16}$/, "Card Number must be 16 digits")
+      .matches(
+        /^(?:[0-9]{16}|[0-9]{6}\*{6}[0-9]{4})$/,
+        "Card Number must be 16 digits"
+      )
       .required("Card Number is required"),
     expMonth: Yup.number()
       .min(1, "Invalid month")
@@ -98,6 +101,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
       cvv: values.cvv,
     };
 
+    console.log("here", values, type);
     try {
       if (type === "WALLET") {
         if (values.id !== 0) {
@@ -229,6 +233,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
       initialValues={initialValues}
       validationSchema={validationSchema}
       onSubmit={(values) => {
+        console.log("Here on submit");
         handleSavecardAddress(values, isCardSavedInWallet ? "WALLET" : "TEMP");
       }}
     >
@@ -339,7 +344,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
               <Button
                 btnType="primary"
                 label={isCardSavedInWallet ? "Update" : "Save"}
-                onClick={handleSubmit}
+                onClick={() => handleSubmit()}
               />
             </div>
           </div>

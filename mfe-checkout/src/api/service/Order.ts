@@ -35,7 +35,7 @@ export interface Success {
   notifications: Notification[];
 }
 
-export interface Data { }
+export interface Data {}
 
 export interface MetaData {
   status: string;
@@ -90,7 +90,7 @@ export const changeOrder = async (
   try {
     const orderResponse = await axiosInstance(
       shopperUpdateOrderEndpoint(cartId)
-    ).put("", changeStorePayload);
+    ).post("", changeStorePayload);
     return orderResponse.data;
   } catch (error) {
     console.log("error", error);

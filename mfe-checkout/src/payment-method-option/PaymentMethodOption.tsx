@@ -33,6 +33,11 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     paymentMethod.accountName !== SEZZLE.name;
 
   const onChangePaymentMethod = () => {
+    const paypalOrSezzle = paymentMethods.find(
+      (method) =>
+        method.paymentMethod.accountName.includes("PayPal") ||
+        method.paymentMethod.accountName.includes("Sezzle")
+    );
     // Update payment methods with the selected method
     const updatedPaymentOptions = paymentMethods.map((method) =>
       method.paymentMethod.id === paymentOption.paymentMethod.id
@@ -51,15 +56,18 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     setPaymentMethods(updatedPaymentOptions);
 
     // Trigger side effect to update order with the new payment method
+    // if (paypalOrSezzle) {
     changeOrder(
       generateChangeStoreResponse({
         ...order,
         paymentMethod: {
+          ...paymentOption.paymentMethod,
           id: paymentOption.paymentMethod.id,
         },
       }),
       order?.id
     );
+    // }
   };
 
   return (
