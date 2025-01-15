@@ -1,11 +1,10 @@
 import { useAtom, useAtomValue } from "jotai";
-import { debounce } from "lodash";
 import React, { useEffect, useRef, useState } from "react";
+import * as Yup from "yup";
 import { buildOrder } from "../../api/service/Order";
 import {
   addShoppersPaymentMethod,
   addTempPaymentMethod,
-  generateCardToken,
   updateShopperDetails,
 } from "../../api/service/ShoppersPaymentMethods";
 import { AddressForm } from "../../component/AddressForm";
@@ -22,19 +21,7 @@ import {
 } from "../../store";
 import { generateChangeStoreResponse } from "../../utils/helpers/GenerateChangeStoreResponse";
 import "./CardInformation.scss";
-import { on } from "events";
-
-const DEBOUNCE_DELAY = 300;
-
-const debouncedUpdate = debounce(
-  (
-    data: Partial<IPaymentMethod>,
-    updateFunction: (data: Partial<IPaymentMethod>) => void
-  ) => {
-    updateFunction(data);
-  },
-  DEBOUNCE_DELAY
-);
+import { Form, Formik } from "formik";
 
 interface ICardInformationProps {
   paymentMethod: IPaymentMethod;
@@ -61,45 +48,42 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   const [sameShippingAddress, setSameShippingAddress] =
     useState<boolean>(false);
 
-  const [cardInformation, setCardInformation] = useState<{
-    paymentMethod: IPaymentMethod;
-    address: Address;
-  }>({
-    paymentMethod: { ...paymentMethod, cvv: "" },
-    address,
-  });
-  const cardInformationRef = useRef(cardInformation.paymentMethod);
+  const [cardAddress, setcardAddress] = useState<Address>(address);
 
-  useEffect(() => {
-    cardInformationRef.current = cardInformation.paymentMethod;
-  }, [cardInformation]);
-
-  const handleInputChange = (
-    field: keyof IPaymentMethod,
-    value: string | number
-  ) => {
-    const updatedCardInformation = {
-      ...cardInformationRef.current,
-      [field]: value,
-    };
-
-    setCardInformation((prevState) => ({
-      ...prevState,
-      paymentMethod: {
-        ...prevState,
-        ...updatedCardInformation,
-      },
-    }));
+  const initialValues: IPaymentMethod = {
+    ...paymentMethod,
+    cvv: "",
   };
 
-  const handleSaveCardInformation = async (type: "TEMP" | "WALLET") => {
-    const { paymentMethod, address } = cardInformation;
+  // Validation Schema using Yup
+  const validationSchema = Yup.object().shape({
+    accountName: Yup.string().required("Name on Card is required"),
+    number: Yup.string()
+      .matches(/^[0-9]{16}$/, "Card Number must be 16 digits")
+      .required("Card Number is required"),
+    expMonth: Yup.number()
+      .min(1, "Invalid month")
+      .max(12, "Invalid month")
+      .required("Expiration Month is required"),
+    expYear: Yup.number()
+      .min(new Date().getFullYear(), "Invalid year")
+      .required("Expiration Year is required"),
+    cvv: Yup.string()
+      .matches(/^[0-9]{3,4}$/, "CVV must be 3 or 4 digits")
+      .required("CVV is required"),
+  });
+
+  const handleSavecardAddress = async (
+    values: IPaymentMethod,
+    type: "TEMP" | "WALLET"
+  ) => {
+    const address = cardAddress;
     const requestData = {
-      name: paymentMethod.accountName,
-      number: paymentMethod.number,
-      month: paymentMethod.expMonth,
-      year: paymentMethod.expYear,
-      preferred: paymentMethod.preferred,
+      name: values.accountName,
+      number: values.number,
+      month: values.expMonth,
+      year: values.expYear,
+      preferred: values.preferred,
       first: address.first,
       last: address.last,
       type: 9,
@@ -111,23 +95,19 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
       country: address.country || "USA",
       phone: address.phone,
       isPoBox: address.isPoBox || false,
-      cvv: paymentMethod.cvv,
+      cvv: values.cvv,
     };
 
     try {
       if (type === "WALLET") {
-        if (cardInformation.paymentMethod.id !== 0) {
-          await updateShopperDetails(
-            shopperId,
-            cardInformation.paymentMethod.id,
-            requestData
-          );
-          if (order && cardInformation.paymentMethod.id) {
+        if (values.id !== 0) {
+          await updateShopperDetails(shopperId, values.id, requestData);
+          if (order && values.id) {
             const updatedOrder = generateChangeStoreResponse({
               ...order,
               paymentMethod: {
                 ...order.paymentMethod,
-                id: cardInformation.paymentMethod.id,
+                id: values.id,
               },
             });
             const orderResponse = await buildOrder(updatedOrder);
@@ -214,8 +194,8 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
     }
   };
 
-  const handleCancelNewCard = () => {
-    const isCancelWhileAddingNewCard = cardInformation.paymentMethod.id === 0;
+  const handleCancelNewCard = (values: IPaymentMethod) => {
+    const isCancelWhileAddingNewCard = values.id === 0;
 
     if (!isCancelWhileAddingNewCard) return;
 
@@ -226,9 +206,9 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           .map((paymentOption) =>
             paymentOption.paymentMethod.preferred
               ? {
-                ...paymentOption,
-                isSelected: true,
-              }
+                  ...paymentOption,
+                  isSelected: true,
+                }
               : paymentOption
           )
       );
@@ -245,101 +225,126 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   const years = getYears(currentYear, currentYear + 10);
 
   return (
-    <div className="card-information-container">
-      <FormField
-        label="Name on Card"
-        required
-        value={cardInformation.paymentMethod.accountName || ""}
-        onChange={(e) => handleInputChange("accountName", e.target.value)}
-      />
-      <FormField
-        label="Card Number"
-        required
-        value={cardInformation.paymentMethod.number || ""}
-        onChange={(e) => handleInputChange("number", e.target.value)}
-      />
-      <div className="form-field-container">
-        <DropdownField
-          label="Expiration Month"
-          selectedValue={cardInformation.paymentMethod.expMonth?.toString()}
-          options={[...Array(12)].map((_, i) => ({
-            value: (i + 1).toString().padStart(2, "0"),
-            label: (i + 1).toString().padStart(2, "0"),
-          }))}
-          onChange={(value) =>
-            handleInputChange("expMonth", parseInt(value, 10))
-          }
-        />
-        <DropdownField
-          label="Expiration Year"
-          selectedValue={cardInformation.paymentMethod.expYear?.toString()}
-          options={years}
-          onChange={(value) =>
-            handleInputChange("expYear", parseInt(value, 10))
-          }
-        />
-      </div>
-      <FormField
-        label="CVV"
-        required
-        value={cardInformation.paymentMethod.cvv}
-        type="password"
-        onChange={(e) => handleInputChange("cvv", e.target.value)}
-      />
-      <div className="save-for-later">
-        <input
-          type="checkbox"
-          className="checkbox"
-          checked={isCardSavedInWallet}
-          onChange={(e) => setIsCardSavedInWallet(!isCardSavedInWallet)}
-        />
-        <span>Save card for later</span>
-      </div>
-      <div className="billing">
-        <input
-          type="checkbox"
-          className="checkbox"
-          checked={sameShippingAddress}
-          onChange={() => setSameShippingAddress(!sameShippingAddress)}
-        />
-        <span>Same as shipping</span>
-      </div>
-      {!sameShippingAddress ? (
-        <AddressForm
-          shippingAddress={cardInformation.address}
-          siteId="260"
-          onAddressChange={(updatedAddress) => {
-            setCardInformation((prevState) => ({
-              ...prevState,
-              address: updatedAddress,
-            }));
-          }}
-        />
-      ) : (
-        <div className="checkbox-text">
-          {shippingAddress?.first} {shippingAddress?.last}{" "}
-          {shippingAddress?.address1}
-          {shippingAddress?.address2} {shippingAddress?.city}{" "}
-          {shippingAddress?.zip}
-        </div>
+    <Formik
+      initialValues={initialValues}
+      validationSchema={validationSchema}
+      onSubmit={(values) => {
+        handleSavecardAddress(values, isCardSavedInWallet ? "WALLET" : "TEMP");
+      }}
+    >
+      {({
+        values,
+        errors,
+        touched,
+        handleChange,
+        handleBlur,
+        handleSubmit,
+      }) => (
+        <form onSubmit={handleSubmit}>
+          <div className="card-information-container">
+            <FormField
+              label="Name on Card"
+              required
+              name="accountName"
+              value={values.accountName}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              errorMessage={touched.accountName && errors.accountName}
+            />
+            <FormField
+              label="Card Number"
+              required
+              name="number"
+              value={values.number}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              errorMessage={touched.number && errors.number}
+            />
+            <div className="form-field-container">
+              <DropdownField
+                label="Expiration Month"
+                selectedValue={values.expMonth?.toString()}
+                options={[...Array(12)].map((_, i) => ({
+                  value: (i + 1).toString().padStart(2, "0"),
+                  label: (i + 1).toString().padStart(2, "0"),
+                }))}
+                onChange={(value) => handleChange("expMonth")(value)}
+                errorMessage={touched.expMonth && errors.expMonth}
+              />
+              <DropdownField
+                label="Expiration Year"
+                selectedValue={values.expYear?.toString()}
+                options={years}
+                onChange={(value) => handleChange("expYear")(value)}
+                errorMessage={touched.expYear && errors.expYear}
+              />
+            </div>
+            <FormField
+              label="CVV"
+              required
+              name="cvv"
+              type="password"
+              value={values.cvv}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              errorMessage={touched.cvv && errors.cvv}
+            />
+            <div className="save-for-later">
+              <input
+                type="checkbox"
+                className="checkbox"
+                checked={isCardSavedInWallet}
+                onChange={(e) => setIsCardSavedInWallet(!isCardSavedInWallet)}
+              />
+              <span>Save card for later</span>
+            </div>
+            <div className="billing">
+              <input
+                type="checkbox"
+                className="checkbox"
+                checked={sameShippingAddress}
+                onChange={() => setSameShippingAddress(!sameShippingAddress)}
+              />
+              <span>Same as shipping</span>
+            </div>
+
+            {!sameShippingAddress ? (
+              <AddressForm
+                shippingAddress={cardAddress}
+                siteId="260"
+                onAddressChange={(updatedAddress) => {
+                  setcardAddress((prevState) => ({
+                    ...prevState,
+                    address: updatedAddress,
+                  }));
+                }}
+              />
+            ) : (
+              <div className="checkbox-text">
+                {shippingAddress?.first} {shippingAddress?.last}{" "}
+                {shippingAddress?.address1}
+                {shippingAddress?.address2} {shippingAddress?.city}{" "}
+                {shippingAddress?.zip}
+              </div>
+            )}
+            <div className="button-container">
+              <Button
+                btnType="secondary"
+                label="Cancel"
+                onClick={() => {
+                  onCancel();
+                  handleCancelNewCard(values);
+                }}
+              />
+              <Button
+                btnType="primary"
+                label={isCardSavedInWallet ? "Update" : "Save"}
+                onClick={handleSubmit}
+              />
+            </div>
+          </div>
+        </form>
       )}
-      <div className="button-container">
-        <Button
-          btnType="secondary"
-          label="Cancel"
-          onClick={() => {
-            onCancel();
-            handleCancelNewCard();
-          }}
-        />
-        <Button
-          btnType="primary"
-          label={isCardSavedInWallet ? "Update" : "Save"}
-          onClick={() =>
-            handleSaveCardInformation(isCardSavedInWallet ? "WALLET" : "TEMP")
-          }
-        />
-      </div>
-    </div>
+    </Formik>
   );
 };

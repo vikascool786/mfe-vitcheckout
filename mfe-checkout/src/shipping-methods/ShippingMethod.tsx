@@ -49,32 +49,34 @@ export const ShippingMethod: React.FC = ({}) => {
 
       {orders?.stores && (
         <div className="shipping-item-container">
-          {Object.entries(orders?.stores).map(([key, store], index) => {
-            return (
-              store && (
-                <div key={key}>
-                  <div className="shipping-catolog-name">
-                    {getCatalogName(store)}
+          {Object.entries(orders?.stores)
+            .reverse()
+            .map(([key, store]) => {
+              return (
+                store && (
+                  <div key={key}>
+                    <div className="shipping-catolog-name">
+                      {getCatalogName(store)}
+                    </div>
+                    {store.items &&
+                      store.items.map((item, itemIndex) => (
+                        <div key={itemIndex}>
+                          <ShippingItem
+                            item={item}
+                            onRemove={() =>
+                              handleRemoveProduct(key, item.product_hash)
+                            }
+                          />
+                        </div>
+                      ))}
+                    {/* Pass store-specific shippingSelections */}
+                    {store.shippingSelections && (
+                      <ShippingOptions store={store} storeKey={key} />
+                    )}
                   </div>
-                  {store.items &&
-                    store.items.map((item, itemIndex) => (
-                      <div key={itemIndex}>
-                        <ShippingItem
-                          item={item}
-                          onRemove={() =>
-                            handleRemoveProduct(key, item.product_hash)
-                          }
-                        />
-                      </div>
-                    ))}
-                  {/* Pass store-specific shippingSelections */}
-                  {store.shippingSelections && (
-                    <ShippingOptions store={store} storeKey={key} />
-                  )}
-                </div>
-              )
-            );
-          })}
+                )
+              );
+            })}
         </div>
       )}
     </div>

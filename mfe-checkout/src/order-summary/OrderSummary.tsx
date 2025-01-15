@@ -1,5 +1,6 @@
 import { useAtom } from "jotai";
 import React, { useState } from "react";
+import { changeOrder } from "../api/service/Order";
 import { useShopperEWallet } from "../api/service/ShopperEWallet";
 import { Cashback } from "../assets/svgs/Cashback";
 import { Close } from "../assets/svgs/Close";
@@ -7,11 +8,10 @@ import { Button } from "../component/Button/Button";
 import { FormField } from "../component/Form/Field/FormField";
 import { FormHeading } from "../component/Form/Heading/FormHeading";
 import { orderAtom } from "../store";
+import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
+import { getCatalogName } from "../utils/helpers/GetCatalog";
 import { ApplyCashback } from "./apply-cashback/ApplyCashback";
 import "./OrderSummary.scss";
-import { getCatalogName } from "../utils/helpers/GetCatalog";
-import { changeOrder } from "../api/service/Order";
-import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 
 interface IOrderSummary {
   pcid: string;
@@ -158,10 +158,12 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
       <FormHeading title="Order Summary" />
       {!hideCashback && (
         <>
-          {" "}
-          {!loading && !error && eWalletData && (
-            <ApplyCashback cashbackData={eWalletData} />
-          )}
+          {!loading &&
+            !error &&
+            eWalletData &&
+            parseInt(eWalletData.cashbackAvail) > 0 && (
+              <ApplyCashback cashbackData={eWalletData} />
+            )}
           <div className="order-redeem-coupon-text">Redeem Coupon</div>
           <div className="order-summary-coupon-container">
             <div className="order-input-container">

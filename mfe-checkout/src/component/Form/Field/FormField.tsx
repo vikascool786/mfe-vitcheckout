@@ -7,7 +7,7 @@ interface IFormFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   renderCheckBox?: ReactNode;
   required?: boolean;
   extraLabel?: string;
-  errorMessage?: string;
+  errorMessage?: string | false | undefined;
 }
 
 export const FormField: React.FC<IFormFieldProps> = ({

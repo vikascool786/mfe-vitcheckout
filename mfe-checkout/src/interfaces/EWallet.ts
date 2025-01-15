@@ -3,7 +3,7 @@ export interface EWallet {
     lifetimeCoaEarned: string;
     lifetimeTotalCashEarned: string;
     pendingCashbackAvail: string;
-    cashbackAvail: number;
+    cashbackAvail: string;
     coaAvail: string;
     redemptionThreshold: string;
     totalCoaCBAvail: string;

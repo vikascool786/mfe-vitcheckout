@@ -43,6 +43,8 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
 
   const [order, setOrder] = useAtom(orderAtom);
 
+  const [showNewCard, setShowNewCard] = useState<boolean>(false);
+
   useEffect(() => {
     const paymentSiteFlagList = thirdPartyPaymentFlagList.join(",");
     const fetchSiteFlagInfo = async () => {
@@ -88,14 +90,14 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
         // const addressMap = addresses?.map()
         const paymentOptions = response.map(
           (paymentMethod) =>
-          ({
-            paymentMethod,
-            paymentAddress: addressMap.get(
-              paymentMethod.addressId.toString()
-            ),
-            isVisible: paymentMethod.preferred || false,
-            isSelected: paymentMethod.preferred || false,
-          } as IPaymentOption)
+            ({
+              paymentMethod,
+              paymentAddress: addressMap.get(
+                paymentMethod.addressId.toString()
+              ),
+              isVisible: paymentMethod.preferred || false,
+              isSelected: paymentMethod.preferred || false,
+            } as IPaymentOption)
         );
 
         let updatedPaymentOptions = [...paymentOptions, ...paymentMethods];
@@ -213,6 +215,7 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
 
   const onAddNewCard = () => {
     // Check if a card with id 0 is already present
+    setShowNewCard(true);
     const hasTemporaryCard = paymentMethods.some(
       (paymentOption) => paymentOption.paymentMethod.id === 0
     );
@@ -229,6 +232,7 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
       imageUrl: CardOptions,
       id: 0,
       typeID: 9,
+      addressId: 0,
     });
 
     const updatedPaymentOptions = paymentMethods.map((paymentOption) => ({
@@ -248,6 +252,7 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
   };
 
   const removeCard = () => {
+    setShowNewCard(false);
     const updatedPayments = paymentMethods
       .filter((pm) => pm.paymentMethod.id !== 0)
       .map((po) => {
@@ -262,6 +267,13 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
       setPaymentMethods(updatedPayments);
     }, 300);
   };
+
+  useEffect(() => {
+    const isAddingNewCard = paymentMethods.find(
+      (pm) => pm.paymentMethod.id === 0
+    );
+    setShowNewCard(isAddingNewCard ? true : false);
+  }, [paymentMethods]);
 
   return (
     <div className="pm-main-container">
@@ -290,14 +302,16 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
           {showClick2Pay && (
             <PaymentOptionClick2Pay pcid={pcid} order={order} />
           )}
-          <div className="checkout-add-card" onClick={onAddNewCard}>
-            <div className="checkout-add-card-text">
-              <Add /> Add New Card
+          {!showNewCard && (
+            <div className="checkout-add-card" onClick={onAddNewCard}>
+              <div className="checkout-add-card-text">
+                <Add /> Add New Card
+              </div>
+              <div>
+                <img src={CardOptions} />
+              </div>
             </div>
-            <div>
-              <img src={CardOptions} />
-            </div>
-          </div>
+          )}
         </div>
       </div>
       <TextUpdates />
