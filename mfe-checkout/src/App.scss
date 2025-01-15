@@ -7,82 +7,46 @@ body {
 /* Container Styling */
 .container {
   background-color: #f6f6f6;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  box-sizing: border-box;
+  margin: 0 auto;
 }
 
 /* Container Styling */
 .checkout-container {
-  display: grid;
+  display: flex;
   gap: 2rem;
-  margin: 31px auto 0;
-  padding: 0 1rem;
-  height: 100%;
-  position: relative;
-}
-
-@media (min-width: 600px) {
-  .checkout-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-areas: "left right";
-    gap: 2rem;
-    align-items: start;
-    max-width: 76rem;
-  }
-}
-
-/* Single-Column Layout for Smaller Screens */
-@media (max-width: 1024px) {
-  .checkout-container {
-    grid-template-columns: 1fr;
-    padding: 0;
-    grid-template-areas:
-      "left"
-      "right";
-    gap: 2rem;
-    position: relative;
-    width: 100%;
-  }
+  align-items: flex-start;
+  width: 100%;
+  padding: 1rem;
+  box-sizing: border-box;
 }
 
 /* Styling for Left Column */
 .checkout-container .left-column {
-  max-width: 34rem;
-  margin: 0 auto;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 1rem;
-  width: 100%;
+  width: 60%;
+  box-sizing: border-box;
 }
 
 /* Styling for Right Column */
 .checkout-container .right-column {
-  max-width: 34rem;
-  margin: 0 auto;
-  display: grid;
-  gap: 1rem;
-  width: 100%;
-  align-items: center;
-  padding: 0 1rem;
-  position: relative;
+  width: 40%;
+  box-sizing: border-box;
 }
 
-/* For Items Inside the Right Column */
-.checkout-container .right-column>* {
-  justify-self: center;
-  align-self: center;
-  width: auto;
-  height: auto;
-}
-
-/* Make sure PlaceOrder is always at the bottom on mobile */
-@media (max-width: 600px) {
-  .left-column {
+@media (max-width: 1024px) {
+  .checkout-container {
     display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
     flex-direction: column;
-    height: 100%;
   }
-
-  /* Position PlaceOrder component at the bottom */
-  .left-column .place-order {
-    margin-top: auto;
+  .checkout-container .left-column, .checkout-container .right-column {
+    width: 100%;
   }
 }

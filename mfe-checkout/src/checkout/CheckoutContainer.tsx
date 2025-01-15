@@ -22,9 +22,9 @@ import {
   GET_API_KEY,
 } from "../utils/urlResolver";
 import ErrorMessage from "../component/Error";
-import {checkoutSezzle} from "../api/ajaxaction/Sezzle";
-import {handleSezzleCheckout} from "../utils/helpers/SezzleHelper";
-import {Spinner} from "../component/Spinner/Spinner";
+import { checkoutSezzle } from "../api/ajaxaction/Sezzle";
+import { handleSezzleCheckout } from "../utils/helpers/SezzleHelper";
+import { Spinner } from "../component/Spinner/Spinner";
 
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
@@ -78,13 +78,13 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
 
   useEffect(() => {
     handleSezzleCheckout(
-        location.search,
-        orderData,
-        checkoutSezzle,
-        buildOrder,
-        generateChangeStoreResponse,
-        setLoadingOrderConfirmation,
-        confirmOrder
+      location.search,
+      orderData,
+      checkoutSezzle,
+      buildOrder,
+      generateChangeStoreResponse,
+      setLoadingOrderConfirmation,
+      confirmOrder
     );
   }, [location.search]);
 
@@ -183,34 +183,37 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   if (addressError || paymentError) return <div>Failed to load data</div>;
 
   if (loadingOrderConfirmation) return (
-      <div className="loading-order-conf">
-        <div>Please wait while your order is being placed</div>
-        <Spinner/>
-      </div>
+    <div className="loading-order-conf">
+      <div>Please wait while your order is being placed</div>
+      <Spinner />
+    </div>
   )
 
   console.log(orderError)
   return (
-    <div className="checkout-container">
+    <div>
       {orderData ? (
         <>
-          <div className="left-column">
-            <Checkout
-              shopperId={shopperId}
-              siteId={siteId}
-              addresses={addresses || []}
-            />
-            <ShippingMethod order={orderData} />
-            <PaymentMethod
-              cartId={cartId}
-              shopperId={shopperId}
-              siteId={siteId}
-              pcid={pcid}
-              updatePaymentTypeId={setPaymentTypeId}
-            />
-          </div>
-          <div className="right-column">
-            <OrderSummary pcid={pcid} />
+          <div className="checkout-container">
+            <div className="left-column">
+              <Checkout
+                shopperId={shopperId}
+                siteId={siteId}
+                addresses={addresses || []}
+              />
+              <ShippingMethod order={orderData} />
+              <PaymentMethod
+                cartId={cartId}
+                shopperId={shopperId}
+                siteId={siteId}
+                pcid={pcid}
+                updatePaymentTypeId={setPaymentTypeId}
+              />
+            </div>
+            <div className="right-column">
+              <OrderSummary pcid={pcid} />
+            </div>
+
           </div>
           <div className="place-order">
             <PlaceOrder
