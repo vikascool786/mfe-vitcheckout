@@ -22,9 +22,9 @@ import {
   GET_API_KEY,
 } from "../utils/urlResolver";
 import ErrorMessage from "../component/Error";
-import { checkoutSezzle } from "../api/ajaxaction/Sezzle";
-import { handleSezzleCheckout } from "../utils/helpers/SezzleHelper";
-import { Spinner } from "../component/Spinner/Spinner";
+import {checkoutSezzle} from "../api/ajaxaction/Sezzle";
+import {handleSezzleCheckout} from "../utils/helpers/SezzleHelper";
+import {Spinner} from "../component/Spinner/Spinner";
 
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
@@ -70,8 +70,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   const [orderErrorMessage, setOrderErrorMessage] = useState("");
   const [paymentTypeId, setPaymentTypeId] = useState(0);
   const hasInitializedOrder = useRef(false); // Prevent multiple executions of updateOrder
-  const [loadingOrderConfirmation, setLoadingOrderConfirmation] =
-    useState(false);
+  const [loadingOrderConfirmation, setLoadingOrderConfirmation] = useState(false);
 
   const addressUrl = `${apiDomain}/shopper-addressbooks/v1/${shopperId}/AddressBook?api_key=${apiKey}`;
   const paymentUrl = `${apiDomain}/shopper-wallets/v1/Shopper/${shopperId}/Wallet?api_key=${apiKey}`;
@@ -79,13 +78,13 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
 
   useEffect(() => {
     handleSezzleCheckout(
-      location.search,
-      orderData,
-      checkoutSezzle,
-      buildOrder,
-      generateChangeStoreResponse,
-      setLoadingOrderConfirmation,
-      confirmOrder
+        location.search,
+        orderData,
+        checkoutSezzle,
+        buildOrder,
+        generateChangeStoreResponse,
+        setLoadingOrderConfirmation,
+        confirmOrder
     );
   }, [location.search]);
 
@@ -183,13 +182,12 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
 
   if (addressError || paymentError) return <div>Failed to load data</div>;
 
-  if (loadingOrderConfirmation)
-    return (
+  if (loadingOrderConfirmation) return (
       <div className="loading-order-conf">
         <div>Please wait while your order is being placed</div>
-        <Spinner />
+        <Spinner/>
       </div>
-    );
+  )
 
   return (
     <div className="checkout-container">

@@ -24,7 +24,6 @@ export const TextUpdates = () => {
     phone: string;
     boxChecked: boolean;
   }) => {
-    console.log(values);
     changeOrder(
       {
         ...order,
