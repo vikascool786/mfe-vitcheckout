@@ -1,8 +1,13 @@
 import { useAtom } from "jotai";
-import React, { useState } from "react";
+import React, { ChangeEvent, ChangeEventHandler, useState } from "react";
+import { debounce } from "lodash";
 import { RadioButton } from "../component/RadioButton/RadioButton";
 import { CardInformation } from "../payment-method/card-information/CardInformation";
-import {PAYPAL, SEZZLE, thirdPartyPaymentTypeIdList} from "../payment-method/PaymentType";
+import {
+  PAYPAL,
+  SEZZLE,
+  thirdPartyPaymentTypeIdList,
+} from "../payment-method/PaymentType";
 import { IPaymentOption, orderAtom, paymentMethodsAtom } from "../store";
 import "./PaymentMethodOption.scss";
 import { changeOrder } from "../api/service/Order";
@@ -24,6 +29,10 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   const { paymentMethod, paymentAddress } = paymentOption;
   const [paymentMethods, setPaymentMethods] = useAtom(paymentMethodsAtom);
 
+  const [cvvCode, setCvvCode] = useState<string>(
+    paymentMethod.cvv === 1 ? paymentMethod.cvv.toString() : ""
+  );
+
   const [isEditing, setIsEditing] = useState<boolean>(paymentMethod.id === 0);
 
   const isSelected = paymentOption.isSelected ? "selected" : "";
@@ -33,30 +42,32 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     paymentMethod.accountName !== SEZZLE.name;
 
   const onChangePaymentMethod = () => {
-    const paypalOrSezzle = paymentMethods.find(
-      (method) =>
-        method.paymentMethod.accountName.includes("PayPal") ||
-        method.paymentMethod.accountName.includes("Sezzle")
-    );
+    if (order?.paymentMethod?.id === paymentOption.paymentMethod.id) {
+      return;
+    }
     // Update payment methods with the selected method
     const updatedPaymentOptions = paymentMethods.map((method) =>
       method.paymentMethod.id === paymentOption.paymentMethod.id
         ? {
-          ...method,
-          isSelected: true,
-          isVisible: true,
-        }
+            ...method,
+            isSelected: true,
+            isVisible: true,
+          }
         : {
-          ...method,
-          isSelected: false,
-        }
+            ...method,
+            isSelected: false,
+          }
     );
 
     // Set updated payment methods to state
     setPaymentMethods(updatedPaymentOptions);
 
     // Trigger side effect to update order with the new payment method
-    if(!thirdPartyPaymentTypeIdList().includes(paymentOption.paymentMethod.typeID)){
+    if (
+      !thirdPartyPaymentTypeIdList().includes(
+        paymentOption.paymentMethod.typeID
+      )
+    ) {
       changeOrder(
         generateChangeStoreResponse({
           ...order,
@@ -68,6 +79,30 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
         order?.id
       );
     }
+  };
+
+  const handleCVV = (e: ChangeEvent<HTMLInputElement>) => {
+    const input = e.target.value;
+
+    // Allow only numbers and limit the length to 4
+    if (/^\d{0,4}$/.test(input)) {
+      setCvvCode(input);
+
+      // Debounced function to validate CVV
+      debouncedOnValidCVV(input);
+    }
+  };
+
+  // Debounced function to handle valid CVV
+  const debouncedOnValidCVV = debounce((input: string) => {
+    if (input.length === 3 || input.length === 4) {
+      onValidCVV(input);
+    }
+  }, 300); // Adjust debounce time as needed
+
+  const onValidCVV = (cvv: string) => {
+    console.log("Valid CVV entered:", cvv);
+    // Add your additional logic here, e.g., sending to API or enabling a button
   };
 
   return (
@@ -113,9 +148,11 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
               <div className="payment-option-container__card-cvv">
                 <div>CVV</div>
                 <input
-                  onClick={() => setIsEditing(!isEditing)}
+                  onChange={handleCVV}
                   className="payment-option-container__card-cvv-form"
-                  value={order?.paymentMethod?.id ? "***" : ""}
+                  value={cvvCode}
+                  type="password"
+                  placeholder="3 or 4 digits"
                 />
               </div>
             )}

@@ -90,6 +90,10 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             paymentMethod: {
               ...response.paymentMethod,
             },
+            userOptions: {
+              ...changeOrderDetails.userOptions,
+              trackingID: `paypal%3D${response.callID}`,
+            },
           },
           order?.id
         ).then(() => {

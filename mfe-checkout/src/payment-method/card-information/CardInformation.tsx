@@ -80,6 +80,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
     values: IPaymentMethod,
     type: "TEMP" | "WALLET"
   ) => {
+    console.log("Here")
     const address = cardAddress;
     const requestData = {
       name: values.accountName,
@@ -210,9 +211,9 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           .map((paymentOption) =>
             paymentOption.paymentMethod.preferred
               ? {
-                ...paymentOption,
-                isSelected: true,
-              }
+                  ...paymentOption,
+                  isSelected: true,
+                }
               : paymentOption
           )
       );
@@ -233,7 +234,6 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
       initialValues={initialValues}
       validationSchema={validationSchema}
       onSubmit={(values) => {
-        console.log("Here on submit");
         handleSavecardAddress(values, isCardSavedInWallet ? "WALLET" : "TEMP");
       }}
     >
@@ -241,6 +241,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
         values,
         errors,
         touched,
+        isValid,
         handleChange,
         handleBlur,
         handleSubmit,
@@ -344,7 +345,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
               <Button
                 btnType="primary"
                 label={isCardSavedInWallet ? "Update" : "Save"}
-                onClick={() => handleSubmit()}
+                onClick={() => isValid && handleSubmit()}
               />
             </div>
           </div>

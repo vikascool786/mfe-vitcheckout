@@ -32,7 +32,7 @@ import { Site } from "../interfaces/Site";
 
 const defaultAddress: Address = {
   id: 0,
-  isPrimary: 0,
+  isShip: 0,
   first: "",
   last: "",
   address1: "",
@@ -82,7 +82,7 @@ export const Checkout: React.FC<ICheckout> = ({
       if (address.id) {
         const newAddress: Address = {
           id: address.id,
-          isPrimary: address.isPrimary,
+          isShip: address.isShip,
           first: address.first,
           last: address.last,
           address1: address.address1,
@@ -93,7 +93,7 @@ export const Checkout: React.FC<ICheckout> = ({
           phone: address.phone,
           isPoBox: address.isPoBox,
         } as Address;
-        if (newAddress.isPrimary) {
+        if (newAddress.isShip) {
           hasPrimaryAddress = true;
           setShippingAddress(newAddress);
         }
@@ -197,10 +197,10 @@ export const Checkout: React.FC<ICheckout> = ({
         setShowShipAddressForm(false);
 
         const updatedAddresses = [
-          { ...validatedAddress, isPrimary: 1 }, // Set the validated address as primary
+          { ...validatedAddress, isShip: 1 }, // Set the validated address as primary
           ...shopperAddressBook
             .filter((address) => address.id !== validatedAddress.id) // Exclude the validated address
-            .map((address) => ({ ...address, isPrimary: 0 })), // Reset isPrimary for other addresses
+            .map((address) => ({ ...address, isShip: 0 })), // Reset isShip for other addresses
         ];
 
         setShopperAddressBook(updatedAddresses);
@@ -252,8 +252,8 @@ export const Checkout: React.FC<ICheckout> = ({
   const onCancelClick = () => {
     setShowShipAddressForm(!showShipAddressForm);
     setShippingAddress(
-      shopperAddressBook.find((address) => address.isPrimary === 1) ||
-      shippingAddress
+      shopperAddressBook.find((address) => address.isShip === 1) ||
+        shippingAddress
     );
     setIsExpanded(!isExpanded);
   };
@@ -279,13 +279,13 @@ export const Checkout: React.FC<ICheckout> = ({
     const updatedSelectedAddress = shopperAddressBook.map(
       (address) =>
         address.id === id
-          ? { ...address, isPrimary: 1 }
-          : { ...address, isPrimary: 0 } // Reset other addresses' `isPrimary` to 0
+          ? { ...address, isShip: 1 }
+          : { ...address, isShip: 0 } // Reset other addresses' `isShip` to 0
     );
 
     setShippingAddress(
-      updatedSelectedAddress.find((p) => p.isPrimary)
-    ) as Address;
+      updatedSelectedAddress.find((p) => p.isShip)
+    ) as unknown as Address;
     setShopperAddressBook(updatedSelectedAddress);
 
     const newOrder = await buildOrder(

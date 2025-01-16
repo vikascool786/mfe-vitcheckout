@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { useFormik } from "formik";
+import * as Yup from "yup";
 import { fetchStatesAndCountries } from "../../api/service/CountriesAndStates";
 import { Address } from "../../interfaces/Address";
 import { DropdownOption } from "../../interfaces/DropdownOption";
@@ -6,9 +8,9 @@ import { DropdownField } from "../Form/Field/DropdownField";
 import { FormField } from "../Form/Field/FormField";
 
 interface IAddressFormProps {
-  siteId: string; // Pass siteId as a prop to make it dynamic
+  siteId: string;
   shippingAddress: Address;
-  onAddressChange: (updatedAddress: Address) => void; // Callback for address change
+  onAddressChange: (updatedAddress: Address, onSubmitAddress: Function) => void;
 }
 
 export const AddressForm: React.FC<IAddressFormProps> = ({
@@ -25,6 +27,7 @@ export const AddressForm: React.FC<IAddressFormProps> = ({
   // Fetch states and countries on mount
   useEffect(() => {
     const fetchCountryAndStateData = async () => {
+      setLoading(true);
       try {
         const response = await fetchStatesAndCountries(siteId);
         const stateList: DropdownOption[] = response.map((item: any) => ({
@@ -41,38 +44,63 @@ export const AddressForm: React.FC<IAddressFormProps> = ({
     fetchCountryAndStateData();
   }, [siteId]);
 
-  // Update address field
-  const handleInputChange = (field: keyof Address, value: string) => {
-    const updatedAddress = { ...shippingAddress, [field]: value };
-    onAddressChange(updatedAddress);
-  };
+  // Yup validation schema
+  const validationSchema = Yup.object({
+    first: Yup.string().required("First name is required"),
+    last: Yup.string().required("Last name is required"),
+    address1: Yup.string().required("Address Line 1 is required"),
+    city: Yup.string().required("City is required"),
+    state: Yup.string().required("State/Province is required"),
+    zip: Yup.string()
+      .matches(/^\d{5}$/, "Zip code must be 5 digits")
+      .required("Zip code is required"),
+  });
+
+  // Formik setup
+  const formik = useFormik({
+    initialValues: {
+      first: shippingAddress.first || "",
+      last: shippingAddress.last || "",
+      address1: shippingAddress.address1 || "",
+      address2: shippingAddress.address2 || "",
+      city: shippingAddress.city || "",
+      state: shippingAddress.state || "",
+      zip: shippingAddress.zip || "",
+    },
+    validationSchema,
+    onSubmit: (values) => {
+      onAddressChange(values, formik.submitForm);
+    },
+  });
 
   if (loading) {
-    return <p>Loading states...</p>; // Loader while fetching data
+    return <p>Loading states...</p>;
   }
 
   if (error) {
-    return <p>{error}</p>; // Display error message if data fetch fails
+    return <p>{error}</p>;
   }
 
   return (
-    <>
+    <form onSubmit={formik.handleSubmit}>
       <div className="form-field-container">
         <FormField
           label="First Name"
           required
           name="first"
-          data-parsley-required="true"
-          value={shippingAddress.first}
-          onChange={(e) => handleInputChange("first", e.target.value)} // Controlled input
+          value={formik.values.first}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          errorMessage={formik.touched.first && formik.errors.first}
         />
         <FormField
           label="Last Name"
           required
           name="last"
-          data-parsley-required="true"
-          value={shippingAddress.last}
-          onChange={(e) => handleInputChange("last", e.target.value)} // Controlled input
+          value={formik.values.last}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          errorMessage={formik.touched.last && formik.errors.last}
         />
       </div>
       <div className="form-field-container-full">
@@ -80,17 +108,18 @@ export const AddressForm: React.FC<IAddressFormProps> = ({
           label="Address Line 1"
           required
           name="address1"
-          data-parsley-required="true"
-          value={shippingAddress.address1}
-          onChange={(e) => handleInputChange("address1", e.target.value)} // Controlled input
+          value={formik.values.address1}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          errorMessage={formik.touched.address1 && formik.errors.address1}
         />
       </div>
       <div className="form-field-container-full">
         <FormField
           label="Address Line 2"
           name="address2"
-          value={shippingAddress.address2}
-          onChange={(e) => handleInputChange("address2", e.target.value)} // Controlled input
+          value={formik.values.address2}
+          onChange={formik.handleChange}
         />
       </div>
       <div className="form-field-container">
@@ -98,17 +127,19 @@ export const AddressForm: React.FC<IAddressFormProps> = ({
           label="City"
           required
           name="city"
-          data-parsley-required="true"
-          value={shippingAddress.city}
-          onChange={(e) => handleInputChange("city", e.target.value)} // Controlled input
+          value={formik.values.city}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          errorMessage={formik.touched.city && formik.errors.city}
         />
         <DropdownField
           options={stateDropdownList}
           label="State/Province"
           required
-          selectedValue={shippingAddress.state}
+          selectedValue={formik.values.state}
           formName="state"
-          onChange={(e) => handleInputChange("state", "New York")}
+          onChange={(e) => formik.setFieldValue("state", e)}
+          errorMessage={formik.touched.state && formik.errors.state}
         />
       </div>
       <div className="form-field-container">
@@ -116,15 +147,21 @@ export const AddressForm: React.FC<IAddressFormProps> = ({
           label="Zip Code"
           required
           name="zip"
-          data-parsley-required="true"
-          value={shippingAddress.zip}
-          onChange={(e) => handleInputChange("zip", e.target.value)} // Controlled input
+          value={formik.values.zip}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          errorMessage={formik.touched.zip && formik.errors.zip}
         />
         <div className="save-for-later">
-          <input className="checkbox" type="checkbox" />
+          <input
+            className="checkbox"
+            type="checkbox"
+            name="isPoBox"
+            onChange={formik.handleChange}
+          />
           <span className="shipping-text">This address is a PO box</span>
         </div>
       </div>
-    </>
+    </form>
   );
 };
