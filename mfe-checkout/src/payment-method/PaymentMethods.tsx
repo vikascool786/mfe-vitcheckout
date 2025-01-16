@@ -46,7 +46,7 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
   const [showNewCard, setShowNewCard] = useState<boolean>(false);
 
   useEffect(() => {
-    const paymentSiteFlagList = thirdPartyPaymentFlagList.join(",");
+    const paymentSiteFlagList = thirdPartyPaymentFlagList().join(",");
     const fetchSiteFlagInfo = async () => {
       try {
         const response = await fetchSiteFlagData(siteId, paymentSiteFlagList);
@@ -157,7 +157,12 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
 
   useEffect(() => {
     const handleDeselectPaymentMethodsEvent = () => {
-      // handlePaymentMethodChange(-1);
+      setPaymentMethods(
+          paymentMethods.map((item) => ({
+            ...item,
+            isSelected: false,
+          }))
+      )
       updatePaymentTypeId(CLICK2PAY.typeId);
     };
     document.addEventListener(

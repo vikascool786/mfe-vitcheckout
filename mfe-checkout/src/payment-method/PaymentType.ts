@@ -47,11 +47,18 @@ export const PAYPAL: PaymentType = {
     siteflagTypeId: 393
 }
 
-export const thirdPartyPaymentFlagList = [
-    CLICK2PAY.siteflagTypeId,
-    SEZZLE.siteflagTypeId,
-    PAYPAL.siteflagTypeId,
+const thirdPartyPayments = [
+    CLICK2PAY,
+    SEZZLE,
+    PAYPAL,
 ]
+
+export const thirdPartyPaymentFlagList = (): number[] => {
+    return thirdPartyPayments.map(payment => payment.siteflagTypeId ?? 0);
+}
+export const thirdPartyPaymentTypeIdList  = (): number[] => {
+    return thirdPartyPayments.map(payment => payment.typeId);
+}
 
 export const creditCards = [
     VISA, MASTERCARD, AMEX, DISCOVER,

@@ -2,7 +2,7 @@ import { useAtom } from "jotai";
 import React, { useState } from "react";
 import { RadioButton } from "../component/RadioButton/RadioButton";
 import { CardInformation } from "../payment-method/card-information/CardInformation";
-import { PAYPAL, SEZZLE } from "../payment-method/PaymentType";
+import {PAYPAL, SEZZLE, thirdPartyPaymentTypeIdList} from "../payment-method/PaymentType";
 import { IPaymentOption, orderAtom, paymentMethodsAtom } from "../store";
 import "./PaymentMethodOption.scss";
 import { changeOrder } from "../api/service/Order";
@@ -56,18 +56,18 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     setPaymentMethods(updatedPaymentOptions);
 
     // Trigger side effect to update order with the new payment method
-    // if (paypalOrSezzle) {
-    changeOrder(
-      generateChangeStoreResponse({
-        ...order,
-        paymentMethod: {
-          ...paymentOption.paymentMethod,
-          id: paymentOption.paymentMethod.id,
-        },
-      }),
-      order?.id
-    );
-    // }
+    if(!thirdPartyPaymentTypeIdList().includes(paymentOption.paymentMethod.typeID)){
+      changeOrder(
+        generateChangeStoreResponse({
+          ...order,
+          paymentMethod: {
+            ...paymentOption.paymentMethod,
+            id: paymentOption.paymentMethod.id,
+          },
+        }),
+        order?.id
+      );
+    }
   };
 
   return (
