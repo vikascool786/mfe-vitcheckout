@@ -12,6 +12,7 @@ import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStor
 import { getCatalogName } from "../utils/helpers/GetCatalog";
 import { ApplyCashback } from "./apply-cashback/ApplyCashback";
 import "./OrderSummary.scss";
+import Swal from "sweetalert2";
 
 interface IOrderSummary {
   pcid: string;
@@ -119,8 +120,12 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
             }),
             order.id
           ).then((response) => {
-            if (response.response.success?.notifications) {
-              alert(response.response.success.notifications[0].reason);
+            if (response.response.errors.message) {
+              Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: response.response.errors.message as string,
+              });
               return;
             }
             setOrder(response.response.success.data);

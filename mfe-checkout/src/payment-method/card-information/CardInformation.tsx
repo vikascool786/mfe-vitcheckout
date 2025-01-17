@@ -1,6 +1,7 @@
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import React, { useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
+import Swal from "sweetalert2";
 import { buildOrder } from "../../api/service/Order";
 import {
   addShoppersPaymentMethod,
@@ -23,6 +24,7 @@ import {
 import { generateChangeStoreResponse } from "../../utils/helpers/GenerateChangeStoreResponse";
 import "./CardInformation.scss";
 import { Form, Formik } from "formik";
+import { createBlankAddress } from "../../utils/helpers/GenerateAddress";
 
 interface ICardInformationProps {
   paymentMethod: IPaymentMethod;
@@ -47,8 +49,9 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   const [order, setOrder] = useAtom(orderAtom);
 
   const shippingAddress = addressList.find((add) => add.isPrimary);
-  const [sameShippingAddress, setSameShippingAddress] =
-    useState<boolean>(false);
+  const [sameShippingAddress, setSameShippingAddress] = useState<boolean>(
+    !address ? true : false
+  );
 
   const [cardAddress, setcardAddress] = useState<Address>(address);
 
@@ -89,17 +92,17 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
       month: values.expMonth,
       year: values.expYear,
       preferred: values.preferred,
-      first: address.first,
-      last: address.last,
+      first: address?.first,
+      last: address?.last,
       type: 9,
-      address1: address.address1,
-      address2: address.address2,
-      city: address.city || "New York",
-      state: address.state,
-      zip: address.zip,
-      country: address.country || "USA",
-      phone: address.phone,
-      isPoBox: address.isPoBox || false,
+      address1: address?.address1,
+      address2: address?.address2,
+      city: address?.city || "New York",
+      state: address?.state,
+      zip: address?.zip,
+      country: address?.country || "USA",
+      phone: address?.phone,
+      isPoBox: address?.isPoBox || false,
       cvv: values.cvv,
     };
 
@@ -125,42 +128,57 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           return;
         }
 
-        const response = await addShoppersPaymentMethod(shopperId, requestData);
-
-        const updatedPaymentMethods = [
-          ...paymentMethods,
-          {
-            paymentMethod: {
-              ...response.at(-1),
-              cvv: requestData.cvv,
+        try {
+          const response = await addShoppersPaymentMethod(
+            shopperId,
+            requestData
+          );
+          const updatedPaymentMethods = [
+            ...paymentMethods,
+            {
+              paymentMethod: {
+                ...response.at(-1),
+                cvv: requestData.cvv,
+              },
+              isPaymentValidated: true,
+              paymentAddress: sameShippingAddress
+                ? shippingAddress
+                : ({} as Address),
+              isSelected: true,
+              isVisible: true,
             },
-            paymentAddress: sameShippingAddress
-              ? shippingAddress
-              : ({} as Address),
-            isSelected: true,
-            isVisible: true,
-          },
-        ].filter((pm) => pm.paymentMethod?.id !== 0);
+          ].filter((pm) => pm.paymentMethod?.id !== 0);
 
-        setTimeout(
-          () => setPaymentMethods(updatedPaymentMethods as IPaymentOption[]),
-          300
-        );
+          if (order && paymentMethod) {
+            const updatedOrder = generateChangeStoreResponse({
+              ...order,
+              paymentMethod: {
+                ...order.paymentMethod,
+                id: response.at(-1)?.id as number,
+              },
+            });
+            const orderResponse = await buildOrder(updatedOrder);
+            setOrder(orderResponse.response.success.data);
+            setLoading(false);
+          }
 
-        onCancel();
+          setTimeout(
+            () => setPaymentMethods(updatedPaymentMethods as IPaymentOption[]),
+            300
+          );
+        } catch (error) {
+          if (error) {
+            Swal.fire({
+              icon: "error",
+              title: "Oops...",
+              text: error as string,
+            });
+            setLoading(false);
 
-        if (order && paymentMethod) {
-          const updatedOrder = generateChangeStoreResponse({
-            ...order,
-            paymentMethod: {
-              ...order.paymentMethod,
-              id: response.at(-1)?.id as number,
-            },
-          });
-          const orderResponse = await buildOrder(updatedOrder);
-          setOrder(orderResponse.response.success.data);
-          setLoading(false);
+            return;
+          }
         }
+        onCancel();
       } else if (type === "TEMP") {
         onCancel();
         const response = await addTempPaymentMethod(shopperId, requestData);
@@ -328,7 +346,9 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
 
             {!sameShippingAddress ? (
               <AddressForm
-                shippingAddress={cardAddress}
+                shippingAddress={
+                  cardAddress ? cardAddress : createBlankAddress()
+                }
                 siteId="260"
                 onAddressValidation={validateAddressForm}
                 onAddressChange={(updatedAddress) => {

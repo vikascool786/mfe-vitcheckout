@@ -256,6 +256,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       {
         paymentMethod: newCard,
         paymentAddress: {} as Address,
+        isPaymentValidated: false,
         isSelected: true,
         isVisible: true,
       },

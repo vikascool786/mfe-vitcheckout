@@ -33,16 +33,12 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   paymentOption,
 }) => {
   const [order, setOrder] = useAtom(orderAtom);
-  const { paymentMethod, paymentAddress } = paymentOption;
+  const { paymentMethod, paymentAddress, isPaymentValidated } = paymentOption;
   const [paymentMethods, setPaymentMethods] = useAtom(paymentMethodsAtom);
 
   console.log(paymentMethod.cvv);
 
-  const [cvvCode, setCvvCode] = useState<string>(
-    paymentMethod.cvv === 1 || paymentMethod.cvv === 0
-      ? ""
-      : paymentMethod.cvv.toString()
-  );
+  const [cvvCode, setCvvCode] = useState<string>("");
 
   const setLoading = useSetAtom(loadingAtom);
 
@@ -112,7 +108,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
         paymentMethod.id,
         requestData
       );
-      if (order && isPaymentMethodValid) {
+      if (order && isPaymentMethodValid && !isPaymentValidated) {
         const updatedOrder = generateChangeStoreResponse({
           ...order,
           paymentMethod: {
@@ -123,6 +119,23 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
         const orderResponse = await buildOrder(updatedOrder);
         setOrder(orderResponse.response.success.data);
         setLoading(false);
+
+        // Update payment methods with the selected method
+        const updatedPaymentOptions = paymentMethods.map((method) =>
+          method.paymentMethod.id === paymentOption.paymentMethod.id
+            ? {
+                ...method,
+                isSelected: true,
+                isVisible: true,
+                isPaymentValidated: true,
+              }
+            : {
+                ...method,
+                isSelected: false,
+              }
+        );
+
+        setPaymentMethods(updatedPaymentOptions);
       }
     }
   };
@@ -172,7 +185,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                 <input
                   onChange={handleCVV}
                   className="payment-option-container__card-cvv-form"
-                  value={cvvCode}
+                  value={isPaymentValidated ? "***" : cvvCode}
                   type="password"
                   placeholder="3 or 4 digits"
                 />

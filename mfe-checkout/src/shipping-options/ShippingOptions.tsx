@@ -6,6 +6,7 @@ import { ShippingOptionItem } from "../shipping-option-item/ShippingOptionItem";
 import { loadingAtom, orderAtom } from "../store";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import "./ShippingOptions.scss";
+import Swal from "sweetalert2";
 
 interface IShippingOptions {
   store: OrderStore;
@@ -34,13 +35,6 @@ export const ShippingOptions: React.FC<IShippingOptions> = ({
   const handleChange = (method: string) => {
     // Map through the selections to update the isSelected flag
     setLoading(true);
-    const updatedOptions = shippingSelections.map((option) => ({
-      ...option,
-      isSelected: option.method === method, // Set true for selected, false for others
-    }));
-
-    // Set updated shipping options locally
-    setShipping(updatedOptions);
 
     changeOrder(
       generateChangeStoreResponse({
@@ -54,12 +48,39 @@ export const ShippingOptions: React.FC<IShippingOptions> = ({
         },
       }),
       order.id
-    ).then((response) => {
-      if (response) {
+    )
+      .then((response) => {
+        if (response) {
+          if (response.response.errors.message) {
+            Swal.fire({
+              icon: "error",
+              title: "Oops...",
+              text: response.response.errors.message,
+            });
+            setLoading(false);
+            return;
+          }
+          const updatedOptions = shippingSelections.map((option) => ({
+            ...option,
+            isSelected: option.method === method, // Set true for selected, false for others
+          }));
+
+          // Set updated shipping options locally
+          setShipping(updatedOptions);
+          setLoading(false);
+          setOrder(response.response.success.data);
+        }
+      })
+      .catch((er) => {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Something went wrong!",
+        });
+      })
+      .finally(() => {
         setLoading(false);
-        setOrder(response.response.success.data);
-      }
-    });
+      });
   };
 
   return (

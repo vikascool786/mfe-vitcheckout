@@ -13,6 +13,7 @@ import PaymentMethod from "../payment-method/PaymentMethods";
 import ShippingMethod from "../shipping-methods/ShippingMethod";
 import { loadingAtom, orderAtom } from "../store";
 import Checkout from "./Checkout";
+import Swal from "sweetalert2";
 
 import { checkoutSezzle } from "../api/ajaxaction/Sezzle";
 import ErrorMessage from "../component/Error";
@@ -161,6 +162,11 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
       .catch((error) => {
         setLoadingOrderConfirmation(false);
         setOrderErrorMessage(`Detail: ${error?.message || error}`);
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: error?.message,
+        });
       });
   };
 
@@ -194,7 +200,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
 
   return (
     <div>
-      {orderData ? (
+      {orderData && (
         <>
           <div className="checkout-container">
             <div className="left-column">
@@ -230,8 +236,14 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
           </div>
           <HeadHelmet />
         </>
-      ) : (
-        <ErrorMessage errorMessage={orderError && orderError.errors.message} />
+      )}
+
+      {order?.response.errors && (
+        <ErrorMessage
+          errorMessage={
+            order?.response.errors && order?.response.errors.message
+          }
+        />
       )}
     </div>
   );

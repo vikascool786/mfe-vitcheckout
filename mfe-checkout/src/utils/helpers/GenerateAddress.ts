@@ -1,0 +1,36 @@
+import { Address } from "../../interfaces/Address";
+
+export function createBlankAddress(): Address {
+  return {
+    isShip: undefined,
+    isBill: undefined,
+    isPrimary: 0,
+    hasAddress: undefined,
+    id: undefined,
+    description: undefined,
+    prefix: undefined,
+    first: "",
+    mi: undefined,
+    last: "",
+    company: undefined,
+    address1: "",
+    address2: undefined,
+    city: "",
+    state: "",
+    region: undefined,
+    zip: "",
+    country: undefined,
+    phone: undefined,
+    address3: undefined,
+    address4: undefined,
+    address5: undefined,
+    address6: undefined,
+    address7: undefined,
+    zone: undefined,
+    isPoBox: undefined,
+    shopperAccountDisabled: undefined,
+    links: undefined,
+    isoalpha3Code: undefined,
+    hashCode: undefined,
+  };
+}

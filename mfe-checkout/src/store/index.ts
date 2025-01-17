@@ -10,6 +10,7 @@ import { createPaymentMethod } from "../utils/helpers/GeneratePaymentMethod";
 export interface IPaymentOption {
   paymentMethod: IPaymentMethod;
   paymentAddress: Address;
+  isPaymentValidated: boolean;
   isVisible: boolean;
   isSelected: boolean;
 }
@@ -23,6 +24,7 @@ const initialPaymentMethods: IPaymentOption[] = [
       id: -1001,
     }),
     paymentAddress: {} as Address,
+    isPaymentValidated: false,
     isSelected: false,
     isVisible: true,
   },
@@ -33,6 +35,7 @@ const initialPaymentMethods: IPaymentOption[] = [
       imageUrl: SezzleIcon,
       id: -1002,
     }),
+    isPaymentValidated: false,
     paymentAddress: {} as Address,
     isSelected: false,
     isVisible: true,
