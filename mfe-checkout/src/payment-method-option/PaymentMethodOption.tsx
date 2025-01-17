@@ -10,8 +10,10 @@ import {
 } from "../payment-method/PaymentType";
 import { IPaymentOption, orderAtom, paymentMethodsAtom } from "../store";
 import "./PaymentMethodOption.scss";
-import { changeOrder } from "../api/service/Order";
+import { buildOrder, changeOrder } from "../api/service/Order";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
+import { IPaymentMethod } from "../interfaces/PaymentMethod";
+import { updateShopperDetails } from "../api/service/ShoppersPaymentMethods";
 
 export interface IPaymentOptionProps {
   paymentOption: IPaymentOption;
@@ -25,12 +27,16 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   shopperId,
   paymentOption,
 }) => {
-  const [order] = useAtom(orderAtom);
+  const [order, setOrder] = useAtom(orderAtom);
   const { paymentMethod, paymentAddress } = paymentOption;
   const [paymentMethods, setPaymentMethods] = useAtom(paymentMethodsAtom);
 
+  console.log(paymentMethod.cvv);
+
   const [cvvCode, setCvvCode] = useState<string>(
-    paymentMethod.cvv === 1 ? paymentMethod.cvv.toString() : ""
+    paymentMethod.cvv === 1 || paymentMethod.cvv === 0
+      ? ""
+      : paymentMethod.cvv.toString()
   );
 
   const [isEditing, setIsEditing] = useState<boolean>(paymentMethod.id === 0);
@@ -61,24 +67,6 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
 
     // Set updated payment methods to state
     setPaymentMethods(updatedPaymentOptions);
-
-    // Trigger side effect to update order with the new payment method
-    if (
-      !thirdPartyPaymentTypeIdList().includes(
-        paymentOption.paymentMethod.typeID
-      )
-    ) {
-      changeOrder(
-        generateChangeStoreResponse({
-          ...order,
-          paymentMethod: {
-            ...paymentOption.paymentMethod,
-            id: paymentOption.paymentMethod.id,
-          },
-        }),
-        order?.id
-      );
-    }
   };
 
   const handleCVV = (e: ChangeEvent<HTMLInputElement>) => {
@@ -100,9 +88,34 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     }
   }, 300); // Adjust debounce time as needed
 
-  const onValidCVV = (cvv: string) => {
-    console.log("Valid CVV entered:", cvv);
-    // Add your additional logic here, e.g., sending to API or enabling a button
+  const onValidCVV = async (cvv: string) => {
+    if (
+      !thirdPartyPaymentTypeIdList().includes(
+        paymentOption.paymentMethod.typeID
+      ) &&
+      order
+    ) {
+      const requestData = {
+        ...paymentMethod,
+        cvv,
+      };
+      const isPaymentMethodValid = await updateShopperDetails(
+        shopperId,
+        paymentMethod.id,
+        requestData
+      );
+      if (order && isPaymentMethodValid) {
+        const updatedOrder = generateChangeStoreResponse({
+          ...order,
+          paymentMethod: {
+            ...order.paymentMethod,
+            id: paymentMethod.id,
+          },
+        });
+        const orderResponse = await buildOrder(updatedOrder);
+        setOrder(orderResponse.response.success.data);
+      }
+    }
   };
 
   return (

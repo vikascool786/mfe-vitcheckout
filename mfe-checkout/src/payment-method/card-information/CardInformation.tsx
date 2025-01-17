@@ -80,7 +80,6 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
     values: IPaymentMethod,
     type: "TEMP" | "WALLET"
   ) => {
-    console.log("Here")
     const address = cardAddress;
     const requestData = {
       name: values.accountName,
@@ -102,7 +101,6 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
       cvv: values.cvv,
     };
 
-    console.log("here", values, type);
     try {
       if (type === "WALLET") {
         if (values.id !== 0) {
@@ -229,6 +227,10 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   const currentYear = new Date().getFullYear();
   const years = getYears(currentYear, currentYear + 10);
 
+  const validateAddressForm = (submitAddressForm: Function) => {
+    submitAddressForm();
+  };
+
   return (
     <Formik
       initialValues={initialValues}
@@ -318,6 +320,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
               <AddressForm
                 shippingAddress={cardAddress}
                 siteId="260"
+                onAddressValidation={validateAddressForm}
                 onAddressChange={(updatedAddress) => {
                   setcardAddress((prevState) => ({
                     ...prevState,
