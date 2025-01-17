@@ -1,26 +1,24 @@
-import { useAtom } from "jotai";
+import { useAtom, useSetAtom } from "jotai";
 import React from "react";
+import { removeProductFromCart } from "../api/service/Order";
 import { FormHeading } from "../component/Form/Heading/FormHeading";
+import withLoader from "../hoc/withLoader";
 import { ShippingItem } from "../shipping-item/ShippingItem";
 import { ShippingOptions } from "../shipping-options/ShippingOptions";
+import { loadingAtom, orderAtom } from "../store";
 import { getCatalogName } from "../utils/helpers/GetCatalog";
 import "./ShippingMethod.scss";
-import { orderAtom } from "../store";
-import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
-import { changeOrder, removeProductFromCart } from "../api/service/Order";
-import { useApi } from "../hooks/useAPI";
-import {
-  GET_API_ENDPOINT_BASE_URL,
-  GET_API_ENDPOINT_BASE_URL_ONLY,
-} from "../utils/urlResolver";
 
-export const ShippingMethod: React.FC = ({ }) => {
+const ShippingMethod: React.FC = ({ }) => {
   const [orders, setOrder] = useAtom(orderAtom);
+  const setLoading = useSetAtom(loadingAtom);
+
   if (!orders) {
     return <p>Loading shipping methods...</p>;
   }
 
   const handleRemoveProduct = (storeKey: string, itemKey: string) => {
+    setLoading(true);
     // Remove item from the store
     const updatedStores = { ...orders.stores };
     if (!updatedStores[storeKey]) {
@@ -41,6 +39,7 @@ export const ShippingMethod: React.FC = ({ }) => {
     });
 
     removeProductFromCart(orders.id, itemKey);
+    setLoading(false)
   };
 
   return (
@@ -82,3 +81,6 @@ export const ShippingMethod: React.FC = ({ }) => {
     </div>
   );
 };
+
+
+export default withLoader(ShippingMethod);

@@ -1,12 +1,11 @@
+import { useAtom, useSetAtom } from "jotai";
 import React, { useEffect, useState } from "react";
-import { ShippingSelection } from "../interfaces/ShippingMethod";
-import "./ShippingOptions.scss";
-import { ShippingOptionItem } from "../shipping-option-item/ShippingOptionItem";
-import { OrderStore } from "../interfaces/Order";
-import { useAtom, useAtomValue } from "jotai";
-import { orderAtom } from "../store";
 import { changeOrder } from "../api/service/Order";
+import { OrderStore } from "../interfaces/Order";
+import { ShippingOptionItem } from "../shipping-option-item/ShippingOptionItem";
+import { loadingAtom, orderAtom } from "../store";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
+import "./ShippingOptions.scss";
 
 interface IShippingOptions {
   store: OrderStore;
@@ -20,6 +19,7 @@ export const ShippingOptions: React.FC<IShippingOptions> = ({
   const { shippingSelections, shippingMethod } = store;
   const [order, setOrder] = useAtom(orderAtom); // Access both getter and setter for the atom
   const [shipping, setShipping] = useState(shippingSelections);
+  const setLoading = useSetAtom(loadingAtom);
 
   useEffect(() => {
     const defaultShippingOptions = shippingSelections.map((selection) => {
@@ -33,6 +33,7 @@ export const ShippingOptions: React.FC<IShippingOptions> = ({
 
   const handleChange = (method: string) => {
     // Map through the selections to update the isSelected flag
+    setLoading(true);
     const updatedOptions = shippingSelections.map((option) => ({
       ...option,
       isSelected: option.method === method, // Set true for selected, false for others
@@ -55,6 +56,7 @@ export const ShippingOptions: React.FC<IShippingOptions> = ({
       order.id
     ).then((response) => {
       if (response) {
+        setLoading(false);
         setOrder(response.response.success.data);
       }
     });

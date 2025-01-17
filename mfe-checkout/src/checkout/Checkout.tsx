@@ -1,34 +1,34 @@
-import { Field, Form, Formik, FormikErrors } from "formik";
-import { useAtom } from "jotai";
+import { Form, Formik } from "formik";
+import { useAtom, useSetAtom } from "jotai";
 import $ from "jquery";
 import "parsleyjs";
-import React, { RefObject, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
 import { AddressList } from "../address-list/AddressList";
 import { AddressDisplay } from "../address-verification/AddressDisplay";
 import { AddressVerificationContainer } from "../address-verification/AddressVerificationContainer";
 import { fetchStatesAndCountries } from "../api/service/CountriesAndStates";
+import { buildOrder } from "../api/service/Order";
 import {
   useCreateShopperAddressBookEntry,
   useUpdateShopperAddressBookEntry,
   useUpdateTextUpdatesForPhone,
 } from "../api/service/ShopperAddressBook";
-import { Back } from "../assets/svgs/Back";
 import { fetchSiteData } from "../api/service/Site";
+import { Back } from "../assets/svgs/Back";
 import { Button } from "../component/Button/Button";
 import { Checkbox } from "../component/Form/Checkbox/Checkbox";
 import { DropdownField } from "../component/Form/Field/DropdownField";
 import { FormField } from "../component/Form/Field/FormField";
 import { FormHeading } from "../component/Form/Heading/FormHeading";
+import withLoader from "../hoc/withLoader";
 import { Address } from "../interfaces/Address";
 import { AddressHandler } from "../interfaces/AddressHandler";
 import { DropdownOption } from "../interfaces/DropdownOption";
-import { addressAtom, orderAtom } from "../store";
-import "./Checkout.scss";
-import { buildOrder } from "../api/service/Order";
+import { addressAtom, loadingAtom, orderAtom } from "../store";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
+import "./Checkout.scss";
 import { siteApiData } from "./siteAtom";
-import { Site } from "../interfaces/Site";
 
 const defaultAddress: Address = {
   id: 0,
@@ -49,11 +49,7 @@ interface ICheckout {
   addresses: any;
 }
 
-export const Checkout: React.FC<ICheckout> = ({
-  shopperId,
-  siteId,
-  addresses,
-}) => {
+const Checkout: React.FC<ICheckout> = ({ shopperId, siteId, addresses }) => {
   // State to manage whether the form is expanded or collapsed
 
   const { createShopperAddressBookEntry } = useCreateShopperAddressBookEntry();
@@ -104,6 +100,8 @@ export const Checkout: React.FC<ICheckout> = ({
       }
     });
 
+    console.log(filteredAddresses);
+
     if (!hasPrimaryAddress) {
       setShippingAddress(filteredAddresses[0] ?? defaultAddress);
     }
@@ -116,6 +114,8 @@ export const Checkout: React.FC<ICheckout> = ({
 
   const shipFormRef = useRef<HTMLFormElement>(null);
   const childRef = useRef<AddressHandler>(null);
+
+  const setLoading = useSetAtom(loadingAtom);
 
   useEffect(() => {
     setShopperAddressBook(buildShoppersAddressBookFromResponse(addresses));
@@ -184,7 +184,7 @@ export const Checkout: React.FC<ICheckout> = ({
       country: "USA",
     };
 
-    console.log(defaultAddress, address);
+    setLoading(true);
 
     if (childRef.current) {
       try {
@@ -210,8 +210,6 @@ export const Checkout: React.FC<ICheckout> = ({
           Object.entries(validatedAddress as Address)
         ).toString();
 
-        console.log(validatedAddress);
-
         if (validatedAddress?.id && validatedAddress.id > 0) {
           // Use PUT request for existing address (update)
           await updateShopperAddressBookEntry(
@@ -223,8 +221,11 @@ export const Checkout: React.FC<ICheckout> = ({
           // Use POST request for new address (create)
           await createShopperAddressBookEntry(shopperId, addressParams);
         }
+
+        setLoading(false);
       } catch (error) {
         console.error("Error:", error);
+        setLoading(false);
       }
     }
   };
@@ -276,6 +277,7 @@ export const Checkout: React.FC<ICheckout> = ({
   };
 
   const handleAddressSelectChange = async (id: number) => {
+    setLoading(true);
     const updatedSelectedAddress = shopperAddressBook.map(
       (address) =>
         address.id === id
@@ -299,6 +301,7 @@ export const Checkout: React.FC<ICheckout> = ({
     );
 
     setOrder(newOrder.response.success.data);
+    setLoading(false);
   };
 
   const initialValues = {
@@ -548,3 +551,5 @@ export const Checkout: React.FC<ICheckout> = ({
     </div>
   );
 };
+
+export default withLoader(Checkout);

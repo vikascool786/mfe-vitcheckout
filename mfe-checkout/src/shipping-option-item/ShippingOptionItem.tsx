@@ -1,7 +1,7 @@
 import React from "react";
-import "./ShippingOptionItem.scss";
 import { RadioButton } from "../component/RadioButton/RadioButton";
 import { ShippingSelection } from "../interfaces/ShippingMethod";
+import "./ShippingOptionItem.scss";
 
 interface IShippingOption {
   shippingType: string;
@@ -29,6 +29,7 @@ export const ShippingOptionItem: React.FC<IShippingOptionItem> = ({
   const isFirst = index === 0 ? "start" : "";
   const isLast = index === size ? "end" : "";
 
+  
   return (
     <div
       className={`shipping-option-container ${select} ${isFirst} ${isLast}`}

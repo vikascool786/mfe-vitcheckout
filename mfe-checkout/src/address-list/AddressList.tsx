@@ -23,7 +23,7 @@ export const AddressList: React.FC<AppProps> = ({
   return (
     <div className="addresslist">
       {addressBook.map((address, index) => {
-        const isSelected = address.isPrimary === 1 ? "selected" : "";
+        const isSelected = address.isShip === 1 ? "selected" : "";
         const isFirst = index === 0 ? "start" : "";
         return (
           <div
@@ -34,7 +34,7 @@ export const AddressList: React.FC<AppProps> = ({
               <RadioButton
                 id={String(address.id)}
                 name={"ship-address"}
-                checked={address.isPrimary === 1}
+                checked={address.isShip === 1}
                 onChange={() => onSelectChange(address.id)}
               />
               <AddressDisplay
@@ -49,10 +49,7 @@ export const AddressList: React.FC<AppProps> = ({
         );
       })}
       {/* Add New Address Section */}
-      <div
-        className="addresslist-container end"
-        onClick={onAddNewAddressClick}
-      >
+      <div className="addresslist-container end" onClick={onAddNewAddressClick}>
         <div className="address-center">
           <Add /> Add New Address
         </div>

@@ -1,4 +1,4 @@
-import { useAtom, useAtomValue } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import React, { useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
 import { buildOrder } from "../../api/service/Order";
@@ -16,6 +16,7 @@ import { IPaymentMethod } from "../../interfaces/PaymentMethod";
 import {
   addressAtom,
   IPaymentOption,
+  loadingAtom,
   orderAtom,
   paymentMethodsAtom,
 } from "../../store";
@@ -36,6 +37,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   address,
   onCancel,
 }) => {
+  const setLoading = useSetAtom(loadingAtom);
   const [isCardSavedInWallet, setIsCardSavedInWallet] = useState(
     paymentMethod.id !== 0
   );
@@ -101,6 +103,8 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
       cvv: values.cvv,
     };
 
+    setLoading(true);
+
     try {
       if (type === "WALLET") {
         if (values.id !== 0) {
@@ -117,6 +121,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
             setOrder(orderResponse.response.success.data);
           }
           onCancel();
+          setLoading(false);
           return;
         }
 
@@ -154,6 +159,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           });
           const orderResponse = await buildOrder(updatedOrder);
           setOrder(orderResponse.response.success.data);
+          setLoading(false);
         }
       } else if (type === "TEMP") {
         onCancel();
@@ -189,10 +195,14 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
             setOrder(orderResponse.response.success.data);
           }
 
-          setTimeout(() => setPaymentMethods(updatedPaymentMethods));
+          setTimeout(() => {
+            setPaymentMethods(updatedPaymentMethods);
+            setLoading(false);
+          });
         }
       }
     } catch (error) {
+      setLoading(false);
       console.error("Error saving card information:", error);
     }
   };

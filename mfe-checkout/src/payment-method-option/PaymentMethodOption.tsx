@@ -1,4 +1,4 @@
-import { useAtom } from "jotai";
+import { useAtom, useSetAtom } from "jotai";
 import React, { ChangeEvent, ChangeEventHandler, useState } from "react";
 import { debounce } from "lodash";
 import { RadioButton } from "../component/RadioButton/RadioButton";
@@ -8,7 +8,12 @@ import {
   SEZZLE,
   thirdPartyPaymentTypeIdList,
 } from "../payment-method/PaymentType";
-import { IPaymentOption, orderAtom, paymentMethodsAtom } from "../store";
+import {
+  IPaymentOption,
+  loadingAtom,
+  orderAtom,
+  paymentMethodsAtom,
+} from "../store";
 import "./PaymentMethodOption.scss";
 import { buildOrder, changeOrder } from "../api/service/Order";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
@@ -38,6 +43,8 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
       ? ""
       : paymentMethod.cvv.toString()
   );
+
+  const setLoading = useSetAtom(loadingAtom);
 
   const [isEditing, setIsEditing] = useState<boolean>(paymentMethod.id === 0);
 
@@ -89,6 +96,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   }, 300); // Adjust debounce time as needed
 
   const onValidCVV = async (cvv: string) => {
+    setLoading(true);
     if (
       !thirdPartyPaymentTypeIdList().includes(
         paymentOption.paymentMethod.typeID
@@ -114,6 +122,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
         });
         const orderResponse = await buildOrder(updatedOrder);
         setOrder(orderResponse.response.success.data);
+        setLoading(false);
       }
     }
   };

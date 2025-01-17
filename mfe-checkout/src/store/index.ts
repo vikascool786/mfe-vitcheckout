@@ -46,3 +46,5 @@ export const addressAtom = atom<Address[]>([]);
 export const paymentMethodsAtom = atom<IPaymentOption[]>(initialPaymentMethods);
 
 export const OrderStore = createStore();
+
+export const loadingAtom = atom<boolean>(false);

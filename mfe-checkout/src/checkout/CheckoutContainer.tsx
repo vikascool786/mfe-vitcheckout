@@ -1,30 +1,30 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useAtom } from "jotai";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import "../App.scss";
 import { buildOrder, commitOrder, OrderResponse } from "../api/service/Order";
 import { withErrorBoundary } from "../hoc/withErrorBoundary";
-import { Checkout } from "./Checkout";
-import { OrderSummary } from "../order-summary/OrderSummary";
-import { PaymentMethod } from "../payment-method/PaymentMethods";
-import { ShippingMethod } from "../shipping-methods/ShippingMethod";
 import { useApi } from "../hooks/useAPI";
 import { Address } from "../interfaces/Address";
 import { ChangeOrder } from "../interfaces/ChangeOrder";
 import { Order } from "../interfaces/Order";
 import { IPaymentMethod } from "../interfaces/PaymentMethod";
-import { orderAtom } from "../store";
+import { OrderSummary } from "../order-summary/OrderSummary";
+import PaymentMethod from "../payment-method/PaymentMethods";
+import ShippingMethod from "../shipping-methods/ShippingMethod";
+import { loadingAtom, orderAtom } from "../store";
+import Checkout from "./Checkout";
 
-import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
+import { checkoutSezzle } from "../api/ajaxaction/Sezzle";
+import ErrorMessage from "../component/Error";
+import { Spinner } from "../component/Spinner/Spinner";
 import HeadHelmet from "../head-helmet/HeadHelmet";
 import PlaceOrder from "../payment-method/place-order/PlaceOrder";
+import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
+import { handleSezzleCheckout } from "../utils/helpers/SezzleHelper";
 import {
   GET_API_ENDPOINT_BASE_URL_ONLY,
   GET_API_KEY,
 } from "../utils/urlResolver";
-import ErrorMessage from "../component/Error";
-import { checkoutSezzle } from "../api/ajaxaction/Sezzle";
-import { handleSezzleCheckout } from "../utils/helpers/SezzleHelper";
-import { Spinner } from "../component/Spinner/Spinner";
 
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
@@ -67,10 +67,12 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   siteId,
 }) => {
   const [orderData, setOrderData] = useAtom(orderAtom);
+  const [isLoading] = useAtom(loadingAtom);
   const [orderErrorMessage, setOrderErrorMessage] = useState("");
   const [paymentTypeId, setPaymentTypeId] = useState(0);
   const hasInitializedOrder = useRef(false); // Prevent multiple executions of updateOrder
-  const [loadingOrderConfirmation, setLoadingOrderConfirmation] = useState(false);
+  const [loadingOrderConfirmation, setLoadingOrderConfirmation] =
+    useState(false);
 
   const addressUrl = `${apiDomain}/shopper-addressbooks/v1/${shopperId}/AddressBook?api_key=${apiKey}`;
   const paymentUrl = `${apiDomain}/shopper-wallets/v1/Shopper/${shopperId}/Wallet?api_key=${apiKey}`;
@@ -182,14 +184,14 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
 
   if (addressError || paymentError) return <div>Failed to load data</div>;
 
-  if (loadingOrderConfirmation) return (
-    <div className="loading-order-conf">
-      <div>Please wait while your order is being placed</div>
-      <Spinner />
-    </div>
-  )
+  if (loadingOrderConfirmation)
+    return (
+      <div className="loading-order-conf">
+        <div>Please wait while your order is being placed</div>
+        <Spinner />
+      </div>
+    );
 
-  console.log(orderError)
   return (
     <div>
       {orderData ? (
@@ -200,20 +202,21 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                 shopperId={shopperId}
                 siteId={siteId}
                 addresses={addresses || []}
+                loading={isLoading}
               />
-              <ShippingMethod order={orderData} />
+              <ShippingMethod order={orderData} loading={isLoading} />
               <PaymentMethod
                 cartId={cartId}
                 shopperId={shopperId}
                 siteId={siteId}
                 pcid={pcid}
                 updatePaymentTypeId={setPaymentTypeId}
+                loading={isLoading}
               />
             </div>
             <div className="right-column">
               <OrderSummary pcid={pcid} />
             </div>
-
           </div>
           <div className="place-order">
             <PlaceOrder
@@ -228,9 +231,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
           <HeadHelmet />
         </>
       ) : (
-        <ErrorMessage
-          errorMessage={orderError && orderError.errors.message}
-        />
+        <ErrorMessage errorMessage={orderError && orderError.errors.message} />
       )}
     </div>
   );

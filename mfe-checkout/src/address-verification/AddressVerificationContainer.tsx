@@ -4,6 +4,8 @@ import { Address } from "../interfaces/Address";
 import { postAVS } from "../api/service/AddressVerification";
 import { AddressVerification } from "./AddressVerification";
 import { AddressHandler } from "../interfaces/AddressHandler";
+import { useAtom, useSetAtom } from "jotai";
+import { loadingAtom } from "../store";
 
 interface MyComponentProps {
   showAvs: boolean;
@@ -28,6 +30,7 @@ export const AddressVerificationContainer = forwardRef<
     phone: "",
   } as Address);
   const [hasAddressSuggestions, setAddressSuggestions] = useState(false);
+  const setLoading = useSetAtom(loadingAtom);
 
   const [addressList, setAddressList] = useState<Address[]>([]);
 
@@ -38,6 +41,7 @@ export const AddressVerificationContainer = forwardRef<
 
   const verifyAddress = async (addressEntered: Address): Promise<boolean> => {
     let isValidAddress = true;
+    setLoading(true);
     try {
       const response = await postAVS(
         addressEntered.address1,
@@ -60,11 +64,13 @@ export const AddressVerificationContainer = forwardRef<
       }));
       setAddressList(mappedAddresses);
       setAddressSuggestions(mappedAddresses.length > 1);
+
       isValidAddress = await response.data.response.indicators
         .validAddressIndicator;
     } catch (err) {
       console.log(err);
     } finally {
+      setLoading(false);
       setAddressToVerify(addressEntered);
     }
     return isValidAddress;

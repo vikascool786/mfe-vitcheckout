@@ -1,4 +1,4 @@
-import { useAtom } from "jotai";
+import { useAtom, useSetAtom } from "jotai";
 import React, { useEffect, useState } from "react";
 import { fetchSiteFlagData } from "../api/service/SiteFlags";
 import { Add } from "../assets/icons/Add";
@@ -8,7 +8,12 @@ import { FormHeading } from "../component/Form/Heading/FormHeading";
 import { Address } from "../interfaces/Address";
 import { PaymentOptionClick2Pay } from "../payment-method-click2pay/PaymentMethodOptionClick2Pay";
 import { PaymentOption } from "../payment-method-option/PaymentMethodOption";
-import { IPaymentOption, orderAtom, paymentMethodsAtom } from "../store";
+import {
+  IPaymentOption,
+  loadingAtom,
+  orderAtom,
+  paymentMethodsAtom,
+} from "../store";
 import { TextUpdates } from "../text-updates/TextUpdates";
 import { createPaymentMethod } from "../utils/helpers/GeneratePaymentMethod";
 import { SHOPPER_WALLET_ADDRESS, WALLET_DATA } from "../utils/MOCKS";
@@ -19,6 +24,7 @@ import {
   fetchShoppersPaymentMethods,
   generatePayPalTransactionDetails,
 } from "../api/service/ShoppersPaymentMethods";
+import withLoader from "../hoc/withLoader";
 
 interface IPaymentMethod {
   shopperId: string;
@@ -28,7 +34,7 @@ interface IPaymentMethod {
   updatePaymentTypeId: (newValue: number) => void;
 }
 
-export const PaymentMethod: React.FC<IPaymentMethod> = ({
+const PaymentMethod: React.FC<IPaymentMethod> = ({
   shopperId,
   cartId,
   siteId,
@@ -41,7 +47,7 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
 
   const [showClick2Pay, setShowClick2Pay] = useState(false);
 
-  const [order, setOrder] = useAtom(orderAtom);
+  const [order] = useAtom(orderAtom);
 
   const [showNewCard, setShowNewCard] = useState<boolean>(false);
 
@@ -158,11 +164,11 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
   useEffect(() => {
     const handleDeselectPaymentMethodsEvent = () => {
       setPaymentMethods(
-          paymentMethods.map((item) => ({
-            ...item,
-            isSelected: false,
-          }))
-      )
+        paymentMethods.map((item) => ({
+          ...item,
+          isSelected: false,
+        }))
+      );
       updatePaymentTypeId(CLICK2PAY.typeId);
     };
     document.addEventListener(
@@ -323,3 +329,5 @@ export const PaymentMethod: React.FC<IPaymentMethod> = ({
     </div>
   );
 };
+
+export default withLoader(PaymentMethod);
