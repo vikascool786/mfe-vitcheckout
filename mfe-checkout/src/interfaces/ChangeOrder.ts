@@ -54,4 +54,5 @@ export interface UserOptions {
   gcPin?: string[];
   coupons?: string[];
   smsPhone?: string;
+  tempOrderID?: string;
 }

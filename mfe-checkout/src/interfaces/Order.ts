@@ -77,4 +77,5 @@ export interface IUserOptions {
   gcNum: string[];
   gcPin: string[];
   smsPhone: string;
+  tempOrderID: string;
 }

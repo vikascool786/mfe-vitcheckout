@@ -34,12 +34,20 @@ export const generateChangeStoreResponse = (order: Order): ChangeOrder => {
       coupons: order.userOptions?.coupons
         ? order.userOptions.coupons
         : ([] as string[]),
+      tempOrderID: order.userOptions?.tempOrderID,
     },
   };
 
   // Conditionally add properties
   if (order.billingAddress?.id) {
     updatedPayload.billing = { id: order.billingAddress.id };
+  }else if (order.billingAddress && order.billingAddress.address1) {
+    updatedPayload.billing = updatedPayload.billing ?? {};
+    updatedPayload.billing.address1 = order.billingAddress.address1;
+    updatedPayload.billing.city = order.billingAddress.city;
+    updatedPayload.billing.state = order.billingAddress.state;
+    updatedPayload.billing.zip = order.billingAddress.zip;
+    updatedPayload.billing.country = order.billingAddress.country;
   }
 
   if (order.shippingAddress?.id) {

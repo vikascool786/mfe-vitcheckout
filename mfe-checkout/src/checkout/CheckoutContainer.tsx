@@ -14,18 +14,17 @@ import ShippingMethod from "../shipping-methods/ShippingMethod";
 import { loadingAtom, orderAtom } from "../store";
 import Checkout from "./Checkout";
 import Swal from "sweetalert2";
-
-import { checkoutSezzle } from "../api/ajaxaction/Sezzle";
-import ErrorMessage from "../component/Error";
-import { Spinner } from "../component/Spinner/Spinner";
 import HeadHelmet from "../head-helmet/HeadHelmet";
 import PlaceOrder from "../payment-method/place-order/PlaceOrder";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
-import { handleSezzleCheckout } from "../utils/helpers/SezzleHelper";
 import {
   GET_API_ENDPOINT_BASE_URL_ONLY,
   GET_API_KEY,
 } from "../utils/urlResolver";
+import ErrorMessage from "../component/Error";
+import { checkoutSezzle } from "../api/ajaxaction/Sezzle";
+import { handleSezzleCheckout } from "../utils/helpers/SezzleHelper";
+import { Spinner } from "../component/Spinner/Spinner";
 
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
@@ -82,12 +81,12 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   useEffect(() => {
     handleSezzleCheckout(
       location.search,
-      orderData,
       checkoutSezzle,
       buildOrder,
       generateChangeStoreResponse,
       setLoadingOrderConfirmation,
-      confirmOrder
+      confirmOrder,
+      cartId,
     );
   }, [location.search]);
 
@@ -185,6 +184,10 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     setLoadingOrderConfirmation(value);
   };
 
+  const handleUpdateOrderErrorMessage = (message: string) => {
+    setOrderErrorMessage(message);
+  };
+
   if (loadingAddresses || loadingPaymentMethods || loadingOrder)
     return <div>Loading...</div>;
 
@@ -202,6 +205,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     <div>
       {orderData && (
         <>
+        <div className="container">
           <div className="checkout-container">
             <div className="left-column">
               <Checkout
@@ -232,9 +236,11 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
               shopperId={shopperId}
               siteId={siteId}
               order={orderData}
+              updateOrderErrorMessage={handleUpdateOrderErrorMessage}
             />
           </div>
           <HeadHelmet />
+          </div>
         </>
       )}
 

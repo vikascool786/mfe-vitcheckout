@@ -2,10 +2,11 @@ import { GET_AJAX_ENDPOINT_BASE_URL } from "../../utils/urlResolver";
 import axiosInstance from "../axios";
 
 export const fetchSezzleUrl = async (
-    total: string
+    total: string,
+    tempOrderId: string,
 ): Promise<any> => {
     try {
-        const FAMOS_SEZZLE_URL_PATH = `/ajaxaction/get-sezzle-data?isGuest=false&total=${total}`;
+        const FAMOS_SEZZLE_URL_PATH = `/ajaxaction/get-sezzle-data?isGuest=false&total=${total}&tempOrderId=${tempOrderId}`;
         const ajaxEndpoint = `${GET_AJAX_ENDPOINT_BASE_URL()}`.replace("{{path}}", FAMOS_SEZZLE_URL_PATH);
         const ajaxResponse = await axiosInstance(ajaxEndpoint).get("");
         return ajaxResponse.data;

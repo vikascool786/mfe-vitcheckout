@@ -29,7 +29,7 @@ export const ShippingOptionItem: React.FC<IShippingOptionItem> = ({
   const isFirst = index === 0 ? "start" : "";
   const isLast = index === size ? "end" : "";
 
-  
+
   return (
     <div
       className={`shipping-option-container ${select} ${isFirst} ${isLast}`}

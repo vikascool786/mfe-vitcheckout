@@ -25,12 +25,14 @@ export interface IPaymentOptionProps {
   shopperId: string;
   index: number;
   removeCard: () => void;
+  updatePaymentTypeId: (newValue: number) => void;
 }
 
 export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   index,
   shopperId,
   paymentOption,
+  updatePaymentTypeId
 }) => {
   const [order, setOrder] = useAtom(orderAtom);
   const { paymentMethod, paymentAddress, isPaymentValidated } = paymentOption;
@@ -54,22 +56,54 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     if (order?.paymentMethod?.id === paymentOption.paymentMethod.id) {
       return;
     }
+    const isThirdPartySelected = thirdPartyPaymentTypeIdList().includes(paymentOption.paymentMethod.typeID);
     // Update payment methods with the selected method
     const updatedPaymentOptions = paymentMethods.map((method) =>
-      method.paymentMethod.id === paymentOption.paymentMethod.id
-        ? {
+      isThirdPartySelected
+        ? method.paymentMethod.typeID === paymentOption.paymentMethod.typeID
+          ? {
             ...method,
             isSelected: true,
             isVisible: true,
           }
-        : {
+          : {
+            ...method,
+            isSelected: false,
+          }
+        :
+        method.paymentMethod.id === paymentOption.paymentMethod.id
+          ? {
+            ...method,
+            isSelected: true,
+            isVisible: true,
+          }
+          : {
             ...method,
             isSelected: false,
           }
     );
 
+
+    const selectedPayment = updatedPaymentOptions.find((pm) => pm.isSelected);
+
+    updatePaymentTypeId(selectedPayment?.paymentMethod.typeID ?? 0);
+
     // Set updated payment methods to state
     setPaymentMethods(updatedPaymentOptions);
+
+    // Trigger side effect to update order with the new payment method
+    if (!isThirdPartySelected) {
+      changeOrder(
+        generateChangeStoreResponse({
+          ...order,
+          paymentMethod: {
+            ...paymentOption.paymentMethod,
+            id: paymentOption.paymentMethod.id,
+          },
+        }),
+        order?.id
+      );
+    }
   };
 
   const handleCVV = (e: ChangeEvent<HTMLInputElement>) => {
@@ -124,15 +158,15 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
         const updatedPaymentOptions = paymentMethods.map((method) =>
           method.paymentMethod.id === paymentOption.paymentMethod.id
             ? {
-                ...method,
-                isSelected: true,
-                isVisible: true,
-                isPaymentValidated: true,
-              }
+              ...method,
+              isSelected: true,
+              isVisible: true,
+              isPaymentValidated: true,
+            }
             : {
-                ...method,
-                isSelected: false,
-              }
+              ...method,
+              isSelected: false,
+            }
         );
 
         setPaymentMethods(updatedPaymentOptions);

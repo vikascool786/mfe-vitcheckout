@@ -1,18 +1,25 @@
+import { generateOrderTrackingId } from "./GenerateOrderTrackingId";
+import { fetchOrderDetail } from "../../api/service/Order";
+
 export const handleSezzleCheckout = async (
     locationSearch: string,
-    order: any,
     checkoutSezzle: () => Promise<any>,
     buildOrder: (orderData: any) => any,
     generateChangeStoreResponse: (orderData: any) => any,
     setLoadingOrderConfirmation: (status: boolean) => void,
-    confirmOrder: () => void
+    confirmOrder: () => void,
+    cartId: string,
 ) => {
+    const trackingData = new Map<string, string>();
     const createSezzleOrder = async () => {
         console.log("createSezzleOrder");
         try {
             const sezzleResponse = await checkoutSezzle();
             if (typeof sezzleResponse.paymentId !== "undefined") {
                 const paymentId = sezzleResponse.paymentId;
+                const orderUUId = sezzleResponse.orderUUID ?? null;
+                trackingData.set("sezzle", orderUUId);
+                const order = await fetchOrderDetail(cartId);
                 if (order) {
                     return buildOrder(
                         generateChangeStoreResponse({
@@ -20,6 +27,10 @@ export const handleSezzleCheckout = async (
                             paymentMethod: {
                                 ...order.paymentMethod,
                                 id: paymentId,
+                            },
+                            userOptions: {
+                                ...order.userOptions,
+                                trackingID: generateOrderTrackingId(trackingData),
                             },
                         })
                     );
@@ -41,8 +52,6 @@ export const handleSezzleCheckout = async (
             setLoadingOrderConfirmation(true);
             try {
                 const response = await createSezzleOrder();
-                console.log("create sezzle order is complete, commit order");
-                console.log("create order response: " + JSON.stringify(response));
                 confirmOrder();
             } catch (error) {
                 console.error("Sezzle order creation failed: " + error);

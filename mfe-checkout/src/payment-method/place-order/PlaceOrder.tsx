@@ -34,6 +34,7 @@ interface IPlaceOrder {
   shopperId: string;
   siteId: string;
   order?: Order;
+  updateOrderErrorMessage: (newMessage: string) => void
 }
 
 const PAYPAL_TOKEN_URL = (shopperId: string) =>
@@ -48,6 +49,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   shopperId,
   siteId,
   order,
+  updateOrderErrorMessage,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const trackingData = new Map<string, string>();
@@ -255,13 +257,18 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   };
 
   const handleSezzleOrder = async () => {
-    //const total = order ? order.totals.price.toString() : "0";
-    const total = "33.44"; //TODO update when totals come back correctly again
-    const sezzleResponse = await fetchSezzleUrl(total);
+    const total = order ? order.totals.price.toString() : "0";
+    const tempOrderId = order ? order.userOptions?.tempOrderID : "0";
+    const sezzleResponse = await fetchSezzleUrl(total, tempOrderId);
     if (typeof sezzleResponse.url != "undefined") {
       window.location = sezzleResponse.url;
     } else {
-      throw new Error("Error connecting with Sezzle");
+      let errMsg = "Error connecting with Sezzle";
+      if (typeof sezzleResponse.error != "undefined") {
+        errMsg = sezzleResponse.error;
+      }
+      updateOrderErrorMessage(errMsg);
+      throw new Error(errMsg);
     }
   };
 
