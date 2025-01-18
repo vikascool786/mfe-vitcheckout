@@ -34,7 +34,7 @@ interface IPlaceOrder {
   shopperId: string;
   siteId: string;
   order?: Order;
-  updateOrderErrorMessage: (newMessage: string) => void
+  updateOrderErrorMessage: (newMessage: string) => void;
 }
 
 const PAYPAL_TOKEN_URL = (shopperId: string) =>
@@ -86,6 +86,8 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
       );
       if (order) {
         const changeOrderDetails = generateChangeStoreResponse(order);
+
+        delete response["id"];
         changeOrder(
           {
             ...changeOrderDetails,

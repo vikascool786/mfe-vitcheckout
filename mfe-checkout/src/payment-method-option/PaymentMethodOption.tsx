@@ -52,10 +52,11 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   const [cvvCode, setCvvCode] = useState<string>("");
 
   useEffect(() => {
+    console.log("isPaymentValidated", isPaymentValidated);
     if (isPaymentValidated) {
       setCvvCode("***");
     }
-  }, [isPaymentValidated]);
+  }, [isPaymentValidated, paymentMethod.cvv]);
 
   const setLoading = useSetAtom(loadingAtom);
 

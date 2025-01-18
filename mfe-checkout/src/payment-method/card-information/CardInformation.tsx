@@ -126,8 +126,8 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
     const addressEntered = {
       ...shippingAddress,
       ...address,
-      id: shippingAddress?.id || 0,
-      country: "USA",
+      isBill: 1,
+      id: 0,
     };
 
     setLoading(true);
@@ -150,9 +150,8 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           shopperId,
           addressParams
         );
-        return response;
-
         setLoading(false);
+        return response;
       } catch (error) {
         console.error("Error:", error);
         setLoading(false);
@@ -182,8 +181,6 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
 
     const newAddressResponse = await handleSaveAddress(newAddressToAdd);
 
-    console.log(newAddressResponse);
-
     const requestData = {
       name: values.accountName,
       number: values.number,
@@ -197,8 +194,18 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
 
     setLoading(true);
 
-    if (shippingAddress?.id) {
-      requestData.addressId = shippingAddress?.id;
+    console.log("newAddressResponse", newAddressResponse);
+
+    if (newAddressResponse) {
+      const newBillAddress = newAddressResponse.find(
+        (address: Address) => address.isBill
+      );
+      console.log("newBillAddress", newBillAddress);
+      if (newBillAddress) {
+        requestData.addressId = newBillAddress.id;
+      } else {
+        requestData.addressId = shippingAddress?.id;
+      }
     }
 
     try {
@@ -387,6 +394,10 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   if (error) {
     return <p>{error}</p>;
   }
+
+  const handleEditClick = () => {
+    setShowAVS(false);
+  };
 
   return (
     <>
@@ -617,6 +628,12 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           </form>
         )}
       </Formik>
+      <AddressVerificationContainer
+        ref={childRef}
+        showAvs={showAVS}
+        onClick={handleEditClick}
+        onSelectAddress={handleUseSelectedAddress}
+      />
     </>
   );
 };
