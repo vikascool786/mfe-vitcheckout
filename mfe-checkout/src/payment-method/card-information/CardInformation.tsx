@@ -48,7 +48,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   const addressList = useAtomValue(addressAtom);
   const [order, setOrder] = useAtom(orderAtom);
 
-  const shippingAddress = addressList.find((add) => add.isPrimary);
+  const shippingAddress = addressList.find((add) => add.isShip);
   const [sameShippingAddress, setSameShippingAddress] = useState<boolean>(
     !address ? true : false
   );
@@ -196,6 +196,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                 cvv: requestData.cvv,
               },
               paymentAddress: {} as Address,
+              isPaymentValidated: true,
               isSelected: true,
               isVisible: true,
             },

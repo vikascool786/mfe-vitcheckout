@@ -38,7 +38,9 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
 
   console.log(paymentMethod.cvv);
 
-  const [cvvCode, setCvvCode] = useState<string>("");
+  const [cvvCode, setCvvCode] = useState<string>(
+    isPaymentValidated ? "***" : ""
+  );
 
   const setLoading = useSetAtom(loadingAtom);
 
@@ -137,6 +139,8 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
 
         setPaymentMethods(updatedPaymentOptions);
       }
+
+      setLoading(false);
     }
   };
 
@@ -185,7 +189,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                 <input
                   onChange={handleCVV}
                   className="payment-option-container__card-cvv-form"
-                  value={isPaymentValidated ? "***" : cvvCode}
+                  value={cvvCode}
                   type="password"
                   placeholder="3 or 4 digits"
                 />
