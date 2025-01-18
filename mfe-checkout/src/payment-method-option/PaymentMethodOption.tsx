@@ -1,5 +1,10 @@
 import { useAtom, useSetAtom } from "jotai";
-import React, { ChangeEvent, ChangeEventHandler, useState } from "react";
+import React, {
+  ChangeEvent,
+  ChangeEventHandler,
+  useEffect,
+  useState,
+} from "react";
 import { debounce } from "lodash";
 import { RadioButton } from "../component/RadioButton/RadioButton";
 import { CardInformation } from "../payment-method/card-information/CardInformation";
@@ -18,29 +23,39 @@ import "./PaymentMethodOption.scss";
 import { buildOrder, changeOrder } from "../api/service/Order";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import { IPaymentMethod } from "../interfaces/PaymentMethod";
-import { updateShopperDetails } from "../api/service/ShoppersPaymentMethods";
+import {
+  updateShopperDetails,
+  updateTempPaymentMethod,
+} from "../api/service/ShoppersPaymentMethods";
 
 export interface IPaymentOptionProps {
   paymentOption: IPaymentOption;
   shopperId: string;
   index: number;
   removeCard: () => void;
-  updatePaymentTypeId: (newValue: number) => void;
 }
 
 export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   index,
   shopperId,
   paymentOption,
-  updatePaymentTypeId
 }) => {
   const [order, setOrder] = useAtom(orderAtom);
-  const { paymentMethod, paymentAddress, isPaymentValidated } = paymentOption;
+  const {
+    paymentMethod,
+    paymentAddress,
+    isPaymentValidated,
+    isTempPaymentMethod,
+  } = paymentOption;
   const [paymentMethods, setPaymentMethods] = useAtom(paymentMethodsAtom);
 
-  console.log(paymentMethod.cvv);
-
   const [cvvCode, setCvvCode] = useState<string>("");
+
+  useEffect(() => {
+    if (isPaymentValidated) {
+      setCvvCode("***");
+    }
+  }, [isPaymentValidated]);
 
   const setLoading = useSetAtom(loadingAtom);
 
@@ -53,57 +68,29 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     paymentMethod.accountName !== SEZZLE.name;
 
   const onChangePaymentMethod = () => {
+    // Check if the selected payment option is the same as the current one
     if (order?.paymentMethod?.id === paymentOption.paymentMethod.id) {
       return;
     }
-    const isThirdPartySelected = thirdPartyPaymentTypeIdList().includes(paymentOption.paymentMethod.typeID);
+
+    // Set editing to false if switching to a different payment method
+
     // Update payment methods with the selected method
     const updatedPaymentOptions = paymentMethods.map((method) =>
-      isThirdPartySelected
-        ? method.paymentMethod.typeID === paymentOption.paymentMethod.typeID
-          ? {
+      method.paymentMethod.id === paymentOption.paymentMethod.id
+        ? {
             ...method,
             isSelected: true,
             isVisible: true,
           }
-          : {
-            ...method,
-            isSelected: false,
-          }
-        :
-        method.paymentMethod.id === paymentOption.paymentMethod.id
-          ? {
-            ...method,
-            isSelected: true,
-            isVisible: true,
-          }
-          : {
+        : {
             ...method,
             isSelected: false,
           }
     );
 
-
-    const selectedPayment = updatedPaymentOptions.find((pm) => pm.isSelected);
-
-    updatePaymentTypeId(selectedPayment?.paymentMethod.typeID ?? 0);
-
     // Set updated payment methods to state
     setPaymentMethods(updatedPaymentOptions);
-
-    // Trigger side effect to update order with the new payment method
-    if (!isThirdPartySelected) {
-      changeOrder(
-        generateChangeStoreResponse({
-          ...order,
-          paymentMethod: {
-            ...paymentOption.paymentMethod,
-            id: paymentOption.paymentMethod.id,
-          },
-        }),
-        order?.id
-      );
-    }
   };
 
   const handleCVV = (e: ChangeEvent<HTMLInputElement>) => {
@@ -137,11 +124,20 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
         ...paymentMethod,
         cvv,
       };
-      const isPaymentMethodValid = await updateShopperDetails(
-        shopperId,
-        paymentMethod.id,
-        requestData
-      );
+
+      let isPaymentMethodValid;
+      if (isTempPaymentMethod) {
+        isPaymentMethodValid = await updateTempPaymentMethod(
+          shopperId,
+          requestData
+        );
+      } else {
+        isPaymentMethodValid = await updateShopperDetails(
+          shopperId,
+          paymentMethod.id,
+          requestData
+        );
+      }
       if (order && isPaymentMethodValid && !isPaymentValidated) {
         const updatedOrder = generateChangeStoreResponse({
           ...order,
@@ -158,19 +154,21 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
         const updatedPaymentOptions = paymentMethods.map((method) =>
           method.paymentMethod.id === paymentOption.paymentMethod.id
             ? {
-              ...method,
-              isSelected: true,
-              isVisible: true,
-              isPaymentValidated: true,
-            }
+                ...method,
+                isSelected: true,
+                isVisible: true,
+                isPaymentValidated: true,
+              }
             : {
-              ...method,
-              isSelected: false,
-            }
+                ...method,
+                isSelected: false,
+              }
         );
 
         setPaymentMethods(updatedPaymentOptions);
       }
+
+      setLoading(false);
     }
   };
 
@@ -219,7 +217,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                 <input
                   onChange={handleCVV}
                   className="payment-option-container__card-cvv-form"
-                  value={isPaymentValidated ? "***" : cvvCode}
+                  value={cvvCode}
                   type="password"
                   placeholder="3 or 4 digits"
                 />
@@ -244,6 +242,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
         <CardInformation
           paymentMethod={paymentMethod}
           address={paymentAddress}
+          isPaymentValidated={isPaymentValidated}
           shopperId={shopperId}
           onCancel={() => {
             setIsEditing(false);

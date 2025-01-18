@@ -19,20 +19,35 @@ interface IOrderSummary {
   hideCashback?: boolean;
 }
 
+interface ICouponState {
+  coupon: string;
+  couponError: string;
+}
 export const OrderSummary: React.FC<IOrderSummary> = ({
   pcid,
   hideCashback,
 }) => {
   const [order, setOrder] = useAtom(orderAtom);
   const { eWalletData, loading, error } = useShopperEWallet(pcid);
-  const [coupon, setCoupon] = useState("");
+  const [coupon, setCoupon] = useState<ICouponState>({
+    coupon: "",
+    couponError: "",
+  });
   const [showApplyGiftCard, setShowApplyGiftCard] = useState(false);
   const [gcPin, setGcPin] = useState<string>("");
   const [gcNum, setGcNum] = useState<string>("");
 
   // Handle input text change for coupon
+  // Handle input text change for coupon
   const handleCouponTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCoupon(e.target.value);
+    const { value } = e.target;
+
+    setCoupon((prev) => ({
+      ...prev,
+      coupon: value,
+      // Clear the error if the coupon text is cleared
+      couponError: value.trim() === "" ? "" : prev.couponError,
+    }));
   };
 
   // Handle input changes for gift card fields
@@ -102,53 +117,46 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
     }
   };
 
-  const handleAddCoupon = () => {
-    if (order) {
-      if (order?.userOptions.coupons) {
-        const { coupons } = order.userOptions;
-        const trimmedCoupon = coupon.trim();
+  const handleAddCoupon = async () => {
+    try {
+      if (order) {
+        const { coupons } = order?.userOptions || {};
+        const trimmedCoupon = coupon.coupon.trim();
 
-        // Add coupon if not empty and not already present
-        if (trimmedCoupon && !coupons.includes(trimmedCoupon)) {
-          changeOrder(
+        if (trimmedCoupon && (!coupons || !coupons.includes(trimmedCoupon))) {
+          // Create a new coupons array with the new coupon
+          const updatedCoupons = coupons
+            ? [...coupons, trimmedCoupon]
+            : [trimmedCoupon];
+
+          const response = await changeOrder(
             generateChangeStoreResponse({
               ...order,
               userOptions: {
                 ...order.userOptions,
-                coupons: [...coupons, coupon],
+                coupons: updatedCoupons,
               },
             }),
             order.id
-          ).then((response) => {
-            if (response.response.errors.message) {
-              Swal.fire({
-                icon: "error",
-                title: "Oops...",
-                text: response.response.errors.message as string,
-              });
-              return;
-            }
-            setOrder(response.response.success.data);
-          });
+          );
 
-          setCoupon("");
-        }
-      } else {
-        changeOrder(
-          generateChangeStoreResponse({
-            ...order,
-            userOptions: {
-              ...order.userOptions,
-              coupons: [coupon],
-            },
-          }),
-          order.id
-        ).then((response) => {
-          if (response) {
-            setOrder(response.response.success.data);
+          if (response.response.errors?.message) {
+            setCoupon({
+              coupon: coupon.coupon,
+              couponError: response.response.errors.message,
+            });
+            return;
           }
-        });
+
+          setOrder(response.response.success?.data);
+        }
       }
+    } catch (error) {
+      console.error("Error while adding coupon:", error);
+      setCoupon({
+        coupon: coupon.coupon,
+        couponError: "An unexpected error occurred while adding the coupon.",
+      });
     }
   };
 
@@ -172,7 +180,11 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           <div className="order-redeem-coupon-text">Redeem Coupon</div>
           <div className="order-summary-coupon-container">
             <div className="order-input-container">
-              <FormField value={coupon} onChange={handleCouponTextChange} />
+              <FormField
+                value={coupon.coupon}
+                onChange={handleCouponTextChange}
+                errorMessage={coupon.couponError}
+              />
             </div>
             <div className="order-apply-container">
               <Button

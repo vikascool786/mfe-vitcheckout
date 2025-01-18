@@ -11,6 +11,7 @@ export interface IPaymentOption {
   paymentMethod: IPaymentMethod;
   paymentAddress: Address;
   isPaymentValidated: boolean;
+  isTempPaymentMethod?: boolean;
   isVisible: boolean;
   isSelected: boolean;
 }

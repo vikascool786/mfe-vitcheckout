@@ -3,23 +3,67 @@
   flex-direction: column;
   min-width: 15rem;
   width: 100%;
+  margin-bottom: 1rem;
 }
 
 .required-field::after {
   content: "*";
-  color: red;
+  color: #f44336; /* Use a brighter red for visibility */
+  margin-left: 4px;
+  font-weight: bold;
 }
 
 .input-container {
-  padding: 0 4px;
+  padding: 0 8px; /* Increased padding for better usability */
   vertical-align: middle;
-  border-radius: 3px;
+  border-radius: 4px; /* Slightly increased border-radius for modern UI */
   background-color: #ffffff;
   border: 1px solid #000000;
   font-size: 16px;
   min-height: 42px;
   line-height: 18px;
   font-weight: normal;
+  transition: border-color 0.3s ease, background-color 0.3s ease; /* Smooth transitions */
+
+  &:focus {
+    border-color: #4a90e2; /* Highlight border on focus */
+    outline: none;
+    box-shadow: 0 0 4px rgba(74, 144, 226, 0.5); /* Subtle focus glow */
+  }
+
+  &.error-border {
+    border-color: #f44336; /* Red border for errors */
+    background-color: white; /* Light red background for errors */
+  }
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  background-color: #f0f1f7; /* Light red background */
+  border: 1px solid #79787880; /* Subtle red border */
+  border-radius: 8px; /* Rounded corners for modern look */
+  padding: 8px 12px; /* Add padding for better spacing */
+  color: black; /* Dark red text color for contrast */
+  font-family: "Inter", sans-serif;
+  font-size: 14px; /* Adjust text size */
+  font-weight: 400; /* Regular weight for readability */
+  margin-top: 8px; /* Add spacing above the message */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Subtle shadow for elevation */
+  position: relative;
+  min-height: 1.8rem;
+}
+
+.error-message::before {
+  content: "";
+  display: block;
+  width: 6px; /* Width of the left red bar */
+  height: 100%;
+  background-color: #d32f2f; /* Red bar color */
+  border-radius: 4px 0 0 4px; /* Round the left side of the bar */
+  position: absolute;
+  left: 0;
+  top: 0;
 }
 
 .field-extra-label {
@@ -28,4 +72,5 @@
   font-weight: 300;
   margin-top: 4px;
   margin-bottom: 4px;
+  color: #666666; /* Neutral color for extra labels */
 }
