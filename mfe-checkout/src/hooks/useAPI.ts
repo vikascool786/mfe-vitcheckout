@@ -14,6 +14,7 @@ export const useApi = <T>(
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<unknown | null>(null);
   const [order, setOrder] = useState<Order>();
+  const [isComplete, setIsComplete] = useState(false);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -26,6 +27,7 @@ export const useApi = <T>(
     }
 
     setIsLoading(false);
+    setIsComplete(true);
   };
 
   const postData = async (body: any, customOptions?: AxiosRequestConfig) => {
@@ -65,5 +67,5 @@ export const useApi = <T>(
     }
   }, []);
 
-  return { data, isLoading, error, fetchData, postData };
+  return { data, isLoading, error, fetchData, postData, isComplete };
 };

@@ -77,6 +77,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   const addressUrl = `${apiDomain}/shopper-addressbooks/v1/${shopperId}/AddressBook?api_key=${apiKey}`;
   const paymentUrl = `${apiDomain}/shopper-wallets/v1/Shopper/${shopperId}/Wallet?api_key=${apiKey}`;
   const checkoutUrl = `${apiDomain}/checkout-universal/v1/checkouts?api_key=${apiKey}`;
+  const fetchOrderUrl = `${apiDomain}/checkout-universal/v1/checkouts/id/${cartId}?api_key=${apiKey}`;
 
   useEffect(() => {
     handleSezzleCheckout(
@@ -107,10 +108,10 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     isLoading: loadingOrder,
     postData,
     error: orderError,
+    isComplete: isFetchOrderComplete,
   } = useApi<OrderResponse>(
-    checkoutUrl,
-    "POST",
-    getInitialBuildOrderData(cartId)
+      fetchOrderUrl,
+      "GET"
   );
 
   const updateOrder = async (
@@ -118,7 +119,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     billingId: number,
     shippingId: number
   ) => {
-    const orderResponse = await postData(
+    const orderResponse = await buildOrder(
       generateChangeStoreResponse({
         ...orderData,
         billingAddress: { ...orderData.billingAddress, id: billingId },
@@ -170,15 +171,30 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   };
 
   useEffect(() => {
-    if (!hasInitializedOrder.current && order?.response?.success?.data) {
+    if(isFetchOrderComplete){
+      if(!order){
+        const orderResponse = buildOrder(
+            getInitialBuildOrderData(cartId)
+        );
+        orderResponse.then((response: any) => {
+          setOrderData(response?.response.success?.data || null);
+        })
+      }
+    }
+  }, [isFetchOrderComplete]);
+
+  useEffect(() => {
+    const currentOrderData = order ? order.response.success.data : orderData;
+    setOrderData(currentOrderData);
+    if (!hasInitializedOrder.current && currentOrderData && !order) {
       hasInitializedOrder.current = true;
       updateOrder(
-        order.response.success.data,
+        currentOrderData,
         defaultPaymentMethod?.addressId || defaultAddress?.id,
         defaultAddress?.id || ""
       );
     }
-  }, [defaultAddress, defaultPaymentMethod, order?.response?.success?.data]);
+  }, [defaultAddress, defaultPaymentMethod, order, orderData]);
 
   const handlePlaceOrderUpdate = (value: boolean) => {
     setLoadingOrderConfirmation(value);

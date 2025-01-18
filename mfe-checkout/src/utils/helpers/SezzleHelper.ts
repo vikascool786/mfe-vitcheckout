@@ -20,10 +20,14 @@ export const handleSezzleCheckout = async (
                 const orderUUId = sezzleResponse.orderUUID ?? null;
                 trackingData.set("sezzle", orderUUId);
                 const order = await fetchOrderDetail(cartId);
+                const isMissingBilling = order.billingAddress;
+                const billingAddress = isMissingBilling ?  { ...order.shippingAddress } : { ...order.billingAddress };
+
                 if (order) {
                     return buildOrder(
                         generateChangeStoreResponse({
                             ...order,
+                            billingAddress: billingAddress,
                             paymentMethod: {
                                 ...order.paymentMethod,
                                 id: paymentId,

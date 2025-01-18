@@ -96,14 +96,14 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         // const addressMap = addresses?.map()
         const paymentOptions = response.map(
           (paymentMethod) =>
-            ({
-              paymentMethod,
-              paymentAddress: addressMap.get(
-                paymentMethod.addressId.toString()
-              ),
-              isVisible: paymentMethod.preferred || false,
-              isSelected: paymentMethod.preferred || false,
-            } as IPaymentOption)
+          ({
+            paymentMethod,
+            paymentAddress: addressMap.get(
+              paymentMethod.addressId.toString()
+            ),
+            isVisible: paymentMethod.preferred || false,
+            isSelected: paymentMethod.preferred || false,
+          } as IPaymentOption)
         );
 
         let updatedPaymentOptions = [...paymentOptions, ...paymentMethods];
