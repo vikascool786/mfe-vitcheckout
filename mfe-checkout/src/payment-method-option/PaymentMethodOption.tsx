@@ -31,6 +31,7 @@ import {
 export interface IPaymentOptionProps {
   handleCancelNewCard: () => void;
   paymentOption: IPaymentOption;
+  onAddNewCards: (paymentOptions: IPaymentOption[]) => void;
   shopperId: string;
   onCardEdit: (id: number) => void;
   index: number;
@@ -41,8 +42,10 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   shopperId,
   onCardEdit,
   paymentOption,
+  onAddNewCards,
   handleCancelNewCard,
 }) => {
+  console.log("Payment Option", paymentOption.isVisible && paymentOption);
   const [order, setOrder] = useAtom(orderAtom);
 
   const [paymentMethods, setPaymentMethods] = useAtom(paymentMethodsAtom);
@@ -56,12 +59,6 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   } = paymentOption;
 
   const [cvvCode, setCvvCode] = useState<string>("");
-
-  useEffect(() => {
-    if (isPaymentValidated) {
-      setCvvCode("***");
-    }
-  }, [isPaymentValidated, paymentMethod.cvv]);
 
   const setLoading = useSetAtom(loadingAtom);
 
@@ -183,7 +180,18 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     }
   };
 
-  console.log(paymentOption);
+  const updatePaymentValidationStatus = (id: number) => {
+    // Update payment methods with the selected method
+    const updatedPaymentOptions = paymentMethods.map((method) => ({
+      ...method,
+      isPaymentValidated: method.paymentMethod.id === id ? true : false,
+    }));
+
+    setCvvCode((prev) => "***");
+
+    // Set updated payment methods to state
+    setPaymentMethods(updatedPaymentOptions);
+  };
 
   return (
     <div
@@ -253,8 +261,10 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
           paymentMethod={paymentMethod}
           address={paymentAddress}
           isPaymentValidated={isPaymentValidated}
+          updatePaymentValidationStatus={updatePaymentValidationStatus}
           shopperId={shopperId}
           onCancel={handleCancelNewCard}
+          onAddNewCard={onAddNewCards}
         />
       )}
     </div>

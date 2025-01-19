@@ -321,6 +321,14 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     }, 300);
   };
 
+  const onAddNewCards = (payments: IPaymentOption[]) => {
+    setTimeout(() => {
+      setPaymentMethods(payments);
+    }, 1000);
+  };
+
+  console.log(paymentMethods.filter((f) => f.isVisible));
+
   return (
     <div className="pm-main-container">
       <div className="pm-container">
@@ -344,6 +352,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
                 shopperId={shopperId}
                 onCardEdit={onCardEdit}
                 handleCancelNewCard={handleCancelNewCard}
+                onAddNewCards={onAddNewCards}
               />
             ))}
           {showClick2Pay && (

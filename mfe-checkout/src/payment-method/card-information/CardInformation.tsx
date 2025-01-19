@@ -37,11 +37,15 @@ interface ICardInformationProps {
   address: Address;
   shopperId: string;
   onCancel: () => void;
+  onAddNewCard: (pm: IPaymentOption[]) => void;
+  updatePaymentValidationStatus: (id: number) => void;
 }
 
 export const CardInformation: React.FC<ICardInformationProps> = ({
+  updatePaymentValidationStatus,
   isPaymentValidated,
   paymentMethod,
+  onAddNewCard,
   shopperId,
   address,
   onCancel,
@@ -82,15 +86,51 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
       .matches(/^[0-9]{3,4}$/, "CVV must be 3 or 4 digits")
       .required("CVV is required"),
 
-    // Address Validation
-    first: Yup.string().required("First name is required"),
-    last: Yup.string().required("Last name is required"),
-    address1: Yup.string().required("Address Line 1 is required"),
-    city: Yup.string().required("City is required"),
-    state: Yup.string().required("State/Province is required"),
-    zip: Yup.string()
-      .matches(/^\d{5}$/, "Zip code must be 5 digits")
-      .required("Zip code is required"),
+    // Conditionally validate address fields
+    first: Yup.string().when(
+      "sameShippingAddress",
+      (sameShippingAddress, schema) =>
+        sameShippingAddress
+          ? schema.notRequired()
+          : schema.required("First name is required")
+    ),
+    last: Yup.string().when(
+      "sameShippingAddress",
+      (sameShippingAddress, schema) =>
+        sameShippingAddress
+          ? schema.notRequired()
+          : schema.required("Last name is required")
+    ),
+    address1: Yup.string().when(
+      "sameShippingAddress",
+      (sameShippingAddress, schema) =>
+        sameShippingAddress
+          ? schema.notRequired()
+          : schema.required("Address Line 1 is required")
+    ),
+    city: Yup.string().when(
+      "sameShippingAddress",
+      (sameShippingAddress, schema) =>
+        sameShippingAddress
+          ? schema.notRequired()
+          : schema.required("City is required")
+    ),
+    state: Yup.string().when(
+      "sameShippingAddress",
+      (sameShippingAddress, schema) =>
+        sameShippingAddress
+          ? schema.notRequired()
+          : schema.required("State/Province is required")
+    ),
+    zip: Yup.string().when(
+      "sameShippingAddress",
+      (sameShippingAddress, schema) =>
+        sameShippingAddress
+          ? schema.notRequired()
+          : schema
+              .matches(/^\d{5}$/, "Zip code must be 5 digits")
+              .required("Zip code is required")
+    ),
   });
 
   const initialValues = {
@@ -163,23 +203,28 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   const handleSaveCardInformation = async (
     values: IPaymentMethod,
     address: Address,
-    type: "TEMP" | "WALLET"
+    type: "TEMP" | "WALLET",
+    sameShippingAddress: boolean
   ) => {
-    const newAddressToAdd = {
-      first: address?.first,
-      last: address?.last,
-      address1: address?.address1,
-      address2: address?.address2 || "",
-      city: address?.city || "New York",
-      state: address?.state,
-      zip: address?.zip,
-      country: address?.country || "USA",
-      phone: address?.phone || "",
-      isPoBox: address?.isPoBox || false,
-      isUpdateEnabled: false,
-    };
+    const newAddressToAdd = sameShippingAddress
+      ? { ...shippingAddress, isUpdateEnabled: false }
+      : {
+          first: address?.first,
+          last: address?.last,
+          address1: address?.address1,
+          address2: address?.address2 || "",
+          city: address?.city || "New York",
+          state: address?.state,
+          zip: address?.zip,
+          country: address?.country || "USA",
+          phone: address?.phone || "",
+          isPoBox: address?.isPoBox || false,
+          isUpdateEnabled: false,
+        };
 
-    const newAddressResponse = await handleSaveAddress(newAddressToAdd);
+    const newAddressResponse = sameShippingAddress
+      ? shippingAddress?.id
+      : await handleSaveAddress(newAddressToAdd as any);
 
     const requestData = {
       name: values.accountName,
@@ -194,18 +239,17 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
 
     setLoading(true);
 
-    console.log("newAddressResponse", newAddressResponse);
-
-    if (newAddressResponse) {
+    if (!sameShippingAddress) {
       const newBillAddress = newAddressResponse.find(
         (address: Address) => address.isBill
       );
-      console.log("newBillAddress", newBillAddress);
       if (newBillAddress) {
         requestData.addressId = newBillAddress.id;
       } else {
         requestData.addressId = shippingAddress?.id ? shippingAddress.id : 0;
       }
+    } else {
+      requestData.addressId = shippingAddress?.id || 0;
     }
 
     try {
@@ -223,6 +267,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
             const orderResponse = await buildOrder(updatedOrder);
             setOrder(orderResponse.response.success.data);
           }
+          updatePaymentValidationStatus(values.id as number);
           onCancel();
           setLoading(false);
           return;
@@ -243,6 +288,8 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
               paymentAddress: sameShippingAddress ? shippingAddress : address,
               isSelected: true,
               isVisible: true,
+              isEditing: false,
+              isPaymentValidated: true,
             },
           ].filter((pm) => pm.paymentMethod?.id !== 0);
 
@@ -255,14 +302,11 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
               },
             });
             const orderResponse = await buildOrder(updatedOrder);
+            updatePaymentValidationStatus(response.at(-1)?.id as number);
+            onAddNewCard(updatedPaymentMethods as IPaymentOption[]);
             setOrder(orderResponse.response.success.data);
             setLoading(false);
           }
-
-          setTimeout(
-            () => setPaymentMethods(updatedPaymentMethods as IPaymentOption[]),
-            300
-          );
         } catch (error) {
           if (error) {
             Swal.fire({
@@ -300,6 +344,8 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
             },
           ].filter((pm) => pm.paymentMethod.id !== 0);
 
+          updatePaymentValidationStatus(updatedPaymentMethod.id);
+
           if (order && response.id) {
             const updatedOrder = generateChangeStoreResponse({
               ...order,
@@ -309,11 +355,12 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
               },
             });
             const orderResponse = await buildOrder(updatedOrder);
+            updatePaymentValidationStatus(response.id);
             setOrder(orderResponse.response.success.data);
           }
 
           setTimeout(() => {
-            setPaymentMethods(updatedPaymentMethods as IPaymentOption[]);
+            onAddNewCard(updatedPaymentMethods as IPaymentOption[]);
             setLoading(false);
           });
         }
@@ -405,15 +452,17 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
         initialValues={initialValues}
         validationSchema={validationSchema}
         onSubmit={(values) => {
-          const address = {
-            first: values.first,
-            last: values.last,
-            address1: values.address1,
-            address2: values.address2,
-            city: values.city,
-            state: values.state,
-            zip: values.zip,
-          };
+          const address = sameShippingAddress
+            ? {
+                first: values.first,
+                last: values.last,
+                address1: values.address1,
+                address2: values.address2,
+                city: values.city,
+                state: values.state,
+                zip: values.zip,
+              }
+            : (shippingAddress as Address);
           handleSaveCardInformation(
             {
               ...paymentMethod,
@@ -426,7 +475,8 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
               id: paymentMethod.id,
             },
             address,
-            isCardSavedInWallet ? "WALLET" : "TEMP"
+            isCardSavedInWallet ? "WALLET" : "TEMP",
+            sameShippingAddress
           );
         }}
       >
@@ -439,8 +489,9 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           handleBlur,
           handleSubmit,
           setFieldValue,
+          submitForm,
         }) => (
-          <form onSubmit={handleSubmit}>
+          <form>
             <div className="card-information-container">
               <FormField
                 label="Name on Card"
@@ -621,7 +672,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                 <Button
                   btnType="primary"
                   label={isCardSavedInWallet ? "Update" : "Save"}
-                  onClick={() => handleSubmit()}
+                  onClick={submitForm}
                 />
               </div>
             </div>
