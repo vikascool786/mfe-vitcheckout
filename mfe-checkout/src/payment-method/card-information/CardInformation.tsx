@@ -302,7 +302,6 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
               },
             });
             const orderResponse = await buildOrder(updatedOrder);
-            updatePaymentValidationStatus(response.at(-1)?.id as number);
             onAddNewCard(updatedPaymentMethods as IPaymentOption[]);
             setOrder(orderResponse.response.success.data);
             setLoading(false);

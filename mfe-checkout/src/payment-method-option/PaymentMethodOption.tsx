@@ -58,7 +58,9 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     isEditing,
   } = paymentOption;
 
-  const [cvvCode, setCvvCode] = useState<string>("");
+  const [cvvCode, setCvvCode] = useState<string>(
+    isPaymentValidated ? "***" : ""
+  );
 
   const setLoading = useSetAtom(loadingAtom);
 

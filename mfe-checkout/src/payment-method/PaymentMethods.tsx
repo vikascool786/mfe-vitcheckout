@@ -327,8 +327,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     }, 1000);
   };
 
-  console.log(paymentMethods.filter((f) => f.isVisible));
-
   return (
     <div className="pm-main-container">
       <div className="pm-container">
