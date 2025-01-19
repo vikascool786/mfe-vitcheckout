@@ -96,6 +96,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
         : {
             ...method,
             isSelected: false,
+            isEditing: false,
           }
     );
 

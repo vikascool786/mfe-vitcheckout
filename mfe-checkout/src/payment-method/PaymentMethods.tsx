@@ -313,11 +313,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     const updatedPayments = paymentMethods
       .filter((pm) => pm.paymentMethod.id !== 0)
       .map((po) => {
-        if (po.paymentMethod.preferred) {
-          return { ...po, isSelected: true, isVisible: true };
-        }
-
-        return po;
+        return { ...po, isEditing: false };
       });
 
     setTimeout(() => {
