@@ -87,7 +87,8 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
       if (order) {
         const changeOrderDetails = generateChangeStoreResponse(order);
 
-        delete response["id"];
+        delete response.paymentMethod["id"];
+
         changeOrder(
           {
             ...changeOrderDetails,

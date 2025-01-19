@@ -29,30 +29,35 @@ import {
 } from "../api/service/ShoppersPaymentMethods";
 
 export interface IPaymentOptionProps {
+  handleCancelNewCard: () => void;
   paymentOption: IPaymentOption;
   shopperId: string;
+  onCardEdit: (id: number) => void;
   index: number;
-  removeCard: () => void;
 }
 
 export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   index,
   shopperId,
+  onCardEdit,
   paymentOption,
+  handleCancelNewCard,
 }) => {
   const [order, setOrder] = useAtom(orderAtom);
+
+  const [paymentMethods, setPaymentMethods] = useAtom(paymentMethodsAtom);
+
   const {
     paymentMethod,
     paymentAddress,
     isPaymentValidated,
     isTempPaymentMethod,
+    isEditing,
   } = paymentOption;
-  const [paymentMethods, setPaymentMethods] = useAtom(paymentMethodsAtom);
 
   const [cvvCode, setCvvCode] = useState<string>("");
 
   useEffect(() => {
-    console.log("isPaymentValidated", isPaymentValidated);
     if (isPaymentValidated) {
       setCvvCode("***");
     }
@@ -60,13 +65,17 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
 
   const setLoading = useSetAtom(loadingAtom);
 
-  const [isEditing, setIsEditing] = useState<boolean>(paymentMethod.id === 0);
-
   const isSelected = paymentOption.isSelected ? "selected" : "";
   const isFirst = index === 0 ? "start" : "";
   const isCard =
     paymentMethod.accountName !== PAYPAL.name &&
     paymentMethod.accountName !== SEZZLE.name;
+
+  const handlePaymentMethodEdit = () => {
+    if (isSelected && paymentMethod) {
+      onCardEdit(paymentMethod.id);
+    }
+  };
 
   const onChangePaymentMethod = () => {
     // Check if the selected payment option is the same as the current one
@@ -173,6 +182,8 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     }
   };
 
+  console.log(paymentOption);
+
   return (
     <div
       className={`payment-option-container ${isSelected} ${isFirst}`}
@@ -227,10 +238,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
             {isSelected && isCard && (
               <div
                 className="payment-option-container__card-cvv-edit"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsEditing(!isEditing);
-                }}
+                onClick={handlePaymentMethodEdit}
               >
                 edit
               </div>
@@ -245,9 +253,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
           address={paymentAddress}
           isPaymentValidated={isPaymentValidated}
           shopperId={shopperId}
-          onCancel={() => {
-            setIsEditing(false);
-          }}
+          onCancel={handleCancelNewCard}
         />
       )}
     </div>

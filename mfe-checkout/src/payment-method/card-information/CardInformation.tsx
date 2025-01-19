@@ -204,7 +204,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
       if (newBillAddress) {
         requestData.addressId = newBillAddress.id;
       } else {
-        requestData.addressId = shippingAddress?.id;
+        requestData.addressId = shippingAddress?.id ? shippingAddress.id : 0;
       }
     }
 
@@ -313,7 +313,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           }
 
           setTimeout(() => {
-            setPaymentMethods(updatedPaymentMethods);
+            setPaymentMethods(updatedPaymentMethods as IPaymentOption[]);
             setLoading(false);
           });
         }
@@ -336,9 +336,9 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           .map((paymentOption) =>
             paymentOption.paymentMethod.preferred
               ? {
-                ...paymentOption,
-                isSelected: true,
-              }
+                  ...paymentOption,
+                  isSelected: true,
+                }
               : paymentOption
           )
       );
@@ -421,7 +421,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
               number: values.number,
               expMonth: values.expMonth,
               expYear: values.expYear,
-              cvv: values.cvv,
+              cvv: parseInt(values.cvv),
               preferred: paymentMethod.preferred,
               id: paymentMethod.id,
             },
@@ -614,7 +614,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                       number: values.number,
                       expMonth: values.expMonth,
                       expYear: values.expYear,
-                      cvv: values.cvv,
+                      cvv: parseInt(values.cvv),
                     });
                   }}
                 />

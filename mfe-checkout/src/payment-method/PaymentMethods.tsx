@@ -18,7 +18,12 @@ import { TextUpdates } from "../text-updates/TextUpdates";
 import { createPaymentMethod } from "../utils/helpers/GeneratePaymentMethod";
 import { SHOPPER_WALLET_ADDRESS, WALLET_DATA } from "../utils/MOCKS";
 import "./PaymentMethods.scss";
-import { CLICK2PAY, PAYPAL, thirdPartyPaymentFlagList } from "./PaymentType";
+import {
+  CLICK2PAY,
+  PAYPAL,
+  SEZZLE,
+  thirdPartyPaymentFlagList,
+} from "./PaymentType";
 import { useShopperEWalletAddresses } from "../api/service/ShopperEWallet";
 import {
   fetchShoppersPaymentMethods,
@@ -96,14 +101,14 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         // const addressMap = addresses?.map()
         const paymentOptions = response.map(
           (paymentMethod) =>
-          ({
-            paymentMethod,
-            paymentAddress: addressMap.get(
-              paymentMethod.addressId.toString()
-            ),
-            isVisible: paymentMethod.preferred || false,
-            isSelected: paymentMethod.preferred || false,
-          } as IPaymentOption)
+            ({
+              paymentMethod,
+              paymentAddress: addressMap.get(
+                paymentMethod.addressId.toString()
+              ),
+              isVisible: paymentMethod.preferred || false,
+              isSelected: paymentMethod.preferred || false,
+            } as IPaymentOption)
         );
 
         let updatedPaymentOptions = [...paymentOptions, ...paymentMethods];
@@ -259,11 +264,51 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         isPaymentValidated: false,
         isSelected: true,
         isVisible: true,
+        isEditing: true,
       },
     ]);
   };
 
-  const removeCard = () => {
+  useEffect(() => {
+    const isAddingNewCard = paymentMethods.find(
+      (pm) => pm.paymentMethod.id === 0
+    );
+    setShowNewCard(isAddingNewCard ? true : false);
+  }, [paymentMethods]);
+
+  const isMethodDefault = (option: IPaymentOption) => {
+    const { accountName, preferred } = option.paymentMethod;
+    if (accountName === PAYPAL.name || accountName === SEZZLE.name) {
+      return true;
+    }
+
+    if (preferred) return preferred;
+
+    return false;
+  };
+
+  const onCardEdit = (paymentId: number) => {
+    // Update payment methods with the editing state
+
+    const updatedPaymentMethods = paymentMethods.map((method) =>
+      method.paymentMethod.id === paymentId
+        ? {
+            ...method,
+            isEditing: !method.isEditing, // Toggle editing state for the selected payment method
+          }
+        : {
+            ...method,
+            isEditing: false,
+            isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
+          }
+    );
+
+    setTimeout(() => {
+      setPaymentMethods(updatedPaymentMethods);
+    }, 300);
+  };
+
+  const handleCancelNewCard = () => {
     setShowNewCard(false);
     const updatedPayments = paymentMethods
       .filter((pm) => pm.paymentMethod.id !== 0)
@@ -279,13 +324,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       setPaymentMethods(updatedPayments);
     }, 300);
   };
-
-  useEffect(() => {
-    const isAddingNewCard = paymentMethods.find(
-      (pm) => pm.paymentMethod.id === 0
-    );
-    setShowNewCard(isAddingNewCard ? true : false);
-  }, [paymentMethods]);
 
   return (
     <div className="pm-main-container">
@@ -308,7 +346,8 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
                 paymentOption={paymentOption}
                 index={index}
                 shopperId={shopperId}
-                removeCard={removeCard}
+                onCardEdit={onCardEdit}
+                handleCancelNewCard={handleCancelNewCard}
               />
             ))}
           {showClick2Pay && (
