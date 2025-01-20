@@ -37,10 +37,10 @@ interface IPlaceOrder {
   updateOrderErrorMessage: (newMessage: string) => void;
 }
 
-const PAYPAL_TOKEN_URL = (shopperId: string) =>
+const PAYPAL_TOKEN_URL = (shopperId: string, totalAmountDue: number) =>
   // make the return url and cancel url dynamic
   // TODO: PICK THIS UP FROM ENVIORNMENT VARIABLES
-  `${GET_API_ENDPOINT_BASE_URL_ONLY()}/shoppingcart-checkouts/v1/Checkout/Paypal/${shopperId}/Token?creditFlow=false&hideShipping=false&markFlow=false&returnURL=${GET_PAYPAL_RETURN_URL()}&cancelURL=${GET_PAYPAL_RETURN_URL()}&api_key=${GET_API_KEY()}&total=230`;
+  `${GET_API_ENDPOINT_BASE_URL_ONLY()}/shoppingcart-checkouts/v1/Checkout/Paypal/${shopperId}/Token?creditFlow=false&hideShipping=false&markFlow=false&returnURL=${GET_PAYPAL_RETURN_URL()}&cancelURL=${GET_PAYPAL_RETURN_URL()}&api_key=${GET_API_KEY()}&total=${totalAmountDue}`;
 
 const PlaceOrder: React.FC<IPlaceOrder> = ({
   confirmOrder,
@@ -60,7 +60,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   const selectedPaymentMethod = paymentMethods.find((pm) => pm.isSelected);
 
   const { data: paypalToken, error } = useApi<{ tokenId: string }>(
-    PAYPAL_TOKEN_URL(shopperId),
+    PAYPAL_TOKEN_URL(shopperId, order?.totals.price || 0),
     "GET"
   );
 

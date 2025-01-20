@@ -35,6 +35,14 @@ const App: React.FC<AppProps> = () => {
           pcid="2282210204"
           siteId="260"
         />
+
+        {/*
+                 *         <CheckoutContainer
+          cartId="cart_1326748654_W_USA_USA_ENG"
+          shopperId="hqwxZzYzzqpeVzhWmZzZmZpzzkxkjzmZWqqWzxzkzj"
+          pcid="1326748654"
+          siteId="222"
+        />*/}
       </Provider>
     </div>
   );

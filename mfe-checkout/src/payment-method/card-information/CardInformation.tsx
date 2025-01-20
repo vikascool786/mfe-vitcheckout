@@ -320,7 +320,6 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
         }
         onCancel();
       } else if (type === "TEMP") {
-        onCancel();
         const response = await addTempPaymentMethod(shopperId, requestData);
 
         if (response) {
@@ -343,8 +342,6 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
             },
           ].filter((pm) => pm.paymentMethod.id !== 0);
 
-          updatePaymentValidationStatus(updatedPaymentMethod.id);
-
           if (order && response.id) {
             const updatedOrder = generateChangeStoreResponse({
               ...order,
@@ -354,9 +351,10 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
               },
             });
             const orderResponse = await buildOrder(updatedOrder);
-            updatePaymentValidationStatus(response.id);
             setOrder(orderResponse.response.success.data);
           }
+
+          onCancel();
 
           setTimeout(() => {
             onAddNewCard(updatedPaymentMethods as IPaymentOption[]);
