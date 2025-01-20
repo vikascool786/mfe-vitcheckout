@@ -40,7 +40,7 @@ interface IPlaceOrder {
 const PAYPAL_TOKEN_URL = (shopperId: string) =>
   // make the return url and cancel url dynamic
   // TODO: PICK THIS UP FROM ENVIORNMENT VARIABLES
-  `${GET_API_ENDPOINT_BASE_URL_ONLY()}/shoppingcart-checkouts/v1/Checkout/Paypal/${shopperId}/Token?creditFlow=false&hideShipping=false&markFlow=false&returnURL=${GET_PAYPAL_RETURN_URL()}&cancelURL=${GET_PAYPAL_RETURN_URL()}&api_key=${GET_API_KEY()}`;
+  `${GET_API_ENDPOINT_BASE_URL_ONLY()}/shoppingcart-checkouts/v1/Checkout/Paypal/${shopperId}/Token?creditFlow=false&hideShipping=false&markFlow=false&returnURL=${GET_PAYPAL_RETURN_URL()}&cancelURL=${GET_PAYPAL_RETURN_URL()}&api_key=${GET_API_KEY()}&total=230`;
 
 const PlaceOrder: React.FC<IPlaceOrder> = ({
   confirmOrder,
