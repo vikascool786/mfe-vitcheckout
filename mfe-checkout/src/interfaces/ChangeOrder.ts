@@ -48,7 +48,7 @@ export interface UserOptions {
   deliveryDate: string;
   deliveryTime: number;
   signatureRequired: boolean;
-  oosConsolidate: boolean;
+  oosConsolidate: number;
   userSessionId: string;
   gcNum?: string[];
   gcPin?: string[];
