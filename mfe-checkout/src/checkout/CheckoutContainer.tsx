@@ -25,7 +25,6 @@ import ErrorMessage from "../component/Error";
 import { checkoutSezzle } from "../api/ajaxaction/Sezzle";
 import { handleSezzleCheckout } from "../utils/helpers/SezzleHelper";
 import { Spinner } from "../component/Spinner/Spinner";
-import { number } from "yup";
 
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
@@ -48,7 +47,7 @@ const getInitialBuildOrderData = (cartId: string): ChangeOrder => ({
     deliveryDate: "",
     deliveryTime: 1234567890,
     signatureRequired: false,
-    oosConsolidate: 3,
+    oosConsolidate: false,
     userSessionId: "",
     coupons: [],
   },

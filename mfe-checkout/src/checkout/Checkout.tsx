@@ -323,7 +323,7 @@ const Checkout: React.FC<ICheckout> = ({ shopperId, siteId, addresses }) => {
     address1: Yup.string().required("Address Line 1 is required"),
     city: Yup.string().required("City is required"),
     state: Yup.string().required("State/Province is required"),
-    zip: Yup.number().required("Zip code is required"),
+    zip: Yup.string().required("Zip code is required"),
     phone: Yup.string().required("Phone number is required"),
   });
 
@@ -466,7 +466,6 @@ const Checkout: React.FC<ICheckout> = ({ shopperId, siteId, addresses }) => {
                       selectedValue={values.state}
                       formName="state"
                       onChange={(value) => setFieldValue("state", value)}
-                      errorMessage={touched.state && errors.state}
                     />
                   </div>
 
@@ -488,7 +487,7 @@ const Checkout: React.FC<ICheckout> = ({ shopperId, siteId, addresses }) => {
                           }
                         />
                       }
-                      errorMessage={touched.zip && errors.zip}
+                      errorMessage={touched.zip && !!errors.zip}
                     />
                     <FormField
                       name="phone"
@@ -511,7 +510,7 @@ const Checkout: React.FC<ICheckout> = ({ shopperId, siteId, addresses }) => {
                           }
                         />
                       }
-                      errorMessage={touched.phone && errors.phone}
+                      errorMessage={touched.phone && !!errors.phone}
                     />
                   </div>
 

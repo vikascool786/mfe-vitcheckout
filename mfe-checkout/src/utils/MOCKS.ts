@@ -264,7 +264,7 @@ export const ORDER_DATA = {
     deliveryDate: "",
     deliveryTime: 1234567890,
     signatureRequired: false,
-    oosConsolidate: 3,
+    oosConsolidate: false,
     userSessionId: "",
     coupons: [],
     tempOrderID: "491090",

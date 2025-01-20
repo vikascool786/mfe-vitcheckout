@@ -11,12 +11,14 @@ interface IAddressFormProps {
   siteId: string;
   shippingAddress: Address;
   onAddressChange: (updatedAddress: Address, onSubmitAddress: Function) => void;
+  onAddressValidation: (onValidateAddress: Function) => void;
 }
 
 export const AddressForm: React.FC<IAddressFormProps> = ({
   siteId,
   shippingAddress,
   onAddressChange,
+  onAddressValidation,
 }) => {
   const [stateDropdownList, setStateDropdownList] = useState<DropdownOption[]>(
     []
@@ -81,7 +83,9 @@ export const AddressForm: React.FC<IAddressFormProps> = ({
     return <p>{error}</p>;
   }
 
-  const handleAddressForm = () => {};
+  const handleAddressForm = () => {
+    onAddressValidation(formik.submitForm);
+  };
 
   return (
     <form onSubmit={handleAddressForm}>

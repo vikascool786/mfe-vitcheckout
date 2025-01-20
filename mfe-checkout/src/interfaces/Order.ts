@@ -71,7 +71,7 @@ export interface IUserOptions {
   deliveryDate: string;
   deliveryTime: number;
   signatureRequired: boolean;
-  oosConsolidate: number;
+  oosConsolidate: boolean;
   userSessionId: string;
   coupons: string[];
   gcNum: string[];

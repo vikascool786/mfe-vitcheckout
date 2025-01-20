@@ -27,7 +27,7 @@ export const generateChangeStoreResponse = (order: Order): ChangeOrder => {
       deliveryDate: order.userOptions.deliveryDate,
       deliveryTime: order.userOptions.deliveryTime,
       signatureRequired: order.userOptions.signatureRequired,
-      oosConsolidate: Number(order.userOptions.oosConsolidate),
+      oosConsolidate: order.userOptions.oosConsolidate,
       userSessionId: order.userOptions.userSessionId,
       gcNum: order.userOptions.gcNum,
       gcPin: order.userOptions.gcPin,
