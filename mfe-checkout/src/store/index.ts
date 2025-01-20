@@ -9,8 +9,10 @@ import { createPaymentMethod } from "../utils/helpers/GeneratePaymentMethod";
 
 export interface IPaymentOption {
   paymentMethod: IPaymentMethod;
-  paymentAddress: Address;
+  isTempPaymentMethod?: boolean;
   isPaymentValidated: boolean;
+  paymentAddress: Address;
+  isEditing?: boolean;
   isVisible: boolean;
   isSelected: boolean;
 }
