@@ -183,9 +183,16 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
 
   useEffect(() => {
     const currentOrderData = order ? order.response.success.data : orderData;
+    console.log(currentOrderData, order);
     setOrderData(currentOrderData);
-    if (!hasInitializedOrder.current && currentOrderData && !order) {
+    if (
+      !hasInitializedOrder.current &&
+      currentOrderData &&
+      defaultAddress &&
+      defaultPaymentMethod
+    ) {
       hasInitializedOrder.current = true;
+      console.log("Here", currentOrderData);
       updateOrder(
         currentOrderData,
         defaultPaymentMethod?.addressId ?? defaultAddress?.id ?? 0,
