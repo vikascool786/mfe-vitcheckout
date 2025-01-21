@@ -30,7 +30,11 @@ import { number } from "yup";
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
 
-const getInitialBuildOrderData = (cartId: string): ChangeOrder => ({
+const getInitialBuildOrderData = (
+  cartId: string,
+  billingId: number,
+  shippingId: number
+): ChangeOrder => ({
   debug: true,
   id: cartId,
   customer_id: "",
@@ -40,6 +44,12 @@ const getInitialBuildOrderData = (cartId: string): ChangeOrder => ({
   language: "ENG",
   site_type: "W",
   application: "cart",
+  billing: {
+    id: billingId,
+  },
+  shipping: {
+    id: shippingId,
+  },
   userOptions: {
     applyCashback: false,
     applyEWallet: false,
@@ -172,31 +182,32 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
 
   useEffect(() => {
     if (isFetchOrderComplete) {
-      if (!order) {
-        const orderResponse = buildOrder(getInitialBuildOrderData(cartId));
+      if (!order && defaultAddress && defaultPaymentMethod) {
+        const orderResponse = buildOrder(
+          getInitialBuildOrderData(
+            cartId,
+            defaultAddress?.id ?? 0,
+            defaultPaymentMethod?.addressId ?? 0
+          )
+        );
         orderResponse.then((response: any) => {
           setOrderData(response?.response.success?.data || null);
         });
       }
     }
-  }, [isFetchOrderComplete]);
+  }, [isFetchOrderComplete, defaultAddress, defaultPaymentMethod]);
 
   useEffect(() => {
     const currentOrderData = order ? order.response.success.data : orderData;
-    console.log(currentOrderData, order);
     setOrderData(currentOrderData);
-    if (
-      !hasInitializedOrder.current &&
-      currentOrderData &&
-      defaultAddress &&
-      defaultPaymentMethod
-    ) {
+    if (!hasInitializedOrder.current && currentOrderData && !order) {
       hasInitializedOrder.current = true;
-      console.log("Here", currentOrderData);
       updateOrder(
         currentOrderData,
-        defaultPaymentMethod?.addressId ?? defaultAddress?.id ?? 0,
-        defaultAddress?.id ?? 0
+        currentOrderData.shippingAddress.id ?? defaultAddress?.id ?? 0,
+        currentOrderData?.billingAddress.id ??
+          defaultPaymentMethod.addressId ??
+          0
       );
     }
   }, [defaultAddress, defaultPaymentMethod, order, orderData]);
