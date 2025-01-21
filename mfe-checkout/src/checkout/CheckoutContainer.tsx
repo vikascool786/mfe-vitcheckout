@@ -88,7 +88,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
       generateChangeStoreResponse,
       setLoadingOrderConfirmation,
       confirmOrder,
-      cartId,
+      cartId
     );
   }, [location.search]);
 
@@ -110,10 +110,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     postData,
     error: orderError,
     isComplete: isFetchOrderComplete,
-  } = useApi<OrderResponse>(
-      fetchOrderUrl,
-      "GET"
-  );
+  } = useApi<OrderResponse>(fetchOrderUrl, "GET");
 
   const updateOrder = async (
     orderData: Order,
@@ -138,11 +135,13 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     [addresses]
   );
 
-  const defaultPaymentMethod = useMemo(
+  const defaultPaymentMethod: IPaymentMethod = useMemo<IPaymentMethod>(
     () =>
       paymentMethods
-        ? paymentMethods?.find((payment) => payment?.preferred)
-        : [],
+        ? (paymentMethods?.find(
+            (payment) => payment?.preferred
+          ) as IPaymentMethod)
+        : ({} as IPaymentMethod),
     [paymentMethods]
   );
 
@@ -172,14 +171,12 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   };
 
   useEffect(() => {
-    if(isFetchOrderComplete){
-      if(!order){
-        const orderResponse = buildOrder(
-            getInitialBuildOrderData(cartId)
-        );
+    if (isFetchOrderComplete) {
+      if (!order) {
+        const orderResponse = buildOrder(getInitialBuildOrderData(cartId));
         orderResponse.then((response: any) => {
           setOrderData(response?.response.success?.data || null);
-        })
+        });
       }
     }
   }, [isFetchOrderComplete]);
@@ -191,8 +188,8 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
       hasInitializedOrder.current = true;
       updateOrder(
         currentOrderData,
-        defaultPaymentMethod?.addressId || defaultAddress?.id,
-        defaultAddress?.id || ""
+        defaultPaymentMethod?.addressId ?? defaultAddress?.id ?? 0,
+        defaultAddress?.id ?? 0
       );
     }
   }, [defaultAddress, defaultPaymentMethod, order, orderData]);
@@ -222,41 +219,45 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     <div>
       {orderData && (
         <>
-        <div className="container">
-          <div className="checkout-container">
-            <div className="left-column">
-              <Checkout
+          <div className="container">
+            <div className="checkout-container">
+              <div className="left-column">
+                <Checkout
+                  shopperId={shopperId}
+                  siteId={siteId}
+                  addresses={addresses || []}
+                  loading={isLoading}
+                />
+                <ShippingMethod loading={isLoading} />
+                <PaymentMethod
+                  cartId={cartId}
+                  shopperId={shopperId}
+                  siteId={siteId}
+                  pcid={pcid}
+                  updatePaymentTypeId={setPaymentTypeId}
+                  loading={isLoading}
+                />
+              </div>
+              <div className="right-column">
+                <OrderSummary pcid={pcid} />
+              </div>
+            </div>
+            <div className="place-order">
+              <PlaceOrder
+                confirmOrder={confirmOrder}
+                errorMessage={orderErrorMessage}
+                paymentTypeId={paymentTypeId}
                 shopperId={shopperId}
                 siteId={siteId}
-                addresses={addresses || []}
-                loading={isLoading}
-              />
-              <ShippingMethod order={orderData} loading={isLoading} />
-              <PaymentMethod
-                cartId={cartId}
-                shopperId={shopperId}
-                siteId={siteId}
-                pcid={pcid}
-                updatePaymentTypeId={setPaymentTypeId}
-                loading={isLoading}
+                order={orderData}
+                updateOrderErrorMessage={handleUpdateOrderErrorMessage}
+                billingId={defaultAddress?.id || 0}
+                shippingId={
+                  defaultPaymentMethod?.addressId ?? defaultAddress?.id ?? 0
+                }
               />
             </div>
-            <div className="right-column">
-              <OrderSummary pcid={pcid} />
-            </div>
-          </div>
-          <div className="place-order">
-            <PlaceOrder
-              confirmOrder={confirmOrder}
-              errorMessage={orderErrorMessage}
-              paymentTypeId={paymentTypeId}
-              shopperId={shopperId}
-              siteId={siteId}
-              order={orderData}
-              updateOrderErrorMessage={handleUpdateOrderErrorMessage}
-            />
-          </div>
-          <HeadHelmet />
+            <HeadHelmet />
           </div>
         </>
       )}

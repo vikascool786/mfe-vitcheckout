@@ -29,6 +29,8 @@ import { paymentMethodsAtom } from "../../store";
 
 interface IPlaceOrder {
   confirmOrder: () => void;
+  billingId: number;
+  shippingId: number;
   errorMessage: string;
   paymentTypeId: number;
   shopperId: string;
