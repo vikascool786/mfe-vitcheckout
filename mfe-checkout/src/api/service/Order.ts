@@ -52,7 +52,7 @@ const shopperOrderAPIEndpoint = (cartId: string) =>
 const shopperBuildOrderAPIEndpoint = `${apiDomain}/checkout-universal/v1/checkouts?api_key=${apiKey}`;
 
 const shopperUpdateOrderEndpoint = (cartId: string) =>
-  `${GET_API_ENDPOINT_BASE_URL_ONLY()}/checkout-universal/v1/checkouts/id/${cartId}`;
+`${GET_API_ENDPOINT_BASE_URL_ONLY()}/checkout-universal/v1/checkouts?api_key=${apiKey}`;
 
 const commitOrderEndpoint = (cartId: string) =>
   `${GET_API_ENDPOINT_BASE_URL_ONLY()}/checkout-universal/v1/checkouts/id/${cartId}?api_key=${GET_API_KEY()}`;
