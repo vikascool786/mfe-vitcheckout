@@ -1,22 +1,22 @@
-import { useAtom, useSetAtom } from "jotai";
+import { useAtom } from "jotai";
 import React, { useEffect, useState } from "react";
+import { useShopperEWalletAddresses } from "../api/service/ShopperEWallet";
+import {
+  fetchShoppersPaymentMethods,
+  generatePayPalTransactionDetails,
+} from "../api/service/ShoppersPaymentMethods";
 import { fetchSiteFlagData } from "../api/service/SiteFlags";
 import { Add } from "../assets/icons/Add";
 import CardOptions from "../assets/images/CardOptions.png";
 import { Back } from "../assets/svgs/Back";
 import { FormHeading } from "../component/Form/Heading/FormHeading";
+import withLoader from "../hoc/withLoader";
 import { Address } from "../interfaces/Address";
 import { PaymentOptionClick2Pay } from "../payment-method-click2pay/PaymentMethodOptionClick2Pay";
 import { PaymentOption } from "../payment-method-option/PaymentMethodOption";
-import {
-  IPaymentOption,
-  loadingAtom,
-  orderAtom,
-  paymentMethodsAtom,
-} from "../store";
+import { IPaymentOption, orderAtom, paymentMethodsAtom } from "../store";
 import { TextUpdates } from "../text-updates/TextUpdates";
 import { createPaymentMethod } from "../utils/helpers/GeneratePaymentMethod";
-import { SHOPPER_WALLET_ADDRESS, WALLET_DATA } from "../utils/MOCKS";
 import "./PaymentMethods.scss";
 import {
   CLICK2PAY,
@@ -24,12 +24,6 @@ import {
   SEZZLE,
   thirdPartyPaymentFlagList,
 } from "./PaymentType";
-import { useShopperEWalletAddresses } from "../api/service/ShopperEWallet";
-import {
-  fetchShoppersPaymentMethods,
-  generatePayPalTransactionDetails,
-} from "../api/service/ShoppersPaymentMethods";
-import withLoader from "../hoc/withLoader";
 
 interface IPaymentMethod {
   shopperId: string;
@@ -99,17 +93,21 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       try {
         const response = await fetchShoppersPaymentMethods(shopperId);
         // const addressMap = addresses?.map()
-        const paymentOptions = response.map(
-          (paymentMethod) =>
-            ({
-              paymentMethod,
-              paymentAddress: addressMap.get(
-                paymentMethod.addressId.toString()
-              ),
-              isVisible: paymentMethod.preferred || false,
-              isSelected: paymentMethod.preferred || false,
-            } as IPaymentOption)
-        );
+        const paymentOptions = response.map((paymentMethod) => {
+          const isOrderPaymentMethod =
+            paymentMethod.id === order?.paymentMethod.id;
+
+          return {
+            paymentMethod,
+            paymentAddress: addressMap.get(paymentMethod.addressId.toString()),
+            isVisible:
+              isOrderPaymentMethod ||
+              (!order?.paymentMethod.id && paymentMethod.preferred),
+            isSelected:
+              isOrderPaymentMethod ||
+              (!order?.paymentMethod.id && paymentMethod.preferred),
+          } as IPaymentOption;
+        });
 
         let updatedPaymentOptions = [...paymentOptions, ...paymentMethods];
 

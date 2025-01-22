@@ -1,7 +1,12 @@
 import { useAtom } from "jotai";
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import Swal from "sweetalert2";
 import "../App.scss";
+import { checkoutSezzle } from "../api/ajaxaction/Sezzle";
 import { buildOrder, commitOrder, OrderResponse } from "../api/service/Order";
+import ErrorMessage from "../component/Error";
+import { Spinner } from "../component/Spinner/Spinner";
+import HeadHelmet from "../head-helmet/HeadHelmet";
 import { withErrorBoundary } from "../hoc/withErrorBoundary";
 import { useApi } from "../hooks/useAPI";
 import { Address } from "../interfaces/Address";
@@ -10,29 +15,21 @@ import { Order } from "../interfaces/Order";
 import { IPaymentMethod } from "../interfaces/PaymentMethod";
 import { OrderSummary } from "../order-summary/OrderSummary";
 import PaymentMethod from "../payment-method/PaymentMethods";
+import PlaceOrder from "../payment-method/place-order/PlaceOrder";
 import ShippingMethod from "../shipping-methods/ShippingMethod";
 import { loadingAtom, orderAtom } from "../store";
-import Checkout from "./Checkout";
-import Swal from "sweetalert2";
-import HeadHelmet from "../head-helmet/HeadHelmet";
-import PlaceOrder from "../payment-method/place-order/PlaceOrder";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
+import { handleSezzleCheckout } from "../utils/helpers/SezzleHelper";
 import {
   GET_API_ENDPOINT_BASE_URL_ONLY,
   GET_API_KEY,
 } from "../utils/urlResolver";
-import ErrorMessage from "../component/Error";
-import { checkoutSezzle } from "../api/ajaxaction/Sezzle";
-import { handleSezzleCheckout } from "../utils/helpers/SezzleHelper";
-import { Spinner } from "../component/Spinner/Spinner";
-import { number } from "yup";
+import Checkout from "./Checkout";
 
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
 
-const getInitialBuildOrderData = (
-  cartId: string
-): ChangeOrder => ({
+const getInitialBuildOrderData = (cartId: string): ChangeOrder => ({
   debug: true,
   id: cartId,
   customer_id: "",
@@ -129,17 +126,14 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     setOrderData(orderResponse?.response.success?.data || null);
   };
 
-  const defaultAddress = useMemo(
-    () => {
-      const filteredAddresses = addresses?.filter((ad) => ad.hasAddress !== 0);
-      return (
-          filteredAddresses?.find((address) => address?.isShip === 1) ??
-          filteredAddresses?.find((address) => address?.isPrimary === 1) ??
-          filteredAddresses?.[0]
-      );
-    },
-    [addresses]
-  );
+  const defaultAddress = useMemo(() => {
+    const filteredAddresses = addresses?.filter((ad) => ad.hasAddress !== 0);
+    return (
+      filteredAddresses?.find((address) => address?.isShip === 1) ??
+      filteredAddresses?.find((address) => address?.isPrimary === 1) ??
+      filteredAddresses?.[0]
+    );
+  }, [addresses]);
 
   const defaultPaymentMethod: IPaymentMethod = useMemo<IPaymentMethod>(
     () =>
@@ -180,18 +174,16 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     if (isFetchOrderComplete) {
       if (!order) {
         let buildOrderPayload = getInitialBuildOrderData(cartId);
-        if(defaultAddress?.id){
-          buildOrderPayload.shipping = buildOrderPayload.shipping ?? {id:0};
+        if (defaultAddress?.id) {
+          buildOrderPayload.shipping = buildOrderPayload.shipping ?? { id: 0 };
           buildOrderPayload.shipping.id = defaultAddress.id;
         }
-        if(defaultPaymentMethod?.addressId){
-          buildOrderPayload.billing = buildOrderPayload.billing ?? {id:0};
+        if (defaultPaymentMethod?.addressId) {
+          buildOrderPayload.billing = buildOrderPayload.billing ?? { id: 0 };
           buildOrderPayload.billing.id = defaultPaymentMethod.addressId;
         }
 
-        const orderResponse = buildOrder(
-            buildOrderPayload
-        );
+        const orderResponse = buildOrder(buildOrderPayload);
         orderResponse.then((response: any) => {
           setOrderData(response?.response.success?.data || null);
         });
@@ -206,11 +198,11 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
       hasInitializedOrder.current = true;
       updateOrder(
         currentOrderData,
-          defaultPaymentMethod?.addressId ?? defaultAddress?.id ?? 0,
-          defaultAddress?.id ?? 0
+        defaultPaymentMethod?.addressId ?? defaultAddress?.id ?? 0,
+        defaultAddress?.id ?? 0
       );
     }
-  }, [defaultAddress, defaultPaymentMethod, order, orderData]);
+  }, [defaultAddress, defaultPaymentMethod]);
 
   const handlePlaceOrderUpdate = (value: boolean) => {
     setLoadingOrderConfirmation(value);

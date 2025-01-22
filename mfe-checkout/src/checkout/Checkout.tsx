@@ -290,12 +290,18 @@ const Checkout: React.FC<ICheckout> = ({ shopperId, siteId, addresses }) => {
     ) as unknown as Address;
     setShopperAddressBook(updatedSelectedAddress);
 
+    console.log(updatedSelectedAddress.find((add) => add.isBill));
+
     const newOrder = await buildOrder(
       generateChangeStoreResponse({
         ...order,
         shippingAddress: {
           ...order?.shippingAddress,
           id,
+        },
+        billingAddress: {
+          ...order?.billingAddress,
+          id: updatedSelectedAddress.find((add) => add.isBill)?.id || id,
         },
       })
     );

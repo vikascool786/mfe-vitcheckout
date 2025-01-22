@@ -1,12 +1,12 @@
 import { useAtom, useSetAtom } from "jotai";
 import React, { useEffect, useState } from "react";
+import Swal from "sweetalert2";
 import { changeOrder } from "../api/service/Order";
 import { OrderStore } from "../interfaces/Order";
 import { ShippingOptionItem } from "../shipping-option-item/ShippingOptionItem";
 import { loadingAtom, orderAtom } from "../store";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import "./ShippingOptions.scss";
-import Swal from "sweetalert2";
 
 interface IShippingOptions {
   store: OrderStore;
@@ -42,6 +42,16 @@ export const ShippingOptions: React.FC<IShippingOptions> = ({
 
     setShipping(updatedOptions);
 
+    console.log({
+      ...order, // Spread other stores
+      stores: {
+        ...order.stores,
+        [storeKey]: {
+          ...store,
+          shippingMethod: method,
+        },
+      },
+    });
     if (order) {
       changeOrder(
         generateChangeStoreResponse({
@@ -70,7 +80,7 @@ export const ShippingOptions: React.FC<IShippingOptions> = ({
           // Set updated shipping options locally
           setShipping(updatedOptions);
           setLoading(false);
-          // setOrder(data.response.success.data);
+          setOrder(data.response.success.data);
         })
         .catch((er) => {
           console.log("Error", er);

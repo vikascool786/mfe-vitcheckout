@@ -12,7 +12,6 @@ import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStor
 import { getCatalogName } from "../utils/helpers/GetCatalog";
 import { ApplyCashback } from "./apply-cashback/ApplyCashback";
 import "./OrderSummary.scss";
-import Swal from "sweetalert2";
 
 interface IOrderSummary {
   pcid: string;
