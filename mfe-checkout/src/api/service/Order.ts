@@ -52,7 +52,7 @@ const shopperOrderAPIEndpoint = (cartId: string) =>
 const shopperBuildOrderAPIEndpoint = `${apiDomain}/checkout-universal/v1/checkouts?api_key=${apiKey}`;
 
 const shopperUpdateOrderEndpoint = (cartId: string) =>
-`${GET_API_ENDPOINT_BASE_URL_ONLY()}/checkout-universal/v1/checkouts?api_key=${apiKey}`;
+  `${GET_API_ENDPOINT_BASE_URL_ONLY()}/checkout-universal/v1/checkouts?api_key=${apiKey}`;
 
 const commitOrderEndpoint = (cartId: string) =>
   `${GET_API_ENDPOINT_BASE_URL_ONLY()}/checkout-universal/v1/checkouts/id/${cartId}?api_key=${GET_API_KEY()}`;
@@ -78,7 +78,7 @@ export const buildOrder = async (
     ).post("", orderPayload);
     return orderResponse.data;
   } catch (error) {
-    console.log("error", error);
+    // console.log("error", error);
     throw error;
   }
 };
@@ -93,7 +93,7 @@ export const changeOrder = async (
     ).post("", changeStorePayload);
     return orderResponse.data;
   } catch (error) {
-    console.log("error", error);
+    // console.log("error", error);
     throw error;
   }
 };
@@ -128,8 +128,6 @@ export const removeProductFromCart = async (
 
   try {
     const response = await axiosInstance(API_ENDPOINT).delete("");
-
-    console.log(response);
   } catch (error) {
     console.error("Error removing product from cart", error);
     throw error;

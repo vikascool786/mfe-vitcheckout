@@ -144,7 +144,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                 console.error("PayPal SDK failed to load correctly");
                 return;
               }
-              console.log("PayPal SDK loaded:", paypal);
+              // console.log("PayPal SDK loaded:", paypal);
             })
             .catch((error) =>
               console.error("PayPal SDK failed to load", error)
@@ -152,7 +152,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
 
           if (!paypalToken) {
             alert("Failed to fetch PayPal token, check console for message");
-            console.log(error);
+            // console.log(error);
             return;
           }
           const url = `https://www.sandbox.paypal.com/checkoutnow?token=${paypalToken.tokenId}`;

@@ -100,8 +100,6 @@ const Checkout: React.FC<ICheckout> = ({ shopperId, siteId, addresses }) => {
       }
     });
 
-    console.log(filteredAddresses);
-
     if (!hasPrimaryAddress) {
       setShippingAddress(filteredAddresses[0] ?? defaultAddress);
     }

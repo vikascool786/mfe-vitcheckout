@@ -68,7 +68,7 @@ export const AddressVerificationContainer = forwardRef<
       isValidAddress = await response.data.response.indicators
         .validAddressIndicator;
     } catch (err) {
-      console.log(err);
+      // console.log(err);
     } finally {
       setLoading(false);
       setAddressToVerify(addressEntered);

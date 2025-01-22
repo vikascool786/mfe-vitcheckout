@@ -42,16 +42,16 @@ export const ShippingOptions: React.FC<IShippingOptions> = ({
 
     setShipping(updatedOptions);
 
-    console.log({
-      ...order, // Spread other stores
-      stores: {
-        ...order.stores,
-        [storeKey]: {
-          ...store,
-          shippingMethod: method,
-        },
-      },
-    });
+    // console.log({
+    //   ...order, // Spread other stores
+    //   stores: {
+    //     ...order.stores,
+    //     [storeKey]: {
+    //       ...store,
+    //       shippingMethod: method,
+    //     },
+    //   },
+    // });
     if (order) {
       changeOrder(
         generateChangeStoreResponse({
@@ -83,7 +83,7 @@ export const ShippingOptions: React.FC<IShippingOptions> = ({
           setOrder(data.response.success.data);
         })
         .catch((er) => {
-          console.log("Error", er);
+          // console.log("Error", er);
           Swal.fire({
             icon: "error",
             title: "Oops...",

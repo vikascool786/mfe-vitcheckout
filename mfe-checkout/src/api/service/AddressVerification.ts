@@ -22,7 +22,6 @@ export const postAVS = async (
       shpPCode: shpPCode,
       addressHash: addressHash,
     });
-    console.log(avsResponse);
     return avsResponse;
   } catch (err) {
     console.log(err);
