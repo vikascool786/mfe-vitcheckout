@@ -141,7 +141,7 @@ export const generatePayPalTransactionDetails = async (
 ) => {
   try {
     const response = await axiosInstance(
-      `https://devapi2.shop.com/shoppingcart-checkouts/v1/Checkout/Paypal/${shopperId}/Token/${token}?api_key=${GET_API_KEY()}&hideShipping=${hideShipping}&isRecurring=${isRecurring}`
+      `${GET_API_ENDPOINT_BASE_URL_ONLY()}/shoppingcart-checkouts/v1/Checkout/Paypal/${shopperId}/Token/${token}?api_key=${GET_API_KEY()}&hideShipping=${hideShipping}&isRecurring=${isRecurring}`
     ).get("");
     return response.data;
   } catch (error) {

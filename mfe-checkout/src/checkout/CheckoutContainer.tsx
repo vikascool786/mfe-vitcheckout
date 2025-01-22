@@ -31,9 +31,7 @@ const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
 
 const getInitialBuildOrderData = (
-  cartId: string,
-  billingId: number,
-  shippingId: number
+  cartId: string
 ): ChangeOrder => ({
   debug: true,
   id: cartId,
@@ -44,12 +42,6 @@ const getInitialBuildOrderData = (
   language: "ENG",
   site_type: "W",
   application: "cart",
-  billing: {
-    id: billingId,
-  },
-  shipping: {
-    id: shippingId,
-  },
   userOptions: {
     applyCashback: false,
     applyEWallet: false,
@@ -138,10 +130,14 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   };
 
   const defaultAddress = useMemo(
-    () =>
-      addresses
-        ?.filter((ad) => ad.hasAddress !== 0)
-        .find((address) => address?.isPrimary === 1),
+    () => {
+      const filteredAddresses = addresses?.filter((ad) => ad.hasAddress !== 0);
+      return (
+          filteredAddresses?.find((address) => address?.isShip === 1) ??
+          filteredAddresses?.find((address) => address?.isPrimary === 1) ??
+          filteredAddresses?.[0]
+      );
+    },
     [addresses]
   );
 
@@ -182,13 +178,19 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
 
   useEffect(() => {
     if (isFetchOrderComplete) {
-      if (!order && defaultAddress && defaultPaymentMethod) {
+      if (!order) {
+        let buildOrderPayload = getInitialBuildOrderData(cartId);
+        if(defaultAddress?.id){
+          buildOrderPayload.shipping = buildOrderPayload.shipping ?? {id:0};
+          buildOrderPayload.shipping.id = defaultAddress.id;
+        }
+        if(defaultPaymentMethod?.addressId){
+          buildOrderPayload.billing = buildOrderPayload.billing ?? {id:0};
+          buildOrderPayload.billing.id = defaultPaymentMethod.addressId;
+        }
+
         const orderResponse = buildOrder(
-          getInitialBuildOrderData(
-            cartId,
-            defaultAddress?.id ?? 0,
-            defaultPaymentMethod?.addressId ?? 0
-          )
+            buildOrderPayload
         );
         orderResponse.then((response: any) => {
           setOrderData(response?.response.success?.data || null);
@@ -204,10 +206,8 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
       hasInitializedOrder.current = true;
       updateOrder(
         currentOrderData,
-        currentOrderData.shippingAddress.id ?? defaultAddress?.id ?? 0,
-        currentOrderData?.billingAddress.id ??
-          defaultPaymentMethod.addressId ??
-          0
+          defaultPaymentMethod?.addressId ?? defaultAddress?.id ?? 0,
+          defaultAddress?.id ?? 0
       );
     }
   }, [defaultAddress, defaultPaymentMethod, order, orderData]);

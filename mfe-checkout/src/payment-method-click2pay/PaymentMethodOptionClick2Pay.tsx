@@ -6,7 +6,6 @@ import { initiateValidation } from "./Click2PayOTP";
 import "./PaymentOptionClick2Pay.scss";
 import {Add} from "../assets/icons/Add";
 import {Warn} from "../assets/icons/Warn";
-import {CardInformation} from "../payment-method/card-information/CardInformation";
 import {ShopperSavedPayments} from "../interfaces/ShopperSavedPayments";
 import {Button} from "../component/Button/Button";
 import $ from "jquery";
@@ -16,6 +15,7 @@ import {creditCards} from "../payment-method/PaymentType";
 import Click2PayCardLoader from "./Click2PayCardLoader";
 import {GET_C2P_DPAID} from "../utils/urlResolver";
 import {Order} from "../interfaces/Order";
+import {CardInputs} from "./CardInputs";
 
 interface IClick2PayProps {
     pcid: string;
@@ -335,9 +335,7 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({ pcid, order 
                                         secure checkout.
                                     </div>
                                 </div>
-                                {/* <CardInformation showBillingSection={false} shopperId="" initialData={{
-                                    ...shopperSavedPayment,
-                                }}/> */}
+                                <CardInputs/>
                             </div>
                             <div className="form-footer form-footer__dual-button">
                                 <Button

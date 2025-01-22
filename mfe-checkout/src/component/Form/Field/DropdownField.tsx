@@ -8,7 +8,7 @@ type DropdownProps = {
   selectedValue?: string; // Default selected value
   formName?: string; // Form name for the dropdown
   onChange?: (value: string) => void; // Callback for handling selection changes
-  errorMessage: string | false | undefined;
+  errorMessage?: string | false | undefined;
 };
 
 export const DropdownField: React.FC<DropdownProps> = ({
