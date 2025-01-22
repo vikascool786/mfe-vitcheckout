@@ -35,52 +35,60 @@ export const ShippingOptions: React.FC<IShippingOptions> = ({
   const handleChange = (method: string) => {
     // Map through the selections to update the isSelected flag
     setLoading(true);
+    const updatedOptions = shippingSelections.map((option) => ({
+      ...option,
+      isSelected: option.method === method, // Set true for selected, false for others
+    }));
 
-    changeOrder(
-      generateChangeStoreResponse({
-        ...order, // Spread other stores
-        stores: {
-          ...order.stores,
-          [storeKey]: {
-            ...store,
-            shippingMethod: method,
+    setShipping(updatedOptions);
+
+    if (order) {
+      changeOrder(
+        generateChangeStoreResponse({
+          ...order, // Spread other stores
+          stores: {
+            ...order.stores,
+            [storeKey]: {
+              ...store,
+              shippingMethod: method,
+            },
           },
-        },
-      }),
-      order.id
-    )
-      .then((response) => {
-        if (response) {
-          if (response.response.errors.message) {
+        }),
+        order.id
+      )
+        .then((data) => {
+          if (data && data.response.errors) {
             Swal.fire({
               icon: "error",
               title: "Oops...",
-              text: response.response.errors.message,
+              text: data.response.errors.message,
             });
             setLoading(false);
             return;
           }
-          const updatedOptions = shippingSelections.map((option) => ({
-            ...option,
-            isSelected: option.method === method, // Set true for selected, false for others
-          }));
 
           // Set updated shipping options locally
           setShipping(updatedOptions);
           setLoading(false);
-          setOrder(response.response.success.data);
-        }
-      })
-      .catch((er) => {
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: "Something went wrong!",
+          // setOrder(data.response.success.data);
+        })
+        .catch((er) => {
+          console.log("Error", er);
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: "Something went wrong!",
+          });
+          const updatedOptions = shippingSelections.map((option) => ({
+            ...option,
+            isSelected: option.method === method, // Set true for selected, false for others
+          }));
+          setShipping(updatedOptions);
+        })
+        .finally(() => {
+          setLoading(false);
         });
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    }
   };
 
   return (

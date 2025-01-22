@@ -29,11 +29,10 @@ export const ShippingOptionItem: React.FC<IShippingOptionItem> = ({
   const isFirst = index === 0 ? "start" : "";
   const isLast = index === size ? "end" : "";
 
+  console.log(shippingOption);
 
   return (
-    <div
-      className={`shipping-option-container ${select} ${isFirst} ${isLast}`}
-    >
+    <div className={`shipping-option-container ${select} ${isFirst} ${isLast}`}>
       <div className="shipping-option-select-container">
         <RadioButton
           id={shippingOption.id.toString()}
@@ -46,7 +45,9 @@ export const ShippingOptionItem: React.FC<IShippingOptionItem> = ({
         </div>
       </div>
 
-      <div>{shippingOption.total === 0 ? "Free" : `$${shippingOption.total}`}</div>
+      <div>
+        {shippingOption.total === 0 ? "Free" : `$${shippingOption.total}`}
+      </div>
     </div>
   );
 };

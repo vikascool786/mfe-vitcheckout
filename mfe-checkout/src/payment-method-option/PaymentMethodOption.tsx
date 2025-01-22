@@ -45,7 +45,6 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   onAddNewCards,
   handleCancelNewCard,
 }) => {
-  console.log("Payment Option", paymentOption.isVisible && paymentOption);
   const [order, setOrder] = useAtom(orderAtom);
 
   const [paymentMethods, setPaymentMethods] = useAtom(paymentMethodsAtom);

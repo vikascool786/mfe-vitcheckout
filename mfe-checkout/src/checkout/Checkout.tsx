@@ -254,7 +254,7 @@ const Checkout: React.FC<ICheckout> = ({ shopperId, siteId, addresses }) => {
     setShowShipAddressForm(!showShipAddressForm);
     setShippingAddress(
       shopperAddressBook.find((address) => address.isShip === 1) ||
-      shippingAddress
+        shippingAddress
     );
     setIsExpanded(!isExpanded);
   };
@@ -302,6 +302,7 @@ const Checkout: React.FC<ICheckout> = ({ shopperId, siteId, addresses }) => {
 
     setOrder(newOrder.response.success.data);
     setLoading(false);
+    setIsExpanded(false);
   };
 
   const initialValues = {

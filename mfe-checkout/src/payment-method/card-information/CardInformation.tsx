@@ -365,6 +365,8 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
     } catch (error) {
       setLoading(false);
       console.error("Error saving card information:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
