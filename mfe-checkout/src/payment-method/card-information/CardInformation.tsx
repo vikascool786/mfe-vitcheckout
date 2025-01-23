@@ -30,6 +30,8 @@ import { AddressHandler } from "../../interfaces/AddressHandler";
 import { useCreateShopperAddressBookEntry } from "../../api/service/ShopperAddressBook";
 import { DropdownOption } from "../../interfaces/DropdownOption";
 import { fetchStatesAndCountries } from "../../api/service/CountriesAndStates";
+import {creditCardSchema} from "../../validation/creditcardSchema";
+import {CardInputs} from "./CardInputs";
 
 interface ICardInformationProps {
   paymentMethod: IPaymentMethod;
@@ -68,24 +70,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
 
   const validationSchema = Yup.object().shape({
     // Card Information Validation
-    accountName: Yup.string().required("Name on Card is required"),
-    number: Yup.string()
-      .matches(
-        /^(?:[0-9]{16}|[0-9]{6}\*{6}[0-9]{4})$/,
-        "Card Number must be 16 digits"
-      )
-      .required("Card Number is required"),
-    expMonth: Yup.number()
-      .min(1, "Invalid month")
-      .max(12, "Invalid month")
-      .required("Expiration Month is required"),
-    expYear: Yup.number()
-      .min(new Date().getFullYear(), "Invalid year")
-      .required("Expiration Year is required"),
-    cvv: Yup.string()
-      .matches(/^[0-9]{3,4}$/, "CVV must be 3 or 4 digits")
-      .required("CVV is required"),
-
+    cardInfo: creditCardSchema,
     // Conditionally validate address fields
     first: Yup.string().when(
       "sameShippingAddress",
@@ -135,11 +120,13 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
 
   const initialValues = {
     // Card Information Fields
-    accountName: paymentMethod.accountName || "",
-    number: paymentMethod.number || "",
-    expMonth: paymentMethod.expMonth,
-    expYear: paymentMethod.expYear,
-    cvv: isPaymentValidated ? "***" : "",
+    cardInfo: {
+      accountName: paymentMethod.accountName || "",
+      number: paymentMethod.number || "",
+      expMonth: paymentMethod.expMonth,
+      expYear: paymentMethod.expYear,
+      cvv: isPaymentValidated ? "***" : "",
+    },
 
     // Address Fields
     first: address.first || "",
@@ -391,15 +378,6 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
     }, 100);
   };
 
-  const getYears = (startYear: number, endYear: number) =>
-    Array.from({ length: endYear - startYear + 1 }, (_, i) => ({
-      value: `${startYear + i}`,
-      label: `${startYear + i}`,
-    }));
-
-  const currentYear = new Date().getFullYear();
-  const years = getYears(currentYear, currentYear + 10);
-
   const childRef = useRef<AddressHandler>(null);
   const [showAVS, setShowAVS] = useState(false);
 
@@ -465,11 +443,11 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           handleSaveCardInformation(
             {
               ...paymentMethod,
-              accountName: values.accountName,
-              number: values.number,
-              expMonth: values.expMonth,
-              expYear: values.expYear,
-              cvv: parseInt(values.cvv),
+              accountName: values.cardInfo.accountName,
+              number: values.cardInfo.number,
+              expMonth: values.cardInfo.expMonth,
+              expYear: values.cardInfo.expYear,
+              cvv: parseInt(values.cardInfo.cvv),
               preferred: paymentMethod.preferred,
               id: paymentMethod.id,
             },
@@ -492,53 +470,8 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
         }) => (
           <form>
             <div className="card-information-container">
-              <FormField
-                label="Name on Card"
-                required
-                name="accountName"
-                value={values.accountName}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                errorMessage={touched.accountName && errors.accountName}
-              />
-              <FormField
-                label="Card Number"
-                required
-                name="number"
-                value={values.number}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                errorMessage={touched.number && errors.number}
-              />
-              <div className="form-field-container">
-                <DropdownField
-                  label="Expiration Month"
-                  selectedValue={values.expMonth?.toString()}
-                  options={[...Array(12)].map((_, i) => ({
-                    value: (i + 1).toString().padStart(2, "0"),
-                    label: (i + 1).toString().padStart(2, "0"),
-                  }))}
-                  onChange={(value) => handleChange("expMonth")(value)}
-                  errorMessage={touched.expMonth && errors.expMonth}
-                />
-                <DropdownField
-                  label="Expiration Year"
-                  selectedValue={values.expYear?.toString()}
-                  options={years}
-                  onChange={(value) => handleChange("expYear")(value)}
-                  errorMessage={touched.expYear && errors.expYear}
-                />
-              </div>
-              <FormField
-                label="CVV"
-                required
-                name="cvv"
-                type="password"
-                value={values.cvv}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                errorMessage={touched.cvv && errors.cvv}
-              />
+              <CardInputs handleChange={handleChange} touched={touched} errors={errors} handleBlur={handleBlur} values={values}/>
+
               <div className="save-for-later">
                 <input
                   type="checkbox"
@@ -660,11 +593,11 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                     onCancel();
                     handleCancelNewCard({
                       ...paymentMethod,
-                      accountName: values.accountName,
-                      number: values.number,
-                      expMonth: values.expMonth,
-                      expYear: values.expYear,
-                      cvv: parseInt(values.cvv),
+                      accountName: values.cardInfo.accountName,
+                      number: values.cardInfo.number,
+                      expMonth: values.cardInfo.expMonth,
+                      expYear: values.cardInfo.expYear,
+                      cvv: parseInt(values.cardInfo.cvv),
                     });
                   }}
                 />

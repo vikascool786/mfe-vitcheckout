@@ -187,6 +187,8 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
         orderResponse.then((response: any) => {
           setOrderData(response?.response.success?.data || null);
         });
+      } else{
+        setOrderData(order.response.success.data);
       }
     }
   }, [isFetchOrderComplete, defaultAddress, defaultPaymentMethod]);
@@ -202,7 +204,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
         defaultAddress?.id ?? 0
       );
     }
-  }, [defaultAddress, defaultPaymentMethod, order]);
+  }, [defaultAddress, defaultPaymentMethod]);
 
   const handlePlaceOrderUpdate = (value: boolean) => {
     setLoadingOrderConfirmation(value);
