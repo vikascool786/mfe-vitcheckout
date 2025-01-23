@@ -154,6 +154,10 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
             ...order.paymentMethod,
             id: paymentMethod.id,
           },
+          billingAddress: {
+            ...paymentAddress,
+            id: paymentAddress.id as number,
+          },
         });
         const orderResponse = await buildOrder(updatedOrder);
         setOrder(orderResponse.response.success.data);

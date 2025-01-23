@@ -63,13 +63,24 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
   };
 
   // Remove coupon from the list and update order.userOptions.coupons
-  const handleRemoveCoupon = (couponToRemove: string) => {
+  const handleRemoveCoupon = async (couponToRemove: string) => {
     if (order?.userOptions.coupons) {
       const { coupons } = order.userOptions;
 
       // Filter out the coupon to remove
       const updatedCoupons = coupons.filter(
         (appliedCoupon) => appliedCoupon !== couponToRemove
+      );
+
+      await changeOrder(
+        generateChangeStoreResponse({
+          ...order,
+          userOptions: {
+            ...order.userOptions,
+            coupons: updatedCoupons, // Update the coupons array
+          },
+        }),
+        order.id
       );
 
       setOrder({
@@ -139,15 +150,20 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
             order.id
           );
 
-          if (response.response.errors?.message) {
+          if (response.response.success?.notifications) {
             setCoupon({
               coupon: coupon.coupon,
-              couponError: response.response.errors.message,
+              couponError: response.response.success?.notifications[0]
+                ?.reason as string,
             });
             return;
           }
 
           setOrder(response.response.success?.data);
+          setCoupon({
+            coupon: "",
+            couponError: "",
+          });
         }
       }
     } catch (error) {

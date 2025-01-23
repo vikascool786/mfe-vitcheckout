@@ -202,7 +202,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
         defaultAddress?.id ?? 0
       );
     }
-  }, [defaultAddress, defaultPaymentMethod]);
+  }, [defaultAddress, defaultPaymentMethod, order]);
 
   const handlePlaceOrderUpdate = (value: boolean) => {
     setLoadingOrderConfirmation(value);
