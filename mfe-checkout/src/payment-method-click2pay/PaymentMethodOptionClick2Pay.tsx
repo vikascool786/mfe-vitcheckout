@@ -8,14 +8,16 @@ import {Add} from "../assets/icons/Add";
 import {Warn} from "../assets/icons/Warn";
 import {ShopperSavedPayments} from "../interfaces/ShopperSavedPayments";
 import {Button} from "../component/Button/Button";
-import $ from "jquery";
 import {fetchCustomerProfileData} from "../api/service/CustomerProfile";
 import {Click2PayData} from "./Click2PayData";
 import {creditCards} from "../payment-method/PaymentType";
 import Click2PayCardLoader from "./Click2PayCardLoader";
 import {GET_C2P_DPAID} from "../utils/urlResolver";
 import {Order} from "../interfaces/Order";
-import {CardInputs} from "./CardInputs";
+import {CardInputs} from "../payment-method/card-information/CardInputs";
+import {Formik} from "formik";
+import {creditCardSchema} from "../validation/creditcardSchema";
+import * as Yup from "yup";
 
 interface IClick2PayProps {
     pcid: string;
@@ -40,6 +42,10 @@ const c2pCustomerData: Click2PayData = {
         zip: ""
     }
 }
+
+const validationSchema = Yup.object().shape({
+    cardInfo: creditCardSchema,
+});
 
 export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({ pcid, order }) => {
     const [errorMessage, setErrorMessage] = useState("");
@@ -180,10 +186,6 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({ pcid, order 
     }, [cardData]);
 
     useEffect(() => {
-        $(".js-c2p-payment-add-card-form").parsley();
-    }, []);
-
-    useEffect(() => {
         document.addEventListener("c2pError", (event) => {
             const customEvent = event as CustomEvent<{ message: string }>;
             setErrorMessage(customEvent.detail.message);
@@ -204,20 +206,10 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({ pcid, order 
         Click2PayNewCard.closeAddCardOverlay();
     }
 
-    const saveNewCard = () => {
-        if(hasValidNewCardFormFields()){
-            // @ts-ignore
-            Click2PayNewCard.addCardToClick2Pay(window.c2pInstance);
-        }
+    const saveNewCard = (values: any) => {
+        // @ts-ignore
+        Click2PayNewCard.addCardToClick2Pay(window.c2pInstance, values);
     }
-
-    const hasValidNewCardFormFields = () => {
-        const form = document.querySelector(
-            ".js-c2p-payment-add-card-form"
-        ) as HTMLElement;
-        $(form).parsley().validate();
-        return $(form).parsley().isValid();
-    };
 
     const handleCloseErrorMessage = () => {
         setErrorMessage("");
@@ -311,43 +303,67 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({ pcid, order 
                 <div className="js-c2p-payment-add-card-container click-to-pay__iframe-container" role="dialog"
                      aria-modal="true"
                      aria-labelledby="dialogClickToPayAddCard" style={{display: "none"}}>
-                    <form id="dialogClickToPayAddCard"
-                          className="js-c2p-payment-add-card-form click-to-pay__iframe-modal click-to-pay__iframe-modal--padding click-to-pay__iframe-modal--flex
-                     click-to-pay__iframe-modal--scrollable">
-                        <div>
-                            <button
-                                className="overlay-simple__close overlay-simple__close--dark margin-top"
-                                onClick={closeAddCardOverlay}>
-                                <span className="collapse-text">Close</span>
-                                <span className="material-icons" aria-hidden="true">close</span>
-                            </button>
-                        </div>
-                        <div>
-                            <div
-                                className="click-to-pay__iframe-content--scrollable click-to-pay__iframe-content--padding">
-                                <div className="click-to-pay__heading">Card Information</div>
+                    <Formik
+                        initialValues={{ cardInfo: {
+                                accountName: "",
+                                number: "",
+                                cvv: "",
+                                expMonth: "",
+                                expYear: "",
+                            }
+                        }}
+                        validationSchema={validationSchema}
+                        onSubmit={(values) => {
+                            console.log('Form Submitted', values);
+                            saveNewCard(values);
+                        }}
+                    >
+                        {({   touched,
+                              errors,
+                              handleChange,
+                              handleBlur,
+                              submitForm,
+                              values
+                        }) => (
+                            <form id="dialogClickToPayAddCard"
+                                  className="js-c2p-payment-add-card-form click-to-pay__iframe-modal click-to-pay__iframe-modal--padding click-to-pay__iframe-modal--flex
+                         click-to-pay__iframe-modal--scrollable">
                                 <div>
-                                    <src-card-list card-brands={cardBrandsString}/>
-                                    <div className="checkout-method-click-to-pay-text">Save my information with Click to
-                                        Pay
-                                        for
-                                        fast,
-                                        secure checkout.
+                                    <button
+                                        className="overlay-simple__close overlay-simple__close--dark margin-top"
+                                        onClick={closeAddCardOverlay}>
+                                        <span className="collapse-text">Close</span>
+                                        <span className="material-icons" aria-hidden="true">close</span>
+                                    </button>
+                                </div>
+                                <div>
+                                    <div
+                                        className="click-to-pay__iframe-content--scrollable click-to-pay__iframe-content--padding">
+                                        <div className="click-to-pay__heading">Card Information</div>
+                                        <div>
+                                            <src-card-list card-brands={cardBrandsString}/>
+                                            <div className="checkout-method-click-to-pay-text">Save my information with
+                                                Click to
+                                                Pay
+                                                for
+                                                fast,
+                                                secure checkout.
+                                            </div>
+                                        </div>
+                                        <CardInputs handleChange={handleChange} touched={touched} errors={errors} handleBlur={handleBlur} values={values} />
+                                    </div>
+                                    <div className="form-footer form-footer__dual-button">
+                                        <Button
+                                            label="Cancel"
+                                            btnType="secondary"
+                                            onClick={closeAddCardOverlay}
+                                        />
+                                        <Button label="Save" btnType="primary" onClick={submitForm}/>
                                     </div>
                                 </div>
-                                <CardInputs/>
-                            </div>
-                            <div className="form-footer form-footer__dual-button">
-                                <Button
-                                    label="Cancel"
-                                    btnType="secondary"
-                                    onClick={closeAddCardOverlay}
-                                />
-                                <Button label="Save" btnType="primary"
-                                        onClick={saveNewCard}/>
-                            </div>
-                        </div>
-                    </form>
+                            </form>
+                        )}
+                    </Formik>
                 </div>
                 <div className="js-c2p-payment-iframe-container click-to-pay__iframe-container" role="dialog"
                      aria-modal="true" aria-labelledby="dialogClickToPay" style={{display: "none"}}>
