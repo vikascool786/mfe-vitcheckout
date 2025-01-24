@@ -187,8 +187,16 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
         orderResponse.then((response: any) => {
           setOrderData(response?.response.success?.data || null);
         });
-      } else{
-        setOrderData(order.response.success.data);
+      } else {
+        if (!order.response.success.data) return;
+        const orderResponse = order.response.success.data;
+        if (!orderResponse.billingAddress.id) {
+          orderResponse.billingAddress.id = defaultPaymentMethod.addressId;
+        }
+        if (!orderResponse.shippingAddress.id) {
+          orderResponse.shippingAddress.id = defaultAddress?.id;
+        }
+        setOrderData(orderResponse);
       }
     }
   }, [isFetchOrderComplete, defaultAddress, defaultPaymentMethod]);

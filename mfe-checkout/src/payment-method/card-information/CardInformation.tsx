@@ -30,8 +30,8 @@ import { AddressHandler } from "../../interfaces/AddressHandler";
 import { useCreateShopperAddressBookEntry } from "../../api/service/ShopperAddressBook";
 import { DropdownOption } from "../../interfaces/DropdownOption";
 import { fetchStatesAndCountries } from "../../api/service/CountriesAndStates";
-import {creditCardSchema} from "../../validation/creditcardSchema";
-import {CardInputs} from "./CardInputs";
+import { creditCardSchema } from "../../validation/creditcardSchema";
+import { CardInputs } from "./CardInputs";
 
 interface ICardInformationProps {
   paymentMethod: IPaymentMethod;
@@ -281,6 +281,13 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           ].filter((pm) => pm.paymentMethod?.id !== 0);
 
           if (order && paymentMethod) {
+            console.log("order && paymentMethod", {
+              ...order,
+              paymentMethod: {
+                ...order.paymentMethod,
+                id: response.at(-1)?.id as number,
+              },
+            });
             const updatedOrder = generateChangeStoreResponse({
               ...order,
               paymentMethod: {
@@ -470,7 +477,13 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
         }) => (
           <form>
             <div className="card-information-container">
-              <CardInputs handleChange={handleChange} touched={touched} errors={errors} handleBlur={handleBlur} values={values}/>
+              <CardInputs
+                handleChange={handleChange}
+                touched={touched}
+                errors={errors}
+                handleBlur={handleBlur}
+                values={values}
+              />
 
               <div className="save-for-later">
                 <input
