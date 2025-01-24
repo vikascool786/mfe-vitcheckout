@@ -44,6 +44,7 @@ export interface Item {
   catalogSku: string;
   catalogName: string;
   quantity: number;
+  option?: Array<{ optionStringValue: string; name: string; type: string }>;
   totals: {
     price: number;
     cashBack: number;

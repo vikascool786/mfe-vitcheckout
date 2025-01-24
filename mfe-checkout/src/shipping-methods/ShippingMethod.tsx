@@ -9,7 +9,7 @@ import { loadingAtom, orderAtom } from "../store";
 import { getCatalogName } from "../utils/helpers/GetCatalog";
 import "./ShippingMethod.scss";
 
-const ShippingMethod: React.FC = ({ }) => {
+const ShippingMethod: React.FC = ({}) => {
   const [orders, setOrder] = useAtom(orderAtom);
   const setLoading = useSetAtom(loadingAtom);
 
@@ -39,7 +39,7 @@ const ShippingMethod: React.FC = ({ }) => {
     });
 
     removeProductFromCart(orders.id, itemKey);
-    setLoading(false)
+    setLoading(false);
   };
 
   return (
@@ -81,6 +81,5 @@ const ShippingMethod: React.FC = ({ }) => {
     </div>
   );
 };
-
 
 export default withLoader(ShippingMethod);

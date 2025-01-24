@@ -42,16 +42,6 @@ export const ShippingOptions: React.FC<IShippingOptions> = ({
 
     setShipping(updatedOptions);
 
-    // console.log({
-    //   ...order, // Spread other stores
-    //   stores: {
-    //     ...order.stores,
-    //     [storeKey]: {
-    //       ...store,
-    //       shippingMethod: method,
-    //     },
-    //   },
-    // });
     if (order) {
       changeOrder(
         generateChangeStoreResponse({
