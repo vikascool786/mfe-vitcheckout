@@ -292,13 +292,13 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
         </div>
       )}
       {isLoading ? (
-        <div>Processing Order...</div>
-      ) : (
-        <Button
-          label="Place Order"
-          btnType="primary"
-          onClick={handlePlaceOrder}
-        />
+          <div>Processing Order...</div>
+      ): (
+          <Button
+              label={paymentTypeId === SEZZLE.typeId ? ("Pay with Sezzle") : paymentTypeId === PAYPAL.typeId ? ("Pay with PayPal") : ("Place Order")}
+              btnType="primary"
+              onClick={handlePlaceOrder}
+          />
       )}
     </div>
   );

@@ -356,6 +356,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
                 onCardEdit={onCardEdit}
                 handleCancelNewCard={handleCancelNewCard}
                 onAddNewCards={onAddNewCards}
+                updatePaymentTypeId={updatePaymentTypeId}
               />
             ))}
           {showClick2Pay && (

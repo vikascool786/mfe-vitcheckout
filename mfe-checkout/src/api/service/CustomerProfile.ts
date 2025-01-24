@@ -9,6 +9,6 @@ export const fetchCustomerProfileData = async (
         const siteResponse = await axiosInstance(siteFlagApiEndpoint).get("");
         return siteResponse.data;
     } catch (error) {
-        console.error(`Error getting site info for pcid: ${pcid}`, error);
+        console.error(`Error getting customer profile info for pcid: ${pcid}`, error);
     }
 };

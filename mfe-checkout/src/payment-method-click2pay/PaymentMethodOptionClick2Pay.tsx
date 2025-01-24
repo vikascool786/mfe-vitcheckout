@@ -85,22 +85,25 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({ pcid, order 
         if (c2pData) {
             fetchCustomerProfileData(pcid)
                 .then((response: any) => {
-                    setC2pData((prevData) => ({
-                        ...prevData,
-                        email: response.data.email_address,
-                        mobilePhone: response.data.cell_phone,
-                        address: {
-                            ...c2pCustomerData.address,
-                            first: response.data.first_name,
-                            last: response.data.last_name,
-                            address1: response.data.home_address?.address_1,
-                            address2: response.data.home_address?.address_2,
-                            address3: response.data.home_address?.address_3,
-                            city: response.data.home_address?.city,
-                            state: response.data.home_address?.state,
-                            zip: response.data.home_address?.postal_code,
-                        },
-                    }));
+                    if(response){
+                        setC2pData((prevData) => ({
+                            ...prevData,
+                            email: response.data.email_address,
+                            mobilePhone: response.data.cell_phone,
+                            address: {
+                                ...c2pCustomerData.address,
+                                first: response.data.first_name,
+                                last: response.data.last_name,
+                                address1: response.data.home_address?.address_1,
+                                address2: response.data.home_address?.address_2,
+                                address3: response.data.home_address?.address_3,
+                                city: response.data.home_address?.city,
+                                state: response.data.home_address?.state,
+                                zip: response.data.home_address?.postal_code,
+                            },
+                        }));
+                    }
+
                 })
                 .catch((error: { message: string; }) => {
                     console.error("Failed to fetch shopper profile data:", error);

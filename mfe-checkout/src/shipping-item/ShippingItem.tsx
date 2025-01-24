@@ -1,9 +1,9 @@
 import React from "react";
-import { Cashback } from "../assets/svgs/Cashback";
 import { Close } from "../assets/svgs/Close";
-import { Item } from "../interfaces/ShippingMethod";
 import "./ShippingItem.scss";
-import { it } from "node:test";
+import { Cashback } from "../assets/svgs/Cashback";
+import { Item } from "../interfaces/ShippingMethod";
+// import { it } from "node:test";
 
 interface IProduct {
   imageUrl: string;

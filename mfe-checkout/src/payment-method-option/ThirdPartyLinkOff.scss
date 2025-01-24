@@ -1,0 +1,21 @@
+.third-party-link-off-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin: 5px -25px;
+  background-color: #f0f1f7;
+  border-top: 1px solid #aca8a8;
+  border-left: 1px solid black;
+  border-right: 1px solid black;
+  &__icon {
+    max-width: 200px;
+    padding-top: 10px;
+  }
+  &__text {
+    font-size: 14px;
+    max-width: 400px;
+    padding: 10px;
+    text-align: center;
+  }
+}
