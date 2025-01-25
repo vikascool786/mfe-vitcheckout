@@ -191,11 +191,14 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
         if (!order.response.success.data) return;
         const orderResponse = order.response.success.data;
         if (!orderResponse.billingAddress.id) {
-          orderResponse.billingAddress.id = defaultPaymentMethod?.addressId;
+          orderResponse.billingAddress.id =
+            defaultPaymentMethod?.addressId || defaultAddress?.id;
         }
         if (!orderResponse.shippingAddress.id) {
           orderResponse.shippingAddress.id = defaultAddress?.id;
         }
+
+        console.log(orderResponse);
         setOrderData(orderResponse);
       }
     }
