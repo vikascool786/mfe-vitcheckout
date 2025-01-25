@@ -97,6 +97,19 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
           const isOrderPaymentMethod =
             paymentMethod.id === order?.paymentMethod.id;
 
+          if (paymentOptions.length < 2) {
+            return {
+              paymentMethod,
+              paymentAddress: addressMap.get(
+                paymentMethod.addressId.toString()
+              ),
+              isVisible: true,
+              isSelected:
+                isOrderPaymentMethod ||
+                (!order?.paymentMethod.id && paymentMethod.preferred),
+            } as IPaymentOption;
+          }
+
           return {
             paymentMethod,
             paymentAddress: addressMap.get(paymentMethod.addressId.toString()),
