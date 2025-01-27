@@ -97,7 +97,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
           const isOrderPaymentMethod =
             paymentMethod.id === order?.paymentMethod.id;
 
-          if (paymentOptions.length < 2) {
+          if (response.length <= 1) {
             return {
               paymentMethod,
               paymentAddress: addressMap.get(
@@ -108,18 +108,20 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
                 isOrderPaymentMethod ||
                 (!order?.paymentMethod.id && paymentMethod.preferred),
             } as IPaymentOption;
+          } else {
+            return {
+              paymentMethod,
+              paymentAddress: addressMap.get(
+                paymentMethod.addressId.toString()
+              ),
+              isVisible:
+                isOrderPaymentMethod ||
+                (!order?.paymentMethod.id && paymentMethod.preferred),
+              isSelected:
+                isOrderPaymentMethod ||
+                (!order?.paymentMethod.id && paymentMethod.preferred),
+            } as IPaymentOption;
           }
-
-          return {
-            paymentMethod,
-            paymentAddress: addressMap.get(paymentMethod.addressId.toString()),
-            isVisible:
-              isOrderPaymentMethod ||
-              (!order?.paymentMethod.id && paymentMethod.preferred),
-            isSelected:
-              isOrderPaymentMethod ||
-              (!order?.paymentMethod.id && paymentMethod.preferred),
-          } as IPaymentOption;
         });
 
         let updatedPaymentOptions = [...paymentOptions, ...paymentMethods];
