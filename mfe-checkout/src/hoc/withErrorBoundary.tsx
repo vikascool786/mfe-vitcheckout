@@ -36,8 +36,6 @@ class ErrorBoundary extends React.Component<
     const { hasError, error } = this.state;
     const { fallback, children } = this.props;
 
-    console.log(hasError, error)
-
     if (hasError) {
       return fallback || <h1>No items in your cart</h1>;
     }

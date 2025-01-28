@@ -27,7 +27,7 @@ import {
   updateShopperDetails,
   updateTempPaymentMethod,
 } from "../api/service/ShoppersPaymentMethods";
-import {ThirdPartyLinkOff} from "./ThirdPartyLinkOff";
+import { ThirdPartyLinkOff } from "./ThirdPartyLinkOff";
 
 export interface IPaymentOptionProps {
   handleCancelNewCard: () => void;
@@ -79,26 +79,21 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   };
 
   const onChangePaymentMethod = () => {
-    // Check if the selected payment option is the same as the current one
-    if (order?.paymentMethod?.id === paymentOption.paymentMethod.id) {
-      return;
-    }
-
     // Set editing to false if switching to a different payment method
 
     // Update payment methods with the selected method
     const updatedPaymentOptions = paymentMethods.map((method) =>
       method.paymentMethod.id === paymentOption.paymentMethod.id
         ? {
-          ...method,
-          isSelected: true,
-          isVisible: true,
-        }
+            ...method,
+            isSelected: true,
+            isVisible: true,
+          }
         : {
-          ...method,
-          isSelected: false,
-          isEditing: false,
-        }
+            ...method,
+            isSelected: false,
+            isEditing: false,
+          }
     );
 
     const selectedPayment = updatedPaymentOptions.find((pm) => pm.isSelected);
@@ -173,15 +168,15 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
         const updatedPaymentOptions = paymentMethods.map((method) =>
           method.paymentMethod.id === paymentOption.paymentMethod.id
             ? {
-              ...method,
-              isSelected: true,
-              isVisible: true,
-              isPaymentValidated: true,
-            }
+                ...method,
+                isSelected: true,
+                isVisible: true,
+                isPaymentValidated: true,
+              }
             : {
-              ...method,
-              isSelected: false,
-            }
+                ...method,
+                isSelected: false,
+              }
         );
 
         setPaymentMethods(updatedPaymentOptions);
@@ -268,7 +263,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
       </div>
 
       {!isCard && isSelected && (
-          <ThirdPartyLinkOff paymentMethod={paymentMethod}/>
+        <ThirdPartyLinkOff paymentMethod={paymentMethod} />
       )}
 
       {isEditing && (

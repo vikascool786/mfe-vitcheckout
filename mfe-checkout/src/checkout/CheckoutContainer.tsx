@@ -198,7 +198,6 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
           orderResponse.shippingAddress.id = defaultAddress?.id;
         }
 
-        console.log(orderResponse);
         setOrderData(orderResponse);
       }
     }

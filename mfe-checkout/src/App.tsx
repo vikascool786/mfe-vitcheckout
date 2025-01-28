@@ -36,13 +36,12 @@ const App: React.FC<AppProps> = () => {
           siteId="260"
         />
 
-        {/*
-                 *         <CheckoutContainer
+        {/* <CheckoutContainer
           cartId="cart_1326748654_W_USA_USA_ENG"
           shopperId="hqwxZzYzzqpeVzhWmZzZmZpzzkxkjzmZWqqWzxzkzj"
           pcid="1326748654"
           siteId="222"
-        />*/}
+        /> */}
       </Provider>
     </div>
   );

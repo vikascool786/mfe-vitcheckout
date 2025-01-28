@@ -92,36 +92,30 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       );
       try {
         const response = await fetchShoppersPaymentMethods(shopperId);
-        // const addressMap = addresses?.map()
+
         const paymentOptions = response.map((paymentMethod) => {
           const isOrderPaymentMethod =
-            paymentMethod.id === order?.paymentMethod.id;
+            paymentMethod.id === order?.paymentMethod?.id;
 
-          if (response.length <= 1) {
+          // Handle single response case
+          if (response.length === 1) {
             return {
               paymentMethod,
               paymentAddress: addressMap.get(
                 paymentMethod.addressId.toString()
               ),
               isVisible: true,
-              isSelected:
-                isOrderPaymentMethod ||
-                (!order?.paymentMethod.id && paymentMethod.preferred),
-            } as IPaymentOption;
-          } else {
-            return {
-              paymentMethod,
-              paymentAddress: addressMap.get(
-                paymentMethod.addressId.toString()
-              ),
-              isVisible:
-                isOrderPaymentMethod ||
-                (!order?.paymentMethod.id && paymentMethod.preferred),
-              isSelected:
-                isOrderPaymentMethod ||
-                (!order?.paymentMethod.id && paymentMethod.preferred),
+              isSelected: true,
             } as IPaymentOption;
           }
+
+          // Handle multiple response case
+          return {
+            paymentMethod,
+            paymentAddress: addressMap.get(paymentMethod.addressId.toString()),
+            isVisible: isOrderPaymentMethod || paymentMethod.preferred,
+            isSelected: isOrderPaymentMethod || paymentMethod.preferred,
+          } as IPaymentOption;
         });
 
         let updatedPaymentOptions = [...paymentOptions, ...paymentMethods];
@@ -352,7 +346,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       <div className="pm-container">
         <div className="pm-title-container">
           <FormHeading title="Payment Method" />
-          {paymentMethods.length >= 3 && (
+          {paymentMethods.length >= 4 && (
             <div className="pm-show-card" onClick={toggleAccordion}>
               <div>{isExpanded ? "Hide other cards" : "See other cards"}</div>
               <Back className={`accordion ${isExpanded ? "open" : "close"}`} />

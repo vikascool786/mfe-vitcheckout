@@ -65,7 +65,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
 
   const shippingAddress = addressList.find((add) => add.isShip);
   const [sameShippingAddress, setSameShippingAddress] = useState<boolean>(
-    !address ? true : false
+    shippingAddress?.id === address.id
   );
 
   const validationSchema = Yup.object().shape({
@@ -113,8 +113,8 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
         sameShippingAddress
           ? schema.notRequired()
           : schema
-            .matches(/^\d{5}$/, "Zip code must be 5 digits")
-            .required("Zip code is required")
+              .matches(/^\d{5}$/, "Zip code must be 5 digits")
+              .required("Zip code is required")
     ),
   });
 
@@ -196,18 +196,18 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
     const newAddressToAdd = sameShippingAddress
       ? { ...shippingAddress, isUpdateEnabled: false }
       : {
-        first: address?.first,
-        last: address?.last,
-        address1: address?.address1,
-        address2: address?.address2 || "",
-        city: address?.city || "New York",
-        state: address?.state,
-        zip: address?.zip,
-        country: address?.country || "USA",
-        phone: address?.phone || "",
-        isPoBox: address?.isPoBox || false,
-        isUpdateEnabled: false,
-      };
+          first: address?.first,
+          last: address?.last,
+          address1: address?.address1,
+          address2: address?.address2 || "",
+          city: address?.city || "New York",
+          state: address?.state,
+          zip: address?.zip,
+          country: address?.country || "USA",
+          phone: address?.phone || "",
+          isPoBox: address?.isPoBox || false,
+          isUpdateEnabled: false,
+        };
 
     const newAddressResponse = sameShippingAddress
       ? shippingAddress?.id
@@ -226,7 +226,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
 
     setLoading(true);
 
-    if (!sameShippingAddress) {
+    if (!sameShippingAddress && newAddressResponse) {
       const newBillAddress = newAddressResponse.find(
         (address: Address) => address.isBill
       );
@@ -376,9 +376,9 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           .map((paymentOption) =>
             paymentOption.paymentMethod.preferred
               ? {
-                ...paymentOption,
-                isSelected: true,
-              }
+                  ...paymentOption,
+                  isSelected: true,
+                }
               : paymentOption
           )
       );
@@ -438,14 +438,14 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
         onSubmit={(values) => {
           const address = sameShippingAddress
             ? {
-              first: values.first,
-              last: values.last,
-              address1: values.address1,
-              address2: values.address2,
-              city: values.city,
-              state: values.state,
-              zip: values.zip,
-            }
+                first: values.first,
+                last: values.last,
+                address1: values.address1,
+                address2: values.address2,
+                city: values.city,
+                state: values.state,
+                zip: values.zip,
+              }
             : (shippingAddress as Address);
           handleSaveCardInformation(
             {
@@ -474,155 +474,159 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           handleSubmit,
           setFieldValue,
           submitForm,
-        }) => (
-          <form>
-            <div className="card-information-container">
-              <CardInputs
-                handleChange={handleChange}
-                touched={touched}
-                errors={errors}
-                handleBlur={handleBlur}
-                values={values}
-              />
-
-              <div className="save-for-later">
-                <input
-                  type="checkbox"
-                  className="checkbox"
-                  checked={isCardSavedInWallet}
-                  onChange={(e) => setIsCardSavedInWallet(!isCardSavedInWallet)}
+        }) => {
+          return (
+            <form>
+              <div className="card-information-container">
+                <CardInputs
+                  handleChange={handleChange}
+                  touched={touched}
+                  errors={errors}
+                  handleBlur={handleBlur}
+                  values={values.cardInfo}
                 />
-                <span>Save card for later</span>
-              </div>
-              <div className="billing">
-                <input
-                  type="checkbox"
-                  className="checkbox"
-                  checked={sameShippingAddress}
-                  onChange={() => {
-                    setSameShippingAddress(!sameShippingAddress);
-                  }}
-                />
-                <span>Same as shipping</span>
-              </div>
 
-              {!sameShippingAddress ? (
-                <form>
-                  <div className="form-field-container">
-                    <FormField
-                      label="First Name"
-                      required
-                      name="first"
-                      value={values.first}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      errorMessage={touched.first && errors.first}
-                    />
-                    <FormField
-                      label="Last Name"
-                      required
-                      name="last"
-                      value={values.last}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      errorMessage={touched.last && errors.last}
-                    />
-                  </div>
-                  <div className="form-field-container-full">
-                    <FormField
-                      label="Address Line 1"
-                      required
-                      name="address1"
-                      value={values.address1}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      errorMessage={touched.address1 && errors.address1}
-                    />
-                  </div>
-                  <div className="form-field-container-full">
-                    <FormField
-                      label="Address Line 2"
-                      name="address2"
-                      value={values.address2}
-                      onChange={handleChange}
-                    />
-                  </div>
-                  <div className="form-field-container">
-                    <FormField
-                      label="City"
-                      required
-                      name="city"
-                      value={values.city}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      errorMessage={touched.city && errors.city}
-                    />
-                    <DropdownField
-                      options={stateDropdownList}
-                      label="State/Province"
-                      required
-                      selectedValue={values.state}
-                      formName="state"
-                      onChange={(e) => setFieldValue("state", e)}
-                      errorMessage={touched.state && errors.state}
-                    />
-                  </div>
-                  <div className="form-field-container">
-                    <FormField
-                      label="Zip Code"
-                      required
-                      name="zip"
-                      value={values.zip}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      errorMessage={touched.zip && errors.zip}
-                    />
-                    <div className="save-for-later">
-                      <input
-                        className="checkbox"
-                        type="checkbox"
-                        name="isPoBox"
+                <div className="save-for-later">
+                  <input
+                    type="checkbox"
+                    className="checkbox"
+                    checked={isCardSavedInWallet}
+                    onChange={(e) =>
+                      setIsCardSavedInWallet(!isCardSavedInWallet)
+                    }
+                  />
+                  <span>Save card for later</span>
+                </div>
+                <div className="billing">
+                  <input
+                    type="checkbox"
+                    className="checkbox"
+                    checked={sameShippingAddress}
+                    onChange={() => {
+                      setSameShippingAddress(!sameShippingAddress);
+                    }}
+                  />
+                  <span>Same as shipping</span>
+                </div>
+
+                {!sameShippingAddress ? (
+                  <form>
+                    <div className="form-field-container">
+                      <FormField
+                        label="First Name"
+                        required
+                        name="first"
+                        value={values.first}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        errorMessage={touched.first && errors.first}
+                      />
+                      <FormField
+                        label="Last Name"
+                        required
+                        name="last"
+                        value={values.last}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        errorMessage={touched.last && errors.last}
+                      />
+                    </div>
+                    <div className="form-field-container-full">
+                      <FormField
+                        label="Address Line 1"
+                        required
+                        name="address1"
+                        value={values.address1}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        errorMessage={touched.address1 && errors.address1}
+                      />
+                    </div>
+                    <div className="form-field-container-full">
+                      <FormField
+                        label="Address Line 2"
+                        name="address2"
+                        value={values.address2}
                         onChange={handleChange}
                       />
-                      <span className="shipping-text">
-                        This address is a PO box
-                      </span>
                     </div>
+                    <div className="form-field-container">
+                      <FormField
+                        label="City"
+                        required
+                        name="city"
+                        value={values.city}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        errorMessage={touched.city && errors.city}
+                      />
+                      <DropdownField
+                        options={stateDropdownList}
+                        label="State/Province"
+                        required
+                        selectedValue={values.state}
+                        formName="state"
+                        onChange={(e) => setFieldValue("state", e)}
+                        errorMessage={touched.state && errors.state}
+                      />
+                    </div>
+                    <div className="form-field-container">
+                      <FormField
+                        label="Zip Code"
+                        required
+                        name="zip"
+                        value={values.zip}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        errorMessage={touched.zip && errors.zip}
+                      />
+                      <div className="save-for-later">
+                        <input
+                          className="checkbox"
+                          type="checkbox"
+                          name="isPoBox"
+                          onChange={handleChange}
+                        />
+                        <span className="shipping-text">
+                          This address is a PO box
+                        </span>
+                      </div>
+                    </div>
+                  </form>
+                ) : (
+                  <div className="checkbox-text">
+                    {shippingAddress?.first} {shippingAddress?.last}{" "}
+                    {shippingAddress?.address1}
+                    {shippingAddress?.address2} {shippingAddress?.city}{" "}
+                    {shippingAddress?.zip}
                   </div>
-                </form>
-              ) : (
-                <div className="checkbox-text">
-                  {shippingAddress?.first} {shippingAddress?.last}{" "}
-                  {shippingAddress?.address1}
-                  {shippingAddress?.address2} {shippingAddress?.city}{" "}
-                  {shippingAddress?.zip}
+                )}
+                <div className="button-container">
+                  <Button
+                    btnType="secondary"
+                    label="Cancel"
+                    onClick={() => {
+                      onCancel();
+                      handleCancelNewCard({
+                        ...paymentMethod,
+                        accountName: values.cardInfo.accountName,
+                        number: values.cardInfo.number,
+                        expMonth: values.cardInfo.expMonth,
+                        expYear: values.cardInfo.expYear,
+                        cvv: parseInt(values.cardInfo.cvv),
+                      });
+                    }}
+                  />
+                  <Button
+                    btnType="primary"
+                    label={isCardSavedInWallet ? "Update" : "Save"}
+                    onClick={submitForm}
+                  />
                 </div>
-              )}
-              <div className="button-container">
-                <Button
-                  btnType="secondary"
-                  label="Cancel"
-                  onClick={() => {
-                    onCancel();
-                    handleCancelNewCard({
-                      ...paymentMethod,
-                      accountName: values.cardInfo.accountName,
-                      number: values.cardInfo.number,
-                      expMonth: values.cardInfo.expMonth,
-                      expYear: values.cardInfo.expYear,
-                      cvv: parseInt(values.cardInfo.cvv),
-                    });
-                  }}
-                />
-                <Button
-                  btnType="primary"
-                  label={isCardSavedInWallet ? "Update" : "Save"}
-                  onClick={submitForm}
-                />
               </div>
-            </div>
-          </form>
-        )}
+            </form>
+          );
+        }}
       </Formik>
       <AddressVerificationContainer
         ref={childRef}
