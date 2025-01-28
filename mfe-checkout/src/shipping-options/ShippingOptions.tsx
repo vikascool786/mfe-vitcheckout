@@ -1,6 +1,5 @@
 import { useAtom, useSetAtom } from "jotai";
 import React, { useEffect, useState } from "react";
-import Swal from "sweetalert2";
 import { changeOrder } from "../api/service/Order";
 import { OrderStore } from "../interfaces/Order";
 import { ShippingOptionItem } from "../shipping-option-item/ShippingOptionItem";
@@ -58,11 +57,6 @@ export const ShippingOptions: React.FC<IShippingOptions> = ({
       )
         .then((data) => {
           if (data && data.response.errors) {
-            Swal.fire({
-              icon: "error",
-              title: "Oops...",
-              text: data.response.errors.message,
-            });
             setLoading(false);
             return;
           }
@@ -74,11 +68,7 @@ export const ShippingOptions: React.FC<IShippingOptions> = ({
         })
         .catch((er) => {
           // console.log("Error", er);
-          Swal.fire({
-            icon: "error",
-            title: "Oops...",
-            text: "Something went wrong!",
-          });
+
           const updatedOptions = shippingSelections.map((option) => ({
             ...option,
             isSelected: option.method === method, // Set true for selected, false for others

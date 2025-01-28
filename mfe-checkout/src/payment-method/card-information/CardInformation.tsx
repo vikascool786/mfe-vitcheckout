@@ -1,18 +1,22 @@
+import { Formik } from "formik";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import React, { useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
-import Swal from "sweetalert2";
+import { AddressVerificationContainer } from "../../address-verification/AddressVerificationContainer";
+import { fetchStatesAndCountries } from "../../api/service/CountriesAndStates";
 import { buildOrder } from "../../api/service/Order";
+import { useCreateShopperAddressBookEntry } from "../../api/service/ShopperAddressBook";
 import {
   addShoppersPaymentMethod,
   addTempPaymentMethod,
   updateShopperDetails,
 } from "../../api/service/ShoppersPaymentMethods";
-import { AddressForm } from "../../component/AddressForm";
 import { Button } from "../../component/Button/Button";
 import { DropdownField } from "../../component/Form/Field/DropdownField";
 import { FormField } from "../../component/Form/Field/FormField";
 import { Address } from "../../interfaces/Address";
+import { AddressHandler } from "../../interfaces/AddressHandler";
+import { DropdownOption } from "../../interfaces/DropdownOption";
 import { IPaymentMethod } from "../../interfaces/PaymentMethod";
 import {
   addressAtom,
@@ -22,15 +26,8 @@ import {
   paymentMethodsAtom,
 } from "../../store";
 import { generateChangeStoreResponse } from "../../utils/helpers/GenerateChangeStoreResponse";
-import "./CardInformation.scss";
-import { Form, Formik, useFormik } from "formik";
-import { createBlankAddress } from "../../utils/helpers/GenerateAddress";
-import { AddressVerificationContainer } from "../../address-verification/AddressVerificationContainer";
-import { AddressHandler } from "../../interfaces/AddressHandler";
-import { useCreateShopperAddressBookEntry } from "../../api/service/ShopperAddressBook";
-import { DropdownOption } from "../../interfaces/DropdownOption";
-import { fetchStatesAndCountries } from "../../api/service/CountriesAndStates";
 import { creditCardSchema } from "../../validation/creditcardSchema";
+import "./CardInformation.scss";
 import { CardInputs } from "./CardInputs";
 
 interface ICardInformationProps {
@@ -302,11 +299,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           }
         } catch (error) {
           if (error) {
-            Swal.fire({
-              icon: "error",
-              title: "Oops...",
-              text: error as string,
-            });
+
             setLoading(false);
 
             return;

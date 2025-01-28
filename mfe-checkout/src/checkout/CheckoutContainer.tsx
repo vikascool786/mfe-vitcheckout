@@ -1,6 +1,5 @@
 import { useAtom } from "jotai";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import Swal from "sweetalert2";
 import "../App.scss";
 import { checkoutSezzle } from "../api/ajaxaction/Sezzle";
 import { buildOrder, commitOrder, OrderResponse } from "../api/service/Order";
@@ -67,6 +66,8 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   siteId,
 }) => {
   const [orderData, setOrderData] = useAtom(orderAtom);
+
+  const [showEmptyOrder, setShowEmptyOrder] = useState(false);
   const [isLoading] = useAtom(loadingAtom);
   const [orderErrorMessage, setOrderErrorMessage] = useState("");
   const [paymentTypeId, setPaymentTypeId] = useState(0);
@@ -161,12 +162,6 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
       })
       .catch((error) => {
         setLoadingOrderConfirmation(false);
-        setOrderErrorMessage(`Detail: ${error?.message || error}`);
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: error?.message,
-        });
       });
   };
 
