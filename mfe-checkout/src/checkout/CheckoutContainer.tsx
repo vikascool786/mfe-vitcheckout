@@ -295,4 +295,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   );
 };
 
-export default withErrorBoundary(CheckoutContainer);
+export default withErrorBoundary(
+  CheckoutContainer,
+  <div>An unexpected error occurred. Please try again later.</div>
+);

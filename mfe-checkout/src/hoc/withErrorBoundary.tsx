@@ -1,57 +1,57 @@
-import React, { ComponentType, ReactNode } from "react";
+import React from "react";
 
-// Props for the ErrorBoundary component
 interface ErrorBoundaryProps {
-  fallback?: ReactNode; // Fallback UI to render on error
+  fallback?: React.ReactNode;
 }
 
-// State for the ErrorBoundary component
 interface ErrorBoundaryState {
   hasError: boolean;
   error: Error | null;
 }
 
-// ErrorBoundary class component
 class ErrorBoundary extends React.Component<
   React.PropsWithChildren<ErrorBoundaryProps>,
   ErrorBoundaryState
 > {
   constructor(props: ErrorBoundaryProps) {
     super(props);
-    this.state = {
-      hasError: false,
-      error: null,
-    };
+    this.state = { hasError: false, error: null };
   }
 
-  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+  static getDerivedStateFromError(error: Error) {
     return { hasError: true, error };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error("Error caught by ErrorBoundary:", error, errorInfo);
+    // Log the error to an external service if needed
+    console.error("ErrorBoundary caught an error:", error, errorInfo);
   }
 
+  handleRetry = () => {
+    this.setState({ hasError: false, error: null });
+  };
+
   render() {
-    const { hasError, error } = this.state;
-    const { fallback, children } = this.props;
-
-    if (hasError) {
-      return fallback || <h1>No items in your cart</h1>;
+    if (this.state.hasError) {
+      return (
+        this.props.fallback || (
+          <div className="error-boundary">
+            <h1>Something went wrong.</h1>
+            <p>{this.state.error?.message}</p>
+            <button onClick={this.handleRetry}>Retry</button>
+          </div>
+        )
+      );
     }
-
-    return children;
+    return this.props.children;
   }
 }
 
-// Higher-Order Component
 export const withErrorBoundary = <P extends object>(
-  WrappedComponent: ComponentType<P>,
-  fallback?: ReactNode
-) => {
-  return (props: P) => (
-    <ErrorBoundary fallback={fallback}>
-      <WrappedComponent {...props} />
-    </ErrorBoundary>
-  );
-};
+  Component: React.ComponentType<P>,
+  fallback?: React.ReactNode
+) => (props: P) => (
+  <ErrorBoundary fallback={fallback}>
+    <Component {...props} />
+  </ErrorBoundary>
+);
