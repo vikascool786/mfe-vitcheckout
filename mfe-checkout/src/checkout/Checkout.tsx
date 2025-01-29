@@ -189,7 +189,7 @@ const Checkout: React.FC<ICheckout> = ({ shopperId, siteId, addresses }) => {
         const isValidAddress = await childRef.current.verifyAddress({
           ...addressEntered,
         });
-        const validatedAddress = { ...addressEntered, isShip: 1 };
+        const validatedAddress = { ...addressEntered, defaultaddr: true };
 
         setShippingAddress(validatedAddress);
         setShowShipAddressForm(false);
@@ -223,25 +223,25 @@ const Checkout: React.FC<ICheckout> = ({ shopperId, siteId, addresses }) => {
             (address) => address.isShip
           );
 
-          // if (newAddedAddress && order) {
-          //   const newOrder = await buildOrder(
-          //     generateChangeStoreResponse({
-          //       ...order,
-          //       shippingAddress: {
-          //         ...newAddedAddress,
-          //         id: newAddedAddress.id,
-          //       },
-          //       billingAddress: {
-          //         ...order?.billingAddress,
-          //         id:
-          //           updatedAddressList.find((add) => add.isBill)?.id ||
-          //           newAddedAddress.id,
-          //       },
-          //     })
-          //   );
+          if (newAddedAddress && order) {
+            const newOrder = await buildOrder(
+              generateChangeStoreResponse({
+                ...order,
+                shippingAddress: {
+                  ...newAddedAddress,
+                  id: newAddedAddress.id,
+                },
+                billingAddress: {
+                  ...order?.billingAddress,
+                  id:
+                    updatedAddressList.find((add) => add.isBill)?.id ||
+                    newAddedAddress.id,
+                },
+              })
+            );
 
-          //   setOrder(newOrder.response.success.data);
-          // }
+            setOrder(newOrder.response.success.data);
+          }
         }
 
         setLoading(false);
@@ -276,7 +276,7 @@ const Checkout: React.FC<ICheckout> = ({ shopperId, siteId, addresses }) => {
     setShowShipAddressForm(!showShipAddressForm);
     setShippingAddress(
       shopperAddressBook.find((address) => address.isShip === 1) ||
-        shippingAddress
+      shippingAddress
     );
     setIsExpanded(!isExpanded);
   };
