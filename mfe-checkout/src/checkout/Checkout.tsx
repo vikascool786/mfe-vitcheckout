@@ -189,7 +189,7 @@ const Checkout: React.FC<ICheckout> = ({ shopperId, siteId, addresses }) => {
         const isValidAddress = await childRef.current.verifyAddress({
           ...addressEntered,
         });
-        const validatedAddress = { ...addressEntered };
+        const validatedAddress = { ...addressEntered, isShip: 1 };
 
         setShippingAddress(validatedAddress);
         setShowShipAddressForm(false);
@@ -217,7 +217,31 @@ const Checkout: React.FC<ICheckout> = ({ shopperId, siteId, addresses }) => {
           );
         } else {
           // Use POST request for new address (create)
-          await createShopperAddressBookEntry(shopperId, addressParams);
+          const updatedAddressList: Address[] =
+            await createShopperAddressBookEntry(shopperId, addressParams);
+          const newAddedAddress = updatedAddressList.find(
+            (address) => address.isShip
+          );
+
+          // if (newAddedAddress && order) {
+          //   const newOrder = await buildOrder(
+          //     generateChangeStoreResponse({
+          //       ...order,
+          //       shippingAddress: {
+          //         ...newAddedAddress,
+          //         id: newAddedAddress.id,
+          //       },
+          //       billingAddress: {
+          //         ...order?.billingAddress,
+          //         id:
+          //           updatedAddressList.find((add) => add.isBill)?.id ||
+          //           newAddedAddress.id,
+          //       },
+          //     })
+          //   );
+
+          //   setOrder(newOrder.response.success.data);
+          // }
         }
 
         setLoading(false);
