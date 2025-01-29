@@ -240,7 +240,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               </div>
               <div className="gift-card-apply">
                 <Button
-                  label="Apply Gift Card"
+                  label="Apply"
                   btnType="secondary"
                   onClick={handleAddGiftCard}
                 />

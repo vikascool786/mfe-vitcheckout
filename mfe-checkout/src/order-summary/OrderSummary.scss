@@ -23,7 +23,13 @@
 .order-apply-container {
   display: flex;
   flex-direction: row;
-  flex: 3; // This will take 20% of the space
+
+  .custom-button.secondary{
+    width: 90px;
+    height: 39px;
+    padding: 12px 24px;
+    box-sizing: border-box;
+  }
 }
 
 .gift-card-number {
@@ -240,6 +246,13 @@
 .gift-card-apply {
   display: flex;
   justify-content: flex-end; // Aligns the button to the right
+
+  .custom-button.secondary {
+    width: 90px;
+    height: 39px;
+    padding: 12px 24px;
+    box-sizing: border-box;
+  }
 }
 
 .shipping-catolog-name {
