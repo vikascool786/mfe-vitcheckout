@@ -33,7 +33,7 @@ export const addShoppersPaymentMethod = async (
 ): Promise<IPaymentMethod[]> => {
   try {
     const response = await axiosInstance(
-      `https://devapi2.shop.com/shopper-wallets/v1/Shopper/${shopperId}/Wallet?api_key=c7f5de6a77644516b24c68fc4ac173fc`
+      `${GET_API_ENDPOINT_BASE_URL_ONLY()}/shopper-wallets/v1/Shopper/${shopperId}/Wallet?api_key=${GET_API_KEY()}`
     ).post("", walletData, {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
