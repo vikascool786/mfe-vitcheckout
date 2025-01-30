@@ -276,7 +276,7 @@ const Checkout: React.FC<ICheckout> = ({ shopperId, siteId, addresses }) => {
     setShowShipAddressForm(!showShipAddressForm);
     setShippingAddress(
       shopperAddressBook.find((address) => address.isShip === 1) ||
-      shippingAddress
+        shippingAddress
     );
     setIsExpanded(!isExpanded);
   };
@@ -331,6 +331,40 @@ const Checkout: React.FC<ICheckout> = ({ shopperId, siteId, addresses }) => {
     setOrder(newOrder.response.success.data);
     setLoading(false);
     setIsExpanded(false);
+  };
+
+  const handleEnableTextUpdates = async (
+    shouldEnable: boolean,
+    phone: string
+  ) => {
+    if (shouldEnable) {
+      const phoneNumber = shouldEnable ? phone : "";
+
+      console.log(
+        generateChangeStoreResponse({
+          ...order,
+          userOptions: {
+            ...order?.userOptions,
+            smsPhone: phoneNumber,
+          },
+        })
+      );
+      try {
+        const orderResponse = await buildOrder(
+          generateChangeStoreResponse({
+            ...order,
+            userOptions: {
+              ...order?.userOptions,
+              smsPhone: phoneNumber,
+            },
+          })
+        );
+
+        setOrder(orderResponse.response.success.data);
+      } catch (error) {
+        alert("Failed to update text updates");
+      }
+    }
   };
 
   const initialValues = {
@@ -532,12 +566,17 @@ const Checkout: React.FC<ICheckout> = ({ shopperId, siteId, addresses }) => {
                           title="Get Text Updates for this Order"
                           subtitle="Messaging data rates may apply."
                           checked={values.isUpdateEnabled}
-                          onChange={() =>
+                          onChange={() => {
                             setFieldValue(
                               "isUpdateEnabled",
                               !values.isUpdateEnabled
-                            )
-                          }
+                            );
+
+                            handleEnableTextUpdates(
+                              !values.isUpdateEnabled,
+                              values.phone
+                            );
+                          }}
                         />
                       }
                       errorMessage={touched.phone && errors.phone}

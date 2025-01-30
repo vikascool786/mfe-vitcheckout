@@ -22,6 +22,13 @@ interface ICouponState {
   coupon: string;
   couponError: string;
 }
+
+interface IGCState {
+  gcNum: string;
+  gcPin: string;
+  gcError: string;
+}
+
 export const OrderSummary: React.FC<IOrderSummary> = ({
   pcid,
   hideCashback,
@@ -33,8 +40,12 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
     couponError: "",
   });
   const [showApplyGiftCard, setShowApplyGiftCard] = useState(false);
-  const [gcPin, setGcPin] = useState<string>("");
-  const [gcNum, setGcNum] = useState<string>("");
+
+  const [gcState, setgcState] = useState<IGCState>({
+    gcNum: "",
+    gcPin: "",
+    gcError: "",
+  });
 
   // Handle input text change for coupon
   // Handle input text change for coupon
@@ -51,11 +62,19 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
 
   // Handle input changes for gift card fields
   const handleGcNumChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setGcNum(e.target.value);
+    setgcState((prevState) => ({
+      ...prevState,
+      gcNum: e.target.value,
+      gcError: "", // Clear error on input change
+    }));
   };
 
   const handleGcPinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setGcPin(e.target.value);
+    setgcState((prevState) => ({
+      ...prevState,
+      gcPin: e.target.value,
+      gcError: "", // Clear error on input change
+    }));
   };
 
   const handleApplyGiftCard = () => {
@@ -95,20 +114,25 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
 
   // Add gift card to the order
   const handleAddGiftCard = () => {
-    if (order?.userOptions && gcPin.trim() && gcNum.trim()) {
+    if (order?.userOptions && gcState.gcNum.trim() && gcState.gcPin.trim()) {
       changeOrder(
         generateChangeStoreResponse({
           ...order,
           userOptions: {
             ...order.userOptions,
-            gcPin: [gcPin],
-            gcNum: [gcNum],
+            gcPin: [gcState.gcPin],
+            gcNum: [gcState.gcNum],
           },
         }),
         order.id
       ).then((response) => {
         if (response.response.success?.notifications) {
-          alert("Error for the gift card");
+          setgcState({
+            gcNum: gcState.gcNum,
+            gcPin: gcState.gcPin,
+            gcError: response.response.success?.notifications[0]
+              ?.reason as string,
+          });
           console.warn(response.response.success.notifications);
           return;
         }
@@ -117,13 +141,6 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           setOrder(response.response.success.data);
         }
       });
-
-      // Reset the gift card fields
-      setGcPin("");
-      setGcNum("");
-
-      // Hide the gift card fields
-      setShowApplyGiftCard(false);
     }
   };
 
@@ -225,17 +242,21 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
             <div className="gift-card-wrapper">
               <div className="gift-card-wrapper-fields">
                 <div className="gift-card-wrapper-field-1">
-                  <div className="order-redeem-coupon-text"> Gift Card Number</div>
+                  <div className="order-redeem-coupon-text">
+                    Gift Card Number
+                  </div>
                   <FormField
-                    value={gcNum}
+                    value={gcState.gcNum}
                     onChange={handleGcNumChange}
+                    errorMessage={gcState.gcError}
                   />
                 </div>
                 <div className="gift-card-wrapper-field-2">
                   <div className="order-redeem-coupon-text">PIN</div>
                   <FormField
-                    value={gcPin}
+                    value={gcState.gcPin}
                     onChange={handleGcPinChange}
+                    errorMessage={gcState.gcError}
                   />
                 </div>
               </div>
@@ -264,8 +285,9 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           if (!store.totals) return null;
           return (
             <div
-              className={`order-charges-table ${isFirst ? "order-charges-table-first" : ""
-                } ${isLast ? "order-charges-table-last" : ""}`}
+              className={`order-charges-table ${
+                isFirst ? "order-charges-table-first" : ""
+              } ${isLast ? "order-charges-table-last" : ""}`}
               key={store.id || index} // Add a key for the mapped elements
             >
               <div className="shipping-catolog-name">

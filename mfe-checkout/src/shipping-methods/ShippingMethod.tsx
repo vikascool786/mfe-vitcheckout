@@ -1,6 +1,6 @@
 import { useAtom, useSetAtom } from "jotai";
 import React from "react";
-import { removeProductFromCart } from "../api/service/Order";
+import { buildOrder, removeProductFromCart } from "../api/service/Order";
 import { FormHeading } from "../component/Form/Heading/FormHeading";
 import withLoader from "../hoc/withLoader";
 import { ShippingItem } from "../shipping-item/ShippingItem";
@@ -8,8 +8,9 @@ import { ShippingOptions } from "../shipping-options/ShippingOptions";
 import { loadingAtom, orderAtom } from "../store";
 import { getCatalogName } from "../utils/helpers/GetCatalog";
 import "./ShippingMethod.scss";
+import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 
-const ShippingMethod: React.FC = ({ }) => {
+const ShippingMethod: React.FC = ({}) => {
   const [orders, setOrder] = useAtom(orderAtom);
   const setLoading = useSetAtom(loadingAtom);
 
@@ -38,7 +39,14 @@ const ShippingMethod: React.FC = ({ }) => {
       stores: updatedStores,
     });
 
-    removeProductFromCart(orders.id, itemKey);
+    removeProductFromCart(orders.id, itemKey).then(() => {
+      buildOrder(
+        generateChangeStoreResponse({
+          ...orders,
+          stores: updatedStores,
+        })
+      ).then((response) => setOrder(response.response.success.data));
+    });
     setLoading(false);
   };
 
