@@ -111,8 +111,8 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
         sameShippingAddress
           ? schema.notRequired()
           : schema
-              .matches(/^\d{5}$/, "Zip code must be 5 digits")
-              .required("Zip code is required")
+            .matches(/^\d{5}$/, "Zip code must be 5 digits")
+            .required("Zip code is required")
     ),
   });
 
@@ -196,18 +196,18 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
     const newAddressToAdd = sameShippingAddress
       ? { ...shippingAddress, isUpdateEnabled: false }
       : {
-          first: address?.first,
-          last: address?.last,
-          address1: address?.address1,
-          address2: address?.address2 || "",
-          city: address?.city || "New York",
-          state: address?.state,
-          zip: address?.zip,
-          country: address?.country || "USA",
-          phone: address?.phone || "",
-          isPoBox: address?.isPoBox || false,
-          isUpdateEnabled: false,
-        };
+        first: address?.first,
+        last: address?.last,
+        address1: address?.address1,
+        address2: address?.address2 || "",
+        city: address?.city || "New York",
+        state: address?.state,
+        zip: address?.zip,
+        country: address?.country || "USA",
+        phone: address?.phone || "",
+        isPoBox: address?.isPoBox || false,
+        isUpdateEnabled: false,
+      };
 
     const newAddressResponse = sameShippingAddress
       ? shippingAddress?.id
@@ -377,9 +377,9 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           .map((paymentOption) =>
             paymentOption.paymentMethod.preferred
               ? {
-                  ...paymentOption,
-                  isSelected: true,
-                }
+                ...paymentOption,
+                isSelected: true,
+              }
               : paymentOption
           )
       );
@@ -439,14 +439,14 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
         onSubmit={(values) => {
           const address = sameShippingAddress
             ? {
-                first: values.first,
-                last: values.last,
-                address1: values.address1,
-                address2: values.address2,
-                city: values.city,
-                state: values.state,
-                zip: values.zip,
-              }
+              first: values.first,
+              last: values.last,
+              address1: values.address1,
+              address2: values.address2,
+              city: values.city,
+              state: values.state,
+              zip: values.zip,
+            }
             : (shippingAddress as Address);
           handleSaveCardInformation(
             {

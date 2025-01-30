@@ -10,7 +10,7 @@ import { getCatalogName } from "../utils/helpers/GetCatalog";
 import "./ShippingMethod.scss";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 
-const ShippingMethod: React.FC = ({}) => {
+const ShippingMethod: React.FC = ({ }) => {
   const [orders, setOrder] = useAtom(orderAtom);
   const setLoading = useSetAtom(loadingAtom);
 
