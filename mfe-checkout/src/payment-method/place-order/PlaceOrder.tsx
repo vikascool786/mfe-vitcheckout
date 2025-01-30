@@ -295,9 +295,10 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
           <div>Processing Order...</div>
       ): (
           <Button
-              label={paymentTypeId === SEZZLE.typeId ? ("Pay with Sezzle") : paymentTypeId === PAYPAL.typeId ? ("Pay with PayPal") : ("Place Order")}
+              label={paymentTypeId === SEZZLE.typeId || paymentTypeId === PAYPAL.typeId ? ("Pay with") : ("Place Order")}
               btnType="primary"
               onClick={handlePlaceOrder}
+              logo={paymentTypeId === SEZZLE.typeId ? ("https://img.shop.com/Image/resources/checkout/Sezzle-Color-White-Logo.svg") : paymentTypeId === PAYPAL.typeId ? ("https://img.shop.com/Image/resources/checkout/PayPal-White-Logo.svg") : ("")}
           />
       )}
     </div>

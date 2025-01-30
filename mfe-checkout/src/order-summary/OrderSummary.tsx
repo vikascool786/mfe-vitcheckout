@@ -220,21 +220,22 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                 ))}
               </div>
             )}
+
           {showApplyGiftCard && (
-            <div className="gift-card-container">
-              <div className="gift-card-container-fields">
-                <div className="gift-card-container-field-1">
+            <div className="gift-card-wrapper">
+              <div className="gift-card-wrapper-fields">
+                <div className="gift-card-wrapper-field-1">
+                  <div className="order-redeem-coupon-text"> Gift Card Number</div>
                   <FormField
                     value={gcNum}
                     onChange={handleGcNumChange}
-                    placeholder="Gift Card Number"
                   />
                 </div>
-                <div className="gift-card-container-field-2">
+                <div className="gift-card-wrapper-field-2">
+                  <div className="order-redeem-coupon-text">PIN</div>
                   <FormField
                     value={gcPin}
                     onChange={handleGcPinChange}
-                    placeholder="Gift Card PIN"
                   />
                 </div>
               </div>

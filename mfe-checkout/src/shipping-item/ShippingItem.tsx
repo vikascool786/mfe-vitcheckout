@@ -40,11 +40,12 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
   const options =
     item.option && Array.from(createOptionMap(item.option).entries()); // Convert Map entries to an array
 
-  function decodeHtml(html: any) {
-    const txt = document.createElement("textarea");
-    txt.innerHTML = html;
-    return txt.value;
-  }
+  // remove html entities 
+  const decodeHtmlEntities = (html: any) => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, "text/html");
+    return doc.body.textContent || "";
+  };
 
   return (
     <>
@@ -52,7 +53,7 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
         <div className="item-detail-container">
           <img className="item-image" src={image.url} alt="Product" />
           <div className="item-info">
-            <div className="item-name">{decodeHtml(caption)}</div>
+            <div className="item-name">{decodeHtmlEntities(caption)}</div>
             <div>{catalogName}</div>
             <div className="item-cashback">
               <div className="item-cashback-value">+ {totals?.cashBackStr}</div>
