@@ -2,6 +2,7 @@ import React from "react";
 import { RadioButton } from "../component/RadioButton/RadioButton";
 import { ShippingSelection } from "../interfaces/ShippingMethod";
 import "./ShippingOptionItem.scss";
+import { formattedNumber } from "../utils/OrderUtils";
 
 interface IShippingOption {
   shippingType: string;
@@ -44,7 +45,7 @@ export const ShippingOptionItem: React.FC<IShippingOptionItem> = ({
       </div>
 
       <div>
-        {shippingOption.total === 0 ? "Free" : `$${shippingOption.total}`}
+        {shippingOption.total === 0 ? "Free" : `$${formattedNumber(shippingOption.total)}`}
       </div>
     </div>
   );
