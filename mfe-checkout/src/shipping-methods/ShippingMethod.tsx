@@ -70,6 +70,8 @@ const ShippingMethod: React.FC = ({ }) => {
                         <div key={itemIndex}>
                           <ShippingItem
                             item={item}
+                            storeDetail={store?.store}
+                            total={store?.totals}
                             onRemove={() =>
                               handleRemoveProduct(key, item.product_hash)
                             }

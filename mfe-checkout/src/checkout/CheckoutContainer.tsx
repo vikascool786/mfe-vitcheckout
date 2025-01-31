@@ -146,6 +146,16 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     [paymentMethods]
   );
 
+  // const defaultPaymentMethod: IPaymentMethod = useMemo<IPaymentMethod>(() => {
+  //   if (!paymentMethods || paymentMethods.length === 0) {
+  //     return {} as IPaymentMethod; // Return empty object if no payment methods exist
+  //   }
+  //   // Find the preferred payment method
+  //   const preferredPayment = paymentMethods.find(payment => payment?.preferred);
+  //   // If no preferred payment, fallback to the first available card
+  //   return preferredPayment || paymentMethods[0];
+  // }, [paymentMethods]);
+
   const confirmOrder = () => {
     commitOrder(cartId)
       .then((response: any) => {
@@ -244,6 +254,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                   siteId={siteId}
                   addresses={addresses || []}
                   loading={isLoading}
+                  pcid={pcid}
                 />
                 <ShippingMethod loading={isLoading} />
                 <PaymentMethod

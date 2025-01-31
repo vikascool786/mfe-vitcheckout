@@ -12,6 +12,7 @@ import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStor
 import { getCatalogName } from "../utils/helpers/GetCatalog";
 import { ApplyCashback } from "./apply-cashback/ApplyCashback";
 import "./OrderSummary.scss";
+import { formattedNumber } from "../utils/OrderUtils";
 
 interface IOrderSummary {
   pcid: string;
@@ -324,12 +325,37 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
       </div>
 
       {order?.totals?.cashBack && (
-        <div className="order-summary-cashback-container">
-          <div className="order-cashback">
-            <Cashback />
-            VIFT Cashback earned in this order
+        <>
+          <div className="order-summary-cashback-container">
+            <div className="order-cashback">
+              <Cashback />
+              VIFT Cashback earned in this order
+            </div>
+            <div>{`${order.totals.cashBackStr}`}</div>
           </div>
-          <div>{`${order.totals.cashBackStr}`}</div>
+        </>
+      )}
+
+      {order?.stores && (
+        <div className="shipping-item-container">
+          {Object.entries(order?.stores)
+            .reverse()
+            .map(([key, store]) => {
+              return (
+                store && (
+                  <div className="order-summary-cashback-container">
+                    <div className="order-cashback">
+                      {store?.store.isMA === 1 ? (
+                        `BV earned in this order`
+                      ) : (
+                        `IBV earned in this order`
+                      )}
+                    </div>
+                    <div>{store?.store.isMA === 1 ? formattedNumber(store.totals.bv) : formattedNumber(store.totals.ibv)}</div>
+                  </div>
+                )
+              );
+            })}
         </div>
       )}
     </div>

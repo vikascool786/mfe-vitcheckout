@@ -9,3 +9,5 @@ export function updatePaymentMethod(order: ChangeOrder, newPaymentMethodId: numb
         },
     };
 }
+
+export const formattedNumber = (num: any) => Number(num).toFixed(2);

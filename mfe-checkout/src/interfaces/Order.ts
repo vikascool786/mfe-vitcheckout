@@ -1,4 +1,5 @@
 import { Address } from "./Address";
+import { StoreDetail } from "./ShippingMethod";
 import { IPaymentMethod, IStores, ITotal } from "./ShopperCart";
 
 export interface Order {
@@ -21,6 +22,7 @@ interface OrderStores {
 export interface OrderStore {
   totals: ITotal;
   items: Item[];
+  store: StoreDetail;
   shippingSelections: ShippingSelection[];
   shippingMethod: string;
 }

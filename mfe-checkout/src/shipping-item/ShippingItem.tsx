@@ -2,7 +2,8 @@ import React from "react";
 import { Close } from "../assets/svgs/Close";
 import "./ShippingItem.scss";
 import { Cashback } from "../assets/svgs/Cashback";
-import { Item } from "../interfaces/ShippingMethod";
+import { Item, StoreDetail } from "../interfaces/ShippingMethod";
+import { ITotal } from "../interfaces/ShopperCart";
 // import { it } from "node:test";
 
 interface IProduct {
@@ -16,6 +17,8 @@ interface IProduct {
 
 interface IShippingItemProps {
   item: Item;
+  storeDetail: StoreDetail;
+  total: ITotal
   onRemove: () => void;
 }
 
@@ -29,12 +32,19 @@ function createOptionMap(
   return optionMap;
 }
 
+const formattedNumber = (num: any) => Number(num).toFixed(2);
+
 export const ShippingItem: React.FC<IShippingItemProps> = ({
   item,
+  storeDetail,
+  total,
   onRemove,
 }) => {
   const { image, caption, catalogName, totals, quantity } = item;
+  const { catalogId, isMA } = storeDetail;
+  const { bv, ibv } = total;
 
+  console.log("catalogId, isMA", isMA === 1, bv, ibv);
   const isGiftCard = caption.toLowerCase().includes("email delivery");
 
   const options =
@@ -58,7 +68,7 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
             <div className="item-cashback">
               <div className="item-cashback-value">+ {totals?.cashBackStr}</div>
               <Cashback viewBox="0 -2 24 22" />
-              Cashback
+              Cashback / {isMA === 1 ? `${formattedNumber(bv)} BV` : `${formattedNumber(ibv)} IBV`}
             </div>
             <div>{totals?.priceStr}</div>
           </div>

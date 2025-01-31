@@ -8,7 +8,6 @@ import {Add} from "../assets/icons/Add";
 import {Warn} from "../assets/icons/Warn";
 import {ShopperSavedPayments} from "../interfaces/ShopperSavedPayments";
 import {Button} from "../component/Button/Button";
-import {fetchCustomerProfileData} from "../api/service/CustomerProfile";
 import {Click2PayData} from "./Click2PayData";
 import {creditCards} from "../payment-method/PaymentType";
 import Click2PayCardLoader from "./Click2PayCardLoader";
@@ -18,6 +17,8 @@ import {CardInputs} from "../payment-method/card-information/CardInputs";
 import {Formik} from "formik";
 import {creditCardSchema} from "../validation/creditcardSchema";
 import * as Yup from "yup";
+import {useAtom} from "jotai/index";
+import {customerApiData} from "../checkout/customerAtom";
 
 interface IClick2PayProps {
     pcid: string;
@@ -52,6 +53,7 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({ pcid, order 
     const [hasSavedCards, setHasSavedCards] = useState(false);
     const [cardData, setCardData] = useState([]);
     const [c2pData, setC2pData] = useState(c2pCustomerData);
+    const [customerData] = useAtom(customerApiData(pcid));
 
     const cardBrandsString = c2pData.cardBrands.join(",");
     const shopperSavedPayment: ShopperSavedPayments = { //used to prefill address for new c2p card
@@ -83,31 +85,24 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({ pcid, order 
 
     useEffect(() => {
         if (c2pData) {
-            fetchCustomerProfileData(pcid)
-                .then((response: any) => {
-                    if(response){
-                        setC2pData((prevData) => ({
-                            ...prevData,
-                            email: response.data.email_address,
-                            mobilePhone: response.data.cell_phone,
-                            address: {
-                                ...c2pCustomerData.address,
-                                first: response.data.first_name,
-                                last: response.data.last_name,
-                                address1: response.data.home_address?.address_1,
-                                address2: response.data.home_address?.address_2,
-                                address3: response.data.home_address?.address_3,
-                                city: response.data.home_address?.city,
-                                state: response.data.home_address?.state,
-                                zip: response.data.home_address?.postal_code,
-                            },
-                        }));
-                    }
-
-                })
-                .catch((error: { message: string; }) => {
-                    console.error("Failed to fetch shopper profile data:", error);
-                })
+            if(customerData){
+                setC2pData((prevData) => ({
+                    ...prevData,
+                    email: customerData.email_address,
+                    mobilePhone: customerData.cell_phone,
+                    address: {
+                        ...c2pCustomerData.address,
+                        first: customerData.first_name,
+                        last: customerData.last_name,
+                        address1: customerData.home_address?.address_1,
+                        address2: customerData.home_address?.address_2,
+                        address3: customerData.home_address?.address_3,
+                        city: customerData.home_address?.city,
+                        state: customerData.home_address?.state,
+                        zip: customerData.home_address?.postal_code,
+                    },
+                }));
+            }
         }
     }, []);
 

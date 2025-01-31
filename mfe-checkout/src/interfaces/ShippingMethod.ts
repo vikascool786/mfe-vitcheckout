@@ -52,6 +52,14 @@ export interface Item {
     ibv: number;
   };
 }
+export interface StoreDetail {
+  catalogId:number;
+  catalogName: string;
+  isMA: number;
+  marketFacilitator: number;
+  vendorShipTax: number;
+  vendorShipTaxPct: number;
+}
 
 export interface Store {
   totals: { price: number; cashBack: number; bv: number; ibv: number };

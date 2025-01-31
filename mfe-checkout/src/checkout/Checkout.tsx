@@ -29,6 +29,7 @@ import { addressAtom, loadingAtom, orderAtom } from "../store";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import "./Checkout.scss";
 import { siteApiData } from "./siteAtom";
+import {customerApiData} from "./customerAtom";
 
 const defaultAddress: Address = {
   id: 0,
@@ -47,9 +48,10 @@ interface ICheckout {
   shopperId: string;
   siteId: string;
   addresses: any;
+  pcid: string;
 }
 
-const Checkout: React.FC<ICheckout> = ({ shopperId, siteId, addresses }) => {
+const Checkout: React.FC<ICheckout> = ({ shopperId, siteId, addresses, pcid }) => {
   // State to manage whether the form is expanded or collapsed
 
   const { createShopperAddressBookEntry } = useCreateShopperAddressBookEntry();
@@ -67,7 +69,7 @@ const Checkout: React.FC<ICheckout> = ({ shopperId, siteId, addresses }) => {
   );
 
   const [order, setOrder] = useAtom(orderAtom);
-  const [siteData] = useAtom(siteApiData(siteId));
+  const [customerData] = useAtom(customerApiData(pcid));
 
   const buildShoppersAddressBookFromResponse = (
     addressBookResponse: Address[]
@@ -128,10 +130,6 @@ const Checkout: React.FC<ICheckout> = ({ shopperId, siteId, addresses }) => {
     setIsUpdateEnabled(!isUpdateEnabled);
     updateTextUpdatesForPhone(shippingAddress.phone);
   };
-
-  useEffect(() => {
-    $(".shipping-address-form").parsley();
-  }, []);
 
   useEffect(() => {
     const fetchSiteInfo = async () => {
@@ -368,8 +366,8 @@ const Checkout: React.FC<ICheckout> = ({ shopperId, siteId, addresses }) => {
   };
 
   const initialValues = {
-    first: shippingAddress.first || "",
-    last: shippingAddress.last || "",
+    first: shippingAddress.first || customerData?.first_name || "",
+    last: shippingAddress.last || customerData?.last_name || "",
     address1: shippingAddress.address1 || "",
     address2: shippingAddress.address2 || "",
     city: shippingAddress.city || "",
