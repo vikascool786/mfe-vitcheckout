@@ -319,6 +319,7 @@ const Checkout: React.FC<ICheckout> = ({
       newOrder.response.success.notifications &&
       newOrder.response.success.notifications[0]?.reason
     ) {
+      scrollTo(0, 0);
       setErrorMessage(newOrder.response.success.notifications[0].reason);
     }
 
