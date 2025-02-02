@@ -29,7 +29,7 @@ import { addressAtom, loadingAtom, orderAtom } from "../store";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import "./Checkout.scss";
 import { siteApiData } from "./siteAtom";
-import {customerApiData} from "./customerAtom";
+import { customerApiData } from "./customerAtom";
 
 const defaultAddress: Address = {
   id: 0,
@@ -51,7 +51,12 @@ interface ICheckout {
   pcid: string;
 }
 
-const Checkout: React.FC<ICheckout> = ({ shopperId, siteId, addresses, pcid }) => {
+const Checkout: React.FC<ICheckout> = ({
+  shopperId,
+  siteId,
+  addresses,
+  pcid,
+}) => {
   // State to manage whether the form is expanded or collapsed
 
   const { createShopperAddressBookEntry } = useCreateShopperAddressBookEntry();
@@ -67,6 +72,8 @@ const Checkout: React.FC<ICheckout> = ({ shopperId, siteId, addresses, pcid }) =
   const [stateDropdownList, setStateDropdownList] = useState<DropdownOption[]>(
     []
   );
+
+  const [errorMessage, setErrorMessage] = useState("");
 
   const [order, setOrder] = useAtom(orderAtom);
   const [customerData] = useAtom(customerApiData(pcid));
@@ -274,26 +281,9 @@ const Checkout: React.FC<ICheckout> = ({ shopperId, siteId, addresses, pcid }) =
     setShowShipAddressForm(!showShipAddressForm);
     setShippingAddress(
       shopperAddressBook.find((address) => address.isShip === 1) ||
-      shippingAddress
+        shippingAddress
     );
     setIsExpanded(!isExpanded);
-  };
-
-  // Handle input changes
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    const address = {
-      ...shippingAddress,
-      [name]: value,
-    };
-    setShippingAddress(address);
-  };
-
-  const handlePOBoxChange = () => {
-    setShippingAddress({
-      ...shippingAddress,
-      isPoBox: !shippingAddress.isPoBox,
-    });
   };
 
   const handleAddressSelectChange = async (id: number) => {
@@ -309,8 +299,7 @@ const Checkout: React.FC<ICheckout> = ({ shopperId, siteId, addresses, pcid }) =
       updatedSelectedAddress.find((p) => p.isShip)
     ) as unknown as Address;
     setShopperAddressBook(updatedSelectedAddress);
-
-    console.log(updatedSelectedAddress.find((add) => add.isBill));
+    setErrorMessage("");
 
     const newOrder = await buildOrder(
       generateChangeStoreResponse({
@@ -326,6 +315,13 @@ const Checkout: React.FC<ICheckout> = ({ shopperId, siteId, addresses, pcid }) =
       })
     );
 
+    if (
+      newOrder.response.success.notifications &&
+      newOrder.response.success.notifications[0]?.reason
+    ) {
+      setErrorMessage(newOrder.response.success.notifications[0].reason);
+    }
+
     setOrder(newOrder.response.success.data);
     setLoading(false);
     setIsExpanded(false);
@@ -338,15 +334,6 @@ const Checkout: React.FC<ICheckout> = ({ shopperId, siteId, addresses, pcid }) =
     if (shouldEnable) {
       const phoneNumber = shouldEnable ? phone : "";
 
-      console.log(
-        generateChangeStoreResponse({
-          ...order,
-          userOptions: {
-            ...order?.userOptions,
-            smsPhone: phoneNumber,
-          },
-        })
-      );
       try {
         const orderResponse = await buildOrder(
           generateChangeStoreResponse({
@@ -403,6 +390,8 @@ const Checkout: React.FC<ICheckout> = ({ shopperId, siteId, addresses, pcid }) =
               />
             )}
           </div>
+
+          {errorMessage && <div className="error-message">{errorMessage}</div>}
 
           {/* show details fields based on accordion state close  */}
           {!showShipAddressForm && (
