@@ -25,7 +25,7 @@ import { Address } from "../../interfaces/Address";
 import { useAtom, useAtomValue } from "jotai/index";
 import { siteApiData } from "../../checkout/siteAtom";
 import { fetchSezzleUrl } from "../../api/ajaxaction/Sezzle";
-import { paymentMethodsAtom } from "../../store";
+import { orderAtom, paymentMethodsAtom } from "../../store";
 
 interface IPlaceOrder {
   confirmOrder: () => void;
@@ -56,6 +56,8 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   const [isLoading, setIsLoading] = useState(false);
   const trackingData = new Map<string, string>();
   const [siteData] = useAtom(siteApiData(siteId));
+
+  const orderData = useAtomValue(orderAtom);
 
   const paymentMethods = useAtomValue(paymentMethodsAtom);
 
@@ -292,14 +294,24 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
         </div>
       )}
       {isLoading ? (
-          <div>Processing Order...</div>
-      ): (
-          <Button
-              label={paymentTypeId === SEZZLE.typeId || paymentTypeId === PAYPAL.typeId ? ("Pay with") : ("Place Order")}
-              btnType="primary"
-              onClick={handlePlaceOrder}
-              logo={paymentTypeId === SEZZLE.typeId ? ("https://img.shop.com/Image/resources/checkout/Sezzle-Color-White-Logo.svg") : paymentTypeId === PAYPAL.typeId ? ("https://img.shop.com/Image/resources/checkout/PayPal-White-Logo.svg") : ("")}
-          />
+        <div>Processing Order...</div>
+      ) : (
+        <Button
+          label={
+            paymentTypeId === SEZZLE.typeId || paymentTypeId === PAYPAL.typeId
+              ? "Pay with"
+              : "Place Order"
+          }
+          btnType="primary"
+          onClick={handlePlaceOrder}
+          logo={
+            paymentTypeId === SEZZLE.typeId
+              ? "https://img.shop.com/Image/resources/checkout/Sezzle-Color-White-Logo.svg"
+              : paymentTypeId === PAYPAL.typeId
+              ? "https://img.shop.com/Image/resources/checkout/PayPal-White-Logo.svg"
+              : ""
+          }
+        />
       )}
     </div>
   );

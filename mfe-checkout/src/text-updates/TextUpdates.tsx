@@ -1,21 +1,21 @@
-import React, { useEffect, useState } from "react";
-import "./TextUpdates.scss";
-import { FormHeading } from "../component/Form/Heading/FormHeading";
-import { FormField } from "../component/Form/Field/FormField";
+import { Form, Formik, FormikHelpers } from "formik";
 import { useAtom, useAtomValue } from "jotai";
-import { addressAtom, orderAtom } from "../store";
-import { buildOrder } from "../api/service/Order";
-import { Formik, Form, Field, FormikHelpers } from "formik";
+import React from "react";
 import * as Yup from "yup";
+import { buildOrder } from "../api/service/Order";
+import { FormField } from "../component/Form/Field/FormField";
+import { FormHeading } from "../component/Form/Heading/FormHeading";
 import { ChangeOrder } from "../interfaces/ChangeOrder";
-import { Checkbox } from "../component/Form/Checkbox/Checkbox";
+import { addressAtom, orderAtom } from "../store";
+import "./TextUpdates.scss";
 
 // Validation schema
 const TextUpdatesSchema = Yup.object().shape({
   phone: Yup.string()
+    .max(10, "Phone number must be exactly 10 digits")
     .matches(/^\d{10}$/, "Phone number must be exactly 10 digits")
     .required("Mobile Phone is required"),
-  boxChecked: Yup.boolean().oneOf([true], "You must accept to receive updates"),
+  boxChecked: Yup.boolean(),
 });
 
 interface FormValues {
@@ -28,14 +28,11 @@ export const TextUpdates = () => {
   const shippingAddress = addresses.find((address) => address.isShip);
   const [order, setOrder] = useAtom(orderAtom);
 
-  useEffect(() => {
-    // You can now remove phoneAddress state because Formik will handle the form state
-  }, [shippingAddress]);
-
   const handleSendOrderUpdates = async (
     values: FormValues,
     { setSubmitting }: FormikHelpers<FormValues>
   ) => {
+    console.log("values", values);
     try {
       const response = await buildOrder({
         ...order,
@@ -59,9 +56,9 @@ export const TextUpdates = () => {
       <Formik
         initialValues={{
           phone: shippingAddress?.phone || "",
-          boxChecked: false,
+          boxChecked: shippingAddress?.phone ? true : false,
         }}
-        enableReinitialize={true} // This will reinitialize the form whenever `shippingAddress` changes
+        enableReinitialize={true}
         validationSchema={TextUpdatesSchema}
         onSubmit={handleSendOrderUpdates}
       >
@@ -72,6 +69,8 @@ export const TextUpdates = () => {
           handleChange,
           handleBlur,
           handleSubmit,
+          setFieldValue,
+          setFieldError,
         }) => (
           <Form className="tm-form-container">
             <div>
@@ -79,24 +78,46 @@ export const TextUpdates = () => {
                 label="Mobile Phone"
                 extraLabel="10 digits"
                 name="phone"
+                maxLength={10}
                 value={values.phone} // Controlled by Formik
                 required={values.boxChecked}
-                errorMessage={touched.phone && errors.phone}
-                onChange={handleChange}
+                {...(values.boxChecked && {
+                  errorMessage: touched.phone && errors.phone,
+                })}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  // Allow only numbers (digits)
+                  const numericValue = e.target.value.replace(/\D/g, "");
+
+                  if (!numericValue) {
+                    setFieldValue("phone", "");
+                    setFieldValue("boxChecked", false);
+                  }
+                  handleChange({
+                    target: { name: "phone", value: numericValue },
+                  } as React.ChangeEvent<HTMLInputElement>);
+                }}
                 onBlur={handleBlur}
               />
             </div>
             <div className="save-for-later">
-              <Field
+              <FormField
                 type="checkbox"
                 name="boxChecked"
                 className="checkbox"
+                checked={values.boxChecked}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  handleChange(e);
-                  handleSubmit(); // Submit form when checkbox is toggled
+                  console.log(values.phone);
+
+                  if (!values.phone) {
+                    setFieldValue("boxChecked", false);
+                    setFieldError("phone", "Mobile Phone is required");
+                  } else {
+                    handleChange(e);
+                    handleSubmit();
+                  }
                 }}
+                extraLabel="Send order updates"
               />
-              <span className="shipping-text">Send order updates</span>
             </div>
           </Form>
         )}

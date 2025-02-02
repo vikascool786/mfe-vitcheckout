@@ -6,7 +6,7 @@ import {
   GET_API_ENDPOINT_BASE_URL_ONLY,
 } from "../../utils/urlResolver";
 import axiosInstance from "../axios";
-import axios from "axios";
+import axios, { Axios, AxiosError } from "axios";
 
 export interface OrderResponse {
   response: Response;
@@ -35,7 +35,7 @@ export interface Success {
   notifications: Notification[];
 }
 
-export interface Data { }
+export interface Data {}
 
 export interface MetaData {
   status: string;
@@ -104,19 +104,9 @@ export const commitOrder = async (cartId: string): Promise<any> => {
       "",
       {}
     );
-    console.log("commit order successfully: " + JSON.stringify(response));
     return response;
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      if (error.response?.data.errors.length) {
-        throw new Error(error.response?.data.errors[0].message);
-      } else {
-        throw error;
-      }
-    } else {
-      console.error("Unexpected error:", error);
-      throw error;
-    }
+    return error;
   }
 };
 

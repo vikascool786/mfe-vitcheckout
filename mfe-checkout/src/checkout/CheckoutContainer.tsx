@@ -165,12 +165,20 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
           const orderId = response.data.response.success.data.orderId;
           window.location.href = `/nbts/orderconfirmation-${orderId}`;
         } else {
+          console.log(response.response.data.errors[0].message);
+          if (response?.response?.data?.errors[0]?.message) {
+            setOrderErrorMessage(response?.response?.data?.errors[0]?.message);
+            return;
+          }
+
           const errorMessage = response.data.response.errors.message;
           const errorCode = response.data.response.errors.code;
           setOrderErrorMessage(`Detail: ${errorMessage} code: ${errorCode}`);
         }
       })
       .catch((error) => {
+        console.log(error);
+        setOrderErrorMessage(error);
         setLoadingOrderConfirmation(false);
       });
   };
@@ -189,7 +197,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
         }
 
         const orderResponse = buildOrder(buildOrderPayload);
-        orderResponse.then((response: any) => {
+        orderResponse.then((response) => {
           setOrderData(response?.response.success?.data || null);
         });
       } else {
@@ -210,7 +218,9 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
 
   useEffect(() => {
     const currentOrderData = order ? order.response.success.data : orderData;
+
     setOrderData(currentOrderData);
+
     if (!hasInitializedOrder.current && currentOrderData && !order) {
       hasInitializedOrder.current = true;
       updateOrder(

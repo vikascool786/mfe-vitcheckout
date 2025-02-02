@@ -38,7 +38,7 @@ body {
 .form-footer {
   display: flex;
   margin-top: 20px;
-  &__dual-button{
+  &__dual-button {
     gap: 20px;
   }
 }
@@ -75,50 +75,79 @@ body {
   padding-top: 16px;
 }
 
-.addresslist{
-  border: 1px solid #ACA8A8;
+.addresslist {
+  border: 1px solid #aca8a8;
   border-radius: 5px;
-  &-container{
+  &-container {
     display: flex;
     gap: 10px;
-    border-bottom: 1px solid #ACA8A8;
-    &:last-child{
+    border-bottom: 1px solid #aca8a8;
+    &:last-child {
       border: 0;
     }
   }
-  &__content{
+  &__content {
     display: flex;
     flex-direction: column;
   }
-  &__subtitle{
-    color:#535353;
+  &__subtitle {
+    color: #535353;
     font-size: 13px;
     padding-bottom: 5px;
   }
 }
 
-.error-msg{
-  background: #F0F1F7;
+.error-msg {
+  background: #f0f1f7;
   color: #202340;
-  border-left: 5px solid #FF1F35;
+  border-left: 5px solid #ff1f35;
   text-align: left;
   width: 100%;
   display: flex;
   flex-direction: column;
-  &--padding{
+  &--padding {
     padding: 10px;
   }
-  &--bold{
+  &--bold {
     font-weight: bold;
   }
-  &__detail{
+  &__detail {
     font-size: 13px;
     padding-top: 10px;
   }
 }
 
-.loading-order-conf{
+.loading-order-conf {
   padding: 20px;
   display: flex;
   justify-content: center;
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  background-color: #f0f1f7; /* Light red background */
+  border: 1px solid #79787880; /* Subtle red border */
+  border-radius: 8px; /* Rounded corners for modern look */
+  padding: 8px 12px; /* Add padding for better spacing */
+  color: black; /* Dark red text color for contrast */
+  font-family: "Inter", sans-serif;
+  font-size: 14px; /* Adjust text size */
+  font-weight: 400; /* Regular weight for readability */
+  margin-top: 8px; /* Add spacing above the message */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Subtle shadow for elevation */
+  position: relative;
+  min-height: 1.8rem;
+}
+
+.error-message::before {
+  content: "";
+  display: block;
+  width: 6px; /* Width of the left red bar */
+  height: 100%;
+  background-color: #d32f2f; /* Red bar color */
+  border-radius: 4px 0 0 4px; /* Round the left side of the bar */
+  position: absolute;
+  left: 0;
+  top: 0;
 }
