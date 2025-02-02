@@ -45,9 +45,21 @@ body,
   width: 40%;
   box-sizing: border-box;
 }
+
 .error-message {
   color: red;
   padding-top: 5px;
+}
+
+@media only screen and (max-width: 768px) {
+  .container {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    margin: 0;
+    padding-bottom: 40px;
+  }
+
 }
 
 @media (max-width: 1024px) {
@@ -69,12 +81,13 @@ body,
   }
 
   // mobile updates component 
-  .tm-form-container > div {
+  .tm-form-container>div {
     width: 100%;
     overflow: hidden;
   }
 
-  .field-item-container, .save-for-later {
+  .field-item-container,
+  .save-for-later {
     min-width: auto !important;
   }
 }

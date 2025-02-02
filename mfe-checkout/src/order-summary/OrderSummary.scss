@@ -6,6 +6,10 @@
   border-radius: 5px;
   flex-direction: column;
   padding: 20px 20px 30px 20px;
+
+  .order-sub-text {
+    cursor: pointer;
+  }
 }
 
 .order-summary-coupon-container {
@@ -24,7 +28,7 @@
   display: flex;
   flex-direction: row;
 
-  .custom-button.secondary{
+  .custom-button.secondary {
     width: 90px;
     height: 39px;
     padding: 12px 24px;
@@ -41,6 +45,7 @@
   display: flex;
   flex: 3; // This will take 20% of the space
 }
+
 .order-reedem-coupon-text {
   font-size: 16px;
   font-weight: 400;
@@ -203,7 +208,7 @@
   }
 }
 
-.order-apply-cashback-container-cb-bold{
+.order-apply-cashback-container-cb-bold {
   padding: 10px 0px 20px 0px;
 }
 
@@ -247,13 +252,13 @@
 }
 
 .gift-card-container-field-2 {
-  width: 20%;// Allocates 30% of space
+  width: 20%; // Allocates 30% of space
   background-color: blue;
 }
 
 .gift-card-apply {
   display: flex;
-  justify-content: flex-end; // Aligns the button to the right
+  flex: 1; // Aligns the button to the right
 
   .custom-button.secondary {
     width: 90px;
@@ -275,36 +280,41 @@
 //  new gift card css 
 .gift-card-wrapper {
   display: flex;
-    justify-content: space-between;
-    gap: 1rem;
-    width: 100%;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  margin-top: 20px;
 }
 
 .gift-card-wrapper-fields {
-  width: 71%;
-    display: flex;
-    gap: 1rem;
-}
-.gift-card-wrapper-field-1, .gift-card-wrapper-field-2  {
-  .field-item-container {
-    min-width: 100%;
-  }
-}
-.gift-card-wrapper-field-1 {
-  width: 65%;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-.gift-card-wrapper-field-2 {
-  width: 35%;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+  display: flex;
+  flex: 7;
+  align-items: center;
+  position: relative;
 }
 
-.gift-card-wrapper  .gift-card-apply {
-width: 29%;
-    align-items: center;
-    margin-top: 10px;
+.gift-card-wrapper-field-1 {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  width: 78%;
+}
+
+.gift-card-wrapper-field-2 {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  left: 80%;
+  width: 22%;
+}
+
+@media only screen and (max-width: 768px) {
+  .gift-card-wrapper-field-1 {
+    width: 77%;
+  }
+
+  .gift-card-wrapper-field-2 {
+    width: 22%;
+  }
+
 }

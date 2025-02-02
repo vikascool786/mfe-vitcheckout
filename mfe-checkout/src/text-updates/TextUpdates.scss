@@ -16,6 +16,10 @@
   gap: 21px;
   margin-top: 21px;
   align-items: center;
+
+  .field-item-container {
+    min-width: 15rem;
+  }
 }
 
 .tm-form-row {
