@@ -1,1 +1,0 @@
-export const MAX_STORE_SIZE_ON_PARTIAL = 10;
