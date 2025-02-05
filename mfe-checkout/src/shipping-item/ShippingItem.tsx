@@ -19,7 +19,7 @@ interface IProduct {
 interface IShippingItemProps {
   item: Item;
   storeDetail: StoreDetail;
-  total: ITotal
+  total: ITotal;
   onRemove: () => void;
   portalData: Portal;
   isMaProduct: boolean;
@@ -44,7 +44,6 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
   onRemove,
   portalData,
   isMaProduct,
-
 }) => {
   const { image, caption, catalogName, totals, quantity } = item;
   const { catalogId, isMA } = storeDetail || {};
@@ -55,7 +54,7 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
   const options =
     item.option && Array.from(createOptionMap(item.option).entries()); // Convert Map entries to an array
 
-  // remove html entities 
+  // remove html entities
   const decodeHtmlEntities = (html: any) => {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, "text/html");
@@ -70,22 +69,41 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
           <div className="item-info">
             <div className="item-name">{decodeHtmlEntities(caption)}</div>
             <div>{catalogName}</div>
-            <div className="item-cashback">
-              <div className="item-cashback-value">+ {totals?.cashBackStr}</div>
-              <Cashback viewBox="0 -2 24 22" />
-              Cashback / {isMA === 1 ? `${formattedNumber(bv)} BV` : `${formattedNumber(ibv)} IBV`}
-            </div>
+            {totals.cashBack > 0 && (
+              <div className="item-cashback">
+                <div className="item-cashback-value">
+                  + {totals?.cashBackStr}
+                </div>
+                <Cashback viewBox="0 -2 24 22" />
+                Cashback
+                {bv > 0 ||
+                  (ibv > 0 &&
+                    ` / {isMA === 1 ? ${formattedNumber(
+                      bv
+                    )} BV : ${formattedNumber(ibv)} IBV}`)}
+              </div>
+            )}
             <div>{totals?.priceStr}</div>
-            {(item.autoshipFreq > 0 || item.autoShipId) && (portalData?.autoShipDiscount > 0 && isMaProduct ? (
-              <div className="item-autoship"><AutoshipIcon />Saving {portalData.autoShipDiscount}% with Autoship</div>
-            ) : (
-              <div className="item-autoship"><AutoshipIcon />Repeating with Autoship</div>
-            ))
-            }
+            {(item.autoshipFreq > 0 || item.autoShipId) &&
+              (portalData?.autoShipDiscount > 0 && isMaProduct ? (
+                <div className="item-autoship">
+                  <AutoshipIcon />
+                  Saving {portalData.autoShipDiscount}% with Autoship
+                </div>
+              ) : (
+                <div className="item-autoship">
+                  <AutoshipIcon />
+                  Repeating with Autoship
+                </div>
+              ))}
             {item.autoshipFreq > 0 && (
-              <div>Frequency: <span className="item-autoship-frequency">{item.autoshipFreq} days</span></div>
-            )
-            }
+              <div>
+                Frequency:{" "}
+                <span className="item-autoship-frequency">
+                  {item.autoshipFreq} days
+                </span>
+              </div>
+            )}
           </div>
         </div>
         <div className="item-cancel" onClick={onRemove}>

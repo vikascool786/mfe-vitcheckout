@@ -1,6 +1,6 @@
 import { useAtom } from "jotai";
 import React, { useState } from "react";
-import { changeOrder } from "../api/service/Order";
+import { buildOrder, changeOrder } from "../api/service/Order";
 import { useShopperEWallet } from "../api/service/ShopperEWallet";
 import { Cashback } from "../assets/svgs/Cashback";
 import { Close } from "../assets/svgs/Close";
@@ -91,25 +91,20 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
       const updatedCoupons = coupons.filter(
         (appliedCoupon) => appliedCoupon !== couponToRemove
       );
-
-      await changeOrder(
-        generateChangeStoreResponse({
-          ...order,
-          userOptions: {
-            ...order.userOptions,
-            coupons: updatedCoupons, // Update the coupons array
-          },
-        }),
-        order.id
-      );
-
-      setOrder({
-        ...order,
-        userOptions: {
-          ...order.userOptions,
-          coupons: updatedCoupons, // Update the coupons array
-        },
-      });
+      try {
+        const updatedOrder = await buildOrder(
+          generateChangeStoreResponse({
+            ...order,
+            userOptions: {
+              ...order.userOptions,
+              coupons: updatedCoupons, // Update the coupons array
+            },
+          })
+        );
+        setOrder(updatedOrder.response?.success?.data);
+      } catch (error) {
+        console.error("Error while removing coupon:", error);
+      }
     }
   };
 
@@ -286,8 +281,9 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           if (!store.totals) return null;
           return (
             <div
-              className={`order-charges-table ${isFirst ? "order-charges-table-first" : ""
-                } ${isLast ? "order-charges-table-last" : ""}`}
+              className={`order-charges-table ${
+                isFirst ? "order-charges-table-first" : ""
+              } ${isLast ? "order-charges-table-last" : ""}`}
               key={store.id || index} // Add a key for the mapped elements
             >
               <div className="shipping-catolog-name">
