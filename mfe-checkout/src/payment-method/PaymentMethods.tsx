@@ -24,6 +24,7 @@ import {
   SEZZLE,
   thirdPartyPaymentFlagList,
 } from "./PaymentType";
+import { WALLET_DATA } from "../utils/MOCKS";
 
 interface IPaymentMethod {
   shopperId: string;
@@ -92,7 +93,8 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         addressMap.set(id, addresses[parseInt(id)] as Address)
       );
       try {
-        const response = await fetchShoppersPaymentMethods(shopperId);
+        // const response = await fetchShoppersPaymentMethods(shopperId);
+        const response = WALLET_DATA;
 
         const paymentOptions = response.map((paymentMethod) => {
           const isOrderPaymentMethod =

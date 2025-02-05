@@ -10,6 +10,10 @@
   .order-sub-text {
     cursor: pointer;
   }
+
+  .order-redeem-coupon-text {
+    margin-top: 10px;
+  }
 }
 
 .order-summary-coupon-container {
@@ -284,6 +288,7 @@
   gap: 1rem;
   width: 100%;
   margin-top: 20px;
+  margin-bottom: 10px;
 }
 
 .gift-card-wrapper-fields {
