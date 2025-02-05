@@ -32,6 +32,7 @@ import { getCardType } from "../../utils/helpers/GetCardType";
 import { creditCardSchema } from "../../validation/creditcardSchema";
 import "./CardInformation.scss";
 import { CardInputs } from "./CardInputs";
+import {getTypeIdByAltName} from "../PaymentType";
 
 interface ICardInformationProps {
   paymentMethod: IPaymentMethod;
@@ -195,11 +196,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
       ? shippingAddress?.id
       : await handleSaveAddress(newAddressToAdd as any);
 
-    const typeId = order?.paymentMethods.find(
-      (paymentMethod) =>
-        paymentMethod.type.toLowerCase() ===
-        getCardType(values.number).toLowerCase()
-    )?.typeID;
+    const typeId = getTypeIdByAltName(getCardType(values.number).toLowerCase());
 
     const requestData = {
       name: values.accountName,

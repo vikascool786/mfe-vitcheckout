@@ -3,7 +3,7 @@ import { API_KEY } from "../../utils/ApiConstants";
 import {
   GET_API_ENDPOINT_BASE_URL_ONLY,
   GET_API_KEY,
-  GET_TOKEN_SERVICE,
+  GET_TOKEN_SERVICE, GET_TOKEN_SERVICE_SHOP,
 } from "../../utils/urlResolver";
 import axiosInstance from "../axios";
 
@@ -104,7 +104,7 @@ export const updateShopperDetails = async (
 export const generateCardToken = async (ccNumber: string) => {
   const data = `ccNumber=${ccNumber}`;
   try {
-    const response = await axiosInstance(`${GET_TOKEN_SERVICE()}`).post(
+    const response = await axiosInstance(`${GET_TOKEN_SERVICE_SHOP()}`).post(
       "",
       data,
       {

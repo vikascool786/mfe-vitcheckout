@@ -24,9 +24,9 @@ import {
   SEZZLE,
   thirdPartyPaymentFlagList,
 } from "./PaymentType";
-import {SiteFlags} from "../interfaces/SiteFlags";
-import {portalApiData} from "../checkout/portalAtom";
-import {orderHasAutoshipItems} from "../utils/OrderUtils";
+import { SiteFlags } from "../interfaces/SiteFlags";
+import { portalApiData } from "../checkout/portalAtom";
+import { orderHasAutoshipItems } from "../utils/OrderUtils";
 
 interface IPaymentMethod {
   shopperId: string;
@@ -195,15 +195,15 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   useEffect(() => {
     //sezzle rules dependent on site
     const sezzleSiteFlag = getSiteFlagDataForType(SEZZLE.siteflagTypeId || 0);
-    if(!sezzleSiteFlag?.active){
+    if (!sezzleSiteFlag?.active) {
       updateVisibilityOfPaymentMethod(SEZZLE.typeId, false);
       return;
     }
     //sezzle rules dependent on portal
-    if(portalData?.hasItransact){
-      if(sezzleSiteFlag.auxDataText){
+    if (portalData?.hasItransact) {
+      if (sezzleSiteFlag.auxDataText) {
         const jsonData = JSON.parse(sezzleSiteFlag.auxDataText);
-        if(!jsonData.enableForItransact){
+        if (!jsonData.enableForItransact) {
           updateVisibilityOfPaymentMethod(SEZZLE.typeId, false);
           return;
         }
@@ -211,15 +211,15 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     }
     //sezzle rules dependent on order, min order, autohship
     //filter payment method types from order response
-    if(order){
+    if (order) {
       const isSezzleInAcceptedPayments = order.paymentMethods
-          .filter((method) => method.typeID === SEZZLE.typeId).length > 0;
+        .filter((method) => method.typeID === SEZZLE.typeId).length > 0;
       let isAutoshipAllowed = false;
-      if(sezzleSiteFlag?.auxDataText){
+      if (sezzleSiteFlag?.auxDataText) {
         const jsonData = JSON.parse(sezzleSiteFlag.auxDataText);
         isAutoshipAllowed = jsonData.supportedForAutoship;
       }
-      if(!isAutoshipAllowed && orderHasAutoshipItems(order)){
+      if (!isAutoshipAllowed && orderHasAutoshipItems(order)) {
         updateVisibilityOfPaymentMethod(SEZZLE.typeId, false);
         return;
       }
@@ -229,9 +229,9 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   }, [order, thirdPartySiteFlagData, portalData]);
 
   const getSiteFlagDataForType = (siteflagTypeId: number) => {
-    if(thirdPartySiteFlagData){
+    if (thirdPartySiteFlagData) {
       return thirdPartySiteFlagData.find(
-          (item: any) => item.flagID === siteflagTypeId
+        (item: any) => item.flagID === siteflagTypeId
       );
     }
     return null;
@@ -381,14 +381,14 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     const updatedPaymentMethods = paymentMethods.map((method) =>
       method.paymentMethod.id === paymentId
         ? {
-            ...method,
-            isEditing: !method.isEditing, // Toggle editing state for the selected payment method
-          }
+          ...method,
+          isEditing: !method.isEditing, // Toggle editing state for the selected payment method
+        }
         : {
-            ...method,
-            isEditing: false,
-            isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
-          }
+          ...method,
+          isEditing: false,
+          isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
+        }
     );
 
     setTimeout(() => {

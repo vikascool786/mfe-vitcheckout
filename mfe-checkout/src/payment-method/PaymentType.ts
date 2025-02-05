@@ -63,3 +63,7 @@ export const thirdPartyPaymentTypeIdList  = (): number[] => {
 export const creditCards = [
     VISA, MASTERCARD, AMEX, DISCOVER,
 ]
+
+export const getTypeIdByAltName = (altName: string): number | undefined => {
+    return creditCards.find(payment => payment.altName === altName)?.typeId;
+}
