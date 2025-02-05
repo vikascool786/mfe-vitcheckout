@@ -1,8 +1,8 @@
 import { IPaymentMethod } from "../../interfaces/PaymentMethod";
 import { API_KEY } from "../../utils/ApiConstants";
 import {
-  GET_API_KEY,
   GET_API_ENDPOINT_BASE_URL_ONLY,
+  GET_API_KEY,
   GET_TOKEN_SERVICE,
 } from "../../utils/urlResolver";
 import axiosInstance from "../axios";
@@ -51,20 +51,16 @@ export const addShoppersPaymentMethod = async (
 export const addTempPaymentMethod = async (
   shopperId: string,
   walletData: any
-): Promise<IPaymentMethod | undefined> => {
-  try {
-    const response = await axiosInstance(
-      `${GET_API_ENDPOINT_BASE_URL_ONLY()}/shoppingcart-checkouts/v1/Checkout/TempCC/${shopperId}?api_key=${GET_API_KEY()}`
-    ).post("", walletData, {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-    });
+): Promise<IPaymentMethod | string> => {
+  const response = await axiosInstance(
+    `${GET_API_ENDPOINT_BASE_URL_ONLY()}/shoppingcart-checkouts/v1/Checkout/TempCC/${shopperId}?api_key=${GET_API_KEY()}`
+  ).post("", walletData, {
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+  });
 
-    return response.data;
-  } catch (error) {
-    console.error("Unable to add method to wallet", error);
-  }
+  return response.data;
 };
 
 export const updateTempPaymentMethod = async (

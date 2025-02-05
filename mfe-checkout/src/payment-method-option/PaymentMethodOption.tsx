@@ -1,11 +1,11 @@
 import { useAtom, useSetAtom } from "jotai";
-import React, {
-  ChangeEvent,
-  ChangeEventHandler,
-  useEffect,
-  useState,
-} from "react";
 import { debounce } from "lodash";
+import React, { ChangeEvent, useEffect, useState } from "react";
+import { buildOrder } from "../api/service/Order";
+import {
+  updateShopperDetails,
+  updateTempPaymentMethod,
+} from "../api/service/ShoppersPaymentMethods";
 import { RadioButton } from "../component/RadioButton/RadioButton";
 import { CardInformation } from "../payment-method/card-information/CardInformation";
 import {
@@ -19,14 +19,8 @@ import {
   orderAtom,
   paymentMethodsAtom,
 } from "../store";
-import "./PaymentMethodOption.scss";
-import { buildOrder, changeOrder } from "../api/service/Order";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
-import { IPaymentMethod } from "../interfaces/PaymentMethod";
-import {
-  updateShopperDetails,
-  updateTempPaymentMethod,
-} from "../api/service/ShoppersPaymentMethods";
+import "./PaymentMethodOption.scss";
 import { ThirdPartyLinkOff } from "./ThirdPartyLinkOff";
 
 export interface IPaymentOptionProps {
@@ -49,7 +43,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   updatePaymentTypeId,
 }) => {
   const [order, setOrder] = useAtom(orderAtom);
-
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [paymentMethods, setPaymentMethods] = useAtom(paymentMethodsAtom);
 
   const {
@@ -85,15 +79,15 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     const updatedPaymentOptions = paymentMethods.map((method) =>
       method.paymentMethod.id === paymentOption.paymentMethod.id
         ? {
-          ...method,
-          isSelected: true,
-          isVisible: true,
-        }
+            ...method,
+            isSelected: true,
+            isVisible: true,
+          }
         : {
-          ...method,
-          isSelected: false,
-          isEditing: false,
-        }
+            ...method,
+            isSelected: false,
+            isEditing: false,
+          }
     );
 
     const selectedPayment = updatedPaymentOptions.find((pm) => pm.isSelected);
@@ -132,21 +126,26 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     ) {
       const requestData = {
         ...paymentMethod,
+        preferred: true,
         cvv,
       };
 
       let isPaymentMethodValid;
-      if (isTempPaymentMethod) {
-        isPaymentMethodValid = await updateTempPaymentMethod(
-          shopperId,
-          requestData
-        );
-      } else {
-        isPaymentMethodValid = await updateShopperDetails(
-          shopperId,
-          paymentMethod.id,
-          requestData
-        );
+      try {
+        if (isTempPaymentMethod) {
+          isPaymentMethodValid = await updateTempPaymentMethod(
+            shopperId,
+            requestData
+          );
+        } else {
+          isPaymentMethodValid = await updateShopperDetails(
+            shopperId,
+            paymentMethod.id,
+            requestData
+          );
+        }
+      } catch (error) {
+        setErrorMessage("Invalid CVV");
       }
       if (order && isPaymentMethodValid && !isPaymentValidated) {
         const updatedOrder = generateChangeStoreResponse({
@@ -168,15 +167,15 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
         const updatedPaymentOptions = paymentMethods.map((method) =>
           method.paymentMethod.id === paymentOption.paymentMethod.id
             ? {
-              ...method,
-              isSelected: true,
-              isVisible: true,
-              isPaymentValidated: true,
-            }
+                ...method,
+                isSelected: true,
+                isVisible: true,
+                isPaymentValidated: true,
+              }
             : {
-              ...method,
-              isSelected: false,
-            }
+                ...method,
+                isSelected: false,
+              }
         );
 
         setPaymentMethods(updatedPaymentOptions);
@@ -262,6 +261,9 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
               >
                 edit
               </div>
+            )}
+            {errorMessage && (
+              <div className="error-message">{errorMessage}</div>
             )}
           </div>
         ) : null}

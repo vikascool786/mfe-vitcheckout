@@ -9,7 +9,6 @@ import { useCreateShopperAddressBookEntry } from "../../api/service/ShopperAddre
 import {
   addShoppersPaymentMethod,
   addTempPaymentMethod,
-  generateCardExistingToken,
   generateCardToken,
   updateShopperDetails,
   updateTempPaymentMethod,
@@ -29,10 +28,10 @@ import {
   paymentMethodsAtom,
 } from "../../store";
 import { generateChangeStoreResponse } from "../../utils/helpers/GenerateChangeStoreResponse";
+import { getCardType } from "../../utils/helpers/GetCardType";
 import { creditCardSchema } from "../../validation/creditcardSchema";
 import "./CardInformation.scss";
 import { CardInputs } from "./CardInputs";
-import { getCardType } from "../../utils/helpers/GetCardType";
 
 interface ICardInformationProps {
   paymentMethod: IPaymentMethod;
@@ -46,7 +45,7 @@ interface ICardInformationProps {
 
 const CARD_MAP = new Map([
   ["mastercard", "https://img.shop.com/Image/local/images/cc/mastercard.png"],
-  ["visa", "https://img.shop.com/Image/local/images/cc/visa.png"],
+  ["visa", "https://img.shop.com/Image/local/images/cc/visa.jpg"],
   ["discover", "https://img.shop.com/Image/local/images/cc/discover.png"],
   ["american express", "https://img.shop.com/Image/local/images/cc/amex.png"],
   ["diners club", "https://img.shop.com/Image/local/images/cc/diners.png"],
@@ -63,6 +62,8 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   onCancel,
 }) => {
   const setLoading = useSetAtom(loadingAtom);
+
+  console.log(paymentMethod)
   const [isCardSavedInWallet, setIsCardSavedInWallet] = useState(
     paymentMethod.id !== 0
   );
@@ -242,6 +243,34 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
             const orderResponse = await buildOrder(updatedOrder);
             setOrder(orderResponse.response.success.data);
           }
+
+          // Update payment methods
+          const updatedPaymentMethods = paymentMethods.map((pm) => ({
+            ...pm,
+            isSelected: pm.paymentMethod?.id === values.id, // Set isSelected to true only for the updated card
+          }));
+
+          // Add the updated payment method to the list
+          const updatedPaymentMethod = {
+            paymentMethod: {
+              ...response.at(-1),
+              cvv: requestData.cvv,
+            },
+            paymentAddress: sameShippingAddress ? shippingAddress : address,
+            isSelected: true, // Ensure the updated card is selected
+            isVisible: true,
+            isEditing: false,
+            isPaymentValidated: true,
+          };
+
+          // Replace the existing payment method with the updated one
+          const finalPaymentMethods = updatedPaymentMethods
+            .map((pm) =>
+              pm.paymentMethod?.id === values.id ? updatedPaymentMethod : pm
+            )
+            .filter((pm) => pm.paymentMethod?.id !== 0);
+
+          onAddNewCard(finalPaymentMethods as IPaymentOption[]);
           updatePaymentValidationStatus(values.id as number);
           onCancel();
           setLoading(false);
@@ -257,8 +286,12 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
             token,
             number,
           });
+
           const updatedPaymentMethods = [
-            ...paymentMethods,
+            ...paymentMethods.map((pm) => ({
+              ...pm,
+              isSelected: false,
+            })),
             {
               paymentMethod: {
                 ...response.at(-1),
@@ -287,7 +320,8 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           }
         } catch (error) {
           if (error) {
-            alert("Error while adding card");
+            console.log(error);
+            setCardError("Error while adding card");
             setLoading(false);
             return;
           }
@@ -317,7 +351,10 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           };
 
           const updatedPaymentMethods = [
-            ...paymentMethods,
+            ...paymentMethods.map((pm) => ({
+              ...pm,
+              isSelected: false,
+            })),
             {
               paymentMethod: {
                 ...updatedPaymentMethod,
@@ -356,7 +393,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
       }
     } catch (error) {
       setLoading(false);
-      console.error("Error saving card information:", error);
+      setCardError(error?.response?.data);
     } finally {
       setLoading(false);
     }
@@ -434,7 +471,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
         initialValues={initialValues}
         validationSchema={validationSchema}
         onSubmit={(values) => {
-          console.log(values);
+          setCardError(null);
           const address = !sameShippingAddress
             ? {
                 first: values.first,
@@ -602,6 +639,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                     {shippingAddress?.zip}
                   </div>
                 )}
+                {cardError && <div className="error-message">{cardError}</div>}
                 <div className="button-container">
                   <Button
                     btnType="secondary"

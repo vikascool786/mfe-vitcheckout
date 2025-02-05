@@ -82,7 +82,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         };
       };
 
-      // checking paypal order success 
+      // checking paypal order success
       const { token, payerId } = getQueryParams();
       const isPaypalOrderSuccess = token && payerId;
 
@@ -97,6 +97,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         const paymentOptions = response.map((paymentMethod) => {
           const isOrderPaymentMethod =
             paymentMethod.id === order?.paymentMethod?.id;
+          const isPreferred = paymentMethod.preferred;
 
           // Handle single response case
           if (response.length === 1) {
@@ -110,14 +111,23 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
             } as IPaymentOption;
           }
 
-          // Handle multiple response case
           return {
             paymentMethod,
             paymentAddress: addressMap.get(paymentMethod.addressId.toString()),
-            isVisible: isOrderPaymentMethod || paymentMethod.preferred,
-            isSelected: isOrderPaymentMethod || paymentMethod.preferred,
+            isVisible: isOrderPaymentMethod || isPreferred,
+            isSelected: false, // Ensure only one selection later
           } as IPaymentOption;
         });
+
+        // Ensure only one card is selected
+        const selectedPaymentMethod =
+          paymentOptions.find(
+            (option) => option.paymentMethod.id === order?.paymentMethod?.id
+          ) || paymentOptions.find((option) => option.paymentMethod.preferred);
+
+        if (selectedPaymentMethod) {
+          selectedPaymentMethod.isSelected = true;
+        }
 
         let updatedPaymentOptions = [...paymentOptions, ...paymentMethods];
 
@@ -258,7 +268,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       addressId: 0,
     });
 
-    // while adding new card makeing new credit card as selected 
+    // while adding new card makeing new credit card as selected
     const updatedPaymentOptions = paymentMethods.map((paymentOption) => ({
       ...paymentOption,
       isSelected: false,
@@ -302,14 +312,14 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     const updatedPaymentMethods = paymentMethods.map((method) =>
       method.paymentMethod.id === paymentId
         ? {
-          ...method,
-          isEditing: !method.isEditing, // Toggle editing state for the selected payment method
-        }
+            ...method,
+            isEditing: !method.isEditing, // Toggle editing state for the selected payment method
+          }
         : {
-          ...method,
-          isEditing: false,
-          isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
-        }
+            ...method,
+            isEditing: false,
+            isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
+          }
     );
 
     setTimeout(() => {
