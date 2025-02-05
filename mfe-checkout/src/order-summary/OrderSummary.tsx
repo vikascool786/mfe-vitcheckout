@@ -286,8 +286,9 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           if (!store.totals) return null;
           return (
             <div
-              className={`order-charges-table ${isFirst ? "order-charges-table-first" : ""
-                } ${isLast ? "order-charges-table-last" : ""}`}
+              className={`order-charges-table ${
+                isFirst ? "order-charges-table-first" : ""
+              } ${isLast ? "order-charges-table-last" : ""}`}
               key={store.id || index} // Add a key for the mapped elements
             >
               <div className="shipping-catolog-name">
@@ -341,20 +342,24 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           {Object.entries(order?.stores)
             .reverse()
             .map(([key, store]) => {
-              return (
-                store && (
-                  <div className="order-summary-cashback-container">
-                    <div className="order-cashback">
-                      {store?.store?.isMA === 1 ? (
-                        `BV earned in this order`
-                      ) : (
-                        `IBV earned in this order`
-                      )}
+              if (store.totals.ibv > 0 || store.totals.bv > 0) {
+                return (
+                  store && (
+                    <div className="order-summary-cashback-container">
+                      <div className="order-cashback">
+                        {store?.store?.isMA === 1
+                          ? `BV earned in this order`
+                          : `IBV earned in this order`}
+                      </div>
+                      <div>
+                        {store?.store?.isMA === 1
+                          ? formattedNumber(store.totals.bv)
+                          : formattedNumber(store.totals.ibv)}
+                      </div>
                     </div>
-                    <div>{store?.store?.isMA === 1 ? formattedNumber(store.totals.bv) : formattedNumber(store.totals.ibv)}</div>
-                  </div>
-                )
-              );
+                  )
+                );
+              }
             })}
         </div>
       )}
