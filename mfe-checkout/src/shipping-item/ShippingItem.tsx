@@ -4,8 +4,8 @@ import "./ShippingItem.scss";
 import { Cashback } from "../assets/svgs/Cashback";
 import { Item, StoreDetail } from "../interfaces/ShippingMethod";
 import { ITotal } from "../interfaces/ShopperCart";
-import {Portal} from "../interfaces/Portal";
-import {AutoshipIcon} from "../assets/icons/Autoship";
+import { Portal } from "../interfaces/Portal";
+import { AutoshipIcon } from "../assets/icons/Autoship";
 
 interface IProduct {
   imageUrl: string;
@@ -76,14 +76,14 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
               Cashback / {isMA === 1 ? `${formattedNumber(bv)} BV` : `${formattedNumber(ibv)} IBV`}
             </div>
             <div>{totals?.priceStr}</div>
-            { (item.autoshipFreq > 0 || item.autoShipId) && (portalData?.autoShipDiscount > 0 && isMaProduct ? (
-                <div className="item-autoship"><AutoshipIcon />Saving {portalData.autoShipDiscount}% with Autoship</div>
+            {(item.autoshipFreq > 0 || item.autoShipId) && (portalData?.autoShipDiscount > 0 && isMaProduct ? (
+              <div className="item-autoship"><AutoshipIcon />Saving {portalData.autoShipDiscount}% with Autoship</div>
             ) : (
-                <div className="item-autoship"><AutoshipIcon />Repeating with Autoship</div>
+              <div className="item-autoship"><AutoshipIcon />Repeating with Autoship</div>
             ))
             }
-            { item.autoshipFreq > 0 && (
-                <div>Frequency: <span className="item-autoship-frequency">{item.autoshipFreq} days</span></div>
+            {item.autoshipFreq > 0 && (
+              <div>Frequency: <span className="item-autoship-frequency">{item.autoshipFreq} days</span></div>
             )
             }
           </div>

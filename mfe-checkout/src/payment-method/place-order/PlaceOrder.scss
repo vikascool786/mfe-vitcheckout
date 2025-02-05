@@ -4,6 +4,12 @@
   align-items: center;
   width: 100%;
   max-width: 34.563rem; /* Match right-column max-width */
+
+  form {
+    gap: 8px;
+    display: flex;
+    flex-direction: column;
+  }
 }
 
 .checkout-place-order-text {
@@ -11,7 +17,6 @@
   font-weight: 300;
   line-height: 15.23px;
   text-align: left;
-  text-decoration-skip-ink: none;
   &__heading {
     font-weight: bold;
     padding: 5px 0;
