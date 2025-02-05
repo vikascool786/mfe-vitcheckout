@@ -27,30 +27,26 @@ export const GET_API_ENDPOINT_BASE_URL = (
   }
   switch (mode) {
     case "localhost":
-      return `https://stagingapi2.shop.com{{path}}?api_key=${
-        isModuleRanker
+      return `https://stagingapi2.shop.com{{path}}?api_key=${isModuleRanker
           ? "78cfbfddd65949e886faef65db6bba26"
           : "759ef1fc9e4c4e8bbf900db5f4b7caba"
-      }`;
+        }`;
     case "dev":
-      return `https://devapi2.shop.com{{path}}?api_key=${
-        isModuleRanker
+      return `https://devapi2.shop.com{{path}}?api_key=${isModuleRanker
           ? "010308abff314fcbad7452230f0a918d"
           : "6f598d0a7639480eae2d266a1e87c15c"
-      }`;
+        }`;
     case "staging":
-      return `https://stagingapi2.shop.com{{path}}?api_key=${
-        isModuleRanker
+      return `https://stagingapi2.shop.com{{path}}?api_key=${isModuleRanker
           ? "78cfbfddd65949e886faef65db6bba26"
           : "759ef1fc9e4c4e8bbf900db5f4b7caba"
-      }`;
+        }`;
     case "prod":
     default:
-      return `https://api2.shop.com{{path}}?api_key=${
-        isModuleRanker
+      return `https://api2.shop.com{{path}}?api_key=${isModuleRanker
           ? "a1f1ee59f2074026bcca990180af26d7"
           : "93ccfc2eb6624b028341f00fed1db9a1"
-      }`;
+        }`;
   }
 };
 
@@ -130,7 +126,7 @@ export const GET_API_KEY = () => {
 export const GET_TOKEN_SERVICE = () => {
   switch (GET_API_MODE()) {
     case "localhost":
-      return "https://devccsoa.marketamerica.com/TokenService/GetToken";
+      return "https://stagingccsoa.marketamerica.com/TokenService/GetToken";
     case "dev":
       return "https://devccsoa.marketamerica.com/TokenService/GetToken";
     case "staging":

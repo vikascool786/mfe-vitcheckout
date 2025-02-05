@@ -29,6 +29,7 @@ import { orderAtom, paymentMethodsAtom } from "../../store";
 import { Checkbox } from "../../component/Form/Checkbox/Checkbox";
 import { Formik } from "formik";
 import { placeOrderSchema } from "../../validation/placeOrderSchema";
+import {orderHasAutoshipItems} from "../../utils/OrderUtils";
 
 interface IPlaceOrder {
   confirmOrder: () => void;
@@ -282,20 +283,10 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     }
   };
 
-  const orderHasAutoshipItems = (): boolean => {
-    if(order){
-      const autoshipItems = Object.values(order.stores)
-          .flatMap(store => store.items)
-          .filter(item => item.autoshipFreq > 0 || item.autoShipId !== undefined);
-      return autoshipItems.length > 0;
-    }
-    return false;
-  };
-
   return (
     <div className="checkout-place-order">
       <Formik
-          initialValues={{ autoshipTerms: !orderHasAutoshipItems() }}
+          initialValues={{ autoshipTerms: !orderHasAutoshipItems(order || null) }}
           validationSchema={placeOrderSchema}
           onSubmit={(values) => {
             handlePlaceOrder();
@@ -310,7 +301,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             values
           }) => (
               <form>
-                { orderHasAutoshipItems() && (
+                { orderHasAutoshipItems(order || null) && (
                     <div className="checkout-place-order-autoship checkout-place-order-text">
                       <div className="checkout-place-order-text__heading">Autoship Terms and Conditions</div>
                       <div className="checkout-place-order-text">When submitting your AutoShip along with providing payment and a shipping address, you authorize us to charge the same selected payment method each time your AutoShip order is processed. This is for your initial AutoShip order and subsequent AutoShip orders until you cancel your AutoShip. There is no obligation and you may cancel at any time. After you cancel, you will not be billed for, or receive, any future automatic shipments.</div>
