@@ -8,11 +8,18 @@ import { ShippingOptions } from "../shipping-options/ShippingOptions";
 import { loadingAtom, orderAtom } from "../store";
 import { getCatalogName } from "../utils/helpers/GetCatalog";
 import "./ShippingMethod.scss";
+import {portalApiData} from "../checkout/portalAtom";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
+import {OrderStore} from "../interfaces/Order";
 
-const ShippingMethod: React.FC = ({ }) => {
+interface IShippingMethodProps {
+  shopperID: string;
+}
+
+const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
   const [orders, setOrder] = useAtom(orderAtom);
   const setLoading = useSetAtom(loadingAtom);
+  const [portalData] = useAtom(portalApiData(shopperID));
 
   if (!orders) {
     return <p>Loading shipping methods...</p>;
@@ -75,6 +82,8 @@ const ShippingMethod: React.FC = ({ }) => {
                             onRemove={() =>
                               handleRemoveProduct(key, item.product_hash)
                             }
+                            portalData={portalData}
+                            isMaProduct={store?.store?.isMA === 1}
                           />
                         </div>
                       ))}

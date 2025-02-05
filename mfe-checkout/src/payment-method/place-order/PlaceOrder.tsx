@@ -26,6 +26,9 @@ import { useAtom, useAtomValue } from "jotai/index";
 import { siteApiData } from "../../checkout/siteAtom";
 import { fetchSezzleUrl } from "../../api/ajaxaction/Sezzle";
 import { orderAtom, paymentMethodsAtom } from "../../store";
+import { Checkbox } from "../../component/Form/Checkbox/Checkbox";
+import { Formik } from "formik";
+import { placeOrderSchema } from "../../validation/placeOrderSchema";
 
 interface IPlaceOrder {
   confirmOrder: () => void;
@@ -279,40 +282,82 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     }
   };
 
+  const orderHasAutoshipItems = (): boolean => {
+    if(order){
+      const autoshipItems = Object.values(order.stores)
+          .flatMap(store => store.items)
+          .filter(item => item.autoshipFreq > 0 || item.autoShipId !== undefined);
+      return autoshipItems.length > 0;
+    }
+    return false;
+  };
+
   return (
     <div className="checkout-place-order">
-      <div className="checkout-place-order-text">
-        By clicking place order, you agree to the SHOP.COM Terms of Use and
-        Privacy Policy.
-      </div>
-      {errorMessage.length > 0 && (
-        <div className="error-msg error-msg--padding">
-          <div className="error-msg--bold">
-            There was an issue placing your order
-          </div>
-          <div className="error-msg__detail">{errorMessage}</div>
-        </div>
-      )}
-      {isLoading ? (
-        <div>Processing Order...</div>
-      ) : (
-        <Button
-          label={
-            paymentTypeId === SEZZLE.typeId || paymentTypeId === PAYPAL.typeId
-              ? "Pay with"
-              : "Place Order"
-          }
-          btnType="primary"
-          onClick={handlePlaceOrder}
-          logo={
-            paymentTypeId === SEZZLE.typeId
-              ? "https://img.shop.com/Image/resources/checkout/Sezzle-Color-White-Logo.svg"
-              : paymentTypeId === PAYPAL.typeId
-              ? "https://img.shop.com/Image/resources/checkout/PayPal-White-Logo.svg"
-              : ""
-          }
-        />
-      )}
+      <Formik
+          initialValues={{ autoshipTerms: !orderHasAutoshipItems() }}
+          validationSchema={placeOrderSchema}
+          onSubmit={(values) => {
+            handlePlaceOrder();
+          }}
+      >
+        {({ touched,
+            errors,
+            handleChange,
+            handleBlur,
+            setFieldValue,
+            submitForm,
+            values
+          }) => (
+              <form>
+                { orderHasAutoshipItems() && (
+                    <div className="checkout-place-order-autoship checkout-place-order-text">
+                      <div className="checkout-place-order-text__heading">Autoship Terms and Conditions</div>
+                      <div className="checkout-place-order-text">When submitting your AutoShip along with providing payment and a shipping address, you authorize us to charge the same selected payment method each time your AutoShip order is processed. This is for your initial AutoShip order and subsequent AutoShip orders until you cancel your AutoShip. There is no obligation and you may cancel at any time. After you cancel, you will not be billed for, or receive, any future automatic shipments.</div>
+                      <div className="checkout-place-order-text__note">Please note that at the time of your order pulling, the shipping, tax and/or fee cost could change or be adjusted based on current rates and  the availability of the products being shipped.</div>
+                      <Checkbox name="autoshipTerms"
+                                title="I agree to the Autoship Terms & Conditions"
+                                onChange={() =>
+                                    setFieldValue("autoshipTerms", !values.autoshipTerms)
+                                }
+                                errorMessage={touched.autoshipTerms && errors.autoshipTerms}/>
+                    </div>
+                )}
+                <div className="checkout-place-order-text">
+                  By clicking place order, you agree to the SHOP.COM Terms of Use and
+                  Privacy Policy.
+                </div>
+                {errorMessage.length > 0 && (
+                    <div className="error-msg error-msg--padding">
+                      <div className="error-msg--bold">
+                        There was an issue placing your order
+                      </div>
+                      <div className="error-msg__detail">{errorMessage}</div>
+                    </div>
+                )}
+                {isLoading ? (
+                    <div>Processing Order...</div>
+                ): (
+                    <Button
+                        label={
+                            paymentTypeId === SEZZLE.typeId || paymentTypeId === PAYPAL.typeId
+                                ? "Pay with"
+                                : "Place Order"
+                        }
+                        btnType="primary"
+                        onClick={submitForm}
+                        logo={
+                            paymentTypeId === SEZZLE.typeId
+                                ? "https://img.shop.com/Image/resources/checkout/Sezzle-Color-White-Logo.svg"
+                                : paymentTypeId === PAYPAL.typeId
+                                    ? "https://img.shop.com/Image/resources/checkout/PayPal-White-Logo.svg"
+                                    : ""
+                        }
+                    />
+                )}
+              </form>
+          )}
+      </Formik>
     </div>
   );
 };

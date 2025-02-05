@@ -4,7 +4,8 @@ import "./ShippingItem.scss";
 import { Cashback } from "../assets/svgs/Cashback";
 import { Item, StoreDetail } from "../interfaces/ShippingMethod";
 import { ITotal } from "../interfaces/ShopperCart";
-// import { it } from "node:test";
+import {Portal} from "../interfaces/Portal";
+import {AutoshipIcon} from "../assets/icons/Autoship";
 
 interface IProduct {
   imageUrl: string;
@@ -20,6 +21,8 @@ interface IShippingItemProps {
   storeDetail: StoreDetail;
   total: ITotal
   onRemove: () => void;
+  portalData: Portal;
+  isMaProduct: boolean;
 }
 
 function createOptionMap(
@@ -39,12 +42,14 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
   storeDetail,
   total,
   onRemove,
+  portalData,
+  isMaProduct,
+
 }) => {
   const { image, caption, catalogName, totals, quantity } = item;
-  const { catalogId, isMA } = storeDetail;
+  const { catalogId, isMA } = storeDetail || {};
   const { bv, ibv } = total;
 
-  console.log("catalogId, isMA", isMA === 1, bv, ibv);
   const isGiftCard = caption.toLowerCase().includes("email delivery");
 
   const options =
@@ -71,6 +76,16 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
               Cashback / {isMA === 1 ? `${formattedNumber(bv)} BV` : `${formattedNumber(ibv)} IBV`}
             </div>
             <div>{totals?.priceStr}</div>
+            { (item.autoshipFreq > 0 || item.autoShipId) && (portalData?.autoShipDiscount > 0 && isMaProduct ? (
+                <div className="item-autoship"><AutoshipIcon />Saving {portalData.autoShipDiscount}% with Autoship</div>
+            ) : (
+                <div className="item-autoship"><AutoshipIcon />Repeating with Autoship</div>
+            ))
+            }
+            { item.autoshipFreq > 0 && (
+                <div>Frequency: <span className="item-autoship-frequency">{item.autoshipFreq} days</span></div>
+            )
+            }
           </div>
         </div>
         <div className="item-cancel" onClick={onRemove}>

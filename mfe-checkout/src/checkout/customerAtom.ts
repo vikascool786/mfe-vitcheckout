@@ -1,23 +1,27 @@
 import {atomFamily, atomWithDefault} from "jotai/utils";
 import {fetchCustomerProfileData} from "../api/service/CustomerProfile";
 import {CustomerProfile} from "../interfaces/CustomerProfile";
+import {atom} from "jotai/index";
+import {fetchShopperDetail} from "../api/service/ShopperDetail";
 
 export const customerApiData = atomFamily((pcid: string) =>
-    atomWithDefault<Promise<CustomerProfile | null>>(async () => {
-        const maxRetries = 3;
-        const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    atom<Promise<CustomerProfile | null>>(async () => {
+        try {
+            const data: CustomerProfile = await fetchCustomerProfileData(pcid);
+            return data;
+        } catch (error) {
+            console.error("Failed to fetch customer info:", error);
             try {
-                if (attempt > 1) {
-                    await delay(2000 * attempt);
-                }
-                const data: CustomerProfile = await fetchCustomerProfileData(pcid);
-                return data;
+                const shopperData = await fetchShopperDetail(pcid);
+                return {
+                    first_name: shopperData.firstName,
+                    last_name: shopperData.lastName,
+                    email_address: shopperData.email,
+                } as CustomerProfile;
             } catch (error) {
-                console.error(`Attempt retrieving customer profile ${attempt} failed:`, error);
+                console.error("Failed to fetch shopper detail:", error);
+                return null;
             }
         }
-        return null;
     })
 );

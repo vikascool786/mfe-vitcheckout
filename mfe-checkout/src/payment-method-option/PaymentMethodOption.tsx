@@ -186,6 +186,11 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     }
   };
 
+  // cleanup function
+  useEffect(() => {
+    return () => debouncedOnValidCVV.cancel();
+  }, []);
+
   const updatePaymentValidationStatus = (id: number) => {
     // Update payment methods with the selected method
     const updatedPaymentOptions = paymentMethods.map((method) => ({

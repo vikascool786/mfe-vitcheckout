@@ -35,6 +35,7 @@ export interface ShippingSelection {
   total: number;
   estShipDate: string;
   isSelected?: boolean;
+  totalStr: string;
 }
 
 export interface Item {
@@ -45,6 +46,8 @@ export interface Item {
   catalogName: string;
   quantity: number;
   option?: Array<{ optionStringValue: string; name: string; type: string }>;
+  autoshipFreq: number;
+  autoShipId?: number;
   totals: {
     price: number;
     cashBack: number;

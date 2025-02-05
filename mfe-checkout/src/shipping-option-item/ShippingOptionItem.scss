@@ -2,7 +2,6 @@
 
 .shipping-option-container {
   @extend %container-base;
-  @include flex-row-between;
   gap: 9rem;
 
   &.end {
@@ -19,6 +18,12 @@
   }
 }
 
+.shipping-option-wrapper {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+}
+
 .shipping-option-sub-container {
   @include flex-column;
   font-weight: 400;
@@ -31,4 +36,9 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
+}
+
+.shipping-option-autoship {
+  font-size: 12px;
+  padding: 5px 0 0 35px;
 }

@@ -82,9 +82,10 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         };
       };
 
+      // checking paypal order success 
       const { token, payerId } = getQueryParams();
-
       const isPaypalOrderSuccess = token && payerId;
+
       const addressMap = new Map<string, Address>();
 
       Object.keys(addresses).map((id) =>
@@ -194,7 +195,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     const selectedPaymentMethod = paymentMethods.find(
       (method) => method.isSelected
     );
-
     // Filter out the selected payment method from the rest of the list
     const otherPaymentMethods = paymentMethods.filter(
       (method) => !method.isSelected
@@ -258,6 +258,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       addressId: 0,
     });
 
+    // while adding new card makeing new credit card as selected 
     const updatedPaymentOptions = paymentMethods.map((paymentOption) => ({
       ...paymentOption,
       isSelected: false,
@@ -276,6 +277,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     ]);
   };
 
+  // checking new add is adding or not
   useEffect(() => {
     const isAddingNewCard = paymentMethods.find(
       (pm) => pm.paymentMethod.id === 0

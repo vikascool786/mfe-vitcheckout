@@ -37,6 +37,8 @@ export interface Item {
   specialFormula: string;
   quantity: number;
   option: any[];
+  autoshipFreq: number;
+  autoShipId?: number;
   totals: ITotal;
 }
 

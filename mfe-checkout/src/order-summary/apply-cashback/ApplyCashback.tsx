@@ -53,7 +53,7 @@ export const ApplyCashback: React.FC<IApplyCashbackContainer> = ({
           checked={order?.userOptions?.applyEWallet}
           onChange={handleAddApplyCashback}
         />
-        {`$${cashbackData.cashbackAvail} - Use VIFT Cashback on this order`}
+        {`$${cashbackData.totalCoaCBAvail} - Use VIFT Cashback on this order`}
       </div>
     </div>
   );

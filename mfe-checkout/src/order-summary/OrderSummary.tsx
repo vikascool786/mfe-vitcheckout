@@ -207,7 +207,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           {!loading &&
             !error &&
             eWalletData &&
-            parseInt(eWalletData.cashbackAvail) > 0 && (
+            parseInt(eWalletData.totalCoaCBAvail) > 0 && (
               <ApplyCashback cashbackData={eWalletData} />
             )}
           <div className="order-redeem-coupon-text">Redeem Coupon</div>
@@ -310,12 +310,12 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           );
         })}
 
-      {order?.userOptions?.applyEWallet && eWalletData?.cashbackAvail && (
+      {order?.userOptions?.applyEWallet && eWalletData?.totalCoaCBAvail && (
         <div className="order-summary-row">
           <div className="order-summary-row-bold">
             VIFT <span className="order-summary-row-green">Cashback</span>
           </div>
-          <div>${eWalletData.cashbackAvail}</div>
+          <div>${eWalletData.totalCoaCBAvail}</div>
         </div>
       )}
 
@@ -345,13 +345,13 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                 store && (
                   <div className="order-summary-cashback-container">
                     <div className="order-cashback">
-                      {store?.store.isMA === 1 ? (
+                      {store?.store?.isMA === 1 ? (
                         `BV earned in this order`
                       ) : (
                         `IBV earned in this order`
                       )}
                     </div>
-                    <div>{store?.store.isMA === 1 ? formattedNumber(store.totals.bv) : formattedNumber(store.totals.ibv)}</div>
+                    <div>{store?.store?.isMA === 1 ? formattedNumber(store.totals.bv) : formattedNumber(store.totals.ibv)}</div>
                   </div>
                 )
               );

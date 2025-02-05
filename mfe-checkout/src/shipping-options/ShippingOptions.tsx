@@ -81,6 +81,12 @@ export const ShippingOptions: React.FC<IShippingOptions> = ({
     }
   };
 
+  const storeHasAutoshipItems = (order: OrderStore): boolean => {
+    const autoshipItems = order.items
+        .filter(item => item.autoshipFreq > 0 || item.autoShipId !== undefined);
+    return autoshipItems.length > 0;
+  };
+
   return (
     <div className="shipping-options-container">
       {shipping.map((shippingOption, index) => (
@@ -91,6 +97,7 @@ export const ShippingOptions: React.FC<IShippingOptions> = ({
           size={shippingSelections.length - 1}
           isSelected={shippingOption?.isSelected || false}
           onChange={() => handleChange(shippingOption.method)}
+          hasAutoship={storeHasAutoshipItems(store)}
         />
       ))}
     </div>

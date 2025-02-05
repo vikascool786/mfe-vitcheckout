@@ -12,4 +12,15 @@
   line-height: 15.23px;
   text-align: left;
   text-decoration-skip-ink: none;
+  &__heading {
+    font-weight: bold;
+    padding: 5px 0;
+  }
+  &__note {
+    padding: 10px 0;
+  }
+}
+
+.checkout-place-order-autoship {
+  padding: 10px 0;
 }

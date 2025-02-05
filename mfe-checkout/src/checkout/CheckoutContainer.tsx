@@ -24,6 +24,7 @@ import {
   GET_API_KEY,
 } from "../utils/urlResolver";
 import Checkout from "./Checkout";
+import { createAutoshipUrl } from "../api/ajaxaction/Autoship";
 
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
@@ -140,11 +141,21 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     () =>
       paymentMethods
         ? (paymentMethods?.find(
-            (payment) => payment?.preferred
-          ) as IPaymentMethod)
+          (payment) => payment?.preferred
+        ) as IPaymentMethod)
         : ({} as IPaymentMethod),
     [paymentMethods]
   );
+
+  const orderHasNewAutoship = (): boolean => {
+    if(orderData){
+      const newAutoshipItems = Object.values(orderData.stores)
+          .flatMap(store => store.items)
+          .filter(item => item.autoshipFreq > 0);
+      return newAutoshipItems.length > 0;
+    }
+    return false;
+  };
 
   // const defaultPaymentMethod: IPaymentMethod = useMemo<IPaymentMethod>(() => {
   //   if (!paymentMethods || paymentMethods.length === 0) {
@@ -163,17 +174,29 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
         const isSuccessful = response?.data?.response?.success;
         if (isSuccessful) {
           const orderId = response.data.response.success.data.orderId;
-          window.location.href = `/nbts/orderconfirmation-${orderId}`;
+          //if order needs a new autoship created
+          if(orderHasNewAutoship()){
+            createAutoshipUrl(shopperId, orderId).then((response: any) => {
+              redirectToOrderConfirmation(orderId);
+            })
+            .catch((error) => {
+              console.error(`Error creating autoship from order: ${error}`);
+              redirectToOrderConfirmation(orderId);
+            })
+          } else{
+            redirectToOrderConfirmation(orderId);
+          }
         } else {
-          console.log(response.response.data.errors[0].message);
-          if (response?.response?.data?.errors[0]?.message) {
-            setOrderErrorMessage(response?.response?.data?.errors[0]?.message);
+          console.log("response: " + JSON.stringify(response));
+          if (response?.data?.response?.errors[0]?.message) {
+            setOrderErrorMessage(response?.data?.response?.errors[0]?.message);
             return;
           }
 
           const errorMessage = response.data.response.errors.message;
           const errorCode = response.data.response.errors.code;
-          setOrderErrorMessage(`Detail: ${errorMessage} code: ${errorCode}`);
+          const developerMessage = response.data.response.errors.developer_message;
+          setOrderErrorMessage(`Detail: ${errorMessage} ${developerMessage} (code: ${errorCode})`);
         }
       })
       .catch((error) => {
@@ -181,6 +204,10 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
         setOrderErrorMessage(error);
         setLoadingOrderConfirmation(false);
       });
+  };
+
+  const redirectToOrderConfirmation = (orderId: string | number): void => {
+    window.location.href = `/nbts/orderconfirmation-${orderId}`;
   };
 
   useEffect(() => {
@@ -266,7 +293,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                   loading={isLoading}
                   pcid={pcid}
                 />
-                <ShippingMethod loading={isLoading} />
+                <ShippingMethod loading={isLoading} shopperID={shopperId} />
                 <PaymentMethod
                   cartId={cartId}
                   shopperId={shopperId}
