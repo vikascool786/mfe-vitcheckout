@@ -171,12 +171,77 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
     }
   };
 
+  const processCardUpdate = async (
+    values: IPaymentMethod,
+    requestData: any,
+    typeID: number
+  ) => {
+    setLoading(true);
+    try {
+      const response = await updateShopperDetails(
+        shopperId,
+        values.id,
+        requestData
+      );
+      const updatedMethod = response.data.find(
+        (mthd: IPaymentMethod) => mthd.id === values.id
+      );
+
+      // only set isSelected and isVisible true for the updated payment method
+      const updatedPaymentMethods = paymentMethods.map((pm) =>
+        pm.paymentMethod.id === values.id
+          ? {
+              ...pm,
+              paymentMethod: {
+                ...pm.paymentMethod,
+                ...updatedMethod,
+              },
+              isEditing: false,
+              isSelected: true,
+              isVisible: true,
+            }
+          : {
+              ...pm,
+              isSelected: false,
+              isEditing: false,
+            }
+      );
+
+      if (order && values.id) {
+        const updatedOrder = generateChangeStoreResponse({
+          ...order,
+          paymentMethod: {
+            ...order.paymentMethod,
+            typeID,
+            id: values.id,
+          },
+        });
+        const orderResponse = await buildOrder(updatedOrder);
+        setOrder(orderResponse.response.success.data);
+        updatePaymentValidationStatus(values.id as number);
+        onCancel();
+      }
+
+      updatePaymentValidationStatus(values.id as number);
+      setLoading(false);
+      console.log("Card updated successfully:", updatedPaymentMethods);
+      onAddNewCard(updatedPaymentMethods as IPaymentOption[]);
+      onCancel();
+    } catch (error) {
+      setCardError(error?.response?.data);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSaveCardInformation = async (
     values: IPaymentMethod,
     address: Address,
     type: "TEMP" | "WALLET",
     sameShippingAddress: boolean
   ) => {
+    setLoading(true);
+
     const typeId = getTypeIdByAltName(getCardType(values.number).toLowerCase());
 
     let requestData = {
@@ -200,114 +265,55 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
         ...address,
       };
     }
-    setLoading(true);
 
     try {
       if (type === "WALLET") {
         if (values.id !== 0) {
-          await updateShopperDetails(shopperId, values.id, requestData);
-          if (order && values.id) {
-            const updatedOrder = generateChangeStoreResponse({
-              ...order,
-              paymentMethod: {
-                ...order.paymentMethod,
-                typeID: typeId as number,
-                id: values.id,
-              },
-            });
-            const orderResponse = await buildOrder(updatedOrder);
-            setOrder(orderResponse.response.success.data);
-            updatePaymentValidationStatus(values.id as number);
-            onCancel();
-          }
+          processCardUpdate(values, requestData, typeId as number);
+          return;
+        }
 
-          // Update payment methods
-          const updatedPaymentMethods = paymentMethods.map((pm) => ({
+        const cardTokenResponse = await generateCardToken(requestData.number);
+        const token = cardTokenResponse?.token.id;
+        const number = cardTokenResponse?.token.mask;
+        const response = await addShoppersPaymentMethod(shopperId, {
+          ...requestData,
+          token,
+          number,
+        });
+
+        const updatedPaymentMethods = [
+          ...paymentMethods.map((pm) => ({
             ...pm,
-            isSelected: pm.paymentMethod?.id === values.id, // Set isSelected to true only for the updated card
-          }));
-
-          // Add the updated payment method to the list
-          const updatedPaymentMethod = {
+            isSelected: false,
+          })),
+          {
             paymentMethod: {
               ...response.at(-1),
               cvv: requestData.cvv,
             },
             paymentAddress: sameShippingAddress ? shippingAddress : address,
-            isSelected: true, // Ensure the updated card is selected
+            isSelected: true,
             isVisible: true,
             isEditing: false,
             isPaymentValidated: true,
-          };
+          },
+        ].filter((pm) => pm.paymentMethod?.id !== 0);
 
-          // Replace the existing payment method with the updated one
-          const finalPaymentMethods = updatedPaymentMethods
-            .map((pm) =>
-              pm.paymentMethod?.id === values.id ? updatedPaymentMethod : pm
-            )
-            .filter((pm) => pm.paymentMethod?.id !== 0);
-
-          onAddNewCard(finalPaymentMethods as IPaymentOption[]);
-          updatePaymentValidationStatus(values.id as number);
-
-          setLoading(false);
-
-          setTimeout(() => {
-            onCancel();
-          }, 1000);
-          return;
-        }
-
-        try {
-          const cardTokenResponse = await generateCardToken(requestData.number);
-          const token = cardTokenResponse?.token.id;
-          const number = cardTokenResponse?.token.mask;
-          const response = await addShoppersPaymentMethod(shopperId, {
-            ...requestData,
-            token,
-            number,
-          });
-
-          const updatedPaymentMethods = [
-            ...paymentMethods.map((pm) => ({
-              ...pm,
-              isSelected: false,
-            })),
-            {
-              paymentMethod: {
-                ...response.at(-1),
-                cvv: requestData.cvv,
-              },
-              paymentAddress: sameShippingAddress ? shippingAddress : address,
-              isSelected: true,
-              isVisible: true,
-              isEditing: false,
-              isPaymentValidated: true,
+        if (order && paymentMethod) {
+          const updatedOrder = generateChangeStoreResponse({
+            ...order,
+            paymentMethod: {
+              ...order.paymentMethod,
+              id: response.at(-1)?.id as number,
             },
-          ].filter((pm) => pm.paymentMethod?.id !== 0);
-
-          if (order && paymentMethod) {
-            const updatedOrder = generateChangeStoreResponse({
-              ...order,
-              paymentMethod: {
-                ...order.paymentMethod,
-                id: response.at(-1)?.id as number,
-              },
-            });
-            const orderResponse = await buildOrder(updatedOrder);
-            onAddNewCard(updatedPaymentMethods as IPaymentOption[]);
-            setOrder(orderResponse.response.success.data);
-            setLoading(false);
-          }
-        } catch (error) {
-          if (error) {
-            console.log(error);
-            setCardError("Error while adding card");
-            setLoading(false);
-            return;
-          }
+          });
+          const orderResponse = await buildOrder(updatedOrder);
+          onAddNewCard(updatedPaymentMethods as IPaymentOption[]);
+          setOrder(orderResponse.response.success.data);
+          setLoading(false);
+          onCancel();
         }
-        onCancel();
       } else if (type === "TEMP") {
         const cardTokenResponse = await generateCardToken(requestData.number);
         const imageUrl = CARD_MAP.get(

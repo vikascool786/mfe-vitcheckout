@@ -53,13 +53,18 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
 
   const [showNewCard, setShowNewCard] = useState<boolean>(false);
   const [portalData] = useAtom(portalApiData(shopperId));
-  const [thirdPartySiteFlagData, setThirdPartySiteFlagData] = useState<SiteFlags[]>([]);
+  const [thirdPartySiteFlagData, setThirdPartySiteFlagData] = useState<
+    SiteFlags[]
+  >([]);
 
   useEffect(() => {
     const paymentSiteFlagList = thirdPartyPaymentFlagList().join(",");
     const fetchSiteFlagInfo = async () => {
       try {
-        const response: SiteFlags[] = await fetchSiteFlagData(siteId, paymentSiteFlagList);
+        const response: SiteFlags[] = await fetchSiteFlagData(
+          siteId,
+          paymentSiteFlagList
+        );
         setThirdPartySiteFlagData(response);
         paymentMethods.map((method) => {
           const c2pSiteflag = response.find(
@@ -161,7 +166,9 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
           });
         }
 
-        console.log("updatedPaymentOptions: " + JSON.stringify(updatedPaymentOptions));
+        console.log(
+          "updatedPaymentOptions: " + JSON.stringify(updatedPaymentOptions)
+        );
         setPaymentMethods(updatedPaymentOptions);
       } catch (error) {
         if (isPaypalOrderSuccess) {
@@ -212,8 +219,9 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     //sezzle rules dependent on order, min order, autohship
     //filter payment method types from order response
     if (order) {
-      const isSezzleInAcceptedPayments = order.paymentMethods
-        .filter((method) => method.typeID === SEZZLE.typeId).length > 0;
+      const isSezzleInAcceptedPayments =
+        order.paymentMethods.filter((method) => method.typeID === SEZZLE.typeId)
+          .length > 0;
       let isAutoshipAllowed = false;
       if (sezzleSiteFlag?.auxDataText) {
         const jsonData = JSON.parse(sezzleSiteFlag.auxDataText);
@@ -223,9 +231,11 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         updateVisibilityOfPaymentMethod(SEZZLE.typeId, false);
         return;
       }
-      updateVisibilityOfPaymentMethod(SEZZLE.typeId, isSezzleInAcceptedPayments);
+      updateVisibilityOfPaymentMethod(
+        SEZZLE.typeId,
+        isSezzleInAcceptedPayments
+      );
     }
-
   }, [order, thirdPartySiteFlagData, portalData]);
 
   const getSiteFlagDataForType = (siteflagTypeId: number) => {
@@ -235,9 +245,12 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       );
     }
     return null;
-  }
+  };
 
-  const updateVisibilityOfPaymentMethod = (paymentTypeId: number, isVisible: boolean) => {
+  const updateVisibilityOfPaymentMethod = (
+    paymentTypeId: number,
+    isVisible: boolean
+  ) => {
     const updatedPaymentOptions = paymentMethods.map((paymentOption) => {
       if (paymentOption.paymentMethod.typeID === paymentTypeId) {
         return {
@@ -251,7 +264,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       }
     });
     setPaymentMethods(updatedPaymentOptions);
-  }
+  };
 
   useEffect(() => {
     const handleDeselectPaymentMethodsEvent = () => {
@@ -381,14 +394,14 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     const updatedPaymentMethods = paymentMethods.map((method) =>
       method.paymentMethod.id === paymentId
         ? {
-          ...method,
-          isEditing: !method.isEditing, // Toggle editing state for the selected payment method
-        }
+            ...method,
+            isEditing: !method.isEditing, // Toggle editing state for the selected payment method
+          }
         : {
-          ...method,
-          isEditing: false,
-          isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
-        }
+            ...method,
+            isEditing: false,
+            isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
+          }
     );
 
     setTimeout(() => {
