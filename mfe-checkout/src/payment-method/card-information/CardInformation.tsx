@@ -36,7 +36,6 @@ import { getTypeIdByAltName } from "../PaymentType";
 
 interface ICardInformationProps {
   paymentMethod: IPaymentMethod;
-  addresses: Address[];
   isPaymentValidated: boolean;
   address: Address;
   shopperId: string;
@@ -59,7 +58,6 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   isPaymentValidated,
   paymentMethod,
   onAddNewCard,
-  addresses,
   shopperId,
   address,
   onCancel,
@@ -69,8 +67,6 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   const [isCardSavedInWallet, setIsCardSavedInWallet] = useState(
     paymentMethod.id !== 0
   );
-
-  const addressMap = new Map(Object.entries(addresses));
 
   const addressList = useAtomValue(addressAtom);
 
@@ -88,8 +84,6 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
       shippingAddress.id !== 0 &&
       shippingAddress.id === address.id
   );
-
-  console.log(shippingAddress, addressMap);
 
   const validationSchema = Yup.object().shape({
     // Card Information Validation
@@ -518,7 +512,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                   />
                   <span>Save card for later</span>
                 </div>
-                {addressMap.size > 0 && (
+                {addressList.length > 0 && (
                   <div className="billing">
                     <input
                       type="checkbox"

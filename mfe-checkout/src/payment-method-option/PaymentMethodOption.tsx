@@ -280,7 +280,6 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
         <CardInformation
           paymentMethod={paymentMethod}
           address={paymentAddress}
-          addresses={addresses}
           isPaymentValidated={isPaymentValidated}
           updatePaymentValidationStatus={updatePaymentValidationStatus}
           shopperId={shopperId}
