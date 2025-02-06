@@ -45,21 +45,16 @@ export const addShoppersPaymentMethod = async (
   shopperId: string,
   walletData: any
 ): Promise<IPaymentMethod[]> => {
-  try {
-    const response = await axiosInstance(
-      `${GET_API_ENDPOINT_BASE_URL_ONLY()}/shopper-wallets/v1/Shopper/${shopperId}/Wallet?api_key=${GET_API_KEY()}`
-    ).post("", walletData, {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-    });
+  const response = await axiosInstance(
+    `${GET_API_ENDPOINT_BASE_URL_ONLY()}/shopper-wallets/v1/Shopper/${shopperId}/Wallet?api_key=${GET_API_KEY()}`
+  ).post("", walletData, {
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+  });
 
-    // console.log("Card added successfully:", response.data);
-    return response.data;
-  } catch (error) {
-    console.error("Unable to add method to wallet", error);
-  }
-  return [];
+  // console.log("Card added successfully:", response.data);
+  return response.data;
 };
 
 export const addTempPaymentMethod = async (
@@ -101,18 +96,14 @@ export const updateShopperDetails = async (
   id: number,
   walletData: any
 ) => {
-  try {
-    const response = await axiosInstance(
-      `${GET_API_ENDPOINT_BASE_URL_ONLY()}/shopper-wallets/v1/Shopper/${shopperId}/Wallet/${id}?api_key=${GET_API_KEY()}`
-    ).put("", walletData, {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-    });
-    return response;
-  } catch (error) {
-    console.error("Unable to update payment details", error);
-  }
+  const response = await axiosInstance(
+    `${GET_API_ENDPOINT_BASE_URL_ONLY()}/shopper-wallets/v1/Shopper/${shopperId}/Wallet/${id}?api_key=${GET_API_KEY()}`
+  ).put("", walletData, {
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+  });
+  return response;
 };
 
 export const generateCardToken = async (ccNumber: string) => {
