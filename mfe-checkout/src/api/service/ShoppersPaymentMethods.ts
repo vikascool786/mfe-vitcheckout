@@ -51,7 +51,7 @@ export const addShoppersPaymentMethod = async (
 export const addTempPaymentMethod = async (
   shopperId: string,
   walletData: any
-): Promise<IPaymentMethod | string> => {
+): Promise<IPaymentMethod> => {
   const response = await axiosInstance(
     `${GET_API_ENDPOINT_BASE_URL_ONLY()}/shoppingcart-checkouts/v1/Checkout/TempCC/${shopperId}?api_key=${GET_API_KEY()}`
   ).post("", walletData, {
