@@ -252,6 +252,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
       preferred: true,
       type: typeId,
       cvv: values.cvv,
+      defaultaddr: true,
     };
 
     if (sameShippingAddress) {
@@ -388,8 +389,11 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
 
   const handleCancelNewCard = (values: IPaymentMethod) => {
     const isCancelWhileAddingNewCard = values.id === 0;
+    console.log("Cancelling new card");
 
     if (!isCancelWhileAddingNewCard) return;
+
+    console.log("Cancelling new card 2");
 
     setTimeout(() => {
       setPaymentMethods(
@@ -401,10 +405,13 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                   ...paymentOption,
                   isSelected: true,
                 }
-              : paymentOption
+              : {
+                  ...paymentOption,
+                  isSelected: false,
+                }
           )
       );
-    }, 100);
+    }, 300);
   };
 
   const childRef = useRef<AddressHandler>(null);

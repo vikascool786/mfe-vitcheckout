@@ -417,11 +417,11 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         if (po.paymentMethod.preferred) {
           return {
             ...po,
-            isSelected: true,
+            isSelected: false,
             isEditing: false,
           };
         }
-        return { ...po, isEditing: false };
+        return { ...po, isEditing: false, isSelected: false };
       });
 
     setTimeout(() => {
