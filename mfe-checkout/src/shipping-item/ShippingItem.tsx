@@ -69,21 +69,18 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
           <div className="item-info">
             <div className="item-name">{decodeHtmlEntities(caption)}</div>
             <div>{catalogName}</div>
-            {totals.cashBack > 0 && (
+
               <div className="item-cashback">
+              {totals?.cashBack > 0 && (<>
                 <div className="item-cashback-value">
                   + {totals?.cashBackStr}
                 </div>
                 <Cashback viewBox="0 -2 24 22" />
-                Cashback
-                {bv > 0 ||
-                  (ibv > 0 &&
-                    ` / {isMA === 1 ? ${formattedNumber(
-                      bv
-                    )} BV : ${formattedNumber(ibv)} IBV}`)}
+                Cashback / </>)} {bv > 0 && isMA === 1 ? `${formattedNumber(bv)} BV` : ibv > 0 && `${formattedNumber(ibv)} IBV`}
               </div>
-            )}
-            <div>{totals?.priceStr}</div>
+
+            
+            <div className="shippingItem-priceStr">{totals?.priceStr}</div>
             {(item.autoshipFreq > 0 || item.autoShipId) &&
               (portalData?.autoShipDiscount > 0 && isMaProduct ? (
                 <div className="item-autoship">
