@@ -22,6 +22,8 @@ import {
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import "./PaymentMethodOption.scss";
 import { ThirdPartyLinkOff } from "./ThirdPartyLinkOff";
+import { useShopperEWalletAddresses } from "../api/service/ShopperEWallet";
+import { Address } from "../interfaces/Address";
 
 export interface IPaymentOptionProps {
   handleCancelNewCard: () => void;
@@ -45,6 +47,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   const [order, setOrder] = useAtom(orderAtom);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [paymentMethods, setPaymentMethods] = useAtom(paymentMethodsAtom);
+  const { addresses } = useShopperEWalletAddresses(shopperId || "");
 
   const {
     paymentMethod,
@@ -79,15 +82,15 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     const updatedPaymentOptions = paymentMethods.map((method) =>
       method.paymentMethod.id === paymentOption.paymentMethod.id
         ? {
-          ...method,
-          isSelected: true,
-          isVisible: true,
-        }
+            ...method,
+            isSelected: true,
+            isVisible: true,
+          }
         : {
-          ...method,
-          isSelected: false,
-          isEditing: false,
-        }
+            ...method,
+            isSelected: false,
+            isEditing: false,
+          }
     );
 
     const selectedPayment = updatedPaymentOptions.find((pm) => pm.isSelected);
@@ -167,15 +170,15 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
         const updatedPaymentOptions = paymentMethods.map((method) =>
           method.paymentMethod.id === paymentOption.paymentMethod.id
             ? {
-              ...method,
-              isSelected: true,
-              isVisible: true,
-              isPaymentValidated: true,
-            }
+                ...method,
+                isSelected: true,
+                isVisible: true,
+                isPaymentValidated: true,
+              }
             : {
-              ...method,
-              isSelected: false,
-            }
+                ...method,
+                isSelected: false,
+              }
         );
 
         setPaymentMethods(updatedPaymentOptions);
@@ -277,6 +280,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
         <CardInformation
           paymentMethod={paymentMethod}
           address={paymentAddress}
+          addresses={addresses}
           isPaymentValidated={isPaymentValidated}
           updatePaymentValidationStatus={updatePaymentValidationStatus}
           shopperId={shopperId}

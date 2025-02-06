@@ -3,7 +3,8 @@ import { API_KEY } from "../../utils/ApiConstants";
 import {
   GET_API_ENDPOINT_BASE_URL_ONLY,
   GET_API_KEY,
-  GET_TOKEN_SERVICE, GET_TOKEN_SERVICE_SHOP,
+  GET_TOKEN_SERVICE,
+  GET_TOKEN_SERVICE_SHOP,
 } from "../../utils/urlResolver";
 import axiosInstance from "../axios";
 
@@ -24,6 +25,19 @@ export const fetchShoppersPaymentMethods = async (
       error
     );
     throw error;
+  }
+};
+
+export const fetchShoppersPaymentAddresses = async (
+  shopperId: string
+): Promise<any> => {
+  try {
+    const response = await axiosInstance(
+      `${GET_API_ENDPOINT_BASE_URL_ONLY()}/shopper-wallets/v1/Shopper/${shopperId}/Addresses?api_key=${GET_API_KEY()}`
+    ).get("");
+    return response.data;
+  } catch (error) {
+    console.error("Unable to fetch payment addresses", error);
   }
 };
 

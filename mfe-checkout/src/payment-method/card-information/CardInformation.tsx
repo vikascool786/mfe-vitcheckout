@@ -36,6 +36,7 @@ import { getTypeIdByAltName } from "../PaymentType";
 
 interface ICardInformationProps {
   paymentMethod: IPaymentMethod;
+  addresses: Address[];
   isPaymentValidated: boolean;
   address: Address;
   shopperId: string;
@@ -58,6 +59,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   isPaymentValidated,
   paymentMethod,
   onAddNewCard,
+  addresses,
   shopperId,
   address,
   onCancel,
@@ -68,21 +70,26 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
     paymentMethod.id !== 0
   );
 
-  const [saveCardToWallet, setSaveCardToWallet] = useState(false);
+  const addressMap = new Map(Object.entries(addresses));
+
+  const addressList = useAtomValue(addressAtom);
+
+  const [saveCardToWallet, setSaveCardToWallet] = useState(true);
 
   const [cardError, setCardError] = useState<string | null>(null);
   const { createShopperAddressBookEntry } = useCreateShopperAddressBookEntry();
 
   const [paymentMethods, setPaymentMethods] = useAtom(paymentMethodsAtom);
-  const addressList = useAtomValue(addressAtom);
   const [order, setOrder] = useAtom(orderAtom);
 
-  const shippingAddress = addressList.find((add) => add.isShip);
+  const shippingAddress = addressList.find((address) => address.isShip);
   const [sameShippingAddress, setSameShippingAddress] = useState<boolean>(
     !!shippingAddress?.id &&
       shippingAddress.id !== 0 &&
       shippingAddress.id === address.id
   );
+
+  console.log(shippingAddress, addressMap);
 
   const validationSchema = Yup.object().shape({
     // Card Information Validation
@@ -216,6 +223,8 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
             });
             const orderResponse = await buildOrder(updatedOrder);
             setOrder(orderResponse.response.success.data);
+            updatePaymentValidationStatus(values.id as number);
+            onCancel();
           }
 
           // Update payment methods
@@ -246,8 +255,12 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
 
           onAddNewCard(finalPaymentMethods as IPaymentOption[]);
           updatePaymentValidationStatus(values.id as number);
-          onCancel();
+
           setLoading(false);
+
+          setTimeout(() => {
+            onCancel();
+          }, 1000);
           return;
         }
 
@@ -505,7 +518,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                   />
                   <span>Save card for later</span>
                 </div>
-                {addressList.length > 0 && (
+                {addressMap.size > 0 && (
                   <div className="billing">
                     <input
                       type="checkbox"
