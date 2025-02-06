@@ -659,12 +659,6 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           );
         }}
       </Formik>
-      <AddressVerificationContainer
-        ref={childRef}
-        showAvs={showAVS}
-        onClick={handleEditClick}
-        onSelectAddress={handleUseSelectedAddress}
-      />
     </>
   );
 };
