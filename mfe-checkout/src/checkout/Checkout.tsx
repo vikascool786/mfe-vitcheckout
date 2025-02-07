@@ -224,6 +224,8 @@ const Checkout: React.FC<ICheckout> = ({
           // Use POST request for new address (create)
           const updatedAddressList: Address[] =
             await createShopperAddressBookEntry(shopperId, addressParams);
+          //update address atom with new addresslist
+          setShopperAddressBook(updatedAddressList);
           const newAddedAddress = updatedAddressList.find(
             (address) => address.isShip
           );
