@@ -76,7 +76,7 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
                   + {totals?.cashBackStr}
                 </div>
                 <Cashback viewBox="0 -2 24 22" />
-                Cashback / </>)} {bv > 0 && isMA === 1 ? `${formattedNumber(bv)} BV` : ibv > 0 && `${formattedNumber(ibv)} IBV`}
+                Cashback  </>)} {bv > 0 && isMA === 1 ? ` ${formattedNumber(bv)} BV` : ibv > 0 && ` ${formattedNumber(ibv)} IBV`}
               </div>
 
             
