@@ -394,14 +394,14 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     const updatedPaymentMethods = paymentMethods.map((method) =>
       method.paymentMethod.id === paymentId
         ? {
-          ...method,
-          isEditing: !method.isEditing, // Toggle editing state for the selected payment method
-        }
+            ...method,
+            isEditing: !method.isEditing, // Toggle editing state for the selected payment method
+          }
         : {
-          ...method,
-          isEditing: false,
-          isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
-        }
+            ...method,
+            isEditing: false,
+            isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
+          }
     );
 
     setTimeout(() => {
@@ -411,22 +411,24 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
 
   const handleCancelNewCard = () => {
     setShowNewCard(false);
-    const updatedPayments = paymentMethods
+    let updatedPayments = paymentMethods
       .filter((pm) => pm.paymentMethod.id !== 0)
       .map((po) => {
-        if (po.paymentMethod.preferred) {
-          return {
-            ...po,
-            isSelected: false,
-            isEditing: false,
-          };
-        }
         return { ...po, isEditing: false, isSelected: false };
       });
 
-    setTimeout(() => {
+    const selectedPayment = updatedPayments.find((pm) => pm.isSelected);
+
+    if (selectedPayment) {
       setPaymentMethods(updatedPayments);
-    }, 300);
+      return;
+    }
+
+    updatedPayments = paymentMethods.map((po, index) => {
+      return { ...po, isSelected: index === 0, isEditing: false };
+    });
+
+    setTimeout(() => setPaymentMethods(updatedPayments), 300);
   };
 
   const onAddNewCards = (payments: IPaymentOption[]) => {
