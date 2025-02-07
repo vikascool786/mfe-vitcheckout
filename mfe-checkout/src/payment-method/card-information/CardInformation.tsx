@@ -80,14 +80,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
 
   const shippingAddress = addressList.find((address) => address.isShip);
   const [sameShippingAddress, setSameShippingAddress] = useState<boolean>(
-    () => {
-      if (!shippingAddress || !address) return false;
-      return (
-        !!shippingAddress.id &&
-        shippingAddress.id !== 0 &&
-        shippingAddress.id === address.id
-      );
-    }
+    paymentMethod.id < 1
   );
 
   const validationSchema = Yup.object().shape({
@@ -537,7 +530,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                   />
                   <span>Save card for later</span>
                 </div>
-                {addressList.length > 0 && (
+                {addressList.length > 0 && paymentMethod.id < 1 && (
                   <div className="billing">
                     <input
                       type="checkbox"

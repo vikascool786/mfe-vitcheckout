@@ -220,6 +220,20 @@ const Checkout: React.FC<ICheckout> = ({
             validatedAddress.id,
             addressParams
           );
+
+          if (order) {
+            const newOrder = await buildOrder(
+              generateChangeStoreResponse({
+                ...order,
+                shippingAddress: {
+                  ...order.shippingAddress,
+                  id: validatedAddress.id,
+                },
+              })
+            );
+
+            setOrder(newOrder.response.success.data);
+          }
         } else {
           // Use POST request for new address (create)
           const updatedAddressList: Address[] =
@@ -283,7 +297,7 @@ const Checkout: React.FC<ICheckout> = ({
     setShowShipAddressForm(!showShipAddressForm);
     setShippingAddress(
       shopperAddressBook.find((address) => address.isShip === 1) ||
-      shippingAddress
+        shippingAddress
     );
     setIsExpanded(!isExpanded);
   };
@@ -296,6 +310,27 @@ const Checkout: React.FC<ICheckout> = ({
           ? { ...address, isShip: 1 }
           : { ...address, isShip: 0 } // Reset other addresses' `isShip` to 0
     );
+
+    const updatedAddress = updatedSelectedAddress.find((add) => add.id === id);
+
+    if (childRef.current && updatedAddress) {
+      const isValidAddress = await childRef.current.verifyAddress({
+        ...updatedAddress,
+        isShip: 0,
+      });
+      const validatedAddress = {
+        ...updatedAddress,
+        isShip: 0,
+        defaultaddr: true,
+        country: "USA",
+      };
+
+      const addressParams = new URLSearchParams(
+        Object.entries(validatedAddress as Address)
+      ).toString();
+
+      await updateShopperAddressBookEntry(shopperId, id, addressParams);
+    }
 
     setShippingAddress(
       updatedSelectedAddress.find((p) => p.isShip)
