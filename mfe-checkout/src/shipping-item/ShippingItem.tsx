@@ -47,7 +47,7 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
 }) => {
   const { image, caption, catalogName, totals, quantity } = item;
   const { catalogId, isMA } = storeDetail || {};
-  const { bv, ibv } = total;
+  const { bv, ibv } = item.totals;
 
   const isGiftCard = caption.toLowerCase().includes("email delivery");
 
