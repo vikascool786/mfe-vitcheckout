@@ -121,22 +121,30 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           },
         }),
         order.id
-      ).then((response) => {
-        if (response.response.success?.notifications) {
+      )
+        .then((response) => {
+          if (response.response.success?.notifications) {
+            setgcState({
+              gcNum: gcState.gcNum,
+              gcPin: gcState.gcPin,
+              gcError: response.response.success?.notifications[0]
+                ?.reason as string,
+            });
+            console.warn(response.response.success.notifications);
+            return;
+          }
+
+          if (response) {
+            setOrder(response.response.success.data);
+          }
+        })
+        .catch(() => {
           setgcState({
             gcNum: gcState.gcNum,
             gcPin: gcState.gcPin,
-            gcError: response.response.success?.notifications[0]
-              ?.reason as string,
+            gcError: "An unexpected error occurred while adding the gift card.",
           });
-          console.warn(response.response.success.notifications);
-          return;
-        }
-
-        if (response) {
-          setOrder(response.response.success.data);
-        }
-      });
+        });
     }
   };
 
@@ -252,7 +260,6 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                   <FormField
                     value={gcState.gcPin}
                     onChange={handleGcPinChange}
-                    errorMessage={gcState.gcError}
                   />
                 </div>
               </div>
@@ -281,8 +288,9 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           if (!store.totals) return null;
           return (
             <div
-              className={`order-charges-table ${isFirst ? "order-charges-table-first" : ""
-                } ${isLast ? "order-charges-table-last" : ""}`}
+              className={`order-charges-table ${
+                isFirst ? "order-charges-table-first" : ""
+              } ${isLast ? "order-charges-table-last" : ""}`}
               key={store.id || index} // Add a key for the mapped elements
             >
               <div className="shipping-catolog-name">
