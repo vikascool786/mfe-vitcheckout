@@ -27,6 +27,8 @@ interface ICouponState {
 interface IGCState {
   gcNum: string;
   gcPin: string;
+  gcApplied?: boolean;
+  gcVisible?: boolean;
   gcError: string;
 }
 
@@ -40,15 +42,15 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
     coupon: "",
     couponError: "",
   });
-  const [showApplyGiftCard, setShowApplyGiftCard] = useState(false);
 
   const [gcState, setgcState] = useState<IGCState>({
-    gcNum: "",
-    gcPin: "",
+    gcNum: order?.userOptions.gcNum ? order.userOptions.gcNum[0] : "",
+    gcPin: order?.userOptions.gcPin ? order.userOptions.gcPin[0] : "",
     gcError: "",
+    gcVisible: order?.userOptions?.gcNum[0] ? true : false,
+    gcApplied: order?.userOptions?.gcNum[0] ? true : false,
   });
 
-  // Handle input text change for coupon
   // Handle input text change for coupon
   const handleCouponTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
@@ -78,8 +80,13 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
     }));
   };
 
+  // Toggle gift card visibility and reset gcApplied when hiding
   const handleApplyGiftCard = () => {
-    setShowApplyGiftCard(!showApplyGiftCard);
+    setgcState((prevState) => ({
+      ...prevState,
+      gcVisible: !prevState.gcVisible,
+      gcApplied: !prevState.gcVisible ? false : prevState.gcApplied, // Reset gcApplied when hiding
+    }));
   };
 
   // Remove coupon from the list and update order.userOptions.coupons
@@ -109,7 +116,40 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
   };
 
   // Add gift card to the order
-  const handleAddGiftCard = () => {
+  const handleAddGiftCard = (isGCApplied: boolean) => {
+    if (order && isGCApplied) {
+      buildOrder(
+        generateChangeStoreResponse({
+          ...order,
+          userOptions: {
+            ...order.userOptions,
+            gcPin: [],
+            gcNum: [],
+          },
+        })
+      )
+        .then((response) => {
+          if (response) {
+            setgcState({
+              gcNum: "",
+              gcPin: "",
+              gcError: "",
+              gcApplied: false,
+              gcVisible: false,
+            });
+            setOrder(response.response.success.data);
+          }
+        })
+        .catch(() => {
+          setgcState({
+            ...gcState,
+            gcError:
+              "An unexpected error occurred while removing the gift card.",
+          });
+        });
+      return;
+    }
+
     if (order?.userOptions && gcState.gcNum.trim() && gcState.gcPin.trim()) {
       changeOrder(
         generateChangeStoreResponse({
@@ -125,8 +165,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         .then((response) => {
           if (response.response.success?.notifications) {
             setgcState({
-              gcNum: gcState.gcNum,
-              gcPin: gcState.gcPin,
+              ...gcState,
               gcError: response.response.success?.notifications[0]
                 ?.reason as string,
             });
@@ -135,13 +174,18 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           }
 
           if (response) {
+            setgcState({
+              ...gcState,
+              gcError: "",
+              gcApplied: true,
+              gcVisible: true,
+            });
             setOrder(response.response.success.data);
           }
         })
         .catch(() => {
           setgcState({
-            gcNum: gcState.gcNum,
-            gcPin: gcState.gcPin,
+            ...gcState,
             gcError: "An unexpected error occurred while adding the gift card.",
           });
         });
@@ -242,7 +286,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               </div>
             )}
 
-          {showApplyGiftCard && (
+          {gcState.gcVisible && (
             <div className="gift-card-wrapper">
               <div className="gift-card-wrapper-fields">
                 <div className="gift-card-wrapper-field-1">
@@ -265,32 +309,35 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               </div>
               <div className="gift-card-apply">
                 <Button
-                  label="Apply"
+                  label={!!gcState.gcApplied ? "Remove" : "Apply"}
                   btnType="secondary"
-                  onClick={handleAddGiftCard}
+                  onClick={() => handleAddGiftCard(!!gcState.gcApplied)}
                 />
               </div>
             </div>
           )}
-          <div
-            className="order-sub-text underlined"
-            onClick={handleApplyGiftCard}
-          >
-            {showApplyGiftCard ? "Hide gift card" : "Apply gift card"}
-          </div>
+          {!gcState.gcApplied && (
+            <div
+              className="order-sub-text underlined"
+              onClick={handleApplyGiftCard}
+            >
+              {gcState.gcVisible ? "Hide Gift Card" : "Apply Gift Card"}
+            </div>
+          )}
         </>
       )}
 
       {storesTotals &&
         storesTotals.map((store, index) => {
           const isFirst = index === 0;
-          const isLast = index === storesTotals.length - 1; // Fix the condition for the last element
+          const isLast = index === storesTotals.length - 1;
           if (!store.totals) return null;
           return (
             <div
-              className={`order-charges-table ${isFirst ? "order-charges-table-first" : ""
-                } ${isLast ? "order-charges-table-last" : ""}`}
-              key={store.id || index} // Add a key for the mapped elements
+              className={`order-charges-table ${
+                isFirst ? "order-charges-table-first" : ""
+              } ${isLast ? "order-charges-table-last" : ""}`}
+              key={store.id || index}
             >
               <div className="shipping-catolog-name">
                 {getCatalogName(store)}

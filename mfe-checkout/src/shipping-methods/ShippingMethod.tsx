@@ -8,9 +8,10 @@ import { ShippingOptions } from "../shipping-options/ShippingOptions";
 import { loadingAtom, orderAtom } from "../store";
 import { getCatalogName } from "../utils/helpers/GetCatalog";
 import "./ShippingMethod.scss";
-import {portalApiData} from "../checkout/portalAtom";
+import { portalApiData } from "../checkout/portalAtom";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
-import {OrderStore} from "../interfaces/Order";
+import { OrderStore } from "../interfaces/Order";
+import { GET_SHOP_CART_URL } from "../utils/urlResolver";
 
 interface IShippingMethodProps {
   shopperID: string;
@@ -46,13 +47,19 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
       stores: updatedStores,
     });
 
+    //GET_SHOP_CART_URL
     removeProductFromCart(orders.id, itemKey).then(() => {
       buildOrder(
         generateChangeStoreResponse({
           ...orders,
           stores: updatedStores,
         })
-      ).then((response) => setOrder(response.response.success.data));
+      ).then((response) => {
+        if (response.response.errors) {
+          window.location.href = GET_SHOP_CART_URL();
+        }
+        setOrder(response.response.success.data);
+      });
     });
     setLoading(false);
   };

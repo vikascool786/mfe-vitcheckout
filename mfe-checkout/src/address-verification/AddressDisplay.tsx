@@ -22,7 +22,7 @@ export const AddressDisplay: React.FC<AppProps> = ({
     return (
       <div className="add-display">
         {address.first} {address.last}, {address.address1}
-        {address.address2}, {address.city}, {address.state} {address.zip}
+        {", " + address.address2}, {address.city}, {address.state} {address.zip}
       </div>
     );
   }

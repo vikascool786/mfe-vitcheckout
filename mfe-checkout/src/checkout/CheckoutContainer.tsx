@@ -22,6 +22,7 @@ import { handleSezzleCheckout } from "../utils/helpers/SezzleHelper";
 import {
   GET_API_ENDPOINT_BASE_URL_ONLY,
   GET_API_KEY,
+  GET_SHOP_CART_URL,
 } from "../utils/urlResolver";
 import Checkout from "./Checkout";
 import { createAutoshipUrl } from "../api/ajaxaction/Autoship";
@@ -141,17 +142,17 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     () =>
       paymentMethods
         ? (paymentMethods?.find(
-          (payment) => payment?.preferred
-        ) as IPaymentMethod)
+            (payment) => payment?.preferred
+          ) as IPaymentMethod)
         : ({} as IPaymentMethod),
     [paymentMethods]
   );
 
   const orderHasNewAutoship = (): boolean => {
-    if(orderData){
+    if (orderData) {
       const newAutoshipItems = Object.values(orderData.stores)
-          .flatMap(store => store.items)
-          .filter(item => item.autoshipFreq > 0);
+        .flatMap((store) => store.items)
+        .filter((item) => item.autoshipFreq > 0);
       return newAutoshipItems.length > 0;
     }
     return false;
@@ -175,15 +176,16 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
         if (isSuccessful) {
           const orderId = response.data.response.success.data.orderId;
           //if order needs a new autoship created
-          if(orderHasNewAutoship()){
-            createAutoshipUrl(shopperId, orderId).then((response: any) => {
-              redirectToOrderConfirmation(orderId);
-            })
-            .catch((error) => {
-              console.error(`Error creating autoship from order: ${error}`);
-              redirectToOrderConfirmation(orderId);
-            })
-          } else{
+          if (orderHasNewAutoship()) {
+            createAutoshipUrl(shopperId, orderId)
+              .then((response: any) => {
+                redirectToOrderConfirmation(orderId);
+              })
+              .catch((error) => {
+                console.error(`Error creating autoship from order: ${error}`);
+                redirectToOrderConfirmation(orderId);
+              });
+          } else {
             redirectToOrderConfirmation(orderId);
           }
         } else {
@@ -195,8 +197,11 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
 
           const errorMessage = response.data.response.errors.message;
           const errorCode = response.data.response.errors.code;
-          const developerMessage = response.data.response.errors.developer_message;
-          setOrderErrorMessage(`Detail: ${errorMessage} ${developerMessage} (code: ${errorCode})`);
+          const developerMessage =
+            response.data.response.errors.developer_message;
+          setOrderErrorMessage(
+            `Detail: ${errorMessage} ${developerMessage} (code: ${errorCode})`
+          );
         }
       })
       .catch((error) => {
@@ -225,6 +230,12 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
 
         const orderResponse = buildOrder(buildOrderPayload);
         orderResponse.then((response) => {
+          if (
+            response.response?.errors?.message ===
+            "There are no items in your cart."
+          ) {
+            window.location.href = GET_SHOP_CART_URL();
+          }
           setOrderData(response?.response.success?.data || null);
         });
       } else {
