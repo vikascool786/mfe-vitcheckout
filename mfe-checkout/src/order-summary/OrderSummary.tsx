@@ -13,6 +13,7 @@ import { getCatalogName } from "../utils/helpers/GetCatalog";
 import { ApplyCashback } from "./apply-cashback/ApplyCashback";
 import "./OrderSummary.scss";
 import { formattedNumber } from "../utils/OrderUtils";
+import { Spinner } from "../component/Spinner/Spinner";
 
 interface IOrderSummary {
   pcid: string;
@@ -50,6 +51,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
     gcVisible: order?.userOptions?.gcNum[0] ? true : false,
     gcApplied: order?.userOptions?.gcNum[0] ? true : false,
   });
+
+  const [gcLoading, setGCLoading] = useState(false);
 
   // Handle input text change for coupon
   const handleCouponTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -117,6 +120,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
 
   // Add gift card to the order
   const handleAddGiftCard = (isGCApplied: boolean) => {
+    setGCLoading(true);
     if (order && isGCApplied) {
       buildOrder(
         generateChangeStoreResponse({
@@ -146,6 +150,9 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
             gcError:
               "An unexpected error occurred while removing the gift card.",
           });
+        })
+        .finally(() => {
+          setGCLoading(false);
         });
       return;
     }
@@ -188,6 +195,9 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
             ...gcState,
             gcError: "An unexpected error occurred while adding the gift card.",
           });
+        })
+        .finally(() => {
+          setGCLoading(false);
         });
     }
   };
@@ -248,169 +258,174 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
 
   return (
     <div className="order-summary-container">
-      <FormHeading title="Order Summary" />
-      {!hideCashback && (
-        <>
-          {!loading &&
-            !error &&
-            eWalletData &&
-            parseInt(eWalletData.totalCoaCBAvail) > 0 && (
-              <ApplyCashback cashbackData={eWalletData} />
-            )}
-          <div className="order-redeem-coupon-text">Redeem Coupon</div>
-          <div className="order-summary-coupon-container">
-            <div className="order-input-container">
-              <FormField
-                value={coupon.coupon}
-                onChange={handleCouponTextChange}
-                errorMessage={coupon.couponError}
-              />
-            </div>
-            <div className="order-apply-container">
-              <Button
-                label="Apply"
-                btnType="secondary"
-                onClick={handleAddCoupon}
-              />
-            </div>
-          </div>
-          {order?.userOptions.coupons &&
-            order?.userOptions.coupons?.length > 0 && (
-              <div className="order-applied-coupons">
-                {order?.userOptions.coupons.map((appliedCoupon, index) => (
-                  <li key={index} className="order-applied-coupon">
-                    {appliedCoupon}
-                    <Close onClick={() => handleRemoveCoupon(appliedCoupon)} />
-                  </li>
-                ))}
+      {gcLoading && <Spinner />}
+      <>
+        <FormHeading title="Order Summary" />
+        {!hideCashback && (
+          <>
+            {!loading &&
+              !error &&
+              eWalletData &&
+              parseInt(eWalletData.totalCoaCBAvail) > 0 && (
+                <ApplyCashback cashbackData={eWalletData} />
+              )}
+            <div className="order-redeem-coupon-text">Redeem Coupon</div>
+            <div className="order-summary-coupon-container">
+              <div className="order-input-container">
+                <FormField
+                  value={coupon.coupon}
+                  onChange={handleCouponTextChange}
+                  errorMessage={coupon.couponError}
+                />
               </div>
-            )}
-
-          {gcState.gcVisible && (
-            <div className="gift-card-wrapper">
-              <div className="gift-card-wrapper-fields">
-                <div className="gift-card-wrapper-field-1">
-                  <div className="order-redeem-coupon-text">
-                    Gift Card Number
-                  </div>
-                  <FormField
-                    value={gcState.gcNum}
-                    onChange={handleGcNumChange}
-                    errorMessage={gcState.gcError}
-                  />
-                </div>
-                <div className="gift-card-wrapper-field-2">
-                  <div className="order-redeem-coupon-text">PIN</div>
-                  <FormField
-                    value={gcState.gcPin}
-                    onChange={handleGcPinChange}
-                  />
-                </div>
-              </div>
-              <div className="gift-card-apply">
+              <div className="order-apply-container">
                 <Button
-                  label={!!gcState.gcApplied ? "Remove" : "Apply"}
+                  label="Apply"
                   btnType="secondary"
-                  onClick={() => handleAddGiftCard(!!gcState.gcApplied)}
+                  onClick={handleAddCoupon}
                 />
               </div>
             </div>
-          )}
-          {!gcState.gcApplied && (
-            <div
-              className="order-sub-text underlined"
-              onClick={handleApplyGiftCard}
-            >
-              {gcState.gcVisible ? "Hide Gift Card" : "Apply Gift Card"}
-            </div>
-          )}
-        </>
-      )}
+            {order?.userOptions.coupons &&
+              order?.userOptions.coupons?.length > 0 && (
+                <div className="order-applied-coupons">
+                  {order?.userOptions.coupons.map((appliedCoupon, index) => (
+                    <li key={index} className="order-applied-coupon">
+                      {appliedCoupon}
+                      <Close
+                        onClick={() => handleRemoveCoupon(appliedCoupon)}
+                      />
+                    </li>
+                  ))}
+                </div>
+              )}
 
-      {storesTotals &&
-        storesTotals.map((store, index) => {
-          const isFirst = index === 0;
-          const isLast = index === storesTotals.length - 1;
-          if (!store.totals) return null;
-          return (
-            <div
-              className={`order-charges-table ${
-                isFirst ? "order-charges-table-first" : ""
-              } ${isLast ? "order-charges-table-last" : ""}`}
-              key={store.id || index}
-            >
-              <div className="shipping-catolog-name">
-                {getCatalogName(store)}
-              </div>
-              <div className="order-summary-row">
-                <div>Items Subtotal</div>
-                <div>{store?.totals?.priceStr}</div>
-              </div>
-              <div className="order-summary-row">
-                <div>Tax Total</div>
-                <div>{store?.totals?.taxStr}</div>
-              </div>
-
-              <div className="order-summary-row">
-                <div>Shipping</div>
-                <div>{store?.totals?.shippingStr}</div>
-              </div>
-            </div>
-          );
-        })}
-
-      {order?.userOptions?.applyEWallet && eWalletData?.totalCoaCBAvail && (
-        <div className="order-summary-row">
-          <div className="order-summary-row-bold">
-            VIFT <span className="order-summary-row-green">Cashback</span>
-          </div>
-          <div>${eWalletData.totalCoaCBAvail}</div>
-        </div>
-      )}
-
-      <div className="order-summary-total">
-        <div>Total Due</div>
-        <div>{order?.totals?.priceStr}</div>
-      </div>
-
-      {order?.totals?.cashBack && (
-        <>
-          <div className="order-summary-cashback-container">
-            <div className="order-cashback">
-              <Cashback />
-              VIFT Cashback earned in this order
-            </div>
-            <div>{`${order.totals.cashBackStr}`}</div>
-          </div>
-        </>
-      )}
-
-      {order?.stores && (
-        <div className="shipping-item-container">
-          {Object.entries(order?.stores)
-            .reverse()
-            .map(([key, store]) => {
-              if (store.totals.ibv > 0 || store.totals.bv > 0) {
-                return (
-                  store && (
-                    <div className="order-summary-cashback-container">
-                      <div className="order-cashback">
-                        {store?.store?.isMA === 1
-                          ? `BV earned in this order`
-                          : `IBV earned in this order`}
-                      </div>
-                      <div>
-                        {store?.store?.isMA === 1
-                          ? formattedNumber(store.totals.bv)
-                          : formattedNumber(store.totals.ibv)}
-                      </div>
+            {gcState.gcVisible && (
+              <div className="gift-card-wrapper">
+                <div className="gift-card-wrapper-fields">
+                  <div className="gift-card-wrapper-field-1">
+                    <div className="order-redeem-coupon-text">
+                      Gift Card Number
                     </div>
-                  )
-                );
-              }
-            })}
+                    <FormField
+                      value={gcState.gcNum}
+                      onChange={handleGcNumChange}
+                      errorMessage={gcState.gcError}
+                    />
+                  </div>
+                  <div className="gift-card-wrapper-field-2">
+                    <div className="order-redeem-coupon-text">PIN</div>
+                    <FormField
+                      value={gcState.gcPin}
+                      onChange={handleGcPinChange}
+                    />
+                  </div>
+                </div>
+                <div className="gift-card-apply">
+                  <Button
+                    label={!!gcState.gcApplied ? "Remove" : "Apply"}
+                    btnType="secondary"
+                    onClick={() => handleAddGiftCard(!!gcState.gcApplied)}
+                  />
+                </div>
+              </div>
+            )}
+            {!gcState.gcApplied && (
+              <div
+                className="order-sub-text underlined"
+                onClick={handleApplyGiftCard}
+              >
+                {gcState.gcVisible ? "Hide Gift Card" : "Apply Gift Card"}
+              </div>
+            )}
+          </>
+        )}
+
+        {storesTotals &&
+          storesTotals.map((store, index) => {
+            const isFirst = index === 0;
+            const isLast = index === storesTotals.length - 1;
+            if (!store.totals) return null;
+            return (
+              <div
+                className={`order-charges-table ${
+                  isFirst ? "order-charges-table-first" : ""
+                } ${isLast ? "order-charges-table-last" : ""}`}
+                key={store.id || index}
+              >
+                <div className="shipping-catolog-name">
+                  {getCatalogName(store)}
+                </div>
+                <div className="order-summary-row">
+                  <div>Items Subtotal</div>
+                  <div>{store?.totals?.priceStr}</div>
+                </div>
+                <div className="order-summary-row">
+                  <div>Tax Total</div>
+                  <div>{store?.totals?.taxStr}</div>
+                </div>
+
+                <div className="order-summary-row">
+                  <div>Shipping</div>
+                  <div>{store?.totals?.shippingStr}</div>
+                </div>
+              </div>
+            );
+          })}
+
+        {order?.userOptions?.applyEWallet && eWalletData?.totalCoaCBAvail && (
+          <div className="order-summary-row">
+            <div className="order-summary-row-bold">
+              VIFT <span className="order-summary-row-green">Cashback</span>
+            </div>
+            <div>${eWalletData.totalCoaCBAvail}</div>
+          </div>
+        )}
+
+        <div className="order-summary-total">
+          <div>Total Due</div>
+          <div>{order?.totals?.priceStr}</div>
         </div>
-      )}
+
+        {order?.totals?.cashBack && (
+          <>
+            <div className="order-summary-cashback-container">
+              <div className="order-cashback">
+                <Cashback />
+                VIFT Cashback earned in this order
+              </div>
+              <div>{`${order.totals.cashBackStr}`}</div>
+            </div>
+          </>
+        )}
+
+        {order?.stores && (
+          <div className="shipping-item-container">
+            {Object.entries(order?.stores)
+              .reverse()
+              .map(([key, store]) => {
+                if (store.totals.ibv > 0 || store.totals.bv > 0) {
+                  return (
+                    store && (
+                      <div className="order-summary-cashback-container">
+                        <div className="order-cashback">
+                          {store?.store?.isMA === 1
+                            ? `BV earned in this order`
+                            : `IBV earned in this order`}
+                        </div>
+                        <div>
+                          {store?.store?.isMA === 1
+                            ? formattedNumber(store.totals.bv)
+                            : formattedNumber(store.totals.ibv)}
+                        </div>
+                      </div>
+                    )
+                  );
+                }
+              })}
+          </div>
+        )}
+      </>
     </div>
   );
 };
