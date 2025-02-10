@@ -26,8 +26,8 @@ interface ICouponState {
 }
 
 interface IGCState {
-  gcNum: string;
-  gcPin: string;
+  gcNum?: string;
+  gcPin?: string;
   gcApplied?: boolean;
   gcVisible?: boolean;
   gcError: string;
@@ -48,8 +48,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
     gcNum: order?.userOptions.gcNum ? order.userOptions.gcNum[0] : "",
     gcPin: order?.userOptions.gcPin ? order.userOptions.gcPin[0] : "",
     gcError: "",
-    gcVisible: order?.userOptions?.gcNum[0] ? true : false,
-    gcApplied: order?.userOptions?.gcNum[0] ? true : false,
+    gcVisible: order?.userOptions.gcNum && order?.userOptions?.gcNum[0] ? true : false,
+    gcApplied: order?.userOptions.gcNum && order?.userOptions?.gcNum[0] ? true : false,
   });
 
   const [gcLoading, setGCLoading] = useState(false);
