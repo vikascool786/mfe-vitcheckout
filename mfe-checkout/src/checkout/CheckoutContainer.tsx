@@ -142,8 +142,8 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     () =>
       paymentMethods
         ? (paymentMethods?.find(
-            (payment) => payment?.preferred
-          ) as IPaymentMethod)
+          (payment) => payment?.preferred
+        ) as IPaymentMethod)
         : ({} as IPaymentMethod),
     [paymentMethods]
   );

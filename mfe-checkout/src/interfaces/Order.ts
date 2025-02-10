@@ -25,6 +25,7 @@ export interface OrderStore {
   store: StoreDetail;
   shippingSelections: ShippingSelection[];
   shippingMethod: string;
+  canConsolidate: boolean;
 }
 
 export interface Item {
@@ -39,6 +40,7 @@ export interface Item {
   option: any[];
   autoshipFreq: number;
   autoShipId?: number;
+  available?: string;
   totals: ITotal;
 }
 

@@ -297,7 +297,7 @@ const Checkout: React.FC<ICheckout> = ({
     setShowShipAddressForm(!showShipAddressForm);
     setShippingAddress(
       shopperAddressBook.find((address) => address.isShip === 1) ||
-        shippingAddress
+      shippingAddress
     );
     setIsExpanded(!isExpanded);
   };
@@ -414,7 +414,7 @@ const Checkout: React.FC<ICheckout> = ({
       .required("Zip code is required"),
     phone: Yup.string().required("Phone number is required"),
   });
-  
+
   return (
     <div>
       <form className="shipping-address-form">

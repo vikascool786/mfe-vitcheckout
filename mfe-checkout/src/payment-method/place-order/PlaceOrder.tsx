@@ -1,4 +1,4 @@
-import React, { memo, useState } from "react";
+import React, { memo, useEffect, useState } from "react";
 import "./PlaceOrder.scss";
 import { Button } from "../../component/Button/Button";
 import { CLICK2PAY, PAYPAL, SEZZLE } from "../PaymentType";
@@ -29,7 +29,8 @@ import { orderAtom, paymentMethodsAtom } from "../../store";
 import { Checkbox } from "../../component/Form/Checkbox/Checkbox";
 import { Formik } from "formik";
 import { placeOrderSchema } from "../../validation/placeOrderSchema";
-import {orderHasAutoshipItems} from "../../utils/OrderUtils";
+import { getOrderConsolidateData, orderHasAutoshipItems } from "../../utils/OrderUtils";
+import { OrderConsolidationData } from "../../interfaces/OrderConsolidationData";
 
 interface IPlaceOrder {
   confirmOrder: () => void;
@@ -66,6 +67,14 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   const paymentMethods = useAtomValue(paymentMethodsAtom);
 
   const selectedPaymentMethod = paymentMethods.find((pm) => pm.isSelected);
+
+  const [orderConsolidateData, setOrderConsolidateData] = useState<OrderConsolidationData>(getOrderConsolidateData(order || null));
+
+  useEffect(() => {
+    if(order){
+      setOrderConsolidateData(getOrderConsolidateData(order));
+    }
+  }, [order]);
 
   const { data: paypalToken, error } = useApi<{ tokenId: string }>(
     PAYPAL_TOKEN_URL(shopperId, order?.totals.price || 0),
@@ -165,6 +174,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
           window.open(url, "_self");
           break;
         default:
+          await handleFinalPlaceOrderUpdate();
           confirmOrder();
           break;
       }
@@ -172,6 +182,21 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
       console.error("Error placing order:", error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleFinalPlaceOrderUpdate = () => {
+    if (!order) return;
+    if (order) {
+      return buildOrder(
+          generateChangeStoreResponse({
+            ...order,
+            userOptions: {
+              ...order.userOptions,
+              trackingID: generateOrderTrackingId(trackingData),
+            },
+          })
+      );
     }
   };
 
@@ -325,6 +350,9 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                       </div>
                       <div className="error-msg__detail">{errorMessage}</div>
                     </div>
+                )}
+                {orderConsolidateData.oosConsolidate === 2 && (
+                    <div className='alert-message'>You will be charged when product(s) are available for shipment</div>
                 )}
                 {isLoading ? (
                     <div>Processing Order...</div>
