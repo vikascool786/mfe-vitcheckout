@@ -26,6 +26,7 @@ import {
 } from "../utils/urlResolver";
 import Checkout from "./Checkout";
 import { createAutoshipUrl } from "../api/ajaxaction/Autoship";
+import SessionTimeout from "./SessionTimeout";
 
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
@@ -334,6 +335,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
               />
             </div>
             <HeadHelmet />
+            <SessionTimeout />
           </div>
         </>
       )}

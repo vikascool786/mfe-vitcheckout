@@ -31,7 +31,9 @@ export const getOrderConsolidateData = (order: Order | null): OrderConsolidation
     if (!order) return orderConsolidateData;
     let availabilityDates: string[] = [];
     let canConsolidate = Object.values(order.stores).filter(store => store.canConsolidate);
-    orderConsolidateData.showOrderConsolidate = canConsolidate.length > 0;
+    const maProductCount = Object.values(order.stores).filter(entry => entry.store.isMA === 1)
+        .reduce((count, entry) => count + entry.items.length, 0);
+    orderConsolidateData.showOrderConsolidate = canConsolidate.length > 0 && maProductCount > 1;
     if(orderConsolidateData.showOrderConsolidate){
         Object.values(order.stores)
             .forEach(value => {

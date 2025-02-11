@@ -1,6 +1,5 @@
 import { Form, Formik } from "formik";
 import { useAtom, useSetAtom } from "jotai";
-import $ from "jquery";
 import "parsleyjs";
 import React, { useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
@@ -78,6 +77,16 @@ const Checkout: React.FC<ICheckout> = ({
   const [order, setOrder] = useAtom(orderAtom);
   const [customerData] = useAtom(customerApiData(pcid));
 
+  const filterValidShippingAddresses = (addresses: Address[]): Address[] => {
+    let filteredAddresses: Address[] = [];
+    addresses.forEach((address: Address) => {
+      if (address.hasAddress !== 0 && address.isBill !== 1 && address.isPrimary !== 1) {
+        filteredAddresses.push(address);
+      }
+    })
+    return filteredAddresses;
+  };
+
   const buildShoppersAddressBookFromResponse = (
     addressBookResponse: Address[]
   ) => {
@@ -103,11 +112,9 @@ const Checkout: React.FC<ICheckout> = ({
           setShippingAddress(newAddress);
         }
 
-        if (address.hasAddress !== 0) {
-          filteredAddresses.push(newAddress);
-        }
       }
     });
+    filteredAddresses = filterValidShippingAddresses(addresses);
 
     if (!hasPrimaryAddress) {
       setShippingAddress(filteredAddresses[0] ?? defaultAddress);
@@ -239,7 +246,7 @@ const Checkout: React.FC<ICheckout> = ({
           const updatedAddressList: Address[] =
             await createShopperAddressBookEntry(shopperId, addressParams);
           //update address atom with new addresslist
-          setShopperAddressBook(updatedAddressList);
+          setShopperAddressBook(filterValidShippingAddresses(updatedAddressList));
           const newAddedAddress = updatedAddressList.find(
             (address) => address.isShip
           );
