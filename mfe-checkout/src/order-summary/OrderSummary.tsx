@@ -14,6 +14,7 @@ import { ApplyCashback } from "./apply-cashback/ApplyCashback";
 import "./OrderSummary.scss";
 import { formattedNumber } from "../utils/OrderUtils";
 import { Spinner } from "../component/Spinner/Spinner";
+import { VIFT } from "../assets/svgs/VIFT";
 
 interface IOrderSummary {
   pcid: string;
@@ -386,12 +387,12 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           </div>
         )}
 
-        {order?.totals?.gcApplied && order?.totals?.gcApplied < 0 && (
+        {order?.totals?.gcApplied && order?.totals?.gcApplied < 0 ? (
           <div className="order-summary-row">
             <div className="order-summary-row-bold">Gift Card</div>
             <div>{order?.totals.gcAppliedStr}</div>
           </div>
-        )}
+        ) : null}
 
         <div className="order-summary-total">
           <div>Total Due</div>
@@ -409,6 +410,34 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
             </div>
           </>
         )}
+
+        {order?.totals?.extraCashBack && order?.totals?.extraCashBack > 0 ? (
+          <>
+            <div className="order-summary-cashback-container">
+              <div className="order-cashback">
+                <VIFT />
+                You earned 1% extra Cash using VIFT
+              </div>
+              <div>{`$${order.totals.extraCashBack}`}</div>
+            </div>
+          </>
+        ) : null}
+
+        {order?.totals?.cashBack &&
+        order?.totals?.extraCashBack &&
+        order?.totals?.extraCashBack > 0 ? (
+          <>
+            <div className="order-summary-cashback-container">
+              <div className="order-cashback">
+                <VIFT />
+                Total Cash added to your VIFT
+              </div>
+              <div>{`$${
+                order.totals.extraCashBack + order.totals.cashBack
+              }`}</div>
+            </div>
+          </>
+        ) : null}
 
         {order?.stores && (
           <div className="shipping-item-container">
