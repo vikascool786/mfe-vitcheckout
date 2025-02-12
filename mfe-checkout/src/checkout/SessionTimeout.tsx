@@ -25,10 +25,16 @@ const SessionTimeout = () => {
         window.addEventListener("mousemove", resetTimeout);
         window.addEventListener("keydown", resetTimeout);
 
+        // Mobile events
+        window.addEventListener("touchstart", resetTimeout);
+        window.addEventListener("scroll", resetTimeout);
+
         return () => {
             if (timeoutRef.current) clearTimeout(timeoutRef.current);
             window.removeEventListener("mousemove", resetTimeout);
             window.removeEventListener("keydown", resetTimeout);
+            window.removeEventListener("touchstart", resetTimeout);
+            window.removeEventListener("scroll", resetTimeout);
         };
     }, []);
 

@@ -42,10 +42,15 @@ export interface Item {
   autoShipId?: number;
   available?: string;
   totals: ITotal;
+  permutation?: Permutation;
 }
 
 export interface Image {
   url: string;
+}
+
+export interface Permutation {
+  inventoryStatus: string;
 }
 
 export interface ShippingSelection {

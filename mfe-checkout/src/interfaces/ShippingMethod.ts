@@ -48,6 +48,7 @@ export interface Item {
   option?: Array<{ optionStringValue: string; name: string; type: string }>;
   autoshipFreq: number;
   autoShipId?: number;
+  hasAutoShipDiscount: boolean;
   totals: {
     price: number;
     cashBack: number;

@@ -1,0 +1,36 @@
+.feedback-container {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    flex-direction: column-reverse;
+    gap: 5px;
+    margin-top: 170px;
+
+}
+
+.text-top-feedback {
+    font-family: Roboto;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 21.09px;
+    letter-spacing: 0%;
+    text-align: center;
+
+}
+
+.text-bottom-feedback {
+    font-family: Roboto;
+    font-weight: 300;
+    font-size: 14px;
+    line-height: 16.41px;
+    letter-spacing: 0%;
+    text-align: center;
+
+}
+
+.feedback-submit-button {
+    width: 352px;
+    height: 48px;
+    border-radius: 41px;
+    border-width: 1px;
+}

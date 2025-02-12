@@ -79,10 +79,10 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
                 Cashback  </>)} {bv > 0 && isMA === 1 ? ` ${formattedNumber(bv)} BV` : ibv > 0 && ` ${formattedNumber(ibv)} IBV`}
               </div>
 
-            
+
             <div className="shippingItem-priceStr">{totals?.priceStr}</div>
             {(item.autoshipFreq > 0 || item.autoShipId) &&
-              (portalData?.autoShipDiscount > 0 && isMaProduct ? (
+              (portalData?.autoShipDiscount > 0 && isMaProduct && item.hasAutoShipDiscount ? (
                 <div className="item-autoship">
                   <AutoshipIcon />
                   Saving {portalData.autoShipDiscount}% with Autoship

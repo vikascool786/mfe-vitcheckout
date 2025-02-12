@@ -28,7 +28,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
     showOrderConsolidate: false,
     availabilityDate: "",
     oosConsolidate: 3,
-    dateMap: new Map<string, string>(),
+    shipDateMessageMap: new Map<string, string>(),
   });
 
   if (!orders) {
@@ -155,7 +155,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
                       {
                         orderConsolidateData?.oosConsolidate === 2 ? (
                           key.includes("*OOS*") ? (
-                            <span>Backordered Shipping on {orderConsolidateData?.dateMap.get(key)}</span>
+                            <span>{orderConsolidateData?.shipDateMessageMap.get(key)}</span>
                           ) : (
                             <span>Shipping Now</span>
                           )

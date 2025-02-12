@@ -19,6 +19,7 @@ import ShippingMethod from "../shipping-methods/ShippingMethod";
 import { loadingAtom, orderAtom } from "../store";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import { handleSezzleCheckout } from "../utils/helpers/SezzleHelper";
+import Feedback from "./../Feedback/Feedback"
 import {
   GET_API_ENDPOINT_BASE_URL_ONLY,
   GET_API_KEY,
@@ -333,6 +334,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                   defaultPaymentMethod?.addressId ?? defaultAddress?.id ?? 0
                 }
               />
+              <Feedback/>
             </div>
             <HeadHelmet />
             <SessionTimeout />

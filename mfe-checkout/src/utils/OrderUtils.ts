@@ -26,7 +26,7 @@ export const getOrderConsolidateData = (order: Order | null): OrderConsolidation
     let orderConsolidateData = {showOrderConsolidate: false,
         availabilityDate: "",
         oosConsolidate: 3,
-        dateMap: new Map<string, string>()
+        shipDateMessageMap: new Map<string, string>()
     };
     if (!order) return orderConsolidateData;
     let availabilityDates: string[] = [];
@@ -54,7 +54,13 @@ export const getOrderConsolidateData = (order: Order | null): OrderConsolidation
     }
     if(orderConsolidateData.oosConsolidate === 2){
         Object.entries(order.stores).forEach(([key, value]) => {
-                orderConsolidateData.dateMap.set(key, value.items?.[0]?.available || "");
+                const dateAvailable = value.items?.[0]?.available || "";
+                const shipStatusMessage =  value.items?.[0]?.permutation?.inventoryStatus === "PRE_ORDER"
+                    ? "Preorder"
+                    : value.items?.[0]?.permutation?.inventoryStatus === "TEMPORARILY_OUT_OF_STOCK"
+                        ? "Backordered"
+                        : "";
+                orderConsolidateData.shipDateMessageMap.set(key, `${shipStatusMessage} Shipping on ${dateAvailable}`);
             })
     }
     return orderConsolidateData;
