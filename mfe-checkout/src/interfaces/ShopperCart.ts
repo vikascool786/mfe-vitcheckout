@@ -32,6 +32,8 @@ export interface ITotal {
   cashBackAppliedStr: string;
   walletAppliedStr: string;
   couponsStr: string;
+  gcApplied?: number;
+  gcAppliedStr?: string;
 }
 
 export interface IItem {

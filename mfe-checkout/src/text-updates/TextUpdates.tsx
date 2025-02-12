@@ -32,7 +32,6 @@ export const TextUpdates = () => {
     values: FormValues,
     { setSubmitting }: FormikHelpers<FormValues>
   ) => {
-    console.log("values", values);
     try {
       const response = await buildOrder({
         ...order,
@@ -55,8 +54,8 @@ export const TextUpdates = () => {
       <FormHeading title="Text Updates for this Order" />
       <Formik
         initialValues={{
-          phone: shippingAddress?.phone || "",
-          boxChecked: shippingAddress?.phone ? true : false,
+          phone: order?.userOptions.smsPhone || "",
+          boxChecked: order?.userOptions.smsPhone ? true : false,
         }}
         enableReinitialize={true}
         validationSchema={TextUpdatesSchema}
@@ -105,13 +104,9 @@ export const TextUpdates = () => {
                 name="boxChecked"
                 className="checkbox"
                 checked={values.boxChecked}
+                disabled={values.phone.length !== 10} // Disable if phone number is not 10 digits
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  console.log(values.phone);
-
-                  if (!values.phone) {
-                    setFieldValue("boxChecked", false);
-                    setFieldError("phone", "Mobile Phone is required");
-                  } else {
+                  if (values.phone.length === 10) {
                     handleChange(e);
                     handleSubmit();
                   }

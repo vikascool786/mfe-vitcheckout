@@ -48,8 +48,10 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
     gcNum: order?.userOptions.gcNum ? order.userOptions.gcNum[0] : "",
     gcPin: order?.userOptions.gcPin ? order.userOptions.gcPin[0] : "",
     gcError: "",
-    gcVisible: order?.userOptions.gcNum && order?.userOptions?.gcNum[0] ? true : false,
-    gcApplied: order?.userOptions.gcNum && order?.userOptions?.gcNum[0] ? true : false,
+    gcVisible:
+      order?.userOptions.gcNum && order?.userOptions?.gcNum[0] ? true : false,
+    gcApplied:
+      order?.userOptions.gcNum && order?.userOptions?.gcNum[0] ? true : false,
   });
 
   const [gcLoading, setGCLoading] = useState(false);
@@ -256,6 +258,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
       return store;
     });
 
+  console.log(order?.totals?.gcApplied);
+
   return (
     <div className="order-summary-container">
       {gcLoading && <Spinner />}
@@ -348,8 +352,9 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
             if (!store.totals) return null;
             return (
               <div
-                className={`order-charges-table ${isFirst ? "order-charges-table-first" : ""
-                  } ${isLast ? "order-charges-table-last" : ""}`}
+                className={`order-charges-table ${
+                  isFirst ? "order-charges-table-first" : ""
+                } ${isLast ? "order-charges-table-last" : ""}`}
                 key={store.id || index}
               >
                 <div className="shipping-catolog-name">
@@ -381,6 +386,13 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           </div>
         )}
 
+        {order?.totals?.gcApplied && order?.totals?.gcApplied < 0 && (
+          <div className="order-summary-row">
+            <div className="order-summary-row-bold">Gift Card</div>
+            <div>{order?.totals.gcAppliedStr}</div>
+          </div>
+        )}
+
         <div className="order-summary-total">
           <div>Total Due</div>
           <div>{order?.totals?.priceStr}</div>
@@ -400,28 +412,26 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
 
         {order?.stores && (
           <div className="shipping-item-container">
-            {Object.entries(order?.stores)
-              .reverse()
-              .map(([key, store]) => {
-                if (store.totals.ibv > 0 || store.totals.bv > 0) {
-                  return (
-                    store && (
-                      <div className="order-summary-cashback-container">
-                        <div className="order-cashback">
-                          {store?.store?.isMA === 1
-                            ? `BV earned in this order`
-                            : `IBV earned in this order`}
-                        </div>
-                        <div>
-                          {store?.store?.isMA === 1
-                            ? formattedNumber(store.totals.bv)
-                            : formattedNumber(store.totals.ibv)}
-                        </div>
+            {Object.entries(order?.stores).map(([key, store]) => {
+              if (store.totals.ibv > 0 || store.totals.bv > 0) {
+                return (
+                  store && (
+                    <div className="order-summary-cashback-container">
+                      <div className="order-cashback">
+                        {store?.store?.isMA === 1
+                          ? `BV earned in this order`
+                          : `IBV earned in this order`}
                       </div>
-                    )
-                  );
-                }
-              })}
+                      <div>
+                        {store?.store?.isMA === 1
+                          ? formattedNumber(store.totals.bv)
+                          : formattedNumber(store.totals.ibv)}
+                      </div>
+                    </div>
+                  )
+                );
+              }
+            })}
           </div>
         )}
       </>
