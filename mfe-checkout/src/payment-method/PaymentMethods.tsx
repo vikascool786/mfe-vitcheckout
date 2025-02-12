@@ -394,14 +394,14 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     const updatedPaymentMethods = paymentMethods.map((method) =>
       method.paymentMethod.id === paymentId
         ? {
-          ...method,
-          isEditing: !method.isEditing, // Toggle editing state for the selected payment method
-        }
+            ...method,
+            isEditing: !method.isEditing, // Toggle editing state for the selected payment method
+          }
         : {
-          ...method,
-          isEditing: false,
-          isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
-        }
+            ...method,
+            isEditing: false,
+            isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
+          }
     );
 
     setTimeout(() => {
@@ -425,10 +425,23 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     }
 
     updatedPayments = paymentMethods.map((po, index) => {
-      return { ...po, isSelected: index === 0, isEditing: false };
+      return {
+        ...po,
+        isSelected: po.paymentMethod.preferred || false,
+        isVisible:
+          po.paymentMethod.preferred ||
+          po.paymentMethod.accountName === PAYPAL.name ||
+          po.paymentMethod.accountName === SEZZLE.name ||
+          false,
+        isEditing: false,
+      };
     });
 
-    setTimeout(() => setPaymentMethods(updatedPayments), 300);
+    console.log("updatedPayments", updatedPayments);
+    setTimeout(() => {
+      setPaymentMethods(updatedPayments);
+      setIsExpanded(false);
+    }, 300);
   };
 
   const onAddNewCards = (payments: IPaymentOption[]) => {
