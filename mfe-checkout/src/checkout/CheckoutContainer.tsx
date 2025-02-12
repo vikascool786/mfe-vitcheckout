@@ -16,7 +16,7 @@ import { OrderSummary } from "../order-summary/OrderSummary";
 import PaymentMethod from "../payment-method/PaymentMethods";
 import PlaceOrder from "../payment-method/place-order/PlaceOrder";
 import ShippingMethod from "../shipping-methods/ShippingMethod";
-import { loadingAtom, orderAtom } from "../store";
+import {loadingAtom, orderAtom, orderNotificationsAtom} from "../store";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import { handleSezzleCheckout } from "../utils/helpers/SezzleHelper";
 import Feedback from "./../Feedback/Feedback"
@@ -28,6 +28,8 @@ import {
 import Checkout from "./Checkout";
 import { createAutoshipUrl } from "../api/ajaxaction/Autoship";
 import SessionTimeout from "./SessionTimeout";
+import { Notifications } from "./Notifications";
+import { getOrderNotifications } from "../utils/OrderUtils";
 
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
@@ -78,6 +80,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   const hasInitializedOrder = useRef(false); // Prevent multiple executions of updateOrder
   const [loadingOrderConfirmation, setLoadingOrderConfirmation] =
     useState(false);
+  const [orderNotifications, setOrderNotifications] = useAtom(orderNotificationsAtom);
 
   const addressUrl = `${apiDomain}/shopper-addressbooks/v1/${shopperId}/AddressBook?siteId=${siteId}&api_key=${apiKey}`;
   const paymentUrl = `${apiDomain}/shopper-wallets/v1/Shopper/${shopperId}/Wallet?api_key=${apiKey}`;
@@ -129,6 +132,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
       })
     );
     setOrderData(orderResponse?.response.success?.data || null);
+    setOrderNotifications(getOrderNotifications(orderResponse?.response.success));
   };
 
   const defaultAddress = useMemo(() => {
@@ -239,6 +243,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
             window.location.href = GET_SHOP_CART_URL();
           }
           setOrderData(response?.response.success?.data || null);
+          setOrderNotifications(getOrderNotifications(response?.response.success));
         });
       } else {
         if (!order.response.success.data) return;
@@ -252,6 +257,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
         }
 
         setOrderData(orderResponse);
+        setOrderNotifications(getOrderNotifications(order.response.success));
       }
     }
   }, [isFetchOrderComplete, defaultAddress, defaultPaymentMethod]);
@@ -299,6 +305,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
           <div className="container">
             <div className="checkout-container">
               <div className="left-column">
+                <Notifications notificationMessages={orderNotifications || []}/>
                 <Checkout
                   shopperId={shopperId}
                   siteId={siteId}

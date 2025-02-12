@@ -5,12 +5,12 @@ import { FormHeading } from "../component/Form/Heading/FormHeading";
 import withLoader from "../hoc/withLoader";
 import { ShippingItem } from "../shipping-item/ShippingItem";
 import { ShippingOptions } from "../shipping-options/ShippingOptions";
-import { loadingAtom, orderAtom } from "../store";
+import {loadingAtom, orderAtom, orderNotificationsAtom} from "../store";
 import { getCatalogName } from "../utils/helpers/GetCatalog";
 import "./ShippingMethod.scss";
 import { portalApiData } from "../checkout/portalAtom";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
-import { getOrderConsolidateData } from "../utils/OrderUtils";
+import {getOrderConsolidateData, getOrderNotifications} from "../utils/OrderUtils";
 import { RadioButton } from "../component/RadioButton/RadioButton";
 import { OrderConsolidationData } from "../interfaces/OrderConsolidationData";
 import { OrderStore } from "../interfaces/Order";
@@ -30,6 +30,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
     oosConsolidate: 3,
     shipDateMessageMap: new Map<string, string>(),
   });
+  const [orderNotifications, setOrderNotifications] = useAtom(orderNotificationsAtom);
 
   if (!orders) {
     return <p>Loading shipping methods...</p>;
@@ -67,6 +68,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
           window.location.href = GET_SHOP_CART_URL();
         }
         setOrder(response.response.success.data);
+        setOrderNotifications(getOrderNotifications(response.response.success));
       });
     });
     setLoading(false);

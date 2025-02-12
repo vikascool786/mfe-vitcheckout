@@ -53,3 +53,5 @@ export const paymentMethodsAtom = atom<IPaymentOption[]>(initialPaymentMethods);
 export const OrderStore = createStore();
 
 export const loadingAtom = atom<boolean>(false);
+
+export const orderNotificationsAtom = atom<string[]>();

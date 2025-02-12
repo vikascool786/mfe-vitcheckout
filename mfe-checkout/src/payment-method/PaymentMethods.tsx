@@ -483,10 +483,13 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
           {!showNewCard && (
             <div className="checkout-add-card" onClick={onAddNewCard}>
               <div className="checkout-add-card-text">
-                <Add /> Add New Card
+                <div>
+                  <Add />
+                </div>
+                <div>Add New Card</div>
               </div>
               <div>
-                <img src={CardOptions} />
+                <img className="checkout-add-new-card" src={CardOptions} />
               </div>
             </div>
           )}

@@ -228,7 +228,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
       setLoading(false);
       onAddNewCard(updatedPaymentMethods as IPaymentOption[]);
       onCancel();
-    } catch (error) {
+    } catch (error: any) {
       setCardError(error?.response?.data);
     } finally {
       setLoading(false);
@@ -245,7 +245,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
 
     const typeId = getTypeIdByAltName(getCardType(values.number).toLowerCase());
 
-    let requestData = {
+    let requestData: any = {
       name: values.accountName,
       number: values.number,
       month: values.expMonth,

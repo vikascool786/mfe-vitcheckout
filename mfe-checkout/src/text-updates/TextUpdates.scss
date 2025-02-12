@@ -7,6 +7,23 @@
   padding: 20px;
   border-radius: 5px;
   gap: 4px;
+
+  @media only screen and (max-width: 560px) {
+    border-radius: 0px;
+    border: none;
+    box-shadow: none;
+    gap: 0px;
+  }
+}
+
+.tm-container::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 5%;
+  width: 90%;
+  border-bottom: 1px solid #959595;
+  display: none;
 }
 
 .tm-form-container {
@@ -21,6 +38,10 @@
   }
 }
 
+.form-field-label {
+  font-size: 15px;
+}
+
 .tm-form-row {
   display: flex;
   flex-direction: row;
@@ -33,6 +54,24 @@
   line-height: 15.23px;
   text-align: left;
   color: #212121;
+
+  @media only screen and (max-width: 560px) {
+    display: none;
+  }
+}
+
+.tm-rates-mobile {
+  font-size: 13px;
+  font-style: italic;
+  font-weight: 300;
+  line-height: 15.23px;
+  text-align: left;
+  color: #212121;
+  margin-bottom: 10px;
+
+  @media only screen and (min-width: 561px) {
+    display: none;
+  }
 }
 
 .save-for-later {

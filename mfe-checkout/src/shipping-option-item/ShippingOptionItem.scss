@@ -1,4 +1,4 @@
-@use '../styles/abstracts/mixins' as *;
+@use "../styles/abstracts/mixins" as *;
 
 .shipping-option-container {
   @extend %container-base;
@@ -16,6 +16,10 @@
     background-color: #f0f1f7;
     border: 1px solid black;
   }
+
+  @media only screen and (max-width: 560px) {
+    padding: 14px 16px;
+  }
 }
 
 .shipping-option-wrapper {
@@ -30,6 +34,7 @@
   font-weight: 400;
   font-size: 16px;
   min-width: 9rem;
+  flex: 1;
 
   .shipping-option-estShipDate {
     font-family: Roboto;
@@ -44,6 +49,11 @@
   align-items: center;
   justify-content: center;
   gap: 21px;
+  flex: 1;
+
+  @media only screen and (max-width: 325px) {
+    gap: 0px;
+  }
 }
 
 .shipping-option-autoship {

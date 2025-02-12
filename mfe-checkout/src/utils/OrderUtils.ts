@@ -1,6 +1,7 @@
-import {ChangeOrder} from "../interfaces/ChangeOrder";
-import {Order} from "../interfaces/Order";
-import {OrderConsolidationData} from "../interfaces/OrderConsolidationData";
+import { ChangeOrder } from "../interfaces/ChangeOrder";
+import { Order } from "../interfaces/Order";
+import { OrderConsolidationData } from "../interfaces/OrderConsolidationData";
+import { Success } from "../api/service/Order";
 
 export function updatePaymentMethod(order: ChangeOrder, newPaymentMethodId: number): ChangeOrder {
     return {
@@ -64,4 +65,12 @@ export const getOrderConsolidateData = (order: Order | null): OrderConsolidation
             })
     }
     return orderConsolidateData;
+};
+
+export const getOrderNotifications = (orderSuccessResponse: Success | null): string[] => {
+    let orderNotifications: string[] = [];
+    orderSuccessResponse?.notifications?.forEach( n => {
+        orderNotifications.push(n.reason);
+    })
+    return orderNotifications;
 };

@@ -69,6 +69,11 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     paymentMethod.accountName !== PAYPAL.name &&
     paymentMethod.accountName !== SEZZLE.name;
 
+    const getCardNumber = (ccNumber : any) => {
+      return "*" + ccNumber?.slice(-4);
+    };
+
+
   const handlePaymentMethodEdit = () => {
     if (isSelected && paymentMethod) {
       onCardEdit(paymentMethod.id);
@@ -231,7 +236,9 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                   src={paymentMethod.imageUrl}
                   alt={paymentMethod.accountName}
                 />
-                <div>{paymentMethod.number}</div>
+                <div className="payment-option-container__card-number">
+                  {getCardNumber(paymentMethod.number)}
+                </div>
               </div>
               <div className="payment-option-container__card-expiration">
                 Expires {paymentMethod.expires}

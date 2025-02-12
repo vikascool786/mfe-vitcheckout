@@ -1,5 +1,6 @@
 import React from "react";
 import { DropdownOption } from "../../../interfaces/DropdownOption";
+import "./DropdownField.scss";
 
 type DropdownProps = {
   options: DropdownOption[]; // Array of options to populate the dropdown
@@ -9,6 +10,7 @@ type DropdownProps = {
   formName?: string; // Form name for the dropdown
   onChange?: (value: string) => void; // Callback for handling selection changes
   errorMessage?: string | false | undefined;
+  className?: string;
 };
 
 export const DropdownField: React.FC<DropdownProps> = ({
@@ -19,6 +21,7 @@ export const DropdownField: React.FC<DropdownProps> = ({
   formName,
   onChange,
   errorMessage,
+  className,
 }) => {
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
@@ -27,7 +30,7 @@ export const DropdownField: React.FC<DropdownProps> = ({
     }
   };
   return (
-    <div className="field-item-container">
+    <div className={`${className || ""} field-item-container`}>
       {label && (
         <label htmlFor={formName} className={required ? "required-field" : ""}>
           {label}

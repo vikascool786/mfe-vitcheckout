@@ -64,6 +64,7 @@ export const CardInputs: React.FC<ICardInputProps> = ({
             />
             <div className="form-field-container">
                 <DropdownField
+                    className="form-field-half"
                     label="Expiration Month"
                     formName="cardInfo.expMonth"
                     selectedValue={
@@ -79,6 +80,7 @@ export const CardInputs: React.FC<ICardInputProps> = ({
                     errorMessage={touched.cardInfo?.expMonth && errors.cardInfo?.expMonth}
                 />
                 <DropdownField
+                    className="form-field-half"
                     label="Expiration Year"
                     formName="cardInfo.expYear"
                     selectedValue={values.cardInfo?.expYear?.toString() || ""}

@@ -38,6 +38,10 @@
   text-align: left;
   text-underline-position: from-font;
   text-decoration-skip-ink: none;
+
+  @media only screen and (max-width: 560px) {
+    font-size: 15px;
+  }
 }
 
 .addresslist-item-holder {
@@ -56,4 +60,8 @@
   text-decoration-style: solid;
   text-underline-position: from-font;
   text-decoration-skip-ink: none;
+
+  @media only screen and (max-width: 560px) {
+    font-size: 14px;
+  }
 }

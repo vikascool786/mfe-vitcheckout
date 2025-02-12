@@ -24,11 +24,12 @@ import withLoader from "../hoc/withLoader";
 import { Address } from "../interfaces/Address";
 import { AddressHandler } from "../interfaces/AddressHandler";
 import { DropdownOption } from "../interfaces/DropdownOption";
-import { addressAtom, loadingAtom, orderAtom } from "../store";
+import {addressAtom, loadingAtom, orderAtom, orderNotificationsAtom} from "../store";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import "./Checkout.scss";
 import { siteApiData } from "./siteAtom";
 import { customerApiData } from "./customerAtom";
+import { getOrderNotifications } from "../utils/OrderUtils";
 
 const defaultAddress: Address = {
   id: 0,
@@ -75,6 +76,7 @@ const Checkout: React.FC<ICheckout> = ({
   const [errorMessage, setErrorMessage] = useState("");
 
   const [order, setOrder] = useAtom(orderAtom);
+  const [orderNotifications, setOrderNotifications] = useAtom(orderNotificationsAtom);
   const [customerData] = useAtom(customerApiData(pcid));
 
   const filterValidShippingAddresses = (addresses: Address[]): Address[] => {
@@ -240,6 +242,7 @@ const Checkout: React.FC<ICheckout> = ({
             );
 
             setOrder(newOrder.response.success.data);
+            setOrderNotifications(getOrderNotifications(newOrder.response.success));
           }
         } else {
           // Use POST request for new address (create)
@@ -269,6 +272,7 @@ const Checkout: React.FC<ICheckout> = ({
             );
 
             setOrder(newOrder.response.success.data);
+            setOrderNotifications(getOrderNotifications(newOrder.response.success));
           }
         }
 
@@ -368,6 +372,7 @@ const Checkout: React.FC<ICheckout> = ({
     }
 
     setOrder(newOrder.response.success.data);
+    setOrderNotifications(getOrderNotifications(newOrder.response.success));
     setLoading(false);
     setIsExpanded(false);
   };
@@ -391,6 +396,7 @@ const Checkout: React.FC<ICheckout> = ({
         );
 
         setOrder(orderResponse.response.success.data);
+        setOrderNotifications(getOrderNotifications(orderResponse.response.success));
       } catch (error) {
         alert("Failed to update text updates");
       }
@@ -426,7 +432,10 @@ const Checkout: React.FC<ICheckout> = ({
     <div>
       <form className="shipping-address-form">
         <div
-          className={`${!showAVS ? "form-container" : "form-container__hide"}`}
+          className={`${!showAVS
+              ? "checkout-form-container"
+              : "checkout-form-container__hide"
+            }`}
         >
           <div className="form-header">
             <FormHeading title="Shipping Address" />

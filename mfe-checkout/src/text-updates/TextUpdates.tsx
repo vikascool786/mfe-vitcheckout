@@ -52,6 +52,7 @@ export const TextUpdates = () => {
   return (
     <div className="tm-container">
       <FormHeading title="Text Updates for this Order" />
+      <div className="tm-rates-mobile">Message and data rates may apply.</div>
       <Formik
         initialValues={{
           phone: order?.userOptions.smsPhone || "",
@@ -74,7 +75,11 @@ export const TextUpdates = () => {
           <Form className="tm-form-container">
             <div>
               <FormField
-                label="Mobile Phone"
+                label={
+                  (
+                    <span className="form-field-label">Mobile Phone</span>
+                  ) as any
+                }
                 extraLabel="10 digits"
                 name="phone"
                 maxLength={10}

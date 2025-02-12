@@ -27,12 +27,22 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
+    flex: 1;
 
     &-details {
       display: flex;
       flex-direction: row;
       align-items: center;
       gap: 5px;
+    }
+
+    &-number {
+      font-size: 16px;
+      font-weight: 400;
+
+      @media only screen and (max-width: 560px) {
+        font-size: 12px;
+      }
     }
 
     &-img {
@@ -47,6 +57,10 @@
       font-size: 14px;
       line-height: 16px;
       font-weight: 300;
+
+      @media only screen and (max-width: 560px) {
+        font-size: 11px;
+      }
     }
 
     &-cvv {
@@ -54,8 +68,13 @@
       flex-direction: row;
       align-items: center;
       gap: 8px;
+      font-weight: 400;
       font-size: 16px;
       line-height: 18px;
+
+      @media only screen and (max-width: 560px) {
+        font-size: 12px;
+      }
     }
 
     &-cvv-form {
@@ -69,6 +88,15 @@
       line-height: 18px;
       font-weight: normal;
       max-width: 40%;
+
+      @media only screen and (max-width: 560px) {
+        &::placeholder {
+          font-size: 12px;
+        }
+
+        width: 70px;
+        min-height: 20px;
+      }
     }
 
     &-card-cvv-sub {
@@ -89,7 +117,15 @@
       line-height: 21px;
       text-decoration: underline;
       font-weight: 400;
+
+      @media only screen and (max-width: 560px) {
+        font-size: 14px;
+      }
     }
+  }
+
+  @media only screen and (max-width: 560px) {
+    padding: 14px 5px;
   }
 }
 
@@ -99,6 +135,11 @@
   font-weight: 400;
   font-size: 16px;
   min-width: 9rem;
+  flex: 1;
+
+  @media only screen and (max-width: 560px) {
+    gap: 0px;
+  }
 }
 
 .payment-option-select-container {
@@ -107,28 +148,44 @@
   justify-content: space-between;
 }
 
-.payment-option-container__card-img{
+.payment-option-container__card-img {
   width: 130px;
 }
 
 .payment-option-name {
   font-size: 18px;
   font-weight: 500;
+  display: flex;
+  flex: 1;
+  align-items: center;
+
+  @media only screen and (max-width: 560px) {
+    font-size: 15px;
+  }
 }
 
 .error-message {
   display: flex;
   align-items: center;
-  background-color: #f0f1f7; /* Light red background */
-  border: 1px solid #79787880; /* Subtle red border */
-  border-radius: 8px; /* Rounded corners for modern look */
-  padding: 8px 12px; /* Add padding for better spacing */
-  color: black; /* Dark red text color for contrast */
+  background-color: #f0f1f7;
+  /* Light red background */
+  border: 1px solid #79787880;
+  /* Subtle red border */
+  border-radius: 8px;
+  /* Rounded corners for modern look */
+  padding: 8px 12px;
+  /* Add padding for better spacing */
+  color: black;
+  /* Dark red text color for contrast */
   font-family: "Inter", sans-serif;
-  font-size: 14px; /* Adjust text size */
-  font-weight: 400; /* Regular weight for readability */
-  margin-top: 8px; /* Add spacing above the message */
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Subtle shadow for elevation */
+  font-size: 14px;
+  /* Adjust text size */
+  font-weight: 400;
+  /* Regular weight for readability */
+  margin-top: 8px;
+  /* Add spacing above the message */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  /* Subtle shadow for elevation */
   position: relative;
   min-height: 1.8rem;
 }
@@ -136,10 +193,13 @@
 .error-message::before {
   content: "";
   display: block;
-  width: 6px; /* Width of the left red bar */
+  width: 6px;
+  /* Width of the left red bar */
   height: 100%;
-  background-color: #d32f2f; /* Red bar color */
-  border-radius: 4px 0 0 4px; /* Round the left side of the bar */
+  background-color: #d32f2f;
+  /* Red bar color */
+  border-radius: 4px 0 0 4px;
+  /* Round the left side of the bar */
   position: absolute;
   left: 0;
   top: 0;

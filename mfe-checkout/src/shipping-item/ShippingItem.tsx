@@ -65,24 +65,46 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
     <>
       <div className="item-container">
         <div className="item-detail-container">
-          <img className="item-image" src={image.url} alt="Product" />
-          <div className="item-info">
-            <div className="item-name">{decodeHtmlEntities(caption)}</div>
-            <div>{catalogName}</div>
+          <div className="item-image">
+            <img src={image.url} alt="Product" />
+          </div>
 
-              <div className="item-cashback">
-              {totals?.cashBack > 0 && (<>
-                <div className="item-cashback-value">
-                  + {totals?.cashBackStr}
-                </div>
-                <Cashback viewBox="0 -2 24 22" />
-                Cashback  </>)} {bv > 0 && isMA === 1 ? ` ${formattedNumber(bv)} BV` : ibv > 0 && ` ${formattedNumber(ibv)} IBV`}
+          <div className="item-info">
+            {/* first line */}
+            <section className="header-section">
+              <div className="header-block">
+                <div className="item-name">{decodeHtmlEntities(caption)}</div>
+                <div>{catalogName}</div>
               </div>
 
+              <div onClick={onRemove}>
+                <Close />
+              </div>
+            </section>
 
-            <div className="shippingItem-priceStr">{totals?.priceStr}</div>
+            <section className="item-cashback">
+              {totals?.cashBack > 0 && (
+                <>
+                  <div className="item-cashback-value">
+                    + {totals?.cashBackStr}
+                  </div>
+                  <Cashback viewBox="0 -2 24 22" />
+                  Cashback{" "}
+                </>
+              )}{" "}
+              {bv > 0 && isMA === 1
+                ? ` ${formattedNumber(bv)} BV`
+                : ibv > 0 && ` ${formattedNumber(ibv)} IBV`}
+            </section>
+            <section className="price-section">
+              <div className="shippingItem-priceStr">{totals?.priceStr}</div>
+              <div>Quantity: {quantity}</div>
+            </section>
+
             {(item.autoshipFreq > 0 || item.autoShipId) &&
-              (portalData?.autoShipDiscount > 0 && isMaProduct && item.hasAutoShipDiscount ? (
+              (portalData?.autoShipDiscount > 0 &&
+                isMaProduct &&
+                item.hasAutoShipDiscount ? (
                 <div className="item-autoship">
                   <AutoshipIcon />
                   Saving {portalData.autoShipDiscount}% with Autoship
@@ -103,10 +125,10 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
             )}
           </div>
         </div>
-        <div className="item-cancel" onClick={onRemove}>
+        {/* <div className="item-cancel" onClick={onRemove}>
           <Close />
           Quantity: {quantity}
-        </div>
+        </div> */}
       </div>
       {/* Render options if they exist */}
       {isGiftCard && options && options.length > 0 && (

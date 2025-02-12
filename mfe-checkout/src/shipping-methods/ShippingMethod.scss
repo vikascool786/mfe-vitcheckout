@@ -6,6 +6,28 @@
   flex-direction: column;
   padding: 20px;
   border-radius: 5px;
+
+  @media only screen and (max-width: 560px) {
+    border-radius: 0px;
+    border: none;
+    box-shadow: none;
+  }
+}
+
+.shipping-container::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 5%;
+  width: 90%;
+  border-bottom: 1px solid #959595;
+  display: none;
+}
+
+@media only screen and (max-width: 560px) {
+  .shipping-container::after {
+    display: block;
+  }
 }
 
 .shipping-catolog-name {
@@ -13,9 +35,8 @@
   font-weight: 400;
   line-height: 21.09px;
   text-align: left;
-  color: #499AB5;
+  color: #499ab5;
 }
-
 
 .shipping-item-container {
   display: flex;

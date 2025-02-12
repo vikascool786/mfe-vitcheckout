@@ -78,9 +78,10 @@ export const AddressVerificationContainer = forwardRef<
 
   return (
     <div
-      className={`${
-        !props.showAvs ? "form-container__hide" : "form-container"
-      }`}
+      className={`${!props.showAvs
+          ? "checkout-form-container__hide"
+          : "checkout-form-container"
+        }`}
     >
       <AddressVerification
         addressList={addressList}

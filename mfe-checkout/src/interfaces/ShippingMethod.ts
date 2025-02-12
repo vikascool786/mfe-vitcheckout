@@ -54,10 +54,12 @@ export interface Item {
     cashBack: number;
     bv: number;
     ibv: number;
+    cashBackStr?: string;
+    priceStr?: string;
   };
 }
 export interface StoreDetail {
-  catalogId:number;
+  catalogId: number;
   catalogName: string;
   isMA: number;
   marketFacilitator: number;

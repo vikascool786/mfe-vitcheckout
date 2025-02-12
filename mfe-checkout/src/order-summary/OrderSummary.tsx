@@ -160,14 +160,14 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
       return;
     }
 
-    if (order?.userOptions && gcState.gcNum.trim() && gcState.gcPin.trim()) {
+    if (order?.userOptions && gcState?.gcNum.trim() && gcState?.gcPin.trim()) {
       changeOrder(
         generateChangeStoreResponse({
           ...order,
           userOptions: {
             ...order.userOptions,
-            gcPin: [gcState.gcPin],
-            gcNum: [gcState.gcNum],
+            gcPin: [gcState?.gcPin],
+            gcNum: [gcState?.gcNum],
           },
         }),
         order.id
@@ -403,7 +403,9 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
             <div className="order-summary-cashback-container">
               <div className="order-cashback">
                 <Cashback />
-                VIFT Cashback earned in this order
+                <span className="order-vift-cashback-earned">
+                  VIFT Cashback earned in this order
+                </span>
               </div>
               <div>{`${order.totals.cashBackStr}`}</div>
             </div>
