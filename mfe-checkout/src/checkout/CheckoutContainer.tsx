@@ -30,11 +30,12 @@ import { createAutoshipUrl } from "../api/ajaxaction/Autoship";
 import SessionTimeout from "./SessionTimeout";
 import { Notifications } from "./Notifications";
 import { getOrderNotifications } from "../utils/OrderUtils";
+import { portalApiData } from "./portalAtom";
 
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
 
-const getInitialBuildOrderData = (cartId: string): ChangeOrder => ({
+const getInitialBuildOrderData = (cartId: string, portalId: string): ChangeOrder => ({
   debug: true,
   id: cartId,
   customer_id: "",
@@ -55,6 +56,7 @@ const getInitialBuildOrderData = (cartId: string): ChangeOrder => ({
     oosConsolidate: 3,
     userSessionId: "",
     coupons: [],
+    portalId: portalId || "",
   },
 });
 
@@ -81,6 +83,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   const [loadingOrderConfirmation, setLoadingOrderConfirmation] =
     useState(false);
   const [orderNotifications, setOrderNotifications] = useAtom(orderNotificationsAtom);
+  const [portalData] = useAtom(portalApiData(shopperId));
 
   const addressUrl = `${apiDomain}/shopper-addressbooks/v1/${shopperId}/AddressBook?siteId=${siteId}&api_key=${apiKey}`;
   const paymentUrl = `${apiDomain}/shopper-wallets/v1/Shopper/${shopperId}/Wallet?api_key=${apiKey}`;
@@ -224,7 +227,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   useEffect(() => {
     if (isFetchOrderComplete) {
       if (!order) {
-        let buildOrderPayload = getInitialBuildOrderData(cartId);
+        let buildOrderPayload = getInitialBuildOrderData(cartId, portalData?.portalId);
         if (defaultAddress?.id) {
           buildOrderPayload.shipping = buildOrderPayload.shipping ?? { id: 0 };
           buildOrderPayload.shipping.id = defaultAddress.id;

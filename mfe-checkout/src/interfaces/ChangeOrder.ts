@@ -55,4 +55,5 @@ export interface UserOptions {
   coupons?: string[];
   smsPhone?: string;
   tempOrderID?: string;
+  portalId?: string;
 }

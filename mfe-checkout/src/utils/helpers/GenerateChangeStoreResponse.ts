@@ -36,6 +36,7 @@ export const generateChangeStoreResponse = (order: Order): ChangeOrder => {
         : ([] as string[]),
       tempOrderID: order.userOptions?.tempOrderID,
       smsPhone: order.userOptions?.smsPhone,
+      portalId: order.userOptions?.portalId,
     },
   };
 

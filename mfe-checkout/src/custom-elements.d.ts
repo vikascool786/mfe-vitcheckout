@@ -12,6 +12,9 @@ declare global {
             'src-otp-channel-selection': {
                 'type'?: string;
             } & React.HTMLAttributes<HTMLElement>;
+            'src-learn-more': {
+                'display-ok-button'?: string;
+            } & React.HTMLAttributes<HTMLElement>;
         }
     }
 }

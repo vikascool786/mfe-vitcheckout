@@ -54,6 +54,14 @@
   font-weight: 100;
 }
 
+.checkout-method-click-to-pay-container {
+  display: flex;
+
+  @media only screen and (max-width: 560px) {
+    flex-direction: column;
+  }
+}
+
 .checkout-method-click-to-pay {
   display: flex;
   align-items: center;

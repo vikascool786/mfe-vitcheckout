@@ -3,14 +3,13 @@
  */
 
 import axiosInstance from "../api/axios";
+import { GET_AJAX_ENDPOINT_BASE_URL } from "../utils/urlResolver";
+
 const Click2PayLogger = (function () {
     const loggerEndpoint = '/ajaxaction/click2pay/logger';
 
     function getLoggerEndpoint() {
-        //TODO: update domain per environment
-        //const domain = window.location.hostname;
-        const domain = "dev.shop.com";
-        return `https://${domain}${loggerEndpoint}`;
+        return `${GET_AJAX_ENDPOINT_BASE_URL()}`.replace("{{path}}", loggerEndpoint);
     }
 
     function logResponse(method, responseData, instanceData) {

@@ -148,7 +148,9 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
       {orders?.stores && (
         <div className="shipping-item-container">
           {Object.entries(orders?.stores)
-            .reverse()
+            .sort(([, storeA], [, storeB]) => {
+              return (storeB?.store?.isMA ?? 0) - (storeA?.store?.isMA ?? 0);
+            })
             .map(([key, store]) => {
               return (
                 store && (

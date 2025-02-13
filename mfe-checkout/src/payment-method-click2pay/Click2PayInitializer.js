@@ -10,7 +10,7 @@ const Click2PayInitializer = (function(){
             const promiseResolvedPayload = await click2payInstance.init(initParams) // No other library methods should be invoked until `init` resolves
         } catch (promiseRejectedPayload) {
             console.error("init handler failed");
-            //Click2PayLogger.logInfo("init failed message: " + promiseRejectedPayload.message);
+            Click2PayLogger.logInfo("init failed message: " + promiseRejectedPayload.message);
         }
     }
 

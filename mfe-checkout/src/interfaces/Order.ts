@@ -90,4 +90,5 @@ export interface IUserOptions {
   gcPin: string[];
   smsPhone: string;
   tempOrderID: string;
+  portalId: string;
 }

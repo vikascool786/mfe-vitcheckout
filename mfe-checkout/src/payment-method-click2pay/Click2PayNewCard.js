@@ -30,15 +30,15 @@ const Click2PayNewCard = (function () {
     }
 
     function addCardToClick2Pay(c2pInstance, values){
-        //Click2PayLogger.logInfo("click2pay save new card clicked");
+        Click2PayLogger.logInfo("click2pay save new card clicked");
         encryptCard(c2pInstance, values);
     }
 
     function encryptCard(c2pInstance, values){
         //c2pData.mobilePhone = newCardPaymentInfo.mobilePhone.value;
         const params = buildEncryptCardParams(values);
-        //Click2PayLogger.logInfo("initiating encryptCard()");
-        //Click2PayLogger.logResponse("encryptCard", {}, c2pInstance);
+        Click2PayLogger.logInfo("initiating encryptCard()");
+        Click2PayLogger.logResponse("encryptCard", {}, c2pInstance);
         const encryptPromise = c2pInstance.encryptCard(params);
         encryptPromise
             .then(response => encryptCardSuccessHandler(response, c2pInstance))
@@ -46,7 +46,7 @@ const Click2PayNewCard = (function () {
     }
 
     function buildEncryptCardParams(values){
-        //Click2PayLogger.logInfo("click2pay building encrypt card parameters");
+        Click2PayLogger.logInfo("click2pay building encrypt card parameters");
         const parameters = {
             primaryAccountNumber: values.cardInfo.number,
             panExpirationMonth: values.cardInfo.expMonth,
@@ -62,17 +62,15 @@ const Click2PayNewCard = (function () {
     }
 
     function encryptCardSuccessHandler(response, c2pInstance){
-        //Click2PayLogger.logResponse("encryptCard", response, c2pInstance);
+        Click2PayLogger.logResponse("encryptCard", response, c2pInstance);
         closeAddCardOverlay();
         Click2PayPlaceOrder.openIframe();
         checkoutWithNewCard(c2pInstance, response);
-        //checkoutClick2payUtil.openiFrame();
-        ////checkoutC2PAddCard.checkoutWithNewCard(c2pInstance, response);
     }
 
     function encryptCardFailedHandler(error){
         const errorMessage = error.message;
-        //Click2PayLogger.logInfo("encryptCard failed message: " + errorMessage);
+        Click2PayLogger.logInfo("encryptCard failed message: " + errorMessage);
         const encryptErrMsg = "There has been a problem adding your a new card to your Click to Pay wallet. Please enter a different payment method or try again.";
         Click2PayEventUtil.triggerClick2PayErrorEvent(encryptErrMsg);
         closeAddCardOverlay();
@@ -81,8 +79,8 @@ const Click2PayNewCard = (function () {
     function checkoutWithNewCard(c2pInstance, encryptedCardData){
         //checkoutClick2payUtil.hideErrorMessage();
         const params = buildNewCardParameters(encryptedCardData);
-        //Click2PayLogger.logInfo("initiating checkoutWithNewCard()");
-        //Click2PayLogger.logResponse("checkoutWithNewCard", {}, c2pInstance);
+        Click2PayLogger.logInfo("initiating checkoutWithNewCard()");
+        Click2PayLogger.logResponse("checkoutWithNewCard", {}, c2pInstance);
         const checkoutPromise = c2pInstance.checkoutWithNewCard(params);
         checkoutPromise
             .then(response => checkoutWithNewCardSuccessHandler(response, c2pInstance))
@@ -119,13 +117,9 @@ const Click2PayNewCard = (function () {
     }
 
     function checkoutWithNewCardSuccessHandler(response, c2pInstance){
-        //Click2PayLogger.logResponse("checkoutWithNewCard", response, c2pInstance);
+        Click2PayLogger.logResponse("checkoutWithNewCard", response, c2pInstance);
         console.log("checkout with new card success: " + JSON.stringify(response));
         if (response.checkoutActionCode === 'COMPLETE') {
-            /*const placeOrderWithC2PEmbeddedURL = checkoutClick2payUtil.getPlaceOrderURL(response);
-            c2pData.checkoutUrl = placeOrderWithC2PEmbeddedURL;
-            checkoutClick2payUtil.closeiFrame();
-            setNewCardPlaceOrderCustomAttribute(c2pInstance);*/
             Click2PayPlaceOrder.closeIFrame();
             refreshCardList(c2pInstance);
         }else if(response.checkoutActionCode === 'CHANGE_CARD'){
@@ -147,7 +141,7 @@ const Click2PayNewCard = (function () {
     function checkoutWithNewCardFailedHandler(error){
         const errorMessage = error.message;
         console.error("checkoutWithNewCard() failed error message: " + errorMessage, JSON.stringify(error));
-        //Click2PayLogger.logInfo("checkoutWithNewCard failed message: " + errorMessage);
+        Click2PayLogger.logInfo("checkoutWithNewCard failed message: " + errorMessage);
         Click2PayPlaceOrder.closeIFrame();
         const failedMessage = "There has been a problem adding your a new card to your Click to Pay wallet. Please try again.";
         Click2PayEventUtil.triggerClick2PayErrorEvent(failedMessage);

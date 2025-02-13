@@ -20,9 +20,15 @@ const Click2PayEventUtil = (function(){
         document.dispatchEvent(event);
     }
 
+    function triggerClick2PaySignOutEvent(){
+        const event = new CustomEvent('c2pSignOut');
+        document.dispatchEvent(event);
+    }
+
     return {
         triggerClick2PaySelectedCardEvent,
-        triggerClick2PayErrorEvent
+        triggerClick2PayErrorEvent,
+        triggerClick2PaySignOutEvent
     }
 })();
 

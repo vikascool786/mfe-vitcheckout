@@ -26,8 +26,8 @@ const Click2PayPlaceOrder = (function () {
                 "confirmPayment": false
             }
         }
-        //Click2PayLogger.logInfo("initiating checkoutWithCard()");
-        //Click2PayLogger.logResponse("checkoutWithCard", {}, c2pInstance);
+        Click2PayLogger.logInfo("initiating checkoutWithCard()");
+        Click2PayLogger.logResponse("checkoutWithCard", {}, c2pInstance);
         openIframe();
         const checkoutPromise = c2pInstance.checkoutWithCard(params);
         return checkoutPromise
@@ -36,8 +36,7 @@ const Click2PayPlaceOrder = (function () {
     }
 
     function checkoutWithCardSuccessHandler(response, c2pInstance){
-        console.log("checkoutWithCard() SUCCESS");
-        //Click2PayLogger.logResponse("checkoutWithCard", response, c2pInstance);
+        Click2PayLogger.logResponse("checkoutWithCard", response, c2pInstance);
         if (response.checkoutActionCode === 'COMPLETE') {
             closeIFrame();
         } else if(response.checkoutActionCode === 'SWITCH_CONSUMER'){
@@ -47,7 +46,7 @@ const Click2PayPlaceOrder = (function () {
             closeIFrame();
             if(response.network.toUpperCase() === 'VISA'){ //work around Mastercard suggested for when shopper cancels
                 // using visa for c2p (reload payment page)
-                //Click2PayLogger.logInfo("checkoutWithCard() INCOMPLETE VISA");
+                Click2PayLogger.logInfo("checkoutWithCard() INCOMPLETE VISA");
                 //spinner.showSpinner();
                 //window.location.href = window.location.href;
             }
@@ -58,9 +57,8 @@ const Click2PayPlaceOrder = (function () {
     }
 
     function checkoutWithCardFailedHandler(error){
-        console.log("checkoutWithCard() ERROR");
         const errorMessage = error.message;
-        //Click2PayLogger.logInfo("checkoutWithNewCard failed message: " + errorMessage);
+        Click2PayLogger.logInfo("checkoutWithNewCard failed message: " + errorMessage);
         //checkoutClick2payUtil.displayErrorMessage(stringReplacer.getMessage("checkout.click_to_pay.place_order.error"));
         //checkoutClick2payUtil.closeiFrame();
         closeIFrame();

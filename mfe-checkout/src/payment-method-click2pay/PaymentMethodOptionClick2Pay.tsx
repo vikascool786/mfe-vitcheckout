@@ -54,6 +54,7 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({ pcid, order 
     const [cardData, setCardData] = useState([]);
     const [c2pData, setC2pData] = useState(c2pCustomerData);
     const [customerData] = useAtom(customerApiData(pcid));
+    const [showLearnMoreModal, setShowLearnMoreModal] = useState(false);
 
     const cardBrandsString = c2pData.cardBrands.join(",");
     const shopperSavedPayment: ShopperSavedPayments = { //used to prefill address for new c2p card
@@ -190,10 +191,24 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({ pcid, order 
         });
     }, []);
 
+    useEffect(() => {
+        document.addEventListener("c2pSignOut", (event) => {
+            setHasSavedCards(false);
+        });
+    }, []);
+
     const initiateOTPValidation = () => {
         // @ts-ignore
         initiateValidation(window.c2pInstance);
     };
+
+    const showLearnMoreButton = () => {
+        setShowLearnMoreModal(true);
+    }
+
+    const closeLearnMoreButton = () => {
+        setShowLearnMoreModal(false);
+    }
 
     const addNewClick2PayCard = () => {
         Click2PayNewCard.openAddCardOverlay();
@@ -247,14 +262,34 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({ pcid, order 
                             </div>
                         </div>
                     ) :
-                    <div className="js-c2p-container">
+                    <div className="js-c2p-container checkout-method-click-to-pay-container">
                         <div className="checkout-method-save-information js-c2p-save-card-msg">
                             <div className="checkout-method-click-to-pay-text">
                                 Save my information with Click to Pay
-                            </div>
-                            <div className="checkout-method-click-to-pay-text">
                                 for fast, secure checkout.{" "}
-                                <span className="learn-more">Learn more</span>
+                                <button className="learn-more click-to-pay__btn" type="button"
+                                        onClick={showLearnMoreButton}>
+                                    Learn More
+                                </button>
+                                { showLearnMoreModal && (
+                                    <div className="click-to-pay__iframe-container" role="dialog"
+                                         aria-modal="true"
+                                         aria-labelledby="dialogLearnMoreClick2Pay">
+                                        <div className="click-to-pay__iframe-modal click-to-pay__iframe-modal--padding click-to-pay__iframe-modal--flex
+                                                         click-to-pay__iframe-modal--error click-to-pay__iframe-modal--scrollable">
+                                            <div>
+                                                <button
+                                                    className="overlay-simple__close overlay-simple__close--dark margin-top"
+                                                    onClick={closeLearnMoreButton}>
+                                                    <span className="collapse-text">Close</span>
+                                                    <span className="material-icons" aria-hidden="true">close</span>
+                                                </button>
+                                            </div>
+                                        <src-learn-more id="dialogLearnMoreClick2Pay"
+                                                        display-ok-button="false"></src-learn-more>
+                                    </div>
+                                    </div>
+                                )}
                             </div>
                             <div className="click-to-pay__btn-container">
                                 <Add/>

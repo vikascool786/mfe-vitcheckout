@@ -15,7 +15,9 @@ const emptyCardsContainer = '.js-c2p-empty-card-list-msg';
 
 export const initiateValidation = (c2pInstance, selectedChannel) => {
     let initiateValidationPromise;
+    Click2PayLogger.logInfo("initiating validation");
     if(selectedChannel){
+        Click2PayLogger.logInfo(`initiating validation on selected channel: ${selectedChannel}`);
         const params = {
             requestedValidationChannelId: selectedChannel
         }
@@ -38,7 +40,7 @@ export const initiateValidation = (c2pInstance, selectedChannel) => {
             }
         })
         .catch(error => {
-            //Click2PayLogger.logInfo("initiateValidation() failed error: " + error.message);
+            Click2PayLogger.logInfo("initiateValidation() failed error: " + error.message);
             console.log("error: " + error.message);
             Click2PayEventUtil.triggerClick2PayErrorEvent(error.message);
         })
@@ -153,8 +155,7 @@ function validateOTPSuccessHandler(response, c2pInstance){
 }
 
 function validateOTPFailedHandler(error){
-    console.error("error: " + error.message);
-    //Click2PayLogger.logInfo("initiateValidation() failed error: " + error.message);
+    Click2PayLogger.logInfo("initiateValidation() failed error: " + error.message);
     updateOTPErrorReason(error.reason);
     enableOTPInput();
 }
@@ -174,7 +175,7 @@ function handleOTPResponse(cardList, c2pInstance){
         Click2PayCardLoader.loadSRCCardsOnPage(cardList, c2pInstance, true, false, false);
         //checkoutPaymentMethods.hideAllPaymentMethods();
     } else{
-        //Click2PayLogger.logInfo("Click2pay cardlist returned empty");
+        Click2PayLogger.logInfo("Click2pay cardlist returned empty");
         Click2PayCardLoader.hideAccessCardsMessage();
         showEmptyCardListMsg();
         Click2PayElementUtil.showCardListAddNewC2PCard();

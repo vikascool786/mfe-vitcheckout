@@ -347,36 +347,40 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         )}
 
         {storesTotals &&
-          storesTotals.map((store, index) => {
-            const isFirst = index === 0;
-            const isLast = index === storesTotals.length - 1;
-            if (!store.totals) return null;
-            return (
-              <div
-                className={`order-charges-table ${
-                  isFirst ? "order-charges-table-first" : ""
-                } ${isLast ? "order-charges-table-last" : ""}`}
-                key={store.id || index}
-              >
-                <div className="shipping-catolog-name">
-                  {getCatalogName(store)}
-                </div>
-                <div className="order-summary-row">
-                  <div>Items Subtotal</div>
-                  <div>{store?.totals?.priceStr}</div>
-                </div>
-                <div className="order-summary-row">
-                  <div>Tax Total</div>
-                  <div>{store?.totals?.taxStr}</div>
-                </div>
 
-                <div className="order-summary-row">
-                  <div>Shipping</div>
-                  <div>{store?.totals?.shippingStr}</div>
+          storesTotals
+            .sort((storeA, storeB) => {
+              return (storeB?.store?.isMA ?? 0) - (storeA?.store?.isMA ?? 0);
+            })
+            .map((store, index) => {
+              const isFirst = index === 0;
+              const isLast = index === storesTotals.length - 1;
+              if (!store.totals) return null;
+              return (
+                <div
+                  className={`order-charges-table ${isFirst ? "order-charges-table-first" : ""
+                    } ${isLast ? "order-charges-table-last" : ""}`}
+                  key={store?.id || index}
+                >
+                  <div className="shipping-catolog-name">
+                    {getCatalogName(store)}
+                  </div>
+                  <div className="order-summary-row">
+                    <div>Items Subtotal</div>
+                    <div>{store?.totals?.priceStr}</div>
+                  </div>
+                  <div className="order-summary-row">
+                    <div>Tax Total</div>
+                    <div>{store?.totals?.taxStr}</div>
+                  </div>
+
+                  <div className="order-summary-row">
+                    <div>Shipping</div>
+                    <div>{store?.totals?.shippingStr}</div>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
 
         {order?.userOptions?.applyEWallet && eWalletData?.totalCoaCBAvail && (
           <div className="order-summary-row">
@@ -420,23 +424,21 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                 <VIFT />
                 You earned 1% extra Cash using VIFT
               </div>
-              <div>{`$${order.totals.extraCashBack}`}</div>
+              <div>{`$${formattedNumber(order.totals.extraCashBack)}`}</div>
             </div>
           </>
         ) : null}
 
         {order?.totals?.cashBack &&
-        order?.totals?.extraCashBack &&
-        order?.totals?.extraCashBack > 0 ? (
+          order?.totals?.extraCashBack &&
+          order?.totals?.extraCashBack > 0 ? (
           <>
             <div className="order-summary-cashback-container">
               <div className="order-cashback">
                 <VIFT />
                 Total Cash added to your VIFT
               </div>
-              <div>{`$${(
-                order.totals.extraCashBack + order.totals.cashBack
-              ).toFixed(2)}`}</div>
+              <div>{`$${formattedNumber(order?.totals?.extraCashBack + order?.totals?.cashBack)}`}</div>
             </div>
           </>
         ) : null}
