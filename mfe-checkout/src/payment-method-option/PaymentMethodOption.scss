@@ -175,7 +175,7 @@
   /* Rounded corners for modern look */
   padding: 8px 12px;
   /* Add padding for better spacing */
-  color: black;
+  color: red;
   /* Dark red text color for contrast */
   font-family: "Inter", sans-serif;
   font-size: 14px;
@@ -190,17 +190,9 @@
   min-height: 1.8rem;
 }
 
-.error-message::before {
-  content: "";
-  display: block;
-  width: 6px;
-  /* Width of the left red bar */
-  height: 100%;
-  background-color: #d32f2f;
-  /* Red bar color */
-  border-radius: 4px 0 0 4px;
-  /* Round the left side of the bar */
-  position: absolute;
-  left: 0;
-  top: 0;
+.cvv-text {
+  font-weight: 300;
+  font-size: 14px;
+  line-height: 16.41px;
+  letter-spacing: 0%;
 }

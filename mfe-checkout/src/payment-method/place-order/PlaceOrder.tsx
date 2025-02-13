@@ -29,7 +29,10 @@ import { orderAtom, paymentMethodsAtom } from "../../store";
 import { Checkbox } from "../../component/Form/Checkbox/Checkbox";
 import { Formik } from "formik";
 import { placeOrderSchema } from "../../validation/placeOrderSchema";
-import { getOrderConsolidateData, orderHasAutoshipItems } from "../../utils/OrderUtils";
+import {
+  getOrderConsolidateData,
+  orderHasAutoshipItems,
+} from "../../utils/OrderUtils";
 import { OrderConsolidationData } from "../../interfaces/OrderConsolidationData";
 
 interface IPlaceOrder {
@@ -62,26 +65,36 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   const trackingData = new Map<string, string>();
   const [siteData] = useAtom(siteApiData(siteId));
 
-  const orderData = useAtomValue(orderAtom);
+  const [orderData, setOrderData] = useAtom(orderAtom);
 
   const paymentMethods = useAtomValue(paymentMethodsAtom);
 
   const selectedPaymentMethod = paymentMethods.find((pm) => pm.isSelected);
 
-  const [orderConsolidateData, setOrderConsolidateData] = useState<OrderConsolidationData>(getOrderConsolidateData(order || null));
+  const [orderConsolidateData, setOrderConsolidateData] =
+    useState<OrderConsolidationData>(getOrderConsolidateData(order || null));
 
   useEffect(() => {
-    if(order){
+    if (order) {
       setOrderConsolidateData(getOrderConsolidateData(order));
     }
   }, [order]);
 
-  const { data: paypalToken, error } = useApi<{ tokenId: string }>(
+  const { data: paypalToken } = useApi<{ tokenId: string }>(
     PAYPAL_TOKEN_URL(shopperId, order?.totals.price || 0),
     "GET"
   );
 
   const handlePlaceOrder = async () => {
+    const selectedPaymentMethod = paymentMethods.find((pm) => pm.isSelected);
+
+    if (!selectedPaymentMethod?.isPaymentValidated && orderData) {
+      setOrderData({
+        ...orderData,
+        isOrderValidForNotValidPlacing: true,
+      });
+      return;
+    }
     const getQueryParams = () => {
       const params = new URLSearchParams(window.location.search);
       return {
@@ -189,13 +202,13 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     if (!order) return;
     if (order) {
       return buildOrder(
-          generateChangeStoreResponse({
-            ...order,
-            userOptions: {
-              ...order.userOptions,
-              trackingID: generateOrderTrackingId(trackingData),
-            },
-          })
+        generateChangeStoreResponse({
+          ...order,
+          userOptions: {
+            ...order.userOptions,
+            trackingID: generateOrderTrackingId(trackingData),
+          },
+        })
       );
     }
   };
@@ -311,71 +324,94 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   return (
     <div className="checkout-place-order">
       <Formik
-          initialValues={{ autoshipTerms: !orderHasAutoshipItems(order || null) }}
-          validationSchema={placeOrderSchema}
-          onSubmit={(values) => {
-            handlePlaceOrder();
-          }}
+        initialValues={{ autoshipTerms: !orderHasAutoshipItems(order || null) }}
+        validationSchema={placeOrderSchema}
+        onSubmit={(values) => {
+          handlePlaceOrder();
+        }}
       >
-        {({ touched,
-            errors,
-            handleChange,
-            handleBlur,
-            setFieldValue,
-            submitForm,
-            values
-          }) => (
-              <form>
-                { orderHasAutoshipItems(order || null) && (
-                    <div className="checkout-place-order-autoship checkout-place-order-text">
-                      <div className="checkout-place-order-text__heading">Autoship Terms and Conditions</div>
-                      <div className="checkout-place-order-text">When submitting your AutoShip along with providing payment and a shipping address, you authorize us to charge the same selected payment method each time your AutoShip order is processed. This is for your initial AutoShip order and subsequent AutoShip orders until you cancel your AutoShip. There is no obligation and you may cancel at any time. After you cancel, you will not be billed for, or receive, any future automatic shipments.</div>
-                      <div className="checkout-place-order-text__note">Please note that at the time of your order pulling, the shipping, tax and/or fee cost could change or be adjusted based on current rates and  the availability of the products being shipped.</div>
-                      <Checkbox name="autoshipTerms"
-                                title="I agree to the Autoship Terms & Conditions"
-                                onChange={() =>
-                                    setFieldValue("autoshipTerms", !values.autoshipTerms)
-                                }
-                                errorMessage={touched.autoshipTerms && errors.autoshipTerms}/>
-                    </div>
-                )}
-                <div className="checkout-place-order-text">
-                  By clicking place order, you agree to the SHOP.COM <a href="/info/terms-of-use">Terms of Use</a> and
-                  <a href="/info/privacy-policy">Privacy Policy</a>.
+        {({
+          touched,
+          errors,
+          handleChange,
+          handleBlur,
+          setFieldValue,
+          submitForm,
+          values,
+        }) => (
+          <form>
+            {orderHasAutoshipItems(order || null) && (
+              <div className="checkout-place-order-autoship checkout-place-order-text">
+                <div className="checkout-place-order-text__heading">
+                  Autoship Terms and Conditions
                 </div>
-                {errorMessage.length > 0 && (
-                    <div className="error-msg error-msg--padding">
-                      <div className="error-msg--bold">
-                        There was an issue placing your order
-                      </div>
-                      <div className="error-msg__detail">{errorMessage}</div>
-                    </div>
-                )}
-                {orderConsolidateData.oosConsolidate === 2 && (
-                    <div className='alert-message'>You will be charged when product(s) are available for shipment</div>
-                )}
-                {isLoading ? (
-                    <div>Processing Order...</div>
-                ): (
-                    <Button
-                        label={
-                            paymentTypeId === SEZZLE.typeId || paymentTypeId === PAYPAL.typeId
-                                ? "Pay with"
-                                : "Place Order"
-                        }
-                        btnType="primary"
-                        onClick={submitForm}
-                        logo={
-                            paymentTypeId === SEZZLE.typeId
-                                ? "https://img.shop.com/Image/resources/checkout/Sezzle-Color-White-Logo.svg"
-                                : paymentTypeId === PAYPAL.typeId
-                                    ? "https://img.shop.com/Image/resources/checkout/PayPal-White-Logo.svg"
-                                    : ""
-                        }
-                    />
-                )}
-              </form>
-          )}
+                <div className="checkout-place-order-text">
+                  When submitting your AutoShip along with providing payment and
+                  a shipping address, you authorize us to charge the same
+                  selected payment method each time your AutoShip order is
+                  processed. This is for your initial AutoShip order and
+                  subsequent AutoShip orders until you cancel your AutoShip.
+                  There is no obligation and you may cancel at any time. After
+                  you cancel, you will not be billed for, or receive, any future
+                  automatic shipments.
+                </div>
+                <div className="checkout-place-order-text__note">
+                  Please note that at the time of your order pulling, the
+                  shipping, tax and/or fee cost could change or be adjusted
+                  based on current rates and the availability of the products
+                  being shipped.
+                </div>
+                <Checkbox
+                  name="autoshipTerms"
+                  title="I agree to the Autoship Terms & Conditions"
+                  onChange={() =>
+                    setFieldValue("autoshipTerms", !values.autoshipTerms)
+                  }
+                  errorMessage={touched.autoshipTerms && errors.autoshipTerms}
+                />
+              </div>
+            )}
+            <div className="checkout-place-order-text">
+              By clicking place order, you agree to the SHOP.COM{" "}
+              <a href="/info/terms-of-use">Terms of Use</a> and
+              <a href="/info/privacy-policy">Privacy Policy</a>.
+            </div>
+            {errorMessage.length > 0 && (
+              <div className="error-msg error-msg--padding">
+                <div className="error-msg--bold">
+                  There was an issue placing your order
+                </div>
+                <div className="error-msg__detail">{errorMessage}</div>
+              </div>
+            )}
+            {orderConsolidateData.oosConsolidate === 2 && (
+              <div className="alert-message">
+                You will be charged when product(s) are available for shipment
+              </div>
+            )}
+            {isLoading ? (
+              <div>Processing Order...</div>
+            ) : (
+              <Button
+                label={
+                  paymentTypeId === SEZZLE.typeId ||
+                  paymentTypeId === PAYPAL.typeId
+                    ? "Pay with"
+                    : "Place Order"
+                }
+                btnType="primary"
+                onClick={submitForm}
+                logo={
+                  paymentTypeId === SEZZLE.typeId
+                    ? "https://img.shop.com/Image/resources/checkout/Sezzle-Color-White-Logo.svg"
+                    : paymentTypeId === PAYPAL.typeId
+                    ? "https://img.shop.com/Image/resources/checkout/PayPal-White-Logo.svg"
+                    : ""
+                }
+              />
+            )}
+          </form>
+        )}
       </Formik>
     </div>
   );

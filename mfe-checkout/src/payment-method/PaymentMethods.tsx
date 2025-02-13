@@ -44,6 +44,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   updatePaymentTypeId,
 }) => {
   const [paymentMethods, setPaymentMethods] = useAtom(paymentMethodsAtom);
+
   const [isExpanded, setIsExpanded] = useState(false);
   const { addresses } = useShopperEWalletAddresses(shopperId || "");
 
@@ -166,9 +167,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
           });
         }
 
-        console.log(
-          "updatedPaymentOptions: " + JSON.stringify(updatedPaymentOptions)
-        );
         setPaymentMethods(updatedPaymentOptions);
       } catch (error) {
         if (isPaypalOrderSuccess) {
@@ -394,14 +392,14 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     const updatedPaymentMethods = paymentMethods.map((method) =>
       method.paymentMethod.id === paymentId
         ? {
-          ...method,
-          isEditing: !method.isEditing, // Toggle editing state for the selected payment method
-        }
+            ...method,
+            isEditing: !method.isEditing, // Toggle editing state for the selected payment method
+          }
         : {
-          ...method,
-          isEditing: false,
-          isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
-        }
+            ...method,
+            isEditing: false,
+            isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
+          }
     );
 
     setTimeout(() => {
@@ -437,7 +435,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       };
     });
 
-    console.log("updatedPayments", updatedPayments);
     setTimeout(() => {
       setPaymentMethods(updatedPayments);
       setIsExpanded(false);

@@ -24,7 +24,12 @@ import withLoader from "../hoc/withLoader";
 import { Address } from "../interfaces/Address";
 import { AddressHandler } from "../interfaces/AddressHandler";
 import { DropdownOption } from "../interfaces/DropdownOption";
-import {addressAtom, loadingAtom, orderAtom, orderNotificationsAtom} from "../store";
+import {
+  addressAtom,
+  loadingAtom,
+  orderAtom,
+  orderNotificationsAtom,
+} from "../store";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import "./Checkout.scss";
 import { siteApiData } from "./siteAtom";
@@ -76,16 +81,22 @@ const Checkout: React.FC<ICheckout> = ({
   const [errorMessage, setErrorMessage] = useState("");
 
   const [order, setOrder] = useAtom(orderAtom);
-  const [orderNotifications, setOrderNotifications] = useAtom(orderNotificationsAtom);
+  const [orderNotifications, setOrderNotifications] = useAtom(
+    orderNotificationsAtom
+  );
   const [customerData] = useAtom(customerApiData(pcid));
 
   const filterValidShippingAddresses = (addresses: Address[]): Address[] => {
     let filteredAddresses: Address[] = [];
     addresses.forEach((address: Address) => {
-      if (address.hasAddress !== 0 && address.isBill !== 1 && address.isPrimary !== 1) {
+      if (
+        address.hasAddress !== 0 &&
+        address.isBill !== 1 &&
+        address.isPrimary !== 1
+      ) {
         filteredAddresses.push(address);
       }
-    })
+    });
     return filteredAddresses;
   };
 
@@ -113,7 +124,6 @@ const Checkout: React.FC<ICheckout> = ({
           hasPrimaryAddress = true;
           setShippingAddress(newAddress);
         }
-
       }
     });
     filteredAddresses = filterValidShippingAddresses(addresses);
@@ -242,14 +252,18 @@ const Checkout: React.FC<ICheckout> = ({
             );
 
             setOrder(newOrder.response.success.data);
-            setOrderNotifications(getOrderNotifications(newOrder.response.success));
+            setOrderNotifications(
+              getOrderNotifications(newOrder.response.success)
+            );
           }
         } else {
           // Use POST request for new address (create)
           const updatedAddressList: Address[] =
             await createShopperAddressBookEntry(shopperId, addressParams);
           //update address atom with new addresslist
-          setShopperAddressBook(filterValidShippingAddresses(updatedAddressList));
+          setShopperAddressBook(
+            filterValidShippingAddresses(updatedAddressList)
+          );
           const newAddedAddress = updatedAddressList.find(
             (address) => address.isShip
           );
@@ -272,7 +286,9 @@ const Checkout: React.FC<ICheckout> = ({
             );
 
             setOrder(newOrder.response.success.data);
-            setOrderNotifications(getOrderNotifications(newOrder.response.success));
+            setOrderNotifications(
+              getOrderNotifications(newOrder.response.success)
+            );
           }
         }
 
@@ -308,7 +324,7 @@ const Checkout: React.FC<ICheckout> = ({
     setShowShipAddressForm(!showShipAddressForm);
     setShippingAddress(
       shopperAddressBook.find((address) => address.isShip === 1) ||
-      shippingAddress
+        shippingAddress
     );
     setIsExpanded(!isExpanded);
   };
@@ -396,7 +412,9 @@ const Checkout: React.FC<ICheckout> = ({
         );
 
         setOrder(orderResponse.response.success.data);
-        setOrderNotifications(getOrderNotifications(orderResponse.response.success));
+        setOrderNotifications(
+          getOrderNotifications(orderResponse.response.success)
+        );
       } catch (error) {
         alert("Failed to update text updates");
       }
@@ -425,17 +443,20 @@ const Checkout: React.FC<ICheckout> = ({
     zip: Yup.string()
       .matches(/^\d{5}(-\d{4})?$/, "Invalid ZIP code format")
       .required("Zip code is required"),
-    phone: Yup.string().required("Phone number is required"),
+    phone: Yup.string()
+      .matches(/^\d{10}$/, "Phone number must be exactly 10 digits")
+      .required("Phone number is required"),
   });
 
   return (
     <div>
       <form className="shipping-address-form">
         <div
-          className={`${!showAVS
+          className={`${
+            !showAVS
               ? "checkout-form-container"
               : "checkout-form-container__hide"
-            }`}
+          }`}
         >
           <div className="form-header">
             <FormHeading title="Shipping Address" />
