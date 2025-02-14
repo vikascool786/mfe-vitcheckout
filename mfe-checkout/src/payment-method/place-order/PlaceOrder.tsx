@@ -148,8 +148,6 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   }, []); // Ensure dependencies are correctly handled
 
   const handlePlaceOrder = async () => {
-    const selectedPaymentMethod = paymentMethods.find((pm) => pm.isSelected);
-
     try {
       setIsLoading(true);
       paymentTypeId =
@@ -198,6 +196,13 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
           break;
         default:
           await handleFinalPlaceOrderUpdate();
+          const selectedPaymentMethod = paymentMethods.find(
+            (pm) => pm.isSelected
+          );
+
+          console.log("SELECTEDPAYMENTMETHOD", selectedPaymentMethod);
+          console.log("NEWCHANGEHERE");
+
           if (
             orderData &&
             !selectedPaymentMethod?.isPaymentValidated &&
