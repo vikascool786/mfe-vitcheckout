@@ -1,7 +1,7 @@
 import React, { memo, useEffect, useState } from "react";
 import "./PlaceOrder.scss";
 import { Button } from "../../component/Button/Button";
-import { CLICK2PAY, PAYPAL, SEZZLE } from "../PaymentType";
+import { CLICK2PAY, isThirdPartyPayment, PAYPAL, SEZZLE } from "../PaymentType";
 import { getTransactionData } from "../../api/service/Click2PayTransaction";
 import Click2PayPlaceOrder from "../../payment-method-click2pay/Click2PayPlaceOrder";
 import {
@@ -34,6 +34,7 @@ import {
   orderHasAutoshipItems,
 } from "../../utils/OrderUtils";
 import { OrderConsolidationData } from "../../interfaces/OrderConsolidationData";
+import { hasPaypalToken } from "../../utils/helpers/PaypalHelper";
 
 interface IPlaceOrder {
   confirmOrder: () => void;
@@ -81,14 +82,16 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   }, [order]);
 
   const { data: paypalToken } = useApi<{ tokenId: string }>(
-    PAYPAL_TOKEN_URL(shopperId, order?.totals.price || 0),
-    "GET"
+      !hasPaypalToken(location.search) && order
+          ? PAYPAL_TOKEN_URL(shopperId, order.totals.price)
+          : "",
+      "GET"
   );
 
   const handlePlaceOrder = async () => {
     const selectedPaymentMethod = paymentMethods.find((pm) => pm.isSelected);
 
-    if (!selectedPaymentMethod?.isPaymentValidated && orderData) {
+    if (!selectedPaymentMethod?.isPaymentValidated && orderData && !isThirdPartyPayment(selectedPaymentMethod?.paymentMethod.typeID || 0)) {
       setOrderData({
         ...orderData,
         isOrderValidForNotValidPlacing: true,
@@ -119,6 +122,8 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
 
         delete response.paymentMethod["id"];
 
+        trackingData.set("paypal", response.callID);
+
         changeOrder(
           {
             ...changeOrderDetails,
@@ -127,7 +132,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             },
             userOptions: {
               ...changeOrderDetails.userOptions,
-              trackingID: `paypal%3D${response.callID}`,
+              trackingID: generateOrderTrackingId(trackingData),
             },
           },
           order?.id

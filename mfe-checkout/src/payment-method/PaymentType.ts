@@ -60,6 +60,10 @@ export const thirdPartyPaymentTypeIdList  = (): number[] => {
     return thirdPartyPayments.map(payment => payment.typeId);
 }
 
+export const isThirdPartyPayment  = (paymentTypeId: number): boolean => {
+    return thirdPartyPaymentTypeIdList().includes(paymentTypeId);
+}
+
 export const creditCards = [
     VISA, MASTERCARD, AMEX, DISCOVER,
 ]
