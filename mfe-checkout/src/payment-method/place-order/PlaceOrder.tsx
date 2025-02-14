@@ -35,6 +35,7 @@ import {
 } from "../../utils/OrderUtils";
 import { OrderConsolidationData } from "../../interfaces/OrderConsolidationData";
 import { hasPaypalToken } from "../../utils/helpers/PaypalHelper";
+import { Spinner } from "../../component/Spinner/Spinner";
 
 interface IPlaceOrder {
   confirmOrder: () => void;
@@ -82,22 +83,13 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   }, [order]);
 
   const { data: paypalToken } = useApi<{ tokenId: string }>(
-      !hasPaypalToken(location.search) && order
-          ? PAYPAL_TOKEN_URL(shopperId, order.totals.price)
-          : "",
-      "GET"
+    !hasPaypalToken(location.search) && order
+      ? PAYPAL_TOKEN_URL(shopperId, order.totals.price)
+      : "",
+    "GET"
   );
 
-  const handlePlaceOrder = async () => {
-    const selectedPaymentMethod = paymentMethods.find((pm) => pm.isSelected);
-
-    if (!selectedPaymentMethod?.isPaymentValidated && orderData && !isThirdPartyPayment(selectedPaymentMethod?.paymentMethod.typeID || 0)) {
-      setOrderData({
-        ...orderData,
-        isOrderValidForNotValidPlacing: true,
-      });
-      return;
-    }
+  useEffect(() => {
     const getQueryParams = () => {
       const params = new URLSearchParams(window.location.search);
       return {
@@ -108,41 +100,55 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
 
     const { token, payerId } = getQueryParams();
 
-    const isPaypalOrderSuccess = token && payerId;
+    const fetchPayPalTransactionDetails = async () => {
+      setIsLoading(true);
 
-    if (isPaypalOrderSuccess) {
-      const response = await generatePayPalTransactionDetails(
-        shopperId,
-        token,
-        true,
-        false
-      );
-      if (order) {
-        const changeOrderDetails = generateChangeStoreResponse(order);
+      if (token && payerId) {
+        try {
+          const response = await generatePayPalTransactionDetails(
+            shopperId,
+            token,
+            true,
+            false
+          );
 
-        delete response.paymentMethod["id"];
+          if (order) {
+            const changeOrderDetails = generateChangeStoreResponse(order);
 
-        trackingData.set("paypal", response.callID);
+            delete response.paymentMethod["id"];
 
-        changeOrder(
-          {
-            ...changeOrderDetails,
-            paymentMethod: {
-              ...response.paymentMethod,
-            },
-            userOptions: {
-              ...changeOrderDetails.userOptions,
-              trackingID: generateOrderTrackingId(trackingData),
-            },
-          },
-          order?.id
-        ).then(() => {
-          confirmOrder();
-        });
+            trackingData.set("paypal", response.callID);
+
+            await changeOrder(
+              {
+                ...changeOrderDetails,
+                paymentMethod: {
+                  ...response.paymentMethod,
+                },
+                userOptions: {
+                  ...changeOrderDetails.userOptions,
+                  trackingID: generateOrderTrackingId(trackingData),
+                },
+              },
+              order?.id
+            );
+
+            confirmOrder();
+          }
+        } catch (error) {
+          console.error("Error processing PayPal order:", error);
+          setIsLoading(false);
+        }
       }
+    };
 
-      return;
+    if (token && payerId) {
+      fetchPayPalTransactionDetails();
     }
+  }, []); // Ensure dependencies are correctly handled
+
+  const handlePlaceOrder = async () => {
+    const selectedPaymentMethod = paymentMethods.find((pm) => pm.isSelected);
 
     try {
       setIsLoading(true);
@@ -155,7 +161,6 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
           confirmOrder();
           break;
         case SEZZLE.typeId:
-          console.log("place order with Sezzle");
           await handleSezzleOrder();
           break;
         case PAYPAL.typeId:
@@ -193,6 +198,19 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
           break;
         default:
           await handleFinalPlaceOrderUpdate();
+          if (
+            orderData &&
+            !selectedPaymentMethod?.isPaymentValidated &&
+            !isThirdPartyPayment(
+              selectedPaymentMethod?.paymentMethod.typeID || 0
+            )
+          ) {
+            setOrderData({
+              ...orderData,
+              isOrderValidForNotValidPlacing: true,
+            });
+            return;
+          }
           confirmOrder();
           break;
       }
@@ -326,6 +344,10 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     }
   };
 
+  if (isLoading) {
+    return <Spinner />;
+  }
+
   return (
     <div className="checkout-place-order">
       <Formik
@@ -400,7 +422,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
               <Button
                 label={
                   paymentTypeId === SEZZLE.typeId ||
-                    paymentTypeId === PAYPAL.typeId
+                  paymentTypeId === PAYPAL.typeId
                     ? "Pay with"
                     : "Place Order"
                 }
@@ -410,8 +432,8 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                   paymentTypeId === SEZZLE.typeId
                     ? "https://img.shop.com/Image/resources/checkout/Sezzle-Color-White-Logo.svg"
                     : paymentTypeId === PAYPAL.typeId
-                      ? "https://img.shop.com/Image/resources/checkout/PayPal-White-Logo.svg"
-                      : ""
+                    ? "https://img.shop.com/Image/resources/checkout/PayPal-White-Logo.svg"
+                    : ""
                 }
               />
             )}
