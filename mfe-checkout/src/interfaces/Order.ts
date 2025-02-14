@@ -13,7 +13,7 @@ export interface Order {
   totals: ITotal;
   paymentMethods: IPaymentMethod2[];
   userOptions: IUserOptions;
-  isOrderValidForNotValidPlacing?: boolean;
+  isOrderValid?: boolean;
 }
 
 interface OrderStores {

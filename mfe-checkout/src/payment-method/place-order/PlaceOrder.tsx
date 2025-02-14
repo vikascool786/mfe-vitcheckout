@@ -196,26 +196,6 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
           break;
         default:
           await handleFinalPlaceOrderUpdate();
-          const selectedPaymentMethod = paymentMethods.find(
-            (pm) => pm.isSelected
-          );
-
-          console.log("SELECTEDPAYMENTMETHOD", selectedPaymentMethod);
-          console.log("NEWCHANGEHERE");
-
-          if (
-            orderData &&
-            !selectedPaymentMethod?.isPaymentValidated &&
-            !isThirdPartyPayment(
-              selectedPaymentMethod?.paymentMethod.typeID || 0
-            )
-          ) {
-            setOrderData({
-              ...orderData,
-              isOrderValidForNotValidPlacing: true,
-            });
-            return;
-          }
           confirmOrder();
           break;
       }
@@ -425,6 +405,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
               <div>Processing Order...</div>
             ) : (
               <Button
+                disabled={!order?.isOrderValid}
                 label={
                   paymentTypeId === SEZZLE.typeId ||
                   paymentTypeId === PAYPAL.typeId

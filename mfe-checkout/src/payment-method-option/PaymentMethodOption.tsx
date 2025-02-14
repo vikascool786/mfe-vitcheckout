@@ -86,18 +86,28 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     const updatedPaymentOptions = paymentMethods.map((method) =>
       method.paymentMethod.id === paymentOption.paymentMethod.id
         ? {
-          ...method,
-          isSelected: true,
-          isVisible: true,
-        }
+            ...method,
+            isSelected: true,
+            isVisible: true,
+          }
         : {
-          ...method,
-          isSelected: false,
-          isEditing: false,
-        }
+            ...method,
+            isSelected: false,
+            isEditing: false,
+          }
     );
 
     const selectedPayment = updatedPaymentOptions.find((pm) => pm.isSelected);
+
+    if (
+      (order && selectedPayment?.paymentMethod.typeID === PAYPAL.typeId) ||
+      selectedPayment?.paymentMethod.typeID === SEZZLE.typeId
+    ) {
+      setOrder({
+        ...order,
+        isOrderValid: true,
+      });
+    }
     updatePaymentTypeId(selectedPayment?.paymentMethod.typeID ?? 0);
 
     // Set updated payment methods to state
@@ -174,15 +184,15 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
         const updatedPaymentOptions = paymentMethods.map((method) =>
           method.paymentMethod.id === paymentOption.paymentMethod.id
             ? {
-              ...method,
-              isSelected: true,
-              isVisible: true,
-              isPaymentValidated: true,
-            }
+                ...method,
+                isSelected: true,
+                isVisible: true,
+                isPaymentValidated: true,
+              }
             : {
-              ...method,
-              isSelected: false,
-            }
+                ...method,
+                isSelected: false,
+              }
         );
 
         setPaymentMethods(updatedPaymentOptions);
@@ -208,7 +218,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     if (order) {
       setOrder({
         ...order,
-        isOrderValidForNotValidPlacing: false,
+        isOrderValid: true,
       });
     }
 
@@ -216,7 +226,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     setPaymentMethods(updatedPaymentOptions);
   };
 
-  console.log("order", order?.isOrderValidForNotValidPlacing);
+  console.log("order", order?.isOrderValid);
 
   return (
     <div
