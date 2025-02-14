@@ -88,17 +88,17 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
       }
       return method.paymentMethod.id === paymentOption.paymentMethod.id
         ? {
-            ...method,
-            isSelected: true,
-            isVisible: true,
-            isPaymentValidated: false,
-          }
+          ...method,
+          isSelected: true,
+          isVisible: true,
+          isPaymentValidated: false,
+        }
         : {
-            ...method,
-            isSelected: false,
-            isEditing: false,
-            isPaymentValidated: false,
-          };
+          ...method,
+          isSelected: false,
+          isEditing: false,
+          isPaymentValidated: false,
+        };
     });
 
     const selectedPayment = updatedPaymentOptions.find((pm) => pm.isSelected);
@@ -202,15 +202,15 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
         const updatedPaymentOptions = paymentMethods.map((method) =>
           method.paymentMethod.id === paymentOption.paymentMethod.id
             ? {
-                ...method,
-                isSelected: true,
-                isVisible: true,
-                isPaymentValidated: true,
-              }
+              ...method,
+              isSelected: true,
+              isVisible: true,
+              isPaymentValidated: true,
+            }
             : {
-                ...method,
-                isSelected: false,
-              }
+              ...method,
+              isSelected: false,
+            }
         );
 
         setPaymentMethods(updatedPaymentOptions);

@@ -16,10 +16,10 @@ import { OrderSummary } from "../order-summary/OrderSummary";
 import PaymentMethod from "../payment-method/PaymentMethods";
 import PlaceOrder from "../payment-method/place-order/PlaceOrder";
 import ShippingMethod from "../shipping-methods/ShippingMethod";
-import {loadingAtom, orderAtom, orderNotificationsAtom} from "../store";
+import { loadingAtom, orderAtom, orderNotificationsAtom } from "../store";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import { handleSezzleCheckout } from "../utils/helpers/SezzleHelper";
-import Feedback from "./../Feedback/Feedback"
+import Feedback from "./../Feedback/Feedback";
 import {
   GET_API_ENDPOINT_BASE_URL_ONLY,
   GET_API_KEY,
@@ -35,7 +35,10 @@ import { portalApiData } from "./portalAtom";
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
 
-const getInitialBuildOrderData = (cartId: string, portalId: string): ChangeOrder => ({
+const getInitialBuildOrderData = (
+  cartId: string,
+  portalId: string
+): ChangeOrder => ({
   debug: true,
   id: cartId,
   customer_id: "",
@@ -65,6 +68,7 @@ interface ICheckoutContainer {
   cartId: string;
   pcid: string;
   siteId: string;
+  sessionId: string;
 }
 
 const CheckoutContainer: React.FC<ICheckoutContainer> = ({
@@ -72,6 +76,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   cartId,
   pcid,
   siteId,
+  sessionId,
 }) => {
   const [orderData, setOrderData] = useAtom(orderAtom);
 
@@ -82,7 +87,9 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   const hasInitializedOrder = useRef(false); // Prevent multiple executions of updateOrder
   const [loadingOrderConfirmation, setLoadingOrderConfirmation] =
     useState(false);
-  const [orderNotifications, setOrderNotifications] = useAtom(orderNotificationsAtom);
+  const [orderNotifications, setOrderNotifications] = useAtom(
+    orderNotificationsAtom
+  );
   const [portalData] = useAtom(portalApiData(shopperId));
 
   const addressUrl = `${apiDomain}/shopper-addressbooks/v1/${shopperId}/AddressBook?siteId=${siteId}&api_key=${apiKey}`;
@@ -135,7 +142,9 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
       })
     );
     setOrderData(orderResponse?.response.success?.data || null);
-    setOrderNotifications(getOrderNotifications(orderResponse?.response.success));
+    setOrderNotifications(
+      getOrderNotifications(orderResponse?.response.success)
+    );
   };
 
   const defaultAddress = useMemo(() => {
@@ -151,8 +160,8 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     () =>
       paymentMethods
         ? (paymentMethods?.find(
-          (payment) => payment?.preferred
-        ) as IPaymentMethod)
+            (payment) => payment?.preferred
+          ) as IPaymentMethod)
         : ({} as IPaymentMethod),
     [paymentMethods]
   );
@@ -227,7 +236,10 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   useEffect(() => {
     if (isFetchOrderComplete) {
       if (!order) {
-        let buildOrderPayload = getInitialBuildOrderData(cartId, portalData?.portalId);
+        let buildOrderPayload = getInitialBuildOrderData(
+          cartId,
+          portalData?.portalId
+        );
         if (defaultAddress?.id) {
           buildOrderPayload.shipping = buildOrderPayload.shipping ?? { id: 0 };
           buildOrderPayload.shipping.id = defaultAddress.id;
@@ -246,7 +258,9 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
             window.location.href = GET_SHOP_CART_URL();
           }
           setOrderData(response?.response.success?.data || null);
-          setOrderNotifications(getOrderNotifications(response?.response.success));
+          setOrderNotifications(
+            getOrderNotifications(response?.response.success)
+          );
         });
       } else {
         if (!order.response.success.data) return;
@@ -308,7 +322,9 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
           <div className="container">
             <div className="checkout-container">
               <div className="left-column">
-                <Notifications notificationMessages={orderNotifications || []}/>
+                <Notifications
+                  notificationMessages={orderNotifications || []}
+                />
                 <Checkout
                   shopperId={shopperId}
                   siteId={siteId}
@@ -344,7 +360,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                   defaultPaymentMethod?.addressId ?? defaultAddress?.id ?? 0
                 }
               />
-              <Feedback/>
+              <Feedback siteId={siteId} pcId={pcid} sessionId={sessionId} />
             </div>
             <HeadHelmet />
             <SessionTimeout />

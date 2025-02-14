@@ -8,6 +8,7 @@ const CheckoutContainerWrapper = (appConfig: {
   shopperId: string;
   siteId: string;
   pcid: string;
+  sessionId: string;
 }) => {
   return (
     <div>
@@ -17,6 +18,7 @@ const CheckoutContainerWrapper = (appConfig: {
           shopperId={appConfig.shopperId}
           siteId={appConfig.siteId}
           pcid={appConfig.pcid}
+          sessionId={appConfig.sessionId}
         />
       </Provider>
     </div>

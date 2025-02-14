@@ -1,14 +1,27 @@
-import React from 'react'
-import './Feedback.scss';
+import React from "react";
+import "./Feedback.scss";
+import FeedbackForm from "../FeedbackForm/FeedbackForm";
+import { IFeedback } from "../utils/types/types";
 
-const Feedback = () => {
-    return (
-        <div className="feedback-container">
-            <button className='feedback-submit-button'>Give Feedback</button>
-            <p className='text-bottom-feedback'>We are constantly looking for ways to improve.</p>
-            <p className='text-top-feedback'>Want to Provide Feedback?</p>
-        </div>
-    );
-}
+const Feedback: React.FC<IFeedback> = ({ pcId, sessionId, siteId }) => {
+  const [isFormDisplayed, setFromDisplayed] = React.useState<boolean>(false);
+  return (
+    <>
+      <div className="feedback-container">
+        <h2>Want to Provide Feedback?</h2>
+        <p>We are constantly looking for ways to improve.</p>
+        <button
+          className="feedback-button"
+          onClick={() => setFromDisplayed(true)}
+        >
+          Feedback
+        </button>
+      </div>
+      {isFormDisplayed && (
+        <FeedbackForm pcId={pcId} siteId={siteId} sessionId={sessionId} />
+      )}
+    </>
+  );
+};
 
-export default Feedback
+export default Feedback;

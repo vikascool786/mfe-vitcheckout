@@ -195,7 +195,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
           window.open(url, "_self");
           break;
         default:
-          // await handleFinalPlaceOrderUpdate();
+          await handleFinalPlaceOrderUpdate();
           confirmOrder();
           break;
       }
@@ -405,10 +405,10 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
               <div>Processing Order...</div>
             ) : (
               <Button
-                disabled={!order?.isOrderValid}
+                // disabled={!order?.isOrderValid}
                 label={
                   paymentTypeId === SEZZLE.typeId ||
-                  paymentTypeId === PAYPAL.typeId
+                    paymentTypeId === PAYPAL.typeId
                     ? "Pay with"
                     : "Place Order"
                 }
@@ -418,8 +418,8 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                   paymentTypeId === SEZZLE.typeId
                     ? "https://img.shop.com/Image/resources/checkout/Sezzle-Color-White-Logo.svg"
                     : paymentTypeId === PAYPAL.typeId
-                    ? "https://img.shop.com/Image/resources/checkout/PayPal-White-Logo.svg"
-                    : ""
+                      ? "https://img.shop.com/Image/resources/checkout/PayPal-White-Logo.svg"
+                      : ""
                 }
               />
             )}
