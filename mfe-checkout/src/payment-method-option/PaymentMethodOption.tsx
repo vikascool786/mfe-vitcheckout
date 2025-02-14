@@ -24,6 +24,7 @@ import "./PaymentMethodOption.scss";
 import { ThirdPartyLinkOff } from "./ThirdPartyLinkOff";
 import { useShopperEWalletAddresses } from "../api/service/ShopperEWallet";
 import { Address } from "../interfaces/Address";
+import { getCardType } from "../utils/helpers/GetCardType";
 
 export interface IPaymentOptionProps {
   handleCancelNewCard: () => void;
@@ -70,7 +71,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     return "*" + ccNumber?.slice(-4);
   };
 
-  const handlePaymentMethodEdit = () => {
+  const handlePaymentMethodEdit = (e) => {
     if (isSelected && paymentMethod) {
       onCardEdit(paymentMethod.id);
     }
@@ -80,9 +81,11 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     // Set editing to false if switching to a different payment method
 
     // Update payment methods with the selected method
-    setCvvCode("");
 
     const updatedPaymentOptions = paymentMethods.map((method) => {
+      if (method.paymentMethod.id !== paymentOption.paymentMethod.id) {
+        setCvvCode("");
+      }
       return method.paymentMethod.id === paymentOption.paymentMethod.id
         ? {
             ...method,
@@ -134,7 +137,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
         isOrderValid: false,
       });
     }
-    if (input.length === 3 || input.length === 4) {
+    if (input.length === maxLength) {
       onValidCVV(input);
     }
   }, 300); // Adjust debounce time as needed
@@ -237,6 +240,8 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     setPaymentMethods(updatedPaymentOptions);
   };
 
+  const maxLength = paymentMethod.typeID === 1 ? 4 : 3;
+
   return (
     <div
       className={`payment-option-container ${isSelected} ${isFirst}`}
@@ -286,12 +291,12 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                     onChange={handleCVV}
                     className="payment-option-container__card-cvv-form"
                     value={cvvCode}
+                    maxLength={maxLength}
                     type="password"
+                    required
                   />
                   <div className="cvv-text">3 or 4 digits</div>
-                  {/* {!order?.isOrderValid && (
-                    <div className="error-message">Required</div>
-                  )} */}
+                  {/* {cvvError && <div className="error-message">Required</div>} */}
                 </div>
               </div>
             )}
