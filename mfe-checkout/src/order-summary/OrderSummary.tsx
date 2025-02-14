@@ -259,8 +259,6 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
       return store;
     });
 
-  console.log(order?.totals?.gcApplied);
-
   return (
     <div className="order-summary-container">
       {gcLoading && <Spinner />}
@@ -347,7 +345,6 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         )}
 
         {storesTotals &&
-
           storesTotals
             .sort((storeA, storeB) => {
               return (storeB?.store?.isMA ?? 0) - (storeA?.store?.isMA ?? 0);
@@ -358,8 +355,9 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               if (!store.totals) return null;
               return (
                 <div
-                  className={`order-charges-table ${isFirst ? "order-charges-table-first" : ""
-                    } ${isLast ? "order-charges-table-last" : ""}`}
+                  className={`order-charges-table ${
+                    isFirst ? "order-charges-table-first" : ""
+                  } ${isLast ? "order-charges-table-last" : ""}`}
                   key={store?.id || index}
                 >
                   <div className="shipping-catolog-name">
@@ -430,15 +428,17 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         ) : null}
 
         {order?.totals?.cashBack &&
-          order?.totals?.extraCashBack &&
-          order?.totals?.extraCashBack > 0 ? (
+        order?.totals?.extraCashBack &&
+        order?.totals?.extraCashBack > 0 ? (
           <>
             <div className="order-summary-cashback-container">
               <div className="order-cashback">
                 <VIFT />
                 Total Cash added to your VIFT
               </div>
-              <div>{`$${formattedNumber(order?.totals?.extraCashBack + order?.totals?.cashBack)}`}</div>
+              <div>{`$${formattedNumber(
+                order?.totals?.extraCashBack + order?.totals?.cashBack
+              )}`}</div>
             </div>
           </>
         ) : null}

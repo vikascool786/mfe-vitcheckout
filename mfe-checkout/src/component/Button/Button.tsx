@@ -6,7 +6,7 @@ interface IButtonProps
     React.ButtonHTMLAttributes<HTMLButtonElement>,
     HTMLButtonElement
   > {
-  btnType: "primary" | "secondary";
+  btnType: "primary" | "secondary" | "disabled";
   label: string;
   logo?: string;
 }

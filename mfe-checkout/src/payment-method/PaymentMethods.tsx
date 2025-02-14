@@ -392,14 +392,14 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     const updatedPaymentMethods = paymentMethods.map((method) =>
       method.paymentMethod.id === paymentId
         ? {
-          ...method,
-          isEditing: !method.isEditing, // Toggle editing state for the selected payment method
-        }
+            ...method,
+            isEditing: !method.isEditing, // Toggle editing state for the selected payment method
+          }
         : {
-          ...method,
-          isEditing: false,
-          isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
-        }
+            ...method,
+            isEditing: false,
+            isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
+          }
     );
 
     setTimeout(() => {
@@ -409,31 +409,32 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
 
   const handleCancelNewCard = () => {
     setShowNewCard(false);
+
     let updatedPayments = paymentMethods
       .filter((pm) => pm.paymentMethod.id !== 0)
-      .map((po) => {
-        return { ...po, isEditing: false, isSelected: false };
-      });
+      .map((po) => ({
+        ...po,
+        isEditing: false,
+        isSelected: false, // Reset selection
+      }));
 
+    // Check if any payment method is already selected
     const selectedPayment = updatedPayments.find((pm) => pm.isSelected);
 
-    if (selectedPayment) {
-      setPaymentMethods(updatedPayments);
-      return;
-    }
-
-    updatedPayments = paymentMethods.map((po, index) => {
-      return {
+    if (!selectedPayment) {
+      // If no selection, set preferred card as selected
+      updatedPayments = updatedPayments.map((po) => ({
         ...po,
         isSelected: po.paymentMethod.preferred || false,
+        isPaymentValidated: false,
         isVisible:
           po.paymentMethod.preferred ||
           po.paymentMethod.accountName === PAYPAL.name ||
           po.paymentMethod.accountName === SEZZLE.name ||
           false,
         isEditing: false,
-      };
-    });
+      }));
+    }
 
     setTimeout(() => {
       setPaymentMethods(updatedPayments);

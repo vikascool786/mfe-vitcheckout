@@ -39,6 +39,7 @@ interface ICardInformationProps {
   isPaymentValidated: boolean;
   address: Address;
   shopperId: string;
+  setCvvCode: (code: string) => void;
   onCancel: () => void;
   onAddNewCard: (pm: IPaymentOption[]) => void;
   updatePaymentValidationStatus: (id: number) => void;
@@ -61,6 +62,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   shopperId,
   address,
   onCancel,
+  setCvvCode,
 }) => {
   const setLoading = useSetAtom(loadingAtom);
 
@@ -90,13 +92,13 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
     // Conditionally apply address validation if sameShippingAddress is true
     ...(!sameShippingAddress
       ? {
-        first: Yup.string().required("First name is required"),
-        last: Yup.string().required("Last name is required"),
-        address1: Yup.string().required("Address is required"),
-        city: Yup.string().required("City is required"),
-        state: Yup.string().required("State is required"),
-        zip: Yup.string().required("Zip code is required"),
-      }
+          first: Yup.string().required("First name is required"),
+          last: Yup.string().required("Last name is required"),
+          address1: Yup.string().required("Address is required"),
+          city: Yup.string().required("City is required"),
+          state: Yup.string().required("State is required"),
+          zip: Yup.string().required("Zip code is required"),
+        }
       : {}),
   });
 
@@ -189,20 +191,24 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
       const updatedPaymentMethods = paymentMethods.map((pm) =>
         pm.paymentMethod.id === values.id
           ? {
-            ...pm,
-            paymentMethod: {
-              ...pm.paymentMethod,
-              ...updatedMethod,
-            },
-            isEditing: false,
-            isSelected: true,
-            isVisible: true,
-          }
+              ...pm,
+              paymentMethod: {
+                ...pm.paymentMethod,
+                ...updatedMethod,
+              },
+              isEditing: false,
+              isSelected: true,
+              isVisible: true,
+            }
           : {
-            ...pm,
-            isSelected: false,
-            isEditing: false,
-          }
+              ...pm,
+              paymentMethod: {
+                ...pm.paymentMethod,
+                preferred: false,
+              },
+              isSelected: false,
+              isEditing: false,
+            }
       );
 
       if (order && values.id) {
@@ -225,6 +231,13 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
       }
 
       updatePaymentValidationStatus(values.id as number);
+      if (order) {
+        setCvvCode("***");
+        setOrder({
+          ...order,
+          isOrderValid: true,
+        });
+      }
       setLoading(false);
       onAddNewCard(updatedPaymentMethods as IPaymentOption[]);
       onCancel();
@@ -331,10 +344,10 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
         const response =
           token && number
             ? await addTempPaymentMethod(shopperId, {
-              ...requestData,
-              token,
-              number,
-            })
+                ...requestData,
+                token,
+                number,
+              })
             : await updateTempPaymentMethod(shopperId, requestData);
 
         if (response) {
@@ -376,6 +389,13 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           onCancel();
 
           setTimeout(() => {
+            if (order) {
+              setCvvCode("***");
+              setOrder({
+                ...order,
+                isOrderValid: true,
+              });
+            }
             onAddNewCard(updatedPaymentMethods as IPaymentOption[]);
             setLoading(false);
           });
@@ -384,6 +404,13 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
         setCardError("Error while adding card");
       }
     } catch (error: any) {
+      if (order) {
+        setCvvCode("");
+        setOrder({
+          ...order,
+          isOrderValid: false,
+        });
+      }
       setLoading(false);
       setCardError(error?.response?.data);
     } finally {
@@ -393,11 +420,8 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
 
   const handleCancelNewCard = (values: IPaymentMethod) => {
     const isCancelWhileAddingNewCard = values.id === 0;
-    console.log("Cancelling new card");
 
     if (!isCancelWhileAddingNewCard) return;
-
-    console.log("Cancelling new card 2");
 
     setTimeout(() => {
       setPaymentMethods(
@@ -406,13 +430,13 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           .map((paymentOption) =>
             paymentOption.paymentMethod.preferred
               ? {
-                ...paymentOption,
-                isSelected: true,
-              }
+                  ...paymentOption,
+                  isSelected: true,
+                }
               : {
-                ...paymentOption,
-                isSelected: false,
-              }
+                  ...paymentOption,
+                  isSelected: false,
+                }
           )
       );
     }, 300);
@@ -420,10 +444,6 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
 
   const childRef = useRef<AddressHandler>(null);
   const [showAVS, setShowAVS] = useState(false);
-
-  const handleUseSelectedAddress = () => {
-    setShowAVS(!showAVS);
-  };
 
   const [stateDropdownList, setStateDropdownList] = useState<DropdownOption[]>(
     []
@@ -468,14 +488,14 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           setCardError(null);
           const address = !sameShippingAddress
             ? {
-              first: values.first,
-              last: values.last,
-              address1: values.address1,
-              address2: values.address2,
-              city: values.city,
-              state: values.state,
-              zip: values.zip,
-            }
+                first: values.first,
+                last: values.last,
+                address1: values.address1,
+                address2: values.address2,
+                city: values.city,
+                state: values.state,
+                zip: values.zip,
+              }
             : (shippingAddress as Address);
           handleSaveCardInformation(
             {
@@ -636,17 +656,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                   <Button
                     btnType="secondary"
                     label="Cancel"
-                    onClick={() => {
-                      onCancel();
-                      handleCancelNewCard({
-                        ...paymentMethod,
-                        accountName: values.cardInfo.accountName,
-                        number: values.cardInfo.number,
-                        expMonth: values.cardInfo.expMonth,
-                        expYear: values.cardInfo.expYear,
-                        cvv: parseInt(values.cardInfo.cvv),
-                      });
-                    }}
+                    onClick={onCancel}
                   />
                   <Button
                     btnType="primary"

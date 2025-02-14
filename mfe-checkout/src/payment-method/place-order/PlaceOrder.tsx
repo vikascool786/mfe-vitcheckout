@@ -195,7 +195,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
           window.open(url, "_self");
           break;
         default:
-          await handleFinalPlaceOrderUpdate();
+          // await handleFinalPlaceOrderUpdate();
           confirmOrder();
           break;
       }

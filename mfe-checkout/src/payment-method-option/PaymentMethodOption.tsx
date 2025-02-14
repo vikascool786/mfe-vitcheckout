@@ -57,9 +57,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     isEditing,
   } = paymentOption;
 
-  const [cvvCode, setCvvCode] = useState<string>(
-    isPaymentValidated ? "***" : ""
-  );
+  const [cvvCode, setCvvCode] = useState<string>("");
 
   const setLoading = useSetAtom(loadingAtom);
 
@@ -83,29 +81,31 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     // Set editing to false if switching to a different payment method
 
     // Update payment methods with the selected method
+    setCvvCode("");
     const updatedPaymentOptions = paymentMethods.map((method) =>
       method.paymentMethod.id === paymentOption.paymentMethod.id
         ? {
             ...method,
             isSelected: true,
             isVisible: true,
+            isPaymentValidated: false,
           }
         : {
             ...method,
             isSelected: false,
             isEditing: false,
+            isPaymentValidated: false,
           }
     );
 
     const selectedPayment = updatedPaymentOptions.find((pm) => pm.isSelected);
 
-    if (
-      (order && selectedPayment?.paymentMethod.typeID === PAYPAL.typeId) ||
-      selectedPayment?.paymentMethod.typeID === SEZZLE.typeId
-    ) {
+    if (order) {
       setOrder({
         ...order,
-        isOrderValid: true,
+        isOrderValid:
+          paymentMethod.typeID === PAYPAL.typeId ||
+          paymentMethod.typeID === SEZZLE.typeId,
       });
     }
     updatePaymentTypeId(selectedPayment?.paymentMethod.typeID ?? 0);
@@ -128,6 +128,12 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
 
   // Debounced function to handle valid CVV
   const debouncedOnValidCVV = debounce((input: string) => {
+    if (order) {
+      setOrder({
+        ...order,
+        isOrderValid: false,
+      });
+    }
     if (input.length === 3 || input.length === 4) {
       onValidCVV(input);
     }
@@ -162,6 +168,12 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
           );
         }
       } catch (error) {
+        if (order) {
+          setOrder({
+            ...order,
+            isOrderValid: false,
+          });
+        }
         setErrorMessage("Invalid CVV");
       }
       if (order && isPaymentMethodValid && !isPaymentValidated) {
@@ -177,7 +189,10 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
           },
         });
         const orderResponse = await buildOrder(updatedOrder);
-        setOrder(orderResponse.response.success.data);
+        setOrder({
+          ...orderResponse.response.success.data,
+          isOrderValid: true,
+        });
         setLoading(false);
 
         // Update payment methods with the selected method
@@ -214,19 +229,8 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
       isPaymentValidated: method.paymentMethod.id === id ? true : false,
     }));
 
-    setCvvCode((prev) => "***");
-    if (order) {
-      setOrder({
-        ...order,
-        isOrderValid: true,
-      });
-    }
-
-    // Set updated payment methods to state
     setPaymentMethods(updatedPaymentOptions);
   };
-
-  console.log("order", order?.isOrderValid);
 
   return (
     <div
@@ -280,9 +284,9 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                     type="password"
                   />
                   <div className="cvv-text">3 or 4 digits</div>
-                  {order?.isOrderValidForNotValidPlacing && (
+                  {/* {!order?.isOrderValid && (
                     <div className="error-message">Required</div>
-                  )}
+                  )} */}
                 </div>
               </div>
             )}
@@ -314,6 +318,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
           shopperId={shopperId}
           onCancel={handleCancelNewCard}
           onAddNewCard={onAddNewCards}
+          setCvvCode={setCvvCode}
         />
       )}
     </div>
