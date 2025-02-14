@@ -160,7 +160,11 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
       return;
     }
 
-    if (order?.userOptions && gcState?.gcNum.trim() && gcState?.gcPin.trim()) {
+    if (
+      order?.userOptions &&
+      gcState?.gcNum?.trim() &&
+      gcState?.gcPin?.trim()
+    ) {
       changeOrder(
         generateChangeStoreResponse({
           ...order,

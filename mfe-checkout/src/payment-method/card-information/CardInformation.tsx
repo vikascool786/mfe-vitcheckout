@@ -109,7 +109,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
       number: paymentMethod.number || "",
       expMonth: paymentMethod.expMonth,
       expYear: paymentMethod.expYear,
-      cvv: isPaymentValidated ? "***" : "",
+      cvv: "",
     },
 
     // Address Fields
@@ -145,12 +145,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
 
     if (childRef.current) {
       try {
-        const isValidAddress = await childRef.current.verifyAddress({
-          ...addressEntered,
-        });
         const validatedAddress = { ...addressEntered };
-
-        setShowAVS(!isValidAddress);
 
         const addressParams = new URLSearchParams(
           Object.entries(validatedAddress as Address)
@@ -299,6 +294,10 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
         const updatedPaymentMethods = [
           ...paymentMethods.map((pm) => ({
             ...pm,
+            paymentMethod: {
+              ...pm.paymentMethod,
+              preferred: false,
+            },
             isSelected: false,
           })),
           {
@@ -327,8 +326,12 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
             },
           });
           const orderResponse = await buildOrder(updatedOrder);
+
           onAddNewCard(updatedPaymentMethods as IPaymentOption[]);
-          setOrder(orderResponse.response.success.data);
+          setOrder({
+            ...orderResponse.response.success.data,
+            isOrderValid: true,
+          });
           setLoading(false);
           onCancel();
         }
@@ -358,6 +361,10 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           const updatedPaymentMethods = [
             ...paymentMethods.map((pm) => ({
               ...pm,
+              paymentMethod: {
+                ...pm.paymentMethod,
+                preferred: false,
+              },
               isSelected: false,
             })),
             {
@@ -383,22 +390,17 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
               },
             });
             const orderResponse = await buildOrder(updatedOrder);
-            setOrder(orderResponse.response.success.data);
+            setOrder({
+              ...orderResponse.response.success.data,
+              isOrderValid: true,
+            });
           }
-
           onCancel();
 
           setTimeout(() => {
-            if (order) {
-              setCvvCode("***");
-              setOrder({
-                ...order,
-                isOrderValid: true,
-              });
-            }
             onAddNewCard(updatedPaymentMethods as IPaymentOption[]);
             setLoading(false);
-          });
+          }, 300);
         }
 
         setCardError("Error while adding card");
@@ -418,32 +420,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
     }
   };
 
-  const handleCancelNewCard = (values: IPaymentMethod) => {
-    const isCancelWhileAddingNewCard = values.id === 0;
-
-    if (!isCancelWhileAddingNewCard) return;
-
-    setTimeout(() => {
-      setPaymentMethods(
-        paymentMethods
-          .filter((paymentMethod) => paymentMethod.paymentMethod.id !== 0)
-          .map((paymentOption) =>
-            paymentOption.paymentMethod.preferred
-              ? {
-                  ...paymentOption,
-                  isSelected: true,
-                }
-              : {
-                  ...paymentOption,
-                  isSelected: false,
-                }
-          )
-      );
-    }, 300);
-  };
-
   const childRef = useRef<AddressHandler>(null);
-  const [showAVS, setShowAVS] = useState(false);
 
   const [stateDropdownList, setStateDropdownList] = useState<DropdownOption[]>(
     []

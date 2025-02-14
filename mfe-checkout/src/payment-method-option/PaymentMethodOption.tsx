@@ -1,6 +1,6 @@
 import { useAtom, useSetAtom } from "jotai";
 import { debounce } from "lodash";
-import React, { ChangeEvent, useEffect, useState } from "react";
+import React, { ChangeEvent, useCallback, useEffect, useState } from "react";
 import { buildOrder } from "../api/service/Order";
 import {
   updateShopperDetails,
@@ -47,7 +47,6 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   const [order, setOrder] = useAtom(orderAtom);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [paymentMethods, setPaymentMethods] = useAtom(paymentMethodsAtom);
-  const { addresses } = useShopperEWalletAddresses(shopperId || "");
 
   const {
     paymentMethod,
@@ -82,8 +81,9 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
 
     // Update payment methods with the selected method
     setCvvCode("");
-    const updatedPaymentOptions = paymentMethods.map((method) =>
-      method.paymentMethod.id === paymentOption.paymentMethod.id
+
+    const updatedPaymentOptions = paymentMethods.map((method) => {
+      return method.paymentMethod.id === paymentOption.paymentMethod.id
         ? {
             ...method,
             isSelected: true,
@@ -95,8 +95,8 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
             isSelected: false,
             isEditing: false,
             isPaymentValidated: false,
-          }
-    );
+          };
+    });
 
     const selectedPayment = updatedPaymentOptions.find((pm) => pm.isSelected);
 
@@ -222,6 +222,11 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     return () => debouncedOnValidCVV.cancel();
   }, []);
 
+  const onAddCardAndUpdate = (paymentOptions: IPaymentOption[]) => {
+    setCvvCode("***");
+    onAddNewCards(paymentOptions);
+  };
+
   const updatePaymentValidationStatus = (id: number) => {
     // Update payment methods with the selected method
     const updatedPaymentOptions = paymentMethods.map((method) => ({
@@ -317,7 +322,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
           updatePaymentValidationStatus={updatePaymentValidationStatus}
           shopperId={shopperId}
           onCancel={handleCancelNewCard}
-          onAddNewCard={onAddNewCards}
+          onAddNewCard={onAddCardAndUpdate}
           setCvvCode={setCvvCode}
         />
       )}
