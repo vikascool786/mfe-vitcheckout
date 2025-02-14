@@ -39,7 +39,6 @@ const getInitialBuildOrderData = (
   cartId: string,
   portalId: string
 ): ChangeOrder => ({
-  debug: true,
   id: cartId,
   customer_id: "",
   ufo_id: "",

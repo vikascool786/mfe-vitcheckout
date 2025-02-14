@@ -385,7 +385,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             )}
             <div className="checkout-place-order-text">
               By clicking place order, you agree to the SHOP.COM{" "}
-              <a href="/info/terms-of-use">Terms of Use</a> and
+              <a href="/info/terms-of-use">Terms of Use</a> and{" "}
               <a href="/info/privacy-policy">Privacy Policy</a>.
             </div>
             {errorMessage.length > 0 && (
@@ -408,7 +408,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                 // disabled={!order?.isOrderValid}
                 label={
                   paymentTypeId === SEZZLE.typeId ||
-                    paymentTypeId === PAYPAL.typeId
+                  paymentTypeId === PAYPAL.typeId
                     ? "Pay with"
                     : "Place Order"
                 }
@@ -418,8 +418,8 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                   paymentTypeId === SEZZLE.typeId
                     ? "https://img.shop.com/Image/resources/checkout/Sezzle-Color-White-Logo.svg"
                     : paymentTypeId === PAYPAL.typeId
-                      ? "https://img.shop.com/Image/resources/checkout/PayPal-White-Logo.svg"
-                      : ""
+                    ? "https://img.shop.com/Image/resources/checkout/PayPal-White-Logo.svg"
+                    : ""
                 }
               />
             )}
