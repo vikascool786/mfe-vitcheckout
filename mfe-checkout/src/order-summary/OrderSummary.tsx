@@ -360,7 +360,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               return (
                 <div
                   className={`order-charges-table ${isFirst ? "order-charges-table-first" : ""
-                    } ${isLast ? "order-charges-table-last" : ""}`}
+                  } ${isLast ? "order-charges-table-last" : ""}`}
                   key={store?.id || index}
                 >
                   <div className="shipping-catolog-name">
@@ -403,8 +403,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           <div>Total Due</div>
           <div>{order?.totals?.priceStr}</div>
         </div>
-
-        {order?.totals?.cashBack && (
+        {Number(order?.totals?.cashBack) > 0 && (
           <>
             <div className="order-summary-cashback-container">
               <div className="order-cashback">
@@ -413,7 +412,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                   VIFT Cashback earned in this order
                 </span>
               </div>
-              <div>{`${order.totals.cashBackStr}`}</div>
+              <div>{`${order?.totals.cashBackStr}`}</div>
             </div>
           </>
         )}
@@ -431,8 +430,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         ) : null}
 
         {order?.totals?.cashBack &&
-          order?.totals?.extraCashBack &&
-          order?.totals?.extraCashBack > 0 ? (
+        order?.totals?.extraCashBack &&
+        order?.totals?.extraCashBack > 0 ? (
           <>
             <div className="order-summary-cashback-container">
               <div className="order-cashback">

@@ -25,7 +25,7 @@ import { Address } from "../../interfaces/Address";
 import { useAtom, useAtomValue } from "jotai/index";
 import { siteApiData } from "../../checkout/siteAtom";
 import { fetchSezzleUrl } from "../../api/ajaxaction/Sezzle";
-import { orderAtom, paymentMethodsAtom } from "../../store";
+import { cvvValidAtom, orderAtom, paymentMethodsAtom } from "../../store";
 import { Checkbox } from "../../component/Form/Checkbox/Checkbox";
 import { Formik } from "formik";
 import { placeOrderSchema } from "../../validation/placeOrderSchema";
@@ -70,6 +70,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   const [orderData, setOrderData] = useAtom(orderAtom);
 
   const paymentMethods = useAtomValue(paymentMethodsAtom);
+  const isCvvValid = useAtomValue<boolean>(cvvValidAtom);
 
   const selectedPaymentMethod = paymentMethods.find((pm) => pm.isSelected);
 
@@ -405,10 +406,9 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
               <div>Processing Order...</div>
             ) : (
               <Button
-                // disabled={!order?.isOrderValid}
+                disabled={!isCvvValid && !(paymentTypeId === SEZZLE.typeId || paymentTypeId === PAYPAL.typeId)}
                 label={
-                  paymentTypeId === SEZZLE.typeId ||
-                  paymentTypeId === PAYPAL.typeId
+                  paymentTypeId === SEZZLE.typeId || paymentTypeId === PAYPAL.typeId
                     ? "Pay with"
                     : "Place Order"
                 }
@@ -418,10 +418,11 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                   paymentTypeId === SEZZLE.typeId
                     ? "https://img.shop.com/Image/resources/checkout/Sezzle-Color-White-Logo.svg"
                     : paymentTypeId === PAYPAL.typeId
-                    ? "https://img.shop.com/Image/resources/checkout/PayPal-White-Logo.svg"
-                    : ""
+                      ? "https://img.shop.com/Image/resources/checkout/PayPal-White-Logo.svg"
+                      : ""
                 }
               />
+
             )}
           </form>
         )}

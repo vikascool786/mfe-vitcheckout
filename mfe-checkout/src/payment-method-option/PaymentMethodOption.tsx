@@ -1,4 +1,4 @@
-import { useAtom, useSetAtom } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { debounce } from "lodash";
 import React, { ChangeEvent, useCallback, useEffect, useState } from "react";
 import { buildOrder } from "../api/service/Order";
@@ -15,6 +15,7 @@ import {
 } from "../payment-method/PaymentType";
 import {
   IPaymentOption,
+  cvvValidAtom,
   loadingAtom,
   orderAtom,
   paymentMethodsAtom,
@@ -48,6 +49,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   const [order, setOrder] = useAtom(orderAtom);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [paymentMethods, setPaymentMethods] = useAtom(paymentMethodsAtom);
+  const setCvvValid = useSetAtom(cvvValidAtom);
 
   const {
     paymentMethod,
@@ -58,6 +60,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   } = paymentOption;
 
   const [cvvCode, setCvvCode] = useState<string>("");
+  const [isCvvTouched, setIsCvvTouched] = useState<boolean>(false);
 
   const setLoading = useSetAtom(loadingAtom);
 
@@ -112,22 +115,36 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
       });
     }
     updatePaymentTypeId(selectedPayment?.paymentMethod.typeID ?? 0);
-
+    setCvvValid(false);
     // Set updated payment methods to state
     setPaymentMethods(updatedPaymentOptions);
   };
 
   const handleCVV = (e: ChangeEvent<HTMLInputElement>) => {
-    const input = e.target.value;
+    let input = e.target.value;
 
-    // Allow only numbers and limit the length to 4
-    if (/^\d{0,4}$/.test(input)) {
-      setCvvCode(input);
+    // Remove non-numeric characters immediately
+    input = input.replace(/\D/g, "");
 
-      // Debounced function to validate CVV
-      debouncedOnValidCVV(input);
+    setCvvCode(input); // Update state with only numbers
+
+    const requiredDigits = paymentOption.paymentMethod.typeID === 1 ? 4 : 3;
+
+    // Check if the input contains only numbers and has the correct length
+    if (!/^\d*$/.test(input)) {
+      setCvvValid(false);
+      alert("Invalid CVV: Only numbers are allowed."); // Throw an error if non-numeric character is included
+      return;
+    }
+
+    if (input.length === requiredDigits) {
+      setCvvValid(true);
+      debouncedOnValidCVV(input); // Debounced validation function
+    } else {
+      setCvvValid(false);
     }
   };
+
 
   // Debounced function to handle valid CVV
   const debouncedOnValidCVV = debounce((input: string) => {
@@ -289,6 +306,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                 <div>
                   <input
                     onChange={handleCVV}
+                    onFocus={() => setIsCvvTouched(true)}
                     className="payment-option-container__card-cvv-form"
                     value={cvvCode}
                     maxLength={maxLength}
@@ -296,7 +314,9 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                     required
                   />
                   <div className="cvv-text">3 or 4 digits</div>
-                  {/* {cvvError && <div className="error-message">Required</div>} */}
+                  {isCvvTouched && cvvCode.length < maxLength && (
+                    <div className="error-message">Invalid CVV</div>
+                  )}
                 </div>
               </div>
             )}
