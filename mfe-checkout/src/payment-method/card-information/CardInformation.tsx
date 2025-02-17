@@ -32,7 +32,7 @@ import { getCardType } from "../../utils/helpers/GetCardType";
 import { creditCardSchema } from "../../validation/creditcardSchema";
 import "./CardInformation.scss";
 import { CardInputs } from "./CardInputs";
-import { getTypeIdByAltName } from "../PaymentType";
+import { getTypeIdByAltName, isThirdPartyPayment } from "../PaymentType";
 
 interface ICardInformationProps {
   paymentMethod: IPaymentMethod;
@@ -42,17 +42,7 @@ interface ICardInformationProps {
   onCancel: () => void;
   onAddNewCard: (pm: IPaymentOption[]) => void;
   updatePaymentValidationStatus: (id: number) => void;
-  setCVVFieldValue: (
-    field: string,
-    value: any,
-    shouldValidate?: boolean
-  ) =>
-    | Promise<void>
-    | Promise<
-        FormikErrors<{
-          cvv: string;
-        }>
-      >;
+  setCVVFieldValue: any;
 }
 
 const CARD_MAP = new Map([
@@ -209,6 +199,12 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
       setCardError(error?.response?.data);
     } finally {
       setLoading(false);
+      const section = document.getElementById("pm-main");
+      section?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+        inline: "start",
+      });
     }
   };
 
@@ -221,7 +217,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
     setLoading(true);
 
     const typeId = getTypeIdByAltName(getCardType(values.number).toLowerCase());
-
+    setCVVFieldValue(values.cvv);
     let requestData: any = {
       name: values.accountName,
       number: values.number,
@@ -231,8 +227,6 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
       type: typeId,
       cvv: values.cvv,
     };
-
-    setCVVFieldValue("cvv", values.cvv);
 
     if (sameShippingAddress) {
       requestData = {
@@ -282,6 +276,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
             },
             isSelected: false,
             isPaymentValidated: false,
+            isVisible: isThirdPartyPayment(pm.paymentMethod.typeID),
           })),
         ].filter((pm) => pm.paymentMethod?.id !== 0);
 
@@ -350,6 +345,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
               },
               isPaymentValidated: false,
               isSelected: false,
+              isVisible: isThirdPartyPayment(pm.paymentMethod.typeID),
             })),
           ].filter((pm) => pm.paymentMethod.id !== 0);
 
@@ -384,6 +380,12 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
       setLoading(false);
       setCardError(error?.response?.data);
     } finally {
+      const section = document.getElementById("pm-main");
+      section?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+        inline: "start",
+      });
       setLoading(false);
     }
   };

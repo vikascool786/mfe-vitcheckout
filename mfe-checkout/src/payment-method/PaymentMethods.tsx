@@ -18,8 +18,10 @@ import { IPaymentOption, orderAtom, paymentMethodsAtom } from "../store";
 import { TextUpdates } from "../text-updates/TextUpdates";
 import { createPaymentMethod } from "../utils/helpers/GeneratePaymentMethod";
 import "./PaymentMethods.scss";
+import * as Yup from "yup";
 import {
   CLICK2PAY,
+  isThirdPartyPayment,
   PAYPAL,
   SEZZLE,
   thirdPartyPaymentFlagList,
@@ -27,6 +29,7 @@ import {
 import { SiteFlags } from "../interfaces/SiteFlags";
 import { portalApiData } from "../checkout/portalAtom";
 import { orderHasAutoshipItems } from "../utils/OrderUtils";
+import { FormikProvider, useFormik } from "formik";
 
 interface IPaymentMethod {
   shopperId: string;
@@ -324,8 +327,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
           ...(selectedPaymentMethod ? [selectedPaymentMethod] : []),
           ...updatedPaymentMethods,
         ]);
-      }, 300)
-
+      }, 300);
     }
 
     // Toggle the state
@@ -381,15 +383,36 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   }, [paymentMethods]);
 
   const isMethodDefault = (option: IPaymentOption) => {
-    const { accountName, preferred } = option.paymentMethod;
+    const { accountName } = option.paymentMethod;
     if (accountName === PAYPAL.name || accountName === SEZZLE.name) {
       return true;
     }
 
-    if (preferred) return preferred;
-
     return false;
   };
+
+  const maxLength =
+    paymentMethods.find((pm) => pm.isSelected)?.paymentMethod.typeID === 1
+      ? 4
+      : 3;
+
+  const formik = useFormik({
+    initialValues: {
+      cvv: "",
+    },
+    validationSchema: Yup.object().shape({
+      cvv: Yup.string()
+        .matches(/^\d+$/, "CVV must be numeric")
+        .min(maxLength, "CVV must be 3 or 4 digits")
+        .max(maxLength, "CVV must be 3 or 4 digits")
+        .required("CVV is required"),
+    }),
+    onSubmit: (values) => {
+      // if (values.cvv.length === maxLength) {
+      //   onValidCVV(values.cvv);
+      // }
+    },
+  });
 
   const onCardEdit = (paymentId: number) => {
     // Update payment methods with the editing state
@@ -406,8 +429,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
             isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
           }
     );
-
-    console.log("Edit Payment Method", updatedPaymentMethods);
     setPaymentMethods(updatedPaymentMethods);
   };
 
@@ -444,7 +465,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         isSelected: po.paymentMethod.id === selectedPayment.paymentMethod.id,
         isPaymentValidated: false,
         isVisible:
-          po.paymentMethod.preferred ||
           po.paymentMethod.accountName === PAYPAL.name ||
           po.paymentMethod.accountName === SEZZLE.name ||
           false,
@@ -464,70 +484,104 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     }, 300);
   };
 
-  const onCollapse = () => {
-    // Filter and update visibility for PayPal & Sezzle
-    const updatedPaymentMethods = paymentMethods.map((method) => ({
-      ...method,
-      isVisible:
-        method.isSelected ||
-        ["Paypal", "Sezzle"].includes(method.paymentMethod.accountName),
-      isPaymentValidated: true,
-    }));
+  const onCollapse = (id: number) => {
+    const updatedPaymentMethods = paymentMethods.map((paymentMethod) => {
+      if (paymentMethod.paymentMethod.id === id) {
+        return {
+          ...paymentMethod,
+          isSelected: true,
+          isVisible: true,
+        };
+      }
+
+      if (isThirdPartyPayment(paymentMethod.paymentMethod.typeID)) {
+        return {
+          ...paymentMethod,
+          isSelected: false,
+          isVisible: true,
+        };
+      }
+
+      if (id === -1001 || id === -1002) {
+        return {
+          ...paymentMethod,
+          isSelected: paymentMethod.paymentMethod.id === id,
+          isVisible: paymentMethod.paymentMethod.preferred || false,
+        };
+      }
+
+      return {
+        ...paymentMethod,
+        isSelected: false,
+        isVisible: false,
+      };
+    });
 
     setTimeout(() => {
+      formik.resetForm();
       setPaymentMethods(updatedPaymentMethods);
       setIsExpanded(false);
     }, 300);
   };
 
+  const setCVVFieldValue = (cvv: string) => {
+    formik.setFieldValue("cvv", cvv);
+  };
+
   return (
-    <div className="pm-main-container">
-      <div className="pm-container" id="pm-main">
-        <div className="pm-title-container">
-          <FormHeading title="Payment Method" />
-          {paymentMethods.length >= 4 && (
-            <div className="pm-show-card" onClick={toggleAccordion}>
-              <div>{isExpanded ? "Hide other cards" : "See other cards"}</div>
-              <Back className={`accordion ${isExpanded ? "open" : "close"}`} />
-            </div>
-          )}
-        </div>
-        <div className="pm-sub-container">
-          {paymentMethods
-            .filter((method) => method.isVisible)
-            .map((paymentOption, index) => (
-              <PaymentOption
-                key={index}
-                paymentOption={paymentOption}
-                index={index}
-                shopperId={shopperId}
-                onCardEdit={onCardEdit}
-                handleCancelNewCard={handleCancelNewCard}
-                onAddNewCards={onAddNewCards}
-                updatePaymentTypeId={updatePaymentTypeId}
-                onCollapse={onCollapse}
-              />
-            ))}
-          {showClick2Pay && (
-            <PaymentOptionClick2Pay pcid={pcid} order={order} />
-          )}
-          {!showNewCard && (
-            <div className="checkout-add-card" onClick={onAddNewCard}>
-              <div className="checkout-add-card-text">
-                <div>
-                  <Add />
+    <FormikProvider value={formik}>
+      <div className="pm-main-container">
+        <div className="pm-container" id="pm-main">
+          <div className="pm-title-container">
+            <FormHeading title="Payment Method" />
+            {paymentMethods.length >= 4 && (
+              <div className="pm-show-card" onClick={toggleAccordion}>
+                <div>{isExpanded ? "Hide other cards" : "See other cards"}</div>
+                <Back
+                  className={`accordion ${isExpanded ? "open" : "close"}`}
+                />
+              </div>
+            )}
+          </div>
+          <div className="pm-sub-container">
+            {paymentMethods
+              .filter((method) => method.isVisible)
+              .map((paymentOption, index) => (
+                <PaymentOption
+                  key={index}
+                  paymentOption={paymentOption}
+                  index={index}
+                  shopperId={shopperId}
+                  onCardEdit={onCardEdit}
+                  handleCancelNewCard={handleCancelNewCard}
+                  onAddNewCards={onAddNewCards}
+                  updatePaymentTypeId={updatePaymentTypeId}
+                  onCollapse={onCollapse}
+                  formik={formik}
+                  setCVVFieldValue={setCVVFieldValue}
+                />
+              ))}
+            {showClick2Pay && (
+              <PaymentOptionClick2Pay pcid={pcid} order={order} />
+            )}
+            {!showNewCard && (
+              <div className="checkout-add-card" onClick={onAddNewCard}>
+                <div className="checkout-add-card-text">
+                  <div>
+                    <Add />
+                  </div>
+                  <div>Add New Card</div>
                 </div>
-                <div>Add New Card</div>
+                <div>
+                  <img className="checkout-add-new-card" src={CardOptions} />
+                </div>
               </div>
-              <div>
-                <img className="checkout-add-new-card" src={CardOptions} />
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
+        <TextUpdates />
       </div>
-      <TextUpdates />
-    </div>
+    </FormikProvider>
   );
 };
 

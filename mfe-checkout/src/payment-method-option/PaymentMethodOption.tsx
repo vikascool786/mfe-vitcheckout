@@ -1,7 +1,6 @@
 import { ErrorMessage, FormikProvider, useFormik } from "formik";
 import { useAtom, useSetAtom } from "jotai";
-import { debounce } from "lodash";
-import React, { ChangeEvent, useEffect, useState } from "react";
+import React, { ChangeEvent, useState } from "react";
 import * as Yup from "yup";
 import { buildOrder } from "../api/service/Order";
 import {
@@ -17,7 +16,6 @@ import {
 } from "../payment-method/PaymentType";
 import {
   IPaymentOption,
-  cvvValidAtom,
   loadingAtom,
   orderAtom,
   paymentMethodsAtom,
@@ -33,7 +31,9 @@ export interface IPaymentOptionProps {
   shopperId: string;
   onCardEdit: (id: number) => void;
   index: number;
-  onCollapse: () => void;
+  onCollapse: (id: number) => void;
+  formik: any;
+  setCVVFieldValue: any;
   updatePaymentTypeId: (newValue: number) => void;
 }
 
@@ -42,9 +42,11 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   shopperId,
   onCardEdit,
   onCollapse,
+  formik,
   paymentOption,
   onAddNewCards,
   handleCancelNewCard,
+  setCVVFieldValue,
   updatePaymentTypeId,
 }) => {
   const [order, setOrder] = useAtom(orderAtom);
@@ -60,24 +62,6 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   } = paymentOption;
 
   const maxLength = paymentMethod.typeID === 1 ? 4 : 3;
-
-  const formik = useFormik({
-    initialValues: {
-      cvv: "",
-    },
-    validationSchema: Yup.object().shape({
-      cvv: Yup.string()
-        .matches(/^\d+$/, "CVV must be numeric")
-        .min(maxLength, "CVV must be 3 or 4 digits")
-        .max(maxLength, "CVV must be 3 or 4 digits")
-        .required("CVV is required"),
-    }),
-    onSubmit: (values) => {
-      if (values.cvv.length === maxLength) {
-        onValidCVV(values.cvv);
-      }
-    },
-  });
 
   const setLoading = useSetAtom(loadingAtom);
 
@@ -98,52 +82,14 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   };
 
   const onChangePaymentMethod = () => {
-    // Find currently selected and validated payment method
     const previouslySelectedPayment = paymentMethods.find(
-      (pm) => pm.isSelected && pm.isPaymentValidated
+      (pm) => pm.isSelected
     );
 
-    const updatedPaymentOptions = paymentMethods.map((method) => {
-      const isPayPalOrSezzle =
-        method.paymentMethod.typeID === PAYPAL.typeId ||
-        method.paymentMethod.typeID === SEZZLE.typeId;
-
-      return method.paymentMethod.id === paymentOption.paymentMethod.id
-        ? {
-            ...method,
-            isSelected: true,
-            isVisible: true, // Always make selected payment visible
-            isPaymentValidated: method.isPaymentValidated, // Keep current validation status
-          }
-        : {
-            ...method,
-            isSelected: false,
-            isEditing: false,
-            isPaymentValidated: false, // Reset validation only when switching
-            isVisible: isPayPalOrSezzle ? true : method.isVisible, // Keep PayPal and Sezzle always visible
-          };
-    });
-
-    // Reset the form ONLY IF the previous card was validated and user switched cards
-    if (
-      previouslySelectedPayment &&
-      previouslySelectedPayment.paymentMethod.id !==
-        paymentOption.paymentMethod.id
-    ) {
-      formik.resetForm();
+    if (previouslySelectedPayment?.paymentMethod.id !== paymentMethod.id) {
+      onCollapse(paymentMethod.id);
+      // If you need to reset any other values manually, you can do so here.
     }
-
-    if (order) {
-      setOrder({
-        ...order,
-        isOrderValid:
-          paymentMethod.typeID === PAYPAL.typeId ||
-          paymentMethod.typeID === SEZZLE.typeId,
-      });
-    }
-
-    updatePaymentTypeId(paymentOption.paymentMethod.typeID ?? 0);
-    onAddNewCards(updatedPaymentOptions);
   };
 
   const onValidCVV = async (cvv: string) => {
@@ -185,11 +131,6 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
           requestData
         );
       }
-
-      // // If the validation fails, stop execution
-      // if (!isPaymentMethodValid) {
-      //   throw new Error("Invalid CVV");
-      // }
 
       // Prevent re-validating if already validated
       if (isPaymentValidated) {
@@ -253,6 +194,8 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     onAddNewCards(updatedPaymentOptions);
   };
 
+  console.log(formik.values.cvv);
+
   return (
     <div
       className={`payment-option-container ${isSelected} ${isFirst}`}
@@ -294,78 +237,76 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
           <img src={paymentMethod.imageUrl} alt={paymentMethod.accountName} />
         )}
         {!isEditing && isCard ? (
-          <FormikProvider value={formik}>
-            <form id="card-form">
-              <div className="payment-option-container__card-cvv-container">
-                {isSelected && (
-                  <div className="payment-option-container__card-cvv">
-                    <div>CVV</div>
-                    <div>
-                      <input
-                        name="cvv"
-                        className="payment-option-container__card-cvv-form"
-                        value={formik.values.cvv}
-                        type="password"
-                        onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                          const sanitizedValue = e.target.value.replace(
-                            /\D/g,
-                            ""
-                          ); // Allow only numbers
-                          if (sanitizedValue.length <= maxLength) {
-                            formik.setFieldValue("cvv", sanitizedValue);
-                          }
+          <form id="card-form">
+            <div className="payment-option-container__card-cvv-container">
+              {isSelected && (
+                <div className="payment-option-container__card-cvv">
+                  <div>CVV</div>
+                  <div>
+                    <input
+                      name="cvv"
+                      className="payment-option-container__card-cvv-form"
+                      value={formik.values.cvv}
+                      type="password"
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                        const sanitizedValue = e.target.value.replace(
+                          /\D/g,
+                          ""
+                        ); // Allow only numbers
+                        if (sanitizedValue.length <= maxLength) {
+                          formik.setFieldValue("cvv", sanitizedValue);
+                        }
 
-                          // Trigger validation when CVV length matches maxLength
-                          if (sanitizedValue.length === maxLength) {
-                            onValidCVV(sanitizedValue);
-                          } else {
-                            const updatedPaymentMethods = paymentMethods.map(
-                              (pm) =>
-                                pm.paymentMethod.id === paymentMethod.id
-                                  ? {
-                                      ...pm,
-                                      isPaymentValidated: false,
-                                    }
-                                  : pm
-                            );
+                        // Trigger validation when CVV length matches maxLength
+                        if (sanitizedValue.length === maxLength) {
+                          onValidCVV(sanitizedValue);
+                        } else {
+                          const updatedPaymentMethods = paymentMethods.map(
+                            (pm) =>
+                              pm.paymentMethod.id === paymentMethod.id
+                                ? {
+                                    ...pm,
+                                    isPaymentValidated: false,
+                                  }
+                                : pm
+                          );
 
-                            onAddNewCards(updatedPaymentMethods);
-                          }
-                        }}
-                        onBlur={formik.handleBlur}
-                        required
-                      />
-                      <div className="cvv-text">3 or 4 digits</div>
-                      <ErrorMessage
-                        name="cvv"
-                        component="div"
-                        className="error-message"
-                      />
-                      {!formik.touched.cvv &&
-                        !formik.dirty &&
-                        order?.shouldShowInvalidCVVMessage && (
-                          <div className="error-message">Required</div>
-                        )}
-                    </div>
+                          onAddNewCards(updatedPaymentMethods);
+                        }
+                      }}
+                      onBlur={formik.handleBlur}
+                      required
+                    />
+                    <div className="cvv-text">3 or 4 digits</div>
+                    <ErrorMessage
+                      name="cvv"
+                      component="div"
+                      className="error-message"
+                    />
+                    {!formik.touched.cvv &&
+                      !formik.dirty &&
+                      order?.shouldShowInvalidCVVMessage && (
+                        <div className="error-message">Required</div>
+                      )}
                   </div>
-                )}
-                {isSelected && isCard && (
-                  <div
-                    className="payment-option-container__card-cvv-edit"
-                    onClick={(event) => {
-                      event.stopPropagation(); // Prevents triggering parent click events
-                      handlePaymentMethodEdit();
-                    }}
-                  >
-                    edit
-                  </div>
-                )}
-                {errorMessage && (
-                  <div className="error-message">{errorMessage}</div>
-                )}
-              </div>
-            </form>
-          </FormikProvider>
+                </div>
+              )}
+              {isSelected && isCard && (
+                <div
+                  className="payment-option-container__card-cvv-edit"
+                  onClick={(event) => {
+                    event.stopPropagation(); // Prevents triggering parent click events
+                    handlePaymentMethodEdit();
+                  }}
+                >
+                  edit
+                </div>
+              )}
+              {errorMessage && (
+                <div className="error-message">{errorMessage}</div>
+              )}
+            </div>
+          </form>
         ) : null}
       </div>
 
@@ -382,7 +323,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
           shopperId={shopperId}
           onCancel={handleCancelNewCard}
           onAddNewCard={onAddNewCards}
-          setCVVFieldValue={formik.setFieldValue}
+          setCVVFieldValue={setCVVFieldValue}
         />
       )}
     </div>
