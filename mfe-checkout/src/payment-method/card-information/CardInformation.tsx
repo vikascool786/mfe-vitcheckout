@@ -352,6 +352,10 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           if (order && response.id) {
             const updatedOrder = generateChangeStoreResponse({
               ...order,
+              billingAddress: {
+                ...order.billingAddress,
+                id: response?.addressId as number,
+              },
               paymentMethod: {
                 ...order.paymentMethod,
                 id: response.id,
