@@ -9,5 +9,3 @@ Module Federation Search Conatiner
 # Run
 
 `npm run start`
-
-

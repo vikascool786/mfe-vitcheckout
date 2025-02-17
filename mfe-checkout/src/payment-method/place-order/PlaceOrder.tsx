@@ -171,6 +171,11 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
       !selectedPaymentMethod.isPaymentValidated &&
       !isThirdPartyPayment(selectedPaymentMethod?.paymentMethod.typeID)
     ) {
+      order &&
+        setOrderData({
+          ...order,
+          shouldShowInvalidCVVMessage: true,
+        });
       scrollToCVV(selectedPaymentMethod);
       return;
     }

@@ -73,7 +73,6 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
         .required("CVV is required"),
     }),
     onSubmit: (values) => {
-      console.log("Here at   onValidCVV(values.cvv);", values.cvv);
       if (values.cvv.length === maxLength) {
         onValidCVV(values.cvv);
       }
@@ -187,10 +186,10 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
         );
       }
 
-      // If the validation fails, stop execution
-      if (!isPaymentMethodValid) {
-        throw new Error("Invalid CVV");
-      }
+      // // If the validation fails, stop execution
+      // if (!isPaymentMethodValid) {
+      //   throw new Error("Invalid CVV");
+      // }
 
       // Prevent re-validating if already validated
       if (isPaymentValidated) {
@@ -215,6 +214,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
       setOrder({
         ...orderResponse.response.success.data,
         isOrderValid: true,
+        shouldShowInvalidCVVMessage: false,
       });
 
       // Reset all payment methods, only keep the validated one
@@ -231,7 +231,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
       // formik.setFieldValue("cvv", "");
     } catch (error) {
       setOrder({ ...order, isOrderValid: false });
-      setErrorMessage("Invalid CVV");
+      // setErrorMessage("Invalid CVV");
     }
 
     setLoading(false);
@@ -317,11 +317,19 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
 
                           // Trigger validation when CVV length matches maxLength
                           if (sanitizedValue.length === maxLength) {
-                            console.log(
-                              "Here at  onValidCVV(sanitizedValue)",
-                              sanitizedValue
-                            );
                             onValidCVV(sanitizedValue);
+                          } else {
+                            const updatedPaymentMethods = paymentMethods.map(
+                              (pm) =>
+                                pm.paymentMethod.id === paymentMethod.id
+                                  ? {
+                                      ...pm,
+                                      isPaymentValidated: false,
+                                    }
+                                  : pm
+                            );
+
+                            onAddNewCards(updatedPaymentMethods);
                           }
                         }}
                         onBlur={formik.handleBlur}
@@ -333,6 +341,11 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                         component="div"
                         className="error-message"
                       />
+                      {!formik.touched.cvv &&
+                        !formik.dirty &&
+                        order?.shouldShowInvalidCVVMessage && (
+                          <div className="error-message">Required</div>
+                        )}
                     </div>
                   </div>
                 )}

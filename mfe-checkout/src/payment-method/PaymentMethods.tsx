@@ -319,10 +319,13 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         })
       );
 
-      setPaymentMethods([
-        ...(selectedPaymentMethod ? [selectedPaymentMethod] : []),
-        ...updatedPaymentMethods,
-      ]);
+      setTimeout(() => {
+        setPaymentMethods([
+          ...(selectedPaymentMethod ? [selectedPaymentMethod] : []),
+          ...updatedPaymentMethods,
+        ]);
+      }, 300)
+
     }
 
     // Toggle the state
