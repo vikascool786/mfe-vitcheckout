@@ -1,4 +1,4 @@
-import { Formik } from "formik";
+import { Formik, FormikErrors } from "formik";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import React, { useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
@@ -42,6 +42,17 @@ interface ICardInformationProps {
   onCancel: () => void;
   onAddNewCard: (pm: IPaymentOption[]) => void;
   updatePaymentValidationStatus: (id: number) => void;
+  setCVVFieldValue: (
+    field: string,
+    value: any,
+    shouldValidate?: boolean
+  ) =>
+    | Promise<void>
+    | Promise<
+        FormikErrors<{
+          cvv: string;
+        }>
+      >;
 }
 
 const CARD_MAP = new Map([
@@ -55,7 +66,7 @@ const CARD_MAP = new Map([
 
 export const CardInformation: React.FC<ICardInformationProps> = ({
   updatePaymentValidationStatus,
-  isPaymentValidated,
+  setCVVFieldValue,
   paymentMethod,
   onAddNewCard,
   shopperId,
@@ -120,50 +131,6 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
     zip: address?.zip || "",
   };
 
-  const handleSaveAddress = async (address: {
-    first: string;
-    last: string;
-    address1: string;
-    address2: string;
-    city: string;
-    state: string;
-    zip: string;
-    phone: string;
-    isPoBox: boolean;
-    isUpdateEnabled: boolean;
-  }) => {
-    const addressEntered = {
-      ...shippingAddress,
-      ...address,
-      isBill: 1,
-      id: 0,
-    };
-
-    setLoading(true);
-
-    if (childRef.current) {
-      try {
-        const validatedAddress = { ...addressEntered };
-
-        const addressParams = new URLSearchParams(
-          Object.entries(validatedAddress as Address)
-        ).toString();
-
-        // Use POST request for new address (create)
-        const response = await createShopperAddressBookEntry(
-          shopperId,
-          addressParams
-        );
-        setLoading(false);
-        return response;
-      } catch (error) {
-        console.error("Error:", error);
-        setLoading(false);
-        return false;
-      }
-    }
-  };
-
   const processCardUpdate = async (
     values: IPaymentMethod,
     requestData: any,
@@ -180,29 +147,34 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
         (mthd: IPaymentMethod) => mthd.id === values.id
       );
 
-      // only set isSelected and isVisible true for the updated payment method
-      const updatedPaymentMethods = paymentMethods.map((pm) =>
-        pm.paymentMethod.id === values.id
-          ? {
-              ...pm,
-              paymentMethod: {
-                ...pm.paymentMethod,
-                ...updatedMethod,
-              },
-              isEditing: false,
-              isSelected: true,
-              isVisible: true,
-            }
-          : {
-              ...pm,
-              paymentMethod: {
-                ...pm.paymentMethod,
-                preferred: false,
-              },
-              isSelected: false,
-              isEditing: false,
-            }
+      // Separate the updated payment method and move it to the top
+      const otherMethods = paymentMethods.filter(
+        (pm) => pm.paymentMethod.id !== values.id
       );
+
+      // Ensure the updated payment method is selected, visible, and validated
+      const updatedPaymentMethods = [
+        {
+          ...values,
+          paymentMethod: {
+            ...updatedMethod,
+          },
+          isEditing: false,
+          isSelected: true,
+          isVisible: true,
+          isPaymentValidated: true,
+        },
+        ...otherMethods.map((pm) => ({
+          ...pm,
+          paymentMethod: {
+            ...pm.paymentMethod,
+            preferred: false,
+          },
+          isSelected: false,
+          isEditing: false,
+          isPaymentValidated: false, // Reset validation for other cards
+        })),
+      ];
 
       if (order && values.id) {
         const updatedOrder = generateChangeStoreResponse({
@@ -219,20 +191,20 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
         });
         const orderResponse = await buildOrder(updatedOrder);
         setOrder(orderResponse.response.success.data);
-        updatePaymentValidationStatus(values.id as number);
+        // updatePaymentValidationStatus(values.id as number);
         onCancel();
       }
 
-      updatePaymentValidationStatus(values.id as number);
       if (order) {
         setOrder({
           ...order,
           isOrderValid: true,
         });
       }
+
       setLoading(false);
       onAddNewCard(updatedPaymentMethods as IPaymentOption[]);
-      onCancel();
+      // onCancel();
     } catch (error: any) {
       setCardError(error?.response?.data);
     } finally {
@@ -259,6 +231,8 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
       type: typeId,
       cvv: values.cvv,
     };
+
+    setCVVFieldValue("cvv", values.cvv);
 
     if (sameShippingAddress) {
       requestData = {
@@ -296,6 +270,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
               preferred: false,
             },
             isSelected: false,
+            isPaymentValidated: false,
           })),
           {
             paymentMethod: {
@@ -362,6 +337,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                 ...pm.paymentMethod,
                 preferred: false,
               },
+              isPaymentValidated: false,
               isSelected: false,
             })),
             {
@@ -629,12 +605,18 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                   <Button
                     btnType="secondary"
                     label="Cancel"
-                    onClick={onCancel}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onCancel();
+                    }}
                   />
                   <Button
                     btnType="primary"
                     label={saveCardToWallet ? "Save to Wallet" : "Save"}
-                    onClick={submitForm}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      submitForm();
+                    }}
                   />
                 </div>
               </div>

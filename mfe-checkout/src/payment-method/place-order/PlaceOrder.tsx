@@ -166,7 +166,11 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   };
 
   const handlePlaceOrder = async () => {
-    if (!isCvvValid && selectedPaymentMethod) {
+    if (
+      selectedPaymentMethod &&
+      !selectedPaymentMethod.isPaymentValidated &&
+      !isThirdPartyPayment(selectedPaymentMethod?.paymentMethod.typeID)
+    ) {
       scrollToCVV(selectedPaymentMethod);
       return;
     }
@@ -360,9 +364,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
       <Formik
         initialValues={{ autoshipTerms: !orderHasAutoshipItems(order || null) }}
         validationSchema={placeOrderSchema}
-        onSubmit={(values) => {
-          handlePlaceOrder();
-        }}
+        onSubmit={handlePlaceOrder}
       >
         {({
           touched,

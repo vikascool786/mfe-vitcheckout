@@ -161,7 +161,9 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
               return {
                 ...paymentOption,
                 isSelected: false,
-                isVisible: paymentOption.isVisible,
+                isVisible:
+                  paymentOption.paymentMethod.typeID === SEZZLE.typeId ||
+                  paymentOption.isVisible,
               };
             }
           });
@@ -402,9 +404,8 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
           }
     );
 
-    setTimeout(() => {
-      setPaymentMethods(updatedPaymentMethods);
-    }, 300);
+    console.log("Edit Payment Method", updatedPaymentMethods);
+    setPaymentMethods(updatedPaymentMethods);
   };
 
   const handleCancelNewCard = () => {
@@ -455,7 +456,25 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   };
 
   const onAddNewCards = (payments: IPaymentOption[]) => {
-    setPaymentMethods(payments);
+    setTimeout(() => {
+      setPaymentMethods(payments);
+    }, 300);
+  };
+
+  const onCollapse = () => {
+    // Filter and update visibility for PayPal & Sezzle
+    const updatedPaymentMethods = paymentMethods.map((method) => ({
+      ...method,
+      isVisible:
+        method.isSelected ||
+        ["Paypal", "Sezzle"].includes(method.paymentMethod.accountName),
+      isPaymentValidated: true,
+    }));
+
+    setTimeout(() => {
+      setPaymentMethods(updatedPaymentMethods);
+      setIsExpanded(false);
+    }, 300);
   };
 
   return (
@@ -483,6 +502,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
                 handleCancelNewCard={handleCancelNewCard}
                 onAddNewCards={onAddNewCards}
                 updatePaymentTypeId={updatePaymentTypeId}
+                onCollapse={onCollapse}
               />
             ))}
           {showClick2Pay && (

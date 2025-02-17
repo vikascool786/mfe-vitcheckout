@@ -1,4 +1,4 @@
-import { ErrorMessage, Field, Formik, FormikProvider, useFormik } from "formik";
+import { ErrorMessage, FormikProvider, useFormik } from "formik";
 import { useAtom, useSetAtom } from "jotai";
 import { debounce } from "lodash";
 import React, { ChangeEvent, useEffect, useState } from "react";
@@ -33,6 +33,7 @@ export interface IPaymentOptionProps {
   shopperId: string;
   onCardEdit: (id: number) => void;
   index: number;
+  onCollapse: () => void;
   updatePaymentTypeId: (newValue: number) => void;
 }
 
@@ -40,6 +41,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   index,
   shopperId,
   onCardEdit,
+  onCollapse,
   paymentOption,
   onAddNewCards,
   handleCancelNewCard,
@@ -47,8 +49,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
 }) => {
   const [order, setOrder] = useAtom(orderAtom);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [paymentMethods, setPaymentMethods] = useAtom(paymentMethodsAtom);
-  const setCvvValid = useSetAtom(cvvValidAtom);
+  const [paymentMethods] = useAtom(paymentMethodsAtom);
 
   const {
     paymentMethod,
@@ -72,6 +73,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
         .required("CVV is required"),
     }),
     onSubmit: (values) => {
+      console.log("Here at   onValidCVV(values.cvv);", values.cvv);
       if (values.cvv.length === maxLength) {
         onValidCVV(values.cvv);
       }
@@ -97,33 +99,40 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   };
 
   const onChangePaymentMethod = () => {
-    // Set editing to false if switching to a different payment method
-
-    // Update payment methods with the selected method
+    // Find currently selected and validated payment method
+    const previouslySelectedPayment = paymentMethods.find(
+      (pm) => pm.isSelected && pm.isPaymentValidated
+    );
 
     const updatedPaymentOptions = paymentMethods.map((method) => {
-      if (
-        method.paymentMethod.id !== paymentOption.paymentMethod.id &&
-        method.isPaymentValidated
-      ) {
-        formik.resetForm();
-      }
+      const isPayPalOrSezzle =
+        method.paymentMethod.typeID === PAYPAL.typeId ||
+        method.paymentMethod.typeID === SEZZLE.typeId;
+
       return method.paymentMethod.id === paymentOption.paymentMethod.id
         ? {
             ...method,
             isSelected: true,
-            isVisible: true,
-            isPaymentValidated: false,
+            isVisible: true, // Always make selected payment visible
+            isPaymentValidated: method.isPaymentValidated, // Keep current validation status
           }
         : {
             ...method,
             isSelected: false,
             isEditing: false,
-            isPaymentValidated: false,
+            isPaymentValidated: false, // Reset validation only when switching
+            isVisible: isPayPalOrSezzle ? true : method.isVisible, // Keep PayPal and Sezzle always visible
           };
     });
 
-    const selectedPayment = updatedPaymentOptions.find((pm) => pm.isSelected);
+    // Reset the form ONLY IF the previous card was validated and user switched cards
+    if (
+      previouslySelectedPayment &&
+      previouslySelectedPayment.paymentMethod.id !==
+        paymentOption.paymentMethod.id
+    ) {
+      formik.resetForm();
+    }
 
     if (order) {
       setOrder({
@@ -133,130 +142,116 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
           paymentMethod.typeID === SEZZLE.typeId,
       });
     }
-    updatePaymentTypeId(selectedPayment?.paymentMethod.typeID ?? 0);
-    setCvvValid(false);
-    // Set updated payment methods to state
-    onAddCardAndUpdate(updatedPaymentOptions);
-  };
 
-  const debouncedOnValidCVV = debounce((input: string, maxLength: number) => {
-    if (order) {
-      setOrder({ ...order, isOrderValid: false });
-    }
-    if (input.length === maxLength) {
-      onValidCVV(input);
-    }
-  }, 300);
+    updatePaymentTypeId(paymentOption.paymentMethod.typeID ?? 0);
+    onAddNewCards(updatedPaymentOptions);
+  };
 
   const onValidCVV = async (cvv: string) => {
     setLoading(true);
-    if (
-      !thirdPartyPaymentTypeIdList().includes(
-        paymentOption.paymentMethod.typeID
-      ) &&
-      order
-    ) {
-      const requestData = {
-        ...paymentMethod,
-        preferred: true,
-        cvv,
-      };
 
-      let isPaymentMethodValid;
-      try {
-        if (isTempPaymentMethod) {
-          isPaymentMethodValid = await updateTempPaymentMethod(
-            shopperId,
-            requestData
-          );
-        } else {
-          isPaymentMethodValid = await updateShopperDetails(
-            shopperId,
-            paymentMethod.id,
-            requestData
-          );
-        }
-      } catch (error) {
-        if (order) {
-          setOrder({
-            ...order,
-            isOrderValid: false,
-          });
-        }
-        setErrorMessage("Invalid CVV");
-      }
-      if (order && isPaymentMethodValid && !isPaymentValidated) {
-        const updatedOrder = generateChangeStoreResponse({
-          ...order,
-          paymentMethod: {
-            ...order.paymentMethod,
-            id: paymentMethod.id,
-          },
-          billingAddress: {
-            ...paymentAddress,
-            id: paymentAddress?.id as number,
-          },
-        });
-        const orderResponse = await buildOrder(updatedOrder);
-        setOrder({
-          ...orderResponse.response.success.data,
-          isOrderValid: true,
-        });
-        setLoading(false);
-
-        // Update payment methods with the selected method
-        const updatedPaymentOptions = paymentMethods.map((method) =>
-          method.paymentMethod.id === paymentOption.paymentMethod.id
-            ? {
-                ...method,
-                isSelected: true,
-                isVisible: true,
-                isPaymentValidated: true,
-              }
-            : {
-                ...method,
-                isSelected: false,
-                isPaymentValidated: false,
-              }
-        );
-
-        onAddCardAndUpdate(updatedPaymentOptions);
-      }
-
+    if (!order) {
       setLoading(false);
+      return;
     }
-  };
 
-  // cleanup function
-  useEffect(() => {
-    return () => debouncedOnValidCVV.cancel();
-  }, []);
+    const isThirdPartyPayment = thirdPartyPaymentTypeIdList().includes(
+      paymentOption.paymentMethod.typeID
+    );
 
-  const onAddCardAndUpdate = (paymentOptions: IPaymentOption[]) => {
-    onAddNewCards(paymentOptions);
+    // Skip validation if it's a third-party payment
+    if (isThirdPartyPayment) {
+      setLoading(false);
+      return;
+    }
+
+    const requestData = {
+      ...paymentMethod,
+      preferred: true,
+      cvv,
+    };
+
+    try {
+      let isPaymentMethodValid;
+
+      if (isTempPaymentMethod) {
+        isPaymentMethodValid = await updateTempPaymentMethod(
+          shopperId,
+          requestData
+        );
+      } else {
+        isPaymentMethodValid = await updateShopperDetails(
+          shopperId,
+          paymentMethod.id,
+          requestData
+        );
+      }
+
+      // If the validation fails, stop execution
+      if (!isPaymentMethodValid) {
+        throw new Error("Invalid CVV");
+      }
+
+      // Prevent re-validating if already validated
+      if (isPaymentValidated) {
+        setLoading(false);
+        return;
+      }
+
+      // Update order with validated payment method
+      const updatedOrder = generateChangeStoreResponse({
+        ...order,
+        paymentMethod: {
+          ...order.paymentMethod,
+          id: paymentMethod.id,
+        },
+        billingAddress: {
+          ...paymentAddress,
+          id: paymentAddress?.id as number,
+        },
+      });
+
+      const orderResponse = await buildOrder(updatedOrder);
+      setOrder({
+        ...orderResponse.response.success.data,
+        isOrderValid: true,
+      });
+
+      // Reset all payment methods, only keep the validated one
+      const updatedPaymentMethods = paymentMethods.map((method) => ({
+        ...method,
+        isSelected: method.paymentMethod.id === paymentOption.paymentMethod.id,
+        isPaymentValidated:
+          method.paymentMethod.id === paymentOption.paymentMethod.id,
+      }));
+
+      onAddNewCards(updatedPaymentMethods);
+
+      // Reset CVV input in formik
+      // formik.setFieldValue("cvv", "");
+    } catch (error) {
+      setOrder({ ...order, isOrderValid: false });
+      setErrorMessage("Invalid CVV");
+    }
+
+    setLoading(false);
   };
 
   const updatePaymentValidationStatus = (id: number) => {
     // Update payment methods with the selected method
-    const updatedPaymentOptions = paymentMethods.map((method) => ({
-      ...method,
-      paymentMethod: {
-        ...paymentMethod,
-        cvv: 1,
-      },
-      isPaymentValidated: method.paymentMethod.id === id ? true : false,
-    }));
-
-    onAddCardAndUpdate(updatedPaymentOptions);
+    const updatedPaymentOptions = paymentMethods.map((method) => {
+      return {
+        ...method,
+        paymentMethod: {
+          ...paymentMethod,
+          cvv: 1,
+        },
+        isSelected: method.paymentMethod.id === id,
+        isPaymentValidated: method.paymentMethod.id === id,
+      };
+    });
+    onAddNewCards(updatedPaymentOptions);
   };
-
-  const cvvValidationSchema = Yup.object().shape({
-    cvv: Yup.string()
-      .matches(/^\d+$/, "CVV must be numeric")
-      .min(maxLength, "CVV must be 3 or 4 digits")
-      .max(maxLength, "CVV must be 3 or 4 digits")
-      .required("CVV is required"),
-  });
 
   return (
     <div
@@ -300,13 +295,13 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
         )}
         {!isEditing && isCard ? (
           <FormikProvider value={formik}>
-            <form>
+            <form id="card-form">
               <div className="payment-option-container__card-cvv-container">
                 {isSelected && (
                   <div className="payment-option-container__card-cvv">
                     <div>CVV</div>
                     <div>
-                      <Field
+                      <input
                         name="cvv"
                         className="payment-option-container__card-cvv-form"
                         value={formik.values.cvv}
@@ -322,6 +317,10 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
 
                           // Trigger validation when CVV length matches maxLength
                           if (sanitizedValue.length === maxLength) {
+                            console.log(
+                              "Here at  onValidCVV(sanitizedValue)",
+                              sanitizedValue
+                            );
                             onValidCVV(sanitizedValue);
                           }
                         }}
@@ -340,7 +339,10 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                 {isSelected && isCard && (
                   <div
                     className="payment-option-container__card-cvv-edit"
-                    onClick={handlePaymentMethodEdit}
+                    onClick={(event) => {
+                      event.stopPropagation(); // Prevents triggering parent click events
+                      handlePaymentMethodEdit();
+                    }}
                   >
                     edit
                   </div>
@@ -366,7 +368,8 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
           updatePaymentValidationStatus={updatePaymentValidationStatus}
           shopperId={shopperId}
           onCancel={handleCancelNewCard}
-          onAddNewCard={onAddCardAndUpdate}
+          onAddNewCard={onAddNewCards}
+          setCVVFieldValue={formik.setFieldValue}
         />
       )}
     </div>
