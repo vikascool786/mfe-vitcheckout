@@ -26,7 +26,7 @@ import { useAtom, useAtomValue } from "jotai/index";
 import { siteApiData } from "../../checkout/siteAtom";
 import { fetchSezzleUrl } from "../../api/ajaxaction/Sezzle";
 import {
-  cvvValidAtom,
+  // cvvValidAtom,
   IPaymentOption,
   orderAtom,
   paymentMethodsAtom,
@@ -75,7 +75,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   const [orderData, setOrderData] = useAtom(orderAtom);
 
   const paymentMethods = useAtomValue(paymentMethodsAtom);
-  const isCvvValid = useAtomValue<boolean>(cvvValidAtom);
+  // const isCvvValid = useAtomValue<boolean>(cvvValidAtom);
 
   const selectedPaymentMethod = paymentMethods.find((pm) => pm.isSelected);
 
@@ -436,7 +436,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
               <Button
                 label={
                   paymentTypeId === SEZZLE.typeId ||
-                  paymentTypeId === PAYPAL.typeId
+                    paymentTypeId === PAYPAL.typeId
                     ? "Pay with"
                     : "Place Order"
                 }
@@ -446,8 +446,8 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                   paymentTypeId === SEZZLE.typeId
                     ? "https://img.shop.com/Image/resources/checkout/Sezzle-Color-White-Logo.svg"
                     : paymentTypeId === PAYPAL.typeId
-                    ? "https://img.shop.com/Image/resources/checkout/PayPal-White-Logo.svg"
-                    : ""
+                      ? "https://img.shop.com/Image/resources/checkout/PayPal-White-Logo.svg"
+                      : ""
                 }
               />
             )}

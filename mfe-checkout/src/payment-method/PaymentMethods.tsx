@@ -503,6 +503,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       }
 
       if (id === -1001 || id === -1002) {
+        
         return {
           ...paymentMethod,
           isSelected: paymentMethod.paymentMethod.id === id,
@@ -519,6 +520,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
 
     setTimeout(() => {
       formik.resetForm();
+      updatePaymentTypeId(updatedPaymentMethods.find((pm) => pm.paymentMethod.id === id)?.paymentMethod.typeID || 0);
       setPaymentMethods(updatedPaymentMethods);
       setIsExpanded(false);
     }, 300);
