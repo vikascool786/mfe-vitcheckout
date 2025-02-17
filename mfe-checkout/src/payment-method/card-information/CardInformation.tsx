@@ -263,15 +263,6 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
         });
 
         const updatedPaymentMethods = [
-          ...paymentMethods.map((pm) => ({
-            ...pm,
-            paymentMethod: {
-              ...pm.paymentMethod,
-              preferred: false,
-            },
-            isSelected: false,
-            isPaymentValidated: false,
-          })),
           {
             paymentMethod: {
               ...response.at(-1),
@@ -283,6 +274,15 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
             isEditing: false,
             isPaymentValidated: true,
           },
+          ...paymentMethods.map((pm) => ({
+            ...pm,
+            paymentMethod: {
+              ...pm.paymentMethod,
+              preferred: false,
+            },
+            isSelected: false,
+            isPaymentValidated: false,
+          })),
         ].filter((pm) => pm.paymentMethod?.id !== 0);
 
         if (order && paymentMethod) {
@@ -330,15 +330,6 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           };
 
           const updatedPaymentMethods = [
-            ...paymentMethods.map((pm) => ({
-              ...pm,
-              paymentMethod: {
-                ...pm.paymentMethod,
-                preferred: false,
-              },
-              isPaymentValidated: false,
-              isSelected: false,
-            })),
             {
               paymentMethod: {
                 ...updatedPaymentMethod,
@@ -351,6 +342,15 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
               isSelected: true,
               isVisible: true,
             },
+            ...paymentMethods.map((pm) => ({
+              ...pm,
+              paymentMethod: {
+                ...pm.paymentMethod,
+                preferred: false,
+              },
+              isPaymentValidated: false,
+              isSelected: false,
+            })),
           ].filter((pm) => pm.paymentMethod.id !== 0);
 
           if (order && response.id) {
@@ -368,10 +368,8 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
             });
           }
 
-          setTimeout(() => {
-            onAddNewCard(updatedPaymentMethods as IPaymentOption[]);
-            setLoading(false);
-          }, 300);
+          onAddNewCard(updatedPaymentMethods as IPaymentOption[]);
+          setLoading(false);
         }
 
         setCardError("Error while adding card");
