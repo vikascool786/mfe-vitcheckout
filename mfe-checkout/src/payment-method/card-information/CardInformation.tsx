@@ -305,7 +305,6 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
             isOrderValid: true,
           });
           setLoading(false);
-          onCancel();
         }
       } else if (type === "TEMP") {
         const cardTokenResponse = await generateCardToken(requestData.number);
@@ -368,7 +367,6 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
               isOrderValid: true,
             });
           }
-          onCancel();
 
           setTimeout(() => {
             onAddNewCard(updatedPaymentMethods as IPaymentOption[]);
