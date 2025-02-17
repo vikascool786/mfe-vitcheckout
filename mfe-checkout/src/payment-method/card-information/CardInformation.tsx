@@ -91,13 +91,13 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
     // Conditionally apply address validation if sameShippingAddress is true
     ...(!sameShippingAddress
       ? {
-          first: Yup.string().required("First name is required"),
-          last: Yup.string().required("Last name is required"),
-          address1: Yup.string().required("Address is required"),
-          city: Yup.string().required("City is required"),
-          state: Yup.string().required("State is required"),
-          zip: Yup.string().required("Zip code is required"),
-        }
+        first: Yup.string().required("First name is required"),
+        last: Yup.string().required("Last name is required"),
+        address1: Yup.string().required("Address is required"),
+        city: Yup.string().required("City is required"),
+        state: Yup.string().required("State is required"),
+        zip: Yup.string().required("Zip code is required"),
+      }
       : {}),
   });
 
@@ -313,10 +313,10 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
         const response =
           token && number
             ? await addTempPaymentMethod(shopperId, {
-                ...requestData,
-                token,
-                number,
-              })
+              ...requestData,
+              token,
+              number,
+            })
             : await updateTempPaymentMethod(shopperId, requestData);
 
         if (response) {
@@ -439,14 +439,14 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           setCardError(null);
           const address = !sameShippingAddress
             ? {
-                first: values.first,
-                last: values.last,
-                address1: values.address1,
-                address2: values.address2,
-                city: values.city,
-                state: values.state,
-                zip: values.zip,
-              }
+              first: values.first,
+              last: values.last,
+              address1: values.address1,
+              address2: values.address2,
+              city: values.city,
+              state: values.state,
+              zip: values.zip,
+            }
             : (shippingAddress as Address);
           handleSaveCardInformation(
             {

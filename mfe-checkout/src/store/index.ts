@@ -54,6 +54,4 @@ export const OrderStore = createStore();
 
 export const loadingAtom = atom<boolean>(false);
 
-export const cvvValidAtom = atom<boolean>(false);
-
 export const orderNotificationsAtom = atom<string[]>();
