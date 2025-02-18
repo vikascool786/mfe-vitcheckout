@@ -182,10 +182,12 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
         inline: "start",
       });
     } else {
-      console.warn("Element not found:", selectedPaymentMethod.paymentMethod.id);
+      console.warn(
+        "Element not found:",
+        selectedPaymentMethod.paymentMethod.id
+      );
     }
   };
-
 
   const handlePlaceOrder = async () => {
     try {
@@ -237,6 +239,10 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
           // console.log("handle place order");
           // console.log("paymentMethods: " + JSON.stringify(paymentMethods));
           // console.log("selectedPaymentMethod: " + JSON.stringify(selectedPaymentMethod));
+          const selectedPaymentMethod = paymentMethods.find(
+            (pm) => pm.isSelected
+          );
+
           if (
             selectedPaymentMethod &&
             !selectedPaymentMethod.isPaymentValidated
@@ -459,7 +465,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
               <Button
                 label={
                   paymentTypeId === SEZZLE.typeId ||
-                    paymentTypeId === PAYPAL.typeId
+                  paymentTypeId === PAYPAL.typeId
                     ? "Pay with"
                     : "Place Order"
                 }
@@ -469,8 +475,8 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                   paymentTypeId === SEZZLE.typeId
                     ? "https://img.shop.com/Image/resources/checkout/Sezzle-Color-White-Logo.svg"
                     : paymentTypeId === PAYPAL.typeId
-                      ? "https://img.shop.com/Image/resources/checkout/PayPal-White-Logo.svg"
-                      : ""
+                    ? "https://img.shop.com/Image/resources/checkout/PayPal-White-Logo.svg"
+                    : ""
                 }
               />
             )}

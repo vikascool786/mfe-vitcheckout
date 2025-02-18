@@ -419,14 +419,14 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     const updatedPaymentMethods = paymentMethods.map((method) =>
       method.paymentMethod.id === paymentId
         ? {
-          ...method,
-          isEditing: !method.isEditing, // Toggle editing state for the selected payment method
-        }
+            ...method,
+            isEditing: !method.isEditing, // Toggle editing state for the selected payment method
+          }
         : {
-          ...method,
-          isEditing: false,
-          isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
-        }
+            ...method,
+            isEditing: false,
+            isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
+          }
     );
     setPaymentMethods(updatedPaymentMethods);
   };
@@ -502,9 +502,9 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       }
 
       if (id === -1001 || id === -1002) {
-        
         return {
           ...paymentMethod,
+          isPaymentValidated: false,
           isSelected: paymentMethod.paymentMethod.id === id,
           isVisible: paymentMethod.paymentMethod.preferred || false,
         };
@@ -519,7 +519,10 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
 
     setTimeout(() => {
       formik.resetForm();
-      updatePaymentTypeId(updatedPaymentMethods.find((pm) => pm.paymentMethod.id === id)?.paymentMethod.typeID || 0);
+      updatePaymentTypeId(
+        updatedPaymentMethods.find((pm) => pm.paymentMethod.id === id)
+          ?.paymentMethod.typeID || 0
+      );
       setPaymentMethods(updatedPaymentMethods);
       setIsExpanded(false);
     }, 300);
