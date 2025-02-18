@@ -10,3 +10,17 @@ export const getCatalogName = (storeData: OrderStore): string | undefined => {
   }
   return `${storeData.items[0].catalogName} Shipment` || undefined;
 };
+
+export const getShipWarningMessage = (
+  storeData: OrderStore
+): string | undefined => {
+  if (!storeData || !storeData.items || storeData.items.length === 0) {
+    return undefined;
+  }
+
+  const firstItem = storeData.items[0];
+
+  return firstItem?.shipWarningMessages?.length
+    ? firstItem.shipWarningMessages[0]
+    : undefined;
+};

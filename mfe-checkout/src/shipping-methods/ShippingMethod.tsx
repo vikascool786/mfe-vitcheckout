@@ -1,20 +1,31 @@
 import { useAtom, useSetAtom } from "jotai";
 import React, { useEffect, useState } from "react";
-import { buildOrder, OrderResponse, removeProductFromCart } from "../api/service/Order";
+import {
+  buildOrder,
+  OrderResponse,
+  removeProductFromCart,
+} from "../api/service/Order";
+import { portalApiData } from "../checkout/portalAtom";
 import { FormHeading } from "../component/Form/Heading/FormHeading";
+import { RadioButton } from "../component/RadioButton/RadioButton";
 import withLoader from "../hoc/withLoader";
+import { OrderConsolidationData } from "../interfaces/OrderConsolidationData";
 import { ShippingItem } from "../shipping-item/ShippingItem";
 import { ShippingOptions } from "../shipping-options/ShippingOptions";
-import {loadingAtom, orderAtom, orderNotificationsAtom} from "../store";
-import { getCatalogName } from "../utils/helpers/GetCatalog";
-import "./ShippingMethod.scss";
-import { portalApiData } from "../checkout/portalAtom";
+import { loadingAtom, orderAtom, orderNotificationsAtom } from "../store";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
-import {getOrderConsolidateData, getOrderNotifications} from "../utils/OrderUtils";
-import { RadioButton } from "../component/RadioButton/RadioButton";
-import { OrderConsolidationData } from "../interfaces/OrderConsolidationData";
-import { OrderStore } from "../interfaces/Order";
+import {
+  getCatalogName,
+  getShipWarningMessage,
+} from "../utils/helpers/GetCatalog";
+import {
+  getOrderConsolidateData,
+  getOrderNotifications,
+} from "../utils/OrderUtils";
 import { GET_SHOP_CART_URL } from "../utils/urlResolver";
+import "./ShippingMethod.scss";
+import { decodeHtmlEntities } from "../utils/helpers/DecodeHtml";
+import { Warning } from "../assets/svgs/Warning";
 
 interface IShippingMethodProps {
   shopperID: string;
@@ -24,13 +35,16 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
   const [orders, setOrder] = useAtom(orderAtom);
   const setLoading = useSetAtom(loadingAtom);
   const [portalData] = useAtom(portalApiData(shopperID));
-  const [orderConsolidateData, setOrderConsolidateData] = useState<OrderConsolidationData>({
-    showOrderConsolidate: false,
-    availabilityDate: "",
-    oosConsolidate: 3,
-    shipDateMessageMap: new Map<string, string>(),
-  });
-  const [orderNotifications, setOrderNotifications] = useAtom(orderNotificationsAtom);
+  const [orderConsolidateData, setOrderConsolidateData] =
+    useState<OrderConsolidationData>({
+      showOrderConsolidate: false,
+      availabilityDate: "",
+      oosConsolidate: 3,
+      shipDateMessageMap: new Map<string, string>(),
+    });
+  const [orderNotifications, setOrderNotifications] = useAtom(
+    orderNotificationsAtom
+  );
 
   if (!orders) {
     return <p>Loading shipping methods...</p>;
@@ -78,9 +92,12 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
     setOrderConsolidateData(getOrderConsolidateData(orders));
   }, [orders]);
 
-  const handleChangeOOSConsolidate = (oosConsolidate: number, event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeOOSConsolidate = (
+    oosConsolidate: number,
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setLoading(true);
-    setOrderConsolidateData(prev => ({
+    setOrderConsolidateData((prev) => ({
       ...prev,
       oosConsolidate: oosConsolidate,
     }));
@@ -111,7 +128,11 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
 
       {orderConsolidateData?.showOrderConsolidate && (
         <div className="shipping-options-container">
-          <div className={`shipping-option-container start ${orderConsolidateData.oosConsolidate === 2 ? "selected" : ""}`}>
+          <div
+            className={`shipping-option-container start ${
+              orderConsolidateData.oosConsolidate === 2 ? "selected" : ""
+            }`}
+          >
             <div className="shipping-option-wrapper">
               <div className="shipping-option-select-container">
                 <RadioButton
@@ -120,13 +141,19 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
                   checked={orderConsolidateData.oosConsolidate === 2}
                 />
                 <div className={`shipping-option-sub-container`}>
-                  <div>Ship available products now and create multiple shipments</div>
+                  <div>
+                    Ship available products now and create multiple shipments
+                  </div>
                   <div>Separate shipping charges apply.</div>
                 </div>
               </div>
             </div>
           </div>
-          <div className={`shipping-option-container end ${orderConsolidateData.oosConsolidate === 3 ? "selected" : ""}`}>
+          <div
+            className={`shipping-option-container end ${
+              orderConsolidateData.oosConsolidate === 3 ? "selected" : ""
+            }`}
+          >
             <div className="shipping-option-wrapper">
               <div className="shipping-option-select-container">
                 <RadioButton
@@ -142,8 +169,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
             </div>
           </div>
         </div>
-      )
-      }
+      )}
 
       {orders?.stores && (
         <div className="shipping-item-container">
@@ -156,19 +182,19 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
                 store && (
                   <div key={key}>
                     <div className="shipping-catolog-name">
-                      {
-                        orderConsolidateData?.oosConsolidate === 2 ? (
-                          key.includes("*OOS*") ? (
-                            <span>{orderConsolidateData?.shipDateMessageMap.get(key)}</span>
-                          ) : (
-                            <span>Shipping Now</span>
-                          )
+                      {orderConsolidateData?.oosConsolidate === 2 ? (
+                        key.includes("*OOS*") ? (
+                          <span>
+                            {orderConsolidateData?.shipDateMessageMap.get(key)}
+                          </span>
                         ) : (
-                          <span>{getCatalogName(store)}</span>
+                          <span>Shipping Now</span>
                         )
-                      }
-
+                      ) : (
+                        <span>{getCatalogName(store)}</span>
+                      )}
                     </div>
+
                     {store.items &&
                       store.items.map((item, itemIndex) => (
                         <div key={itemIndex}>
@@ -185,6 +211,18 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
                         </div>
                       ))}
                     {/* Pass store-specific shippingSelections */}
+
+                    {getShipWarningMessage(store) && (
+                      <div className="warning-message">
+                        <Warning />
+                        <span
+                          className="warning-span"
+                          dangerouslySetInnerHTML={{
+                            __html: getShipWarningMessage(store),
+                          }}
+                        />
+                      </div>
+                    )}
                     {store.shippingSelections && (
                       <ShippingOptions store={store} storeKey={key} />
                     )}

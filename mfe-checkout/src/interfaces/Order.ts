@@ -45,6 +45,7 @@ export interface Item {
   available?: string;
   totals: ITotal;
   permutation?: Permutation;
+  shipWarningMessages?: string[];
 }
 
 export interface Image {
