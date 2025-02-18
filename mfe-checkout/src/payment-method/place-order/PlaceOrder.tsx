@@ -182,10 +182,10 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
       var headerOffset = 80;
       var elementPosition = section.getBoundingClientRect().top;
       var offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-    
+
       window.scrollTo({
-           top: offsetPosition,
-           behavior: "smooth"
+        top: offsetPosition,
+        behavior: "smooth"
       });
     } else {
       console.warn(
@@ -471,7 +471,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
               <Button
                 label={
                   paymentTypeId === SEZZLE.typeId ||
-                  paymentTypeId === PAYPAL.typeId
+                    paymentTypeId === PAYPAL.typeId
                     ? "Pay with"
                     : "Place Order"
                 }
@@ -481,8 +481,8 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                   paymentTypeId === SEZZLE.typeId
                     ? "https://img.shop.com/Image/resources/checkout/Sezzle-Color-White-Logo.svg"
                     : paymentTypeId === PAYPAL.typeId
-                    ? "https://img.shop.com/Image/resources/checkout/PayPal-White-Logo.svg"
-                    : ""
+                      ? "https://img.shop.com/Image/resources/checkout/PayPal-White-Logo.svg"
+                      : ""
                 }
               />
             )}

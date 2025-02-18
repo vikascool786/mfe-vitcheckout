@@ -36,6 +36,7 @@ import Checkout from "./Checkout";
 import { Notifications } from "./Notifications";
 import SessionTimeout from "./SessionTimeout";
 import { portalApiData } from "./portalAtom";
+import Skeleton from "../component/Skeleton/Skeleton";
 
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
@@ -309,7 +310,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   };
 
   if (loadingAddresses || loadingPaymentMethods || loadingOrder)
-    return <div>Loading...</div>;
+    return <Skeleton />;
 
   if (addressError || paymentError) return <div>Failed to load data</div>;
 
