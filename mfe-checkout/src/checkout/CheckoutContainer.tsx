@@ -1,6 +1,7 @@
 import { useAtom, useAtomValue } from "jotai";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import "../App.scss";
+import { createAutoshipUrl } from "../api/ajaxaction/Autoship";
 import { checkoutSezzle } from "../api/ajaxaction/Sezzle";
 import { buildOrder, commitOrder, OrderResponse } from "../api/service/Order";
 import ErrorMessage from "../component/Error";
@@ -22,19 +23,18 @@ import {
   orderNotificationsAtom,
   paymentMethodsAtom,
 } from "../store";
+import { getOrderNotifications } from "../utils/OrderUtils";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import { handleSezzleCheckout } from "../utils/helpers/SezzleHelper";
-import Feedback from "./../Feedback/Feedback";
 import {
   GET_API_ENDPOINT_BASE_URL_ONLY,
   GET_API_KEY,
   GET_SHOP_CART_URL,
 } from "../utils/urlResolver";
+import Feedback from "./../Feedback/Feedback";
 import Checkout from "./Checkout";
-import { createAutoshipUrl } from "../api/ajaxaction/Autoship";
-import SessionTimeout from "./SessionTimeout";
 import { Notifications } from "./Notifications";
-import { getOrderNotifications } from "../utils/OrderUtils";
+import SessionTimeout from "./SessionTimeout";
 import { portalApiData } from "./portalAtom";
 
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
@@ -353,7 +353,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
               </div>
             </div>
             <div className="place-order">
-              {!paymentMethodOptions && (
+              {paymentMethodOptions && (
                 <PlaceOrder
                   confirmOrder={confirmOrder}
                   errorMessage={orderErrorMessage}
@@ -364,6 +364,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                   order={orderData}
                   updateOrderErrorMessage={handleUpdateOrderErrorMessage}
                   billingId={defaultAddress?.id || 0}
+                  setOrderData={setOrderData}
                   shippingId={
                     defaultPaymentMethod?.addressId ?? defaultAddress?.id ?? 0
                   }

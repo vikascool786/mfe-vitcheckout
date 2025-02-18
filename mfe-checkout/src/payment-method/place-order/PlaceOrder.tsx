@@ -21,8 +21,7 @@ import { OrderConsolidationData } from "../../interfaces/OrderConsolidationData"
 import Click2PayPlaceOrder from "../../payment-method-click2pay/Click2PayPlaceOrder";
 import {
   // cvvValidAtom,
-  IPaymentOption,
-  orderAtom
+  IPaymentOption
 } from "../../store";
 import { generateChangeStoreResponse } from "../../utils/helpers/GenerateChangeStoreResponse";
 import { generateOrderTrackingId } from "../../utils/helpers/GenerateOrderTrackingId";
@@ -51,6 +50,7 @@ interface IPlaceOrder {
   siteId: string;
   order?: Order;
   paymentMethods: IPaymentOption[];
+  setOrderData: any;
   updateOrderErrorMessage: (newMessage: string) => void;
 }
 
@@ -61,6 +61,7 @@ const PAYPAL_TOKEN_URL = (shopperId: string, totalAmountDue: number) =>
 
 const PlaceOrder: React.FC<IPlaceOrder> = ({
   confirmOrder,
+  setOrderData,
   paymentMethods,
   errorMessage,
   paymentTypeId,
@@ -73,7 +74,6 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   const trackingData = new Map<string, string>();
   const [siteData] = useAtom(siteApiData(siteId));
 
-  const [orderData, setOrderData] = useAtom(orderAtom);
 
   // const [paymentMethods] = useAtom(paymentMethodsAtom);
   // const isCvvValid = useAtomValue<boolean>(cvvValidAtom);
@@ -179,10 +179,13 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     );
 
     if (section) {
-      section.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-        inline: "start",
+      var headerOffset = 80;
+      var elementPosition = section.getBoundingClientRect().top;
+      var offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+    
+      window.scrollTo({
+           top: offsetPosition,
+           behavior: "smooth"
       });
     } else {
       console.warn(

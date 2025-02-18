@@ -1,7 +1,6 @@
-import { ErrorMessage, FormikProvider, useFormik } from "formik";
+import { ErrorMessage } from "formik";
 import { useAtom, useSetAtom } from "jotai";
 import React, { ChangeEvent, useState } from "react";
-import * as Yup from "yup";
 import { buildOrder } from "../api/service/Order";
 import {
   updateShopperDetails,
@@ -194,6 +193,30 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     onAddNewCards(updatedPaymentOptions);
   };
 
+  const isCardExpired = () => {
+    if (!paymentMethod.expires) {
+      return false;
+    }
+
+    const [expMonth, expYear] = paymentMethod.expires.split("/").map(Number);
+    if (!expMonth || !expYear) {
+      return false;
+    }
+
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth() + 1; // Months are 0-based
+    const currentYear = currentDate.getFullYear() % 100; // Get last two digits of year
+
+    return (
+      expYear < currentYear ||
+      (expYear === currentYear && expMonth < currentMonth)
+    );
+  };
+
+  if (isCardExpired()) {
+    formik.setFieldError("cvv", "Card is expired");
+  }
+
   return (
     <div
       className={`payment-option-container ${isSelected} ${isFirst}`}
@@ -263,9 +286,9 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                             (pm) =>
                               pm.paymentMethod.id === paymentMethod.id
                                 ? {
-                                  ...pm,
-                                  isPaymentValidated: false,
-                                }
+                                    ...pm,
+                                    isPaymentValidated: false,
+                                  }
                                 : pm
                           );
 
