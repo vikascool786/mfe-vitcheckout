@@ -194,8 +194,6 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     onAddNewCards(updatedPaymentOptions);
   };
 
-  console.log(formik.values.cvv);
-
   return (
     <div
       className={`payment-option-container ${isSelected} ${isFirst}`}

@@ -153,32 +153,41 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     }
   }, []); // Ensure dependencies are correctly handled
 
+  // const scrollToCVV = (selectedPaymentMethod: IPaymentOption) => {
+  //   const section = document.getElementById(
+  //     `[id=${selectedPaymentMethod.paymentMethod.id}]`
+  //   );
+  //   section?.scrollIntoView({
+  //     behavior: "smooth",
+  //     block: "start",
+  //     inline: "start",
+  //   });
+  //   return;
+  // };
+
   const scrollToCVV = (selectedPaymentMethod: IPaymentOption) => {
+    if (!selectedPaymentMethod?.paymentMethod?.id) {
+      console.error("Invalid payment method ID");
+      return;
+    }
+
     const section = document.getElementById(
       `[id=${selectedPaymentMethod.paymentMethod.id}]`
     );
-    section?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-      inline: "start",
-    });
-    return;
+
+    if (section) {
+      section.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+        inline: "start",
+      });
+    } else {
+      console.warn("Element not found:", selectedPaymentMethod.paymentMethod.id);
+    }
   };
 
+
   const handlePlaceOrder = async () => {
-    if (
-      selectedPaymentMethod &&
-      !selectedPaymentMethod.isPaymentValidated &&
-      !isThirdPartyPayment(selectedPaymentMethod?.paymentMethod.typeID)
-    ) {
-      order &&
-        setOrderData({
-          ...order,
-          shouldShowInvalidCVVMessage: true,
-        });
-      scrollToCVV(selectedPaymentMethod);
-      return;
-    }
     try {
       setIsLoading(true);
       paymentTypeId =
@@ -219,13 +228,27 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
 
           if (!paypalToken) {
             alert("Failed to fetch PayPal token, check console for message");
-            // console.log(error);
             return;
           }
           const url = `https://www.sandbox.paypal.com/checkoutnow?token=${paypalToken.tokenId}`;
           window.open(url, "_self");
           break;
         default:
+          // console.log("handle place order");
+          // console.log("paymentMethods: " + JSON.stringify(paymentMethods));
+          // console.log("selectedPaymentMethod: " + JSON.stringify(selectedPaymentMethod));
+          if (
+            selectedPaymentMethod &&
+            !selectedPaymentMethod.isPaymentValidated
+          ) {
+            order &&
+              setOrderData({
+                ...order,
+                shouldShowInvalidCVVMessage: true,
+              });
+            scrollToCVV(selectedPaymentMethod);
+            return;
+          }
           await handleFinalPlaceOrderUpdate();
           confirmOrder();
           break;

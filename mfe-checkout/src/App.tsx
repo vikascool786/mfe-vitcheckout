@@ -51,7 +51,6 @@ const App: React.FC<AppProps> = () => {
           siteId="66"
           sessionId=""
         />
-
         {/* <CheckoutContainer
           cartId="cart_1326748654_W_USA_USA_ENG"
           shopperId="hqwxZzYzzqpeVzhWmZzZmZpzzkxkjzmZWqqWzxzkzj"

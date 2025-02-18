@@ -387,7 +387,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     if (accountName === PAYPAL.name || accountName === SEZZLE.name) {
       return true;
     }
-
     return false;
   };
 
