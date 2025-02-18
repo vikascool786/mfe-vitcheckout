@@ -1,4 +1,4 @@
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import "../App.scss";
 import { checkoutSezzle } from "../api/ajaxaction/Sezzle";
@@ -16,7 +16,12 @@ import { OrderSummary } from "../order-summary/OrderSummary";
 import PaymentMethod from "../payment-method/PaymentMethods";
 import PlaceOrder from "../payment-method/place-order/PlaceOrder";
 import ShippingMethod from "../shipping-methods/ShippingMethod";
-import { loadingAtom, orderAtom, orderNotificationsAtom } from "../store";
+import {
+  loadingAtom,
+  orderAtom,
+  orderNotificationsAtom,
+  paymentMethodsAtom,
+} from "../store";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import { handleSezzleCheckout } from "../utils/helpers/SezzleHelper";
 import Feedback from "./../Feedback/Feedback";
@@ -89,6 +94,8 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   const [orderNotifications, setOrderNotifications] = useAtom(
     orderNotificationsAtom
   );
+
+  const paymentMethodOptions = useAtomValue(paymentMethodsAtom);
   const [portalData] = useAtom(portalApiData(shopperId));
 
   const addressUrl = `${apiDomain}/shopper-addressbooks/v1/${shopperId}/AddressBook?siteId=${siteId}&api_key=${apiKey}`;
@@ -346,11 +353,12 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
               </div>
             </div>
             <div className="place-order">
-              {!loadingPaymentMethods && (
+              {!paymentMethodOptions && (
                 <PlaceOrder
                   confirmOrder={confirmOrder}
                   errorMessage={orderErrorMessage}
                   paymentTypeId={paymentTypeId}
+                  paymentMethods={paymentMethodOptions}
                   shopperId={shopperId}
                   siteId={siteId}
                   order={orderData}

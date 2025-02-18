@@ -1,46 +1,45 @@
+import { loadScript } from "@paypal/paypal-js";
+import { Formik } from "formik";
+import { useAtom } from "jotai/index";
 import React, { memo, useEffect, useState } from "react";
-import "./PlaceOrder.scss";
-import { Button } from "../../component/Button/Button";
-import { CLICK2PAY, isThirdPartyPayment, PAYPAL, SEZZLE } from "../PaymentType";
+import { fetchSezzleUrl } from "../../api/ajaxaction/Sezzle";
 import { getTransactionData } from "../../api/service/Click2PayTransaction";
-import Click2PayPlaceOrder from "../../payment-method-click2pay/Click2PayPlaceOrder";
+import { buildOrder, changeOrder } from "../../api/service/Order";
 import {
   addTempPaymentMethod,
   generatePayPalTransactionDetails,
 } from "../../api/service/ShoppersPaymentMethods";
-import { generateChangeStoreResponse } from "../../utils/helpers/GenerateChangeStoreResponse";
-import { loadScript } from "@paypal/paypal-js";
-import { buildOrder, changeOrder } from "../../api/service/Order";
 import { fetchSiteFlagData } from "../../api/service/SiteFlags";
+import { siteApiData } from "../../checkout/siteAtom";
+import { Button } from "../../component/Button/Button";
+import { Checkbox } from "../../component/Form/Checkbox/Checkbox";
+import { Spinner } from "../../component/Spinner/Spinner";
 import { useApi } from "../../hooks/useAPI";
+import { Address } from "../../interfaces/Address";
+import { Order } from "../../interfaces/Order";
+import { OrderConsolidationData } from "../../interfaces/OrderConsolidationData";
+import Click2PayPlaceOrder from "../../payment-method-click2pay/Click2PayPlaceOrder";
+import {
+  // cvvValidAtom,
+  IPaymentOption,
+  orderAtom
+} from "../../store";
+import { generateChangeStoreResponse } from "../../utils/helpers/GenerateChangeStoreResponse";
+import { generateOrderTrackingId } from "../../utils/helpers/GenerateOrderTrackingId";
+import { hasPaypalToken } from "../../utils/helpers/PaypalHelper";
+import {
+  getOrderConsolidateData,
+  orderHasAutoshipItems,
+} from "../../utils/OrderUtils";
 import {
   GET_API_ENDPOINT_BASE_URL_ONLY,
   GET_API_KEY,
   GET_PAYPAL_CLIENT_ID,
   GET_PAYPAL_RETURN_URL,
 } from "../../utils/urlResolver";
-import { Order } from "../../interfaces/Order";
-import { generateOrderTrackingId } from "../../utils/helpers/GenerateOrderTrackingId";
-import { Address } from "../../interfaces/Address";
-import { useAtom, useAtomValue } from "jotai/index";
-import { siteApiData } from "../../checkout/siteAtom";
-import { fetchSezzleUrl } from "../../api/ajaxaction/Sezzle";
-import {
-  // cvvValidAtom,
-  IPaymentOption,
-  orderAtom,
-  paymentMethodsAtom,
-} from "../../store";
-import { Checkbox } from "../../component/Form/Checkbox/Checkbox";
-import { Formik } from "formik";
 import { placeOrderSchema } from "../../validation/placeOrderSchema";
-import {
-  getOrderConsolidateData,
-  orderHasAutoshipItems,
-} from "../../utils/OrderUtils";
-import { OrderConsolidationData } from "../../interfaces/OrderConsolidationData";
-import { hasPaypalToken } from "../../utils/helpers/PaypalHelper";
-import { Spinner } from "../../component/Spinner/Spinner";
+import { CLICK2PAY, PAYPAL, SEZZLE } from "../PaymentType";
+import "./PlaceOrder.scss";
 
 interface IPlaceOrder {
   confirmOrder: () => void;
@@ -51,6 +50,7 @@ interface IPlaceOrder {
   shopperId: string;
   siteId: string;
   order?: Order;
+  paymentMethods: IPaymentOption[];
   updateOrderErrorMessage: (newMessage: string) => void;
 }
 
@@ -61,6 +61,7 @@ const PAYPAL_TOKEN_URL = (shopperId: string, totalAmountDue: number) =>
 
 const PlaceOrder: React.FC<IPlaceOrder> = ({
   confirmOrder,
+  paymentMethods,
   errorMessage,
   paymentTypeId,
   shopperId,
@@ -74,8 +75,10 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
 
   const [orderData, setOrderData] = useAtom(orderAtom);
 
-  const [paymentMethods] = useAtom(paymentMethodsAtom);
+  // const [paymentMethods] = useAtom(paymentMethodsAtom);
   // const isCvvValid = useAtomValue<boolean>(cvvValidAtom);
+
+  console.log("FROM PROPS", paymentMethods)
 
   const selectedPaymentMethod = paymentMethods.find((pm) => pm.isSelected);
 
@@ -398,7 +401,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
       <Formik
         initialValues={{ autoshipTerms: !orderHasAutoshipItems(order || null) }}
         validationSchema={placeOrderSchema}
-        onSubmit={ () => handlePlaceOrder(paymentMethods)}
+        onSubmit={() => handlePlaceOrder(paymentMethods)}
       >
         {({
           touched,
