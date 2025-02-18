@@ -21,7 +21,7 @@ import { OrderConsolidationData } from "../../interfaces/OrderConsolidationData"
 import Click2PayPlaceOrder from "../../payment-method-click2pay/Click2PayPlaceOrder";
 import {
   // cvvValidAtom,
-  IPaymentOption
+  IPaymentOption,
 } from "../../store";
 import { generateChangeStoreResponse } from "../../utils/helpers/GenerateChangeStoreResponse";
 import { generateOrderTrackingId } from "../../utils/helpers/GenerateOrderTrackingId";
@@ -73,12 +73,6 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   const [isLoading, setIsLoading] = useState(false);
   const trackingData = new Map<string, string>();
   const [siteData] = useAtom(siteApiData(siteId));
-
-
-  // const [paymentMethods] = useAtom(paymentMethodsAtom);
-  // const isCvvValid = useAtomValue<boolean>(cvvValidAtom);
-
-  console.log("FROM PROPS", paymentMethods)
 
   const selectedPaymentMethod = paymentMethods.find((pm) => pm.isSelected);
 
@@ -156,18 +150,6 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     }
   }, []); // Ensure dependencies are correctly handled
 
-  // const scrollToCVV = (selectedPaymentMethod: IPaymentOption) => {
-  //   const section = document.getElementById(
-  //     `[id=${selectedPaymentMethod.paymentMethod.id}]`
-  //   );
-  //   section?.scrollIntoView({
-  //     behavior: "smooth",
-  //     block: "start",
-  //     inline: "start",
-  //   });
-  //   return;
-  // };
-
   const scrollToCVV = (selectedPaymentMethod: IPaymentOption) => {
     if (!selectedPaymentMethod?.paymentMethod?.id) {
       console.error("Invalid payment method ID");
@@ -185,7 +167,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
 
       window.scrollTo({
         top: offsetPosition,
-        behavior: "smooth"
+        behavior: "smooth",
       });
     } else {
       console.warn(
@@ -198,6 +180,11 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   const handlePlaceOrder = async (paymentMethods: IPaymentOption[]) => {
     try {
       setIsLoading(true);
+
+      if (!order?.shippingAddress.address1 || !order?.billingAddress.address1) {
+        window.scrollTo(0, 0);
+        return;
+      }
       paymentTypeId =
         selectedPaymentMethod?.paymentMethod.typeID || paymentTypeId;
 
@@ -406,15 +393,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
         validationSchema={placeOrderSchema}
         onSubmit={() => handlePlaceOrder(paymentMethods)}
       >
-        {({
-          touched,
-          errors,
-          handleChange,
-          handleBlur,
-          setFieldValue,
-          submitForm,
-          values,
-        }) => (
+        {({ touched, errors, setFieldValue, submitForm, values }) => (
           <form>
             {orderHasAutoshipItems(order || null) && (
               <div className="checkout-place-order-autoship checkout-place-order-text">
@@ -471,7 +450,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
               <Button
                 label={
                   paymentTypeId === SEZZLE.typeId ||
-                    paymentTypeId === PAYPAL.typeId
+                  paymentTypeId === PAYPAL.typeId
                     ? "Pay with"
                     : "Place Order"
                 }
@@ -481,8 +460,8 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                   paymentTypeId === SEZZLE.typeId
                     ? "https://img.shop.com/Image/resources/checkout/Sezzle-Color-White-Logo.svg"
                     : paymentTypeId === PAYPAL.typeId
-                      ? "https://img.shop.com/Image/resources/checkout/PayPal-White-Logo.svg"
-                      : ""
+                    ? "https://img.shop.com/Image/resources/checkout/PayPal-White-Logo.svg"
+                    : ""
                 }
               />
             )}

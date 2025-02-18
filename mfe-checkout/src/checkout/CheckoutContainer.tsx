@@ -104,6 +104,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   const checkoutUrl = `${apiDomain}/checkout-universal/v1/checkouts?api_key=${apiKey}`;
   const fetchOrderUrl = `${apiDomain}/checkout-universal/v1/checkouts/id/${cartId}?api_key=${apiKey}`;
 
+  console.log("PAYMENT METHODS", paymentMethodOptions);
   useEffect(() => {
     handleSezzleCheckout(
       location.search,
