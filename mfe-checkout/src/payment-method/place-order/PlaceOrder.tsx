@@ -74,7 +74,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
 
   const [orderData, setOrderData] = useAtom(orderAtom);
 
-  const paymentMethods = useAtomValue(paymentMethodsAtom);
+  const [paymentMethods] = useAtom(paymentMethodsAtom);
   // const isCvvValid = useAtomValue<boolean>(cvvValidAtom);
 
   const selectedPaymentMethod = paymentMethods.find((pm) => pm.isSelected);
@@ -189,7 +189,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     }
   };
 
-  const handlePlaceOrder = async () => {
+  const handlePlaceOrder = async (paymentMethods: IPaymentOption[]) => {
     try {
       setIsLoading(true);
       paymentTypeId =
@@ -398,7 +398,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
       <Formik
         initialValues={{ autoshipTerms: !orderHasAutoshipItems(order || null) }}
         validationSchema={placeOrderSchema}
-        onSubmit={handlePlaceOrder}
+        onSubmit={ () => handlePlaceOrder(paymentMethods)}
       >
         {({
           touched,

@@ -346,19 +346,21 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
               </div>
             </div>
             <div className="place-order">
-              <PlaceOrder
-                confirmOrder={confirmOrder}
-                errorMessage={orderErrorMessage}
-                paymentTypeId={paymentTypeId}
-                shopperId={shopperId}
-                siteId={siteId}
-                order={orderData}
-                updateOrderErrorMessage={handleUpdateOrderErrorMessage}
-                billingId={defaultAddress?.id || 0}
-                shippingId={
-                  defaultPaymentMethod?.addressId ?? defaultAddress?.id ?? 0
-                }
-              />
+              {!loadingPaymentMethods && (
+                <PlaceOrder
+                  confirmOrder={confirmOrder}
+                  errorMessage={orderErrorMessage}
+                  paymentTypeId={paymentTypeId}
+                  shopperId={shopperId}
+                  siteId={siteId}
+                  order={orderData}
+                  updateOrderErrorMessage={handleUpdateOrderErrorMessage}
+                  billingId={defaultAddress?.id || 0}
+                  shippingId={
+                    defaultPaymentMethod?.addressId ?? defaultAddress?.id ?? 0
+                  }
+                />
+              )}
               <Feedback siteId={siteId} pcId={pcid} sessionId={sessionId} />
             </div>
             <HeadHelmet />
