@@ -286,47 +286,27 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   }, []);
 
   const toggleAccordion = () => {
-    // Find the selected payment method
-    const selectedPaymentMethod = paymentMethods.find(
-      (method) => method.isSelected
-    );
-
-    // Filter out the selected payment method from the rest of the list
-    const otherPaymentMethods = paymentMethods.filter(
-      (method) => !method.isSelected
-    );
-
     if (isExpanded) {
       // Collapse: Only show preferred, PayPal, and Sezzle
-      const updatedPaymentMethods = otherPaymentMethods.map(
-        (paymentMethod) => ({
-          ...paymentMethod,
-          isVisible:
-            paymentMethod.paymentMethod.preferred ||
-            ["Paypal", "Sezzle"].includes(
-              paymentMethod.paymentMethod.accountName
-            ),
-        })
-      );
+      const updatedPaymentMethods = paymentMethods.map((paymentMethod) => ({
+        ...paymentMethod,
+        isVisible:
+          paymentMethod.paymentMethod.preferred ||
+          ["Paypal", "Sezzle"].includes(
+            paymentMethod.paymentMethod.accountName
+          ),
+      }));
 
-      setPaymentMethods([
-        ...(selectedPaymentMethod ? [selectedPaymentMethod] : []),
-        ...updatedPaymentMethods,
-      ]);
+      setPaymentMethods(updatedPaymentMethods);
     } else {
       // Expand: Show all items
-      const updatedPaymentMethods = otherPaymentMethods.map(
-        (paymentMethod) => ({
-          ...paymentMethod,
-          isVisible: true,
-        })
-      );
+      const updatedPaymentMethods = paymentMethods.map((paymentMethod) => ({
+        ...paymentMethod,
+        isVisible: true,
+      }));
 
       setTimeout(() => {
-        setPaymentMethods([
-          ...(selectedPaymentMethod ? [selectedPaymentMethod] : []),
-          ...updatedPaymentMethods,
-        ]);
+        setPaymentMethods(updatedPaymentMethods);
       }, 300);
     }
 
