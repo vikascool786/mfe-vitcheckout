@@ -487,7 +487,10 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     const updatedPaymentMethods = paymentMethods.map((paymentMethod) => {
       if (paymentMethod.paymentMethod.id === id) {
         return {
-          ...paymentMethod,
+          paymentMethod: {
+            ...paymentMethod.paymentMethod,
+            preferred: true,
+          },
           isSelected: true,
           isVisible: true,
         };
@@ -512,6 +515,10 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
 
       return {
         ...paymentMethod,
+        paymentMethod: {
+          ...paymentMethod.paymentMethod,
+          preferred: false,
+        },
         isSelected: false,
         isVisible: false,
       };

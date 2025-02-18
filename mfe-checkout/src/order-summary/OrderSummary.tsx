@@ -270,12 +270,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         <FormHeading title="Order Summary" />
         {!hideCashback && (
           <>
-            {!loading &&
-              !error &&
-              eWalletData &&
-              parseInt(eWalletData.totalCoaCBAvail) > 0 && (
-                <ApplyCashback cashbackData={eWalletData} />
-              )}
+            {(!loading && !error && order?.userOptions.applyEWallet) ||
+              (eWalletData && <ApplyCashback cashbackData={eWalletData} />)}
             <div className="order-redeem-coupon-text">Redeem Coupon</div>
             <div className="order-summary-coupon-container">
               <div className="order-input-container">
@@ -359,7 +355,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               if (!store.totals) return null;
               return (
                 <div
-                  className={`order-charges-table ${isFirst ? "order-charges-table-first" : ""
+                  className={`order-charges-table ${
+                    isFirst ? "order-charges-table-first" : ""
                   } ${isLast ? "order-charges-table-last" : ""}`}
                   key={store?.id || index}
                 >
