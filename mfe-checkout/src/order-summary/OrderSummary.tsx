@@ -123,8 +123,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
 
   // Add gift card to the order
   const handleAddGiftCard = (isGCApplied: boolean) => {
-    setGCLoading(true);
     if (order && isGCApplied) {
+      setGCLoading(true);
       buildOrder(
         generateChangeStoreResponse({
           ...order,
@@ -165,6 +165,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
       gcState?.gcNum?.trim() &&
       gcState?.gcPin?.trim()
     ) {
+      setGCLoading(true);
+
       changeOrder(
         generateChangeStoreResponse({
           ...order,
@@ -359,7 +361,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               if (!store.totals) return null;
               return (
                 <div
-                  className={`order-charges-table ${isFirst ? "order-charges-table-first" : ""
+                  className={`order-charges-table ${
+                    isFirst ? "order-charges-table-first" : ""
                   } ${isLast ? "order-charges-table-last" : ""}`}
                   key={store?.id || index}
                 >
