@@ -94,4 +94,5 @@ export interface IUserOptions {
   smsMessageType?: string;
   tempOrderID: string;
   portalId: string;
+  walletAppliedStr?: string;
 }
