@@ -136,7 +136,9 @@ const Checkout: React.FC<ICheckout> = ({
   };
 
   const [familyNameFirst, setFamilyNameFirst] = useState(false);
-  const [isUpdateEnabled, setIsUpdateEnabled] = useState(false); // New state to track edit mode
+  const [isUpdateEnabled, setIsUpdateEnabled] = useState(
+    order?.userOptions.smsMessageType
+  ); // New state to track edit mode
 
   const shipFormRef = useRef<HTMLFormElement>(null);
   const childRef = useRef<AddressHandler>(null);
@@ -324,7 +326,7 @@ const Checkout: React.FC<ICheckout> = ({
     setShowShipAddressForm(!showShipAddressForm);
     setShippingAddress(
       shopperAddressBook.find((address) => address.isShip === 1) ||
-      shippingAddress
+        shippingAddress
     );
     setIsExpanded(!isExpanded);
   };
@@ -397,16 +399,14 @@ const Checkout: React.FC<ICheckout> = ({
     shouldEnable: boolean,
     phone: string
   ) => {
-    if (shouldEnable) {
-      const phoneNumber = shouldEnable ? phone : "";
-
+    if (shouldEnable && order) {
       try {
         const orderResponse = await buildOrder(
           generateChangeStoreResponse({
             ...order,
             userOptions: {
               ...order?.userOptions,
-              smsPhone: phoneNumber,
+              smsMessageType: "order-shipped",
             },
           })
         );
@@ -452,10 +452,11 @@ const Checkout: React.FC<ICheckout> = ({
     <div>
       <form className="shipping-address-form">
         <div
-          className={`${!showAVS
-            ? "checkout-form-container"
-            : "checkout-form-container__hide"
-            }`}
+          className={`${
+            !showAVS
+              ? "checkout-form-container"
+              : "checkout-form-container__hide"
+          }`}
         >
           <div className="form-header">
             <FormHeading title="Shipping Address" />

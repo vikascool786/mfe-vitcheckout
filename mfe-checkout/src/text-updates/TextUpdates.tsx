@@ -8,6 +8,7 @@ import { FormHeading } from "../component/Form/Heading/FormHeading";
 import { ChangeOrder } from "../interfaces/ChangeOrder";
 import { addressAtom, orderAtom } from "../store";
 import "./TextUpdates.scss";
+import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 
 // Validation schema
 const TextUpdatesSchema = Yup.object().shape({
@@ -33,13 +34,15 @@ export const TextUpdates = () => {
     { setSubmitting }: FormikHelpers<FormValues>
   ) => {
     try {
-      const response = await buildOrder({
-        ...order,
-        userOptions: {
-          ...order?.userOptions,
-          smsPhone: values.boxChecked ? values.phone : "",
-        },
-      } as ChangeOrder);
+      const response = await buildOrder(
+        generateChangeStoreResponse({
+          ...order,
+          userOptions: {
+            ...order?.userOptions,
+            smsPhone: values.boxChecked ? values.phone : "",
+          },
+        }) as ChangeOrder
+      );
 
       if (!response.response.errors) {
         setOrder(response.response.success.data);

@@ -91,6 +91,7 @@ export interface IUserOptions {
   gcNum: string[];
   gcPin: string[];
   smsPhone: string;
+  smsMessageType?: string;
   tempOrderID: string;
   portalId: string;
 }

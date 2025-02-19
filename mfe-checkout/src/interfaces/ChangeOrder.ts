@@ -54,6 +54,7 @@ export interface UserOptions {
   gcPin?: string[];
   coupons?: string[];
   smsPhone?: string;
+  smsMessageType?: string;
   tempOrderID?: string;
   portalId?: string;
 }
