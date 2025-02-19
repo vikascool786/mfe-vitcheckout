@@ -136,10 +136,6 @@ const Checkout: React.FC<ICheckout> = ({
   };
 
   const [familyNameFirst, setFamilyNameFirst] = useState(false);
-  const [isUpdateEnabled, setIsUpdateEnabled] = useState(
-    order?.userOptions.smsMessageType
-  ); // New state to track edit mode
-
   const shipFormRef = useRef<HTMLFormElement>(null);
   const childRef = useRef<AddressHandler>(null);
 
@@ -152,11 +148,6 @@ const Checkout: React.FC<ICheckout> = ({
   // Function to toggle accordion state
   const toggleAccordion = () => {
     setIsExpanded(!isExpanded);
-  };
-
-  const handlePhoneShippingUpdates = () => {
-    setIsUpdateEnabled(!isUpdateEnabled);
-    updateTextUpdatesForPhone(shippingAddress.phone);
   };
 
   useEffect(() => {
@@ -250,6 +241,12 @@ const Checkout: React.FC<ICheckout> = ({
                   ...order.shippingAddress,
                   id: validatedAddress.id,
                 },
+                userOptions: {
+                  ...order.userOptions,
+                  smsMessageType: address.isUpdateEnabled
+                    ? "order-shipped"
+                    : "",
+                },
               })
             );
 
@@ -283,6 +280,12 @@ const Checkout: React.FC<ICheckout> = ({
                   id:
                     updatedAddressList.find((add) => add.isBill)?.id ||
                     newAddedAddress.id,
+                },
+                userOptions: {
+                  ...order.userOptions,
+                  smsMessageType: address.isUpdateEnabled
+                    ? "order-shipped"
+                    : "",
                 },
               })
             );
@@ -326,7 +329,7 @@ const Checkout: React.FC<ICheckout> = ({
     setShowShipAddressForm(!showShipAddressForm);
     setShippingAddress(
       shopperAddressBook.find((address) => address.isShip === 1) ||
-      shippingAddress
+        shippingAddress
     );
     setIsExpanded(!isExpanded);
   };
@@ -431,7 +434,7 @@ const Checkout: React.FC<ICheckout> = ({
     zip: shippingAddress.zip || "",
     phone: shippingAddress.phone || "",
     isPoBox: shippingAddress.isPoBox || false,
-    isUpdateEnabled: isUpdateEnabled || false,
+    isUpdateEnabled: shippingAddress.isUpdateEnabled || false,
   };
 
   const validationSchema = Yup.object().shape({
@@ -452,10 +455,11 @@ const Checkout: React.FC<ICheckout> = ({
     <div>
       <form className="shipping-address-form">
         <div
-          className={`${!showAVS
+          className={`${
+            !showAVS
               ? "checkout-form-container"
               : "checkout-form-container__hide"
-            }`}
+          }`}
         >
           <div className="form-header">
             <FormHeading title="Shipping Address" />
@@ -633,11 +637,6 @@ const Checkout: React.FC<ICheckout> = ({
                             setFieldValue(
                               "isUpdateEnabled",
                               !values.isUpdateEnabled
-                            );
-
-                            handleEnableTextUpdates(
-                              !values.isUpdateEnabled,
-                              values.phone
                             );
                           }}
                         />
