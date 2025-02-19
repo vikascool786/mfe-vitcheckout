@@ -5,6 +5,7 @@ import "../OrderSummary.scss";
 import { orderAtom } from "../../store";
 import { changeOrder } from "../../api/service/Order";
 import { generateChangeStoreResponse } from "../../utils/helpers/GenerateChangeStoreResponse";
+import { VIFT } from "../../assets/svgs/VIFT";
 
 interface IApplyCashbackContainer {
   cashbackData: EWallet;
@@ -39,22 +40,28 @@ export const ApplyCashback: React.FC<IApplyCashbackContainer> = ({
   };
 
   return (
-    <div className="order-apply-cashback-container">
-      <span className="order-apply-cashback-container-cb-text">
-        Apply your VIFT Cashback
-      </span>
-      <span className="order-apply-cashback-container-cb-italic-text">
-        Earn an extra 1% cash when using VIFT wallet for your entire order.
-      </span>
-      <div className="order-apply-cashback-container-cb-bold">
-        <input
-          className="checkbox"
-          type="checkbox"
-          checked={order?.userOptions?.applyEWallet}
-          onChange={handleAddApplyCashback}
-        />
-        {`$${cashbackData.totalCoaCBAvail} - Use VIFT Cashback on this order`}
+    <div className="GiftCard-container-apply-giftcard">
+      <p className="Top-Text-v-Vard-apply">Pay with VIFT Cashback Balance</p>
+      <div className={order?.userOptions.applyEWallet ? "Inner-Apply-vcard-Container checkedCont" : "Inner-Apply-vcard-Container"}>
+        <div className="left-part-middle-container">
+          <div className="image-border-container">
+            <VIFT />
+          </div>
+          <p className={order?.userOptions.applyEWallet ? "Discount-price-text checked" : "Discount-price-text"}>
+            {`$${cashbackData.totalCoaCBAvail}`}
+          </p>
+        </div>
+        <div className="Right-part-middle-container">
+          <p className="Right-text-part">{order?.userOptions.applyEWallet ? "Applied" : "Not Applied"}</p>
+          <input
+            type="checkbox"
+            className="checkbox"
+            checked={order?.userOptions?.applyEWallet}
+            onChange={handleAddApplyCashback} // Attach the click handler
+          />
+        </div>
       </div>
+      <p className="Bottom-Text-v-Vard-apply">Earn an extra 1% cash when using VIFT balance for your entire order.</p>
     </div>
   );
 };

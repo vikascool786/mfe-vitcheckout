@@ -8,7 +8,7 @@ export const getCatalogName = (storeData: OrderStore): string | undefined => {
   if (storeData.items[0]?.catalogName === "SHOP.COM") {
     return "Email Delivery - Within 5 minutes";
   }
-  return `${storeData.items[0].catalogName} Shipment` || undefined;
+  return `${storeData?.items[0]?.catalogName} Shipment` || undefined;
 };
 
 export const getShipWarningMessage = (

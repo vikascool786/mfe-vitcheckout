@@ -129,9 +129,8 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
       {orderConsolidateData?.showOrderConsolidate && (
         <div className="shipping-options-container">
           <div
-            className={`shipping-option-container start ${
-              orderConsolidateData.oosConsolidate === 2 ? "selected" : ""
-            }`}
+            className={`shipping-option-container start ${orderConsolidateData.oosConsolidate === 2 ? "selected" : ""
+              }`}
           >
             <div className="shipping-option-wrapper">
               <div className="shipping-option-select-container">
@@ -150,9 +149,8 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
             </div>
           </div>
           <div
-            className={`shipping-option-container end ${
-              orderConsolidateData.oosConsolidate === 3 ? "selected" : ""
-            }`}
+            className={`shipping-option-container end ${orderConsolidateData.oosConsolidate === 3 ? "selected" : ""
+              }`}
           >
             <div className="shipping-option-wrapper">
               <div className="shipping-option-select-container">

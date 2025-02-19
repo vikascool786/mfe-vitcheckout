@@ -14,12 +14,13 @@ const App: React.FC<AppProps> = () => {
     <div className="container">
       <Provider store={OrderStore}>
         {/* for new customer  */}
-        {/* <CheckoutContainer
-          cartId="cart_1228818805_W_USA_USA_ENG"
-          shopperId="qejxxxVmzkzqxzhxkYzpzUWzhxmmkWzWUjhXzmqmm"
-          pcid="1228818805"
+        <CheckoutContainer
+          cartId="cart_1649749863_W_USA_USA_ENG"
+          shopperId="YxpkWzXkzUqYezheXYzqwwjzUjkjXYwpjVzxzekeww"
+          pcid="1649749863"
           siteId="222"
-        /> */}
+          sessionId="3006662852"
+        />
 
         {/* <CheckoutContainer
           cartId="cart_1577135711_W_USA_USA_ENG"
@@ -42,15 +43,16 @@ const App: React.FC<AppProps> = () => {
           shopperId="WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz"
           pcid="2282210204"
           siteId="260"
+          sessionId=""
         /> */}
-        {/* for sahil card custoemr  */}
-        <CheckoutContainer
+        {/* for vikas card custoemr  */}
+        {/* <CheckoutContainer
           cartId="cart_1343617963_W_USA_USA_ENG"
           shopperId="xqkpqWUUzhwpxzhxYzzpZYkzmqqXhhZpwzxVzxpx"
           pcid="1343617963"
           siteId="222"
           sessionId="3006662207"
-        />
+        /> */}
         {/* <CheckoutContainer
           cartId="cart_1326748654_W_USA_USA_ENG"
           shopperId="hqwxZzYzzqpeVzhWmZzZmZpzzkxkjzmZWqqWzxzkzj"

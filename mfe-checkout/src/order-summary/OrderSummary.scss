@@ -26,6 +26,134 @@
   }
 }
 
+.GiftCard-container-apply-giftcard {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 20px;
+}
+
+.Top-Text-v-Vard-apply {
+  font-family: Roboto;
+  font-weight: 500;
+  font-size: 15.01px;
+  line-height: 17.59px;
+  letter-spacing: 0%;
+  color: #000000;
+}
+
+.Inner-Apply-vcard-Container {
+  width: 100%;
+  border: 1px solid #47949d;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  border-radius: 7px;
+}
+
+.checkedCont {
+  border: 1px solid #72bc81 !important;
+}
+
+.left-part-middle-container {
+  display: flex;
+  width: 40%;
+  align-items: center;
+  gap: 10px;
+}
+
+.image-border-container {
+  width: 37%;
+  height: 30px;
+  border-radius: 2px;
+  border: 1px solid black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.Discount-price-text {
+  font-family: Roboto;
+  font-weight: 500;
+  font-size: 24.01px;
+  line-height: 28.14px;
+  letter-spacing: 0%;
+}
+
+.checked {
+  color: #72bc81 !important;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 18.75px;
+}
+
+.checkbox {
+  /* Reset default appearance */
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  background-color: #fff;
+  border: 2px solid #000;
+  border-radius: 3px;
+  margin-left: 2px;
+  gap: 4px;
+  cursor: pointer;
+  position: relative;
+  transition: background-color 0.2s, border-color 0.2s;
+
+  &-text {
+    font-family: Roboto;
+    font-size: 18px;
+    font-weight: 300;
+    line-height: 21.09px;
+    text-align: left;
+    text-underline-position: from-font;
+    text-decoration-skip-ink: none;
+  }
+
+  &:checked {
+    background-color: #000;
+    border-color: #000;
+
+    &::before {
+      content: "✔";
+      color: #fff;
+      font-size: 16px;
+      position: absolute;
+      top: 0;
+      left: 4px;
+    }
+  }
+}
+
+.Right-text-part {
+  font-family: Roboto;
+  font-weight: 300;
+  font-size: 12px;
+  line-height: 14.07px;
+  letter-spacing: 0%;
+}
+
+.Right-part-middle-container {
+  display: flex;
+  width: 30%;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+}
+
+.Bottom-Text-v-Vard-apply {
+  font-family: Roboto;
+  font-weight: 300;
+  font-size: 10px;
+  line-height: 11.72px;
+  letter-spacing: 0%;
+  color: #000000;
+}
+
 .order-summary-coupon-container {
   display: flex;
   flex-direction: row;
@@ -166,9 +294,6 @@
   align-items: center;
   gap: 6px;
   flex: 1;
-  svg {
-    min-width: 25px;
-  }
 }
 
 .order-apply-cashback-container {

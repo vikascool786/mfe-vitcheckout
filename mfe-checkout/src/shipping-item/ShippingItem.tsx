@@ -92,7 +92,7 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
                   Cashback{" "}
                 </>
               )}{" "}
-              {bv > 0 &&  isMA && isMA === 1
+              {bv > 0 && isMA && isMA === 1
                 ? ` ${formattedNumber(bv)} BV`
                 : ibv > 0 && ` ${formattedNumber(ibv)} IBV`}
             </section>
