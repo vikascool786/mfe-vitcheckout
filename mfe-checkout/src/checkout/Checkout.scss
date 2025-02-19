@@ -76,6 +76,9 @@ body {
   cursor: pointer;
   transform-origin: center;
   align-self: center;
+  width: auto;
+  height: auto;
+  background: none;
   transition: transform 0.3s ease-in-out; // Smooth rotation
 
   &.open {

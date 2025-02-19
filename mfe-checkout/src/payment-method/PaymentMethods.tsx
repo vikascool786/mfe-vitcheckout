@@ -413,14 +413,14 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     const updatedPaymentMethods = paymentMethods.map((method) =>
       method.paymentMethod.id === paymentId
         ? {
-            ...method,
-            isEditing: !method.isEditing, // Toggle editing state for the selected payment method
-          }
+          ...method,
+          isEditing: !method.isEditing, // Toggle editing state for the selected payment method
+        }
         : {
-            ...method,
-            isEditing: false,
-            isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
-          }
+          ...method,
+          isEditing: false,
+          isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
+        }
     );
     setPaymentMethods(updatedPaymentMethods);
   };

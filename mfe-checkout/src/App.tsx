@@ -5,7 +5,7 @@ import CheckoutContainer from "./checkout/CheckoutContainer";
 import { Provider, useAtom } from "jotai";
 import { loadingAtom, OrderStore } from "./store";
 
-interface AppProps {}
+interface AppProps { }
 
 const App: React.FC<AppProps> = () => {
   const [loading] = useAtom(loadingAtom);
@@ -43,8 +43,8 @@ const App: React.FC<AppProps> = () => {
           pcid="2282210204"
           siteId="260"
         />
-        {/* for sahil card custoemr  */}
-          {/* <CheckoutContainer
+        {/* for vikas card custoemr  */}
+        {/* <CheckoutContainer
             cartId="cart_1876564227_W_USA_USA_ENG"
             shopperId="UVXkYmzkzkehpzhWzmzYeWxzzhpkpYWqZWqhzeemhj"
             pcid="1876564227"

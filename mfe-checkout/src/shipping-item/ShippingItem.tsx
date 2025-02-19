@@ -74,7 +74,6 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
             <section className="header-section">
               <div className="header-block">
                 <div className="item-name">{decodeHtmlEntities(caption)}</div>
-                <div>{catalogName}</div>
               </div>
 
               <div onClick={onRemove}>
