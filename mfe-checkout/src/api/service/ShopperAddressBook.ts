@@ -1,10 +1,12 @@
 import { useState, useCallback } from "react";
-import { GET_API_KEY, GET_API_ENDPOINT_BASE_URL_ONLY } from "../../utils/urlResolver";
+import {
+  GET_API_KEY,
+  GET_API_ENDPOINT_BASE_URL_ONLY,
+} from "../../utils/urlResolver";
 import axiosInstance from "../axios";
 
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
-
 
 // Hook for fetching the shopper's address book
 export const useFetchShopperAddressBook = () => {
@@ -21,7 +23,10 @@ export const useFetchShopperAddressBook = () => {
       setData(response.data);
       return response.data;
     } catch (err) {
-      console.error(`Error fetching address book for shopper: ${shopperId}`, err);
+      console.error(
+        `Error fetching address book for shopper: ${shopperId}`,
+        err
+      );
       setError(err as Error);
       throw err;
     } finally {
@@ -43,14 +48,15 @@ export const useCreateShopperAddressBookEntry = () => {
       setError(null);
       try {
         const endpoint = `${apiDomain}/shopper-addressbooks/v1/${shopperId}/AddressBook?api_key=${apiKey}`;
-        const response = await axiosInstance(endpoint).post(
-          "",
-          addressData,
-          { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
-        );
+        const response = await axiosInstance(endpoint).post("", addressData, {
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        });
         return response.data;
       } catch (err) {
-        console.error(`Error creating address book entry for shopper: ${shopperId}`, err);
+        console.error(
+          `Error creating address book entry for shopper: ${shopperId}`,
+          err
+        );
         setError(err as Error);
         throw err;
       } finally {
@@ -72,21 +78,11 @@ export const useUpdateShopperAddressBookEntry = () => {
     async (shopperId: string, addressId: number, addressData: string) => {
       setLoading(true);
       setError(null);
-      try {
-        const endpoint = `${apiDomain}/shopper-addressbooks/v1/${shopperId}/AddressBook/${addressId}?api_key=${apiKey}`;
-        const response = await axiosInstance(endpoint).put(
-          "",
-          addressData,
-          { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
-        );
-        return response.data;
-      } catch (err) {
-        console.error(`Error updating address book entry for shopper: ${shopperId}`, err);
-        setError(err as Error);
-        throw err;
-      } finally {
-        setLoading(false);
-      }
+      const endpoint = `${apiDomain}/shopper-addressbooks/v1/${shopperId}/AddressBook/${addressId}?api_key=${apiKey}`;
+      const response = await axiosInstance(endpoint).put("", addressData, {
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      });
+      return response.data;
     },
     []
   );
@@ -109,7 +105,10 @@ export const useUpdateTextUpdatesForPhone = () => {
       setData(response.data);
       return response.data;
     } catch (err) {
-      console.error(`Error updating text updates for phone: ${phoneNumber}`, err);
+      console.error(
+        `Error updating text updates for phone: ${phoneNumber}`,
+        err
+      );
       setError(err as Error);
       throw err;
     } finally {

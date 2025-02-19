@@ -5,7 +5,7 @@ import CheckoutContainer from "./checkout/CheckoutContainer";
 import { Provider, useAtom } from "jotai";
 import { loadingAtom, OrderStore } from "./store";
 
-interface AppProps { }
+interface AppProps {}
 
 const App: React.FC<AppProps> = () => {
   const [loading] = useAtom(loadingAtom);
@@ -37,20 +37,20 @@ const App: React.FC<AppProps> = () => {
         /> */}
 
         {/* for old custoemr  */}
-        <CheckoutContainer
+        {/* <CheckoutContainer
           cartId="cart_2282210204_W_USA_USA_ENG"
           shopperId="WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz"
           pcid="2282210204"
           siteId="260"
-        />
+        /> */}
         {/* for vikas card custoemr  */}
-        {/* <CheckoutContainer
-            cartId="cart_1876564227_W_USA_USA_ENG"
-            shopperId="UVXkYmzkzkehpzhWzmzYeWxzzhpkpYWqZWqhzeemhj"
-            pcid="1876564227"
-            siteId="222"
-            sessionId="3006663222"
-          /> */}
+        <CheckoutContainer
+          cartId="cart_1817046463_W_USA_USA_ENG"
+          shopperId="mXeWpzjqzWkwhzhqzYzZWwwzZXjzpwhUpXqqzjjx"
+          pcid="1817046463"
+          siteId="66"
+          sessionId="3055249126"
+        />
         {/* <CheckoutContainer
           cartId="cart_1326748654_W_USA_USA_ENG"
           shopperId="hqwxZzYzzqpeVzhWmZzZmZpzzkxkjzmZWqqWzxzkzj"

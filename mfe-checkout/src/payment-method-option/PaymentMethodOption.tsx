@@ -60,6 +60,12 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     isEditing,
   } = paymentOption;
 
+  const [cvvError, setCvvError] = useState(
+    !formik.touched.cvv && !formik.dirty && order?.shouldShowInvalidCVVMessage
+      ? "Required"
+      : ""
+  );
+
   const maxLength = paymentMethod.typeID === 1 ? 4 : 3;
 
   const setLoading = useSetAtom(loadingAtom);
@@ -92,9 +98,17 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   };
 
   const onValidCVV = async (cvv: string) => {
+    if (!order) {
+      return;
+    }
+
     setLoading(true);
 
-    if (!order) {
+    if (isCardExpired()) {
+      setTimeout(() => {
+        formik.setFieldValue("cvv", "", false);
+        formik.setFieldError("cvv", "Card is expired");
+      }, 300);
       setLoading(false);
       return;
     }
@@ -194,28 +208,20 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   };
 
   const isCardExpired = () => {
-    if (!paymentMethod.expires) {
-      return false;
-    }
-
-    const [expMonth, expYear] = paymentMethod.expires.split("/").map(Number);
+    const { expMonth, expYear } = paymentMethod;
     if (!expMonth || !expYear) {
       return false;
     }
 
     const currentDate = new Date();
     const currentMonth = currentDate.getMonth() + 1; // Months are 0-based
-    const currentYear = currentDate.getFullYear() % 100; // Get last two digits of year
+    const currentYear = currentDate.getFullYear(); // Get last two digits of year
 
     return (
       expYear < currentYear ||
       (expYear === currentYear && expMonth < currentMonth)
     );
   };
-
-  if (isCardExpired()) {
-    formik.setFieldError("cvv", "Card is expired");
-  }
 
   return (
     <div
@@ -286,9 +292,9 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                             (pm) =>
                               pm.paymentMethod.id === paymentMethod.id
                                 ? {
-                                  ...pm,
-                                  isPaymentValidated: false,
-                                }
+                                    ...pm,
+                                    isPaymentValidated: false,
+                                  }
                                 : pm
                           );
 
@@ -304,11 +310,9 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                       component="div"
                       className="error-message"
                     />
-                    {!formik.touched.cvv &&
-                      !formik.dirty &&
-                      order?.shouldShowInvalidCVVMessage && (
-                        <div className="error-message">Required</div>
-                      )}
+                    {cvvError && (
+                      <div className="error-message">{cvvError}</div>
+                    )}
                   </div>
                 </div>
               )}

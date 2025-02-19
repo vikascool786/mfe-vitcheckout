@@ -208,17 +208,12 @@ const Checkout: React.FC<ICheckout> = ({
         });
         const validatedAddress = { ...addressEntered, defaultaddr: true };
 
-        setShippingAddress(validatedAddress);
-        setShowShipAddressForm(false);
-
         const updatedAddresses = [
           { ...validatedAddress, isShip: 1 }, // Set the validated address as primary
           ...shopperAddressBook
             .filter((address) => address.id !== validatedAddress.id) // Exclude the validated address
             .map((address) => ({ ...address, isShip: 0 })), // Reset isShip for other addresses
         ];
-
-        setShopperAddressBook(updatedAddresses);
         setShowAVS(!isValidAddress);
 
         const addressParams = new URLSearchParams(
@@ -232,6 +227,10 @@ const Checkout: React.FC<ICheckout> = ({
             validatedAddress.id,
             addressParams
           );
+
+          setShopperAddressBook(updatedAddresses);
+          setShippingAddress(validatedAddress);
+          setShowShipAddressForm(false);
 
           if (order) {
             const newOrder = await buildOrder(
@@ -299,7 +298,8 @@ const Checkout: React.FC<ICheckout> = ({
 
         setLoading(false);
       } catch (error) {
-        console.error("Error:", error);
+        console.log(error);
+        setErrorMessage(error.response.data);
         setLoading(false);
       }
     }
@@ -326,10 +326,11 @@ const Checkout: React.FC<ICheckout> = ({
   };
 
   const onCancelClick = () => {
+    setErrorMessage("");
     setShowShipAddressForm(!showShipAddressForm);
     setShippingAddress(
       shopperAddressBook.find((address) => address.isShip === 1) ||
-      shippingAddress
+        shippingAddress
     );
     setIsExpanded(!isExpanded);
   };
@@ -455,10 +456,11 @@ const Checkout: React.FC<ICheckout> = ({
     <div>
       <form className="shipping-address-form">
         <div
-          className={`${!showAVS
+          className={`${
+            !showAVS
               ? "checkout-form-container"
               : "checkout-form-container__hide"
-            }`}
+          }`}
         >
           <div className="form-header">
             <FormHeading title="Shipping Address" />

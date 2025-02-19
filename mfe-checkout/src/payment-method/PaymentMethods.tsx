@@ -129,7 +129,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
                 paymentMethod.addressId.toString()
               ),
               isVisible: true,
-              // isSelected: paymentMethod.preferred,
+              isSelected: paymentMethod.preferred,
             } as IPaymentOption;
           }
 
@@ -141,21 +141,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
           } as IPaymentOption;
         });
 
-        // // Ensure only one card is selected
-        // const selectedPaymentMethod =
-        //   paymentOptions.find(
-        //     (option) => option.paymentMethod.id === order?.paymentMethod?.id
-        //   ) || paymentOptions.find((option) => option.paymentMethod.preferred);
-
-        // if (selectedPaymentMethod) {
-        //   selectedPaymentMethod.isSelected = true;
-        // }
-
-        console.log();
-
         let updatedPaymentOptions = [...paymentOptions, ...staticMethods];
-
-        // console.log(updatedPaymentOptions);
 
         if (isPaypalOrderSuccess) {
           const paypalDetails = await generatePayPalTransactionDetails(
@@ -413,14 +399,14 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     const updatedPaymentMethods = paymentMethods.map((method) =>
       method.paymentMethod.id === paymentId
         ? {
-          ...method,
-          isEditing: !method.isEditing, // Toggle editing state for the selected payment method
-        }
+            ...method,
+            isEditing: !method.isEditing, // Toggle editing state for the selected payment method
+          }
         : {
-          ...method,
-          isEditing: false,
-          isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
-        }
+            ...method,
+            isEditing: false,
+            isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
+          }
     );
     setPaymentMethods(updatedPaymentMethods);
   };
