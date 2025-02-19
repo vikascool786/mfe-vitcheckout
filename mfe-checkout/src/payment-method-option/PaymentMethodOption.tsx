@@ -22,6 +22,7 @@ import {
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import "./PaymentMethodOption.scss";
 import { ThirdPartyLinkOff } from "./ThirdPartyLinkOff";
+import CardOptions from "../assets/images/CardOptions.png";
 
 export interface IPaymentOptionProps {
   handleCancelNewCard: () => void;
@@ -48,6 +49,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   setCVVFieldValue,
   updatePaymentTypeId,
 }) => {
+  const [isCardEdit, setIsCardEdit] = useState<boolean>(false);
   const [order, setOrder] = useAtom(orderAtom);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [paymentMethods] = useAtom(paymentMethodsAtom);
@@ -229,7 +231,11 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
       onClick={onChangePaymentMethod}
       id={`[id=${paymentMethod.id}]`}
     >
-      <div className="payment-option-select-container">
+      <div
+        className={`payment-option-select-container ${
+          isEditing ? "form-mode" : ""
+        }`}
+      >
         <div className="payment-option-sub-container">
           <RadioButton
             id={paymentMethod.accountName}
@@ -241,7 +247,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
               {paymentMethod.accountName}
             </div>
           )}
-          {!isEditing && isCard && (
+          {(!isEditing || isCardEdit) && isCard && (
             <div className="payment-option-container__card">
               <div className="payment-option-container__card-details">
                 <img
@@ -256,6 +262,14 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
               <div className="payment-option-container__card-expiration">
                 Expires {paymentMethod.expires}
               </div>
+            </div>
+          )}
+          {isEditing && !isCardEdit && isCard && (
+            <div className="payment-option-add-container__card">
+              <div className="payment-option-add-container__card-title">
+                Credit or Debit Card
+              </div>
+              <img className="checkout-add-new-card" src={CardOptions} />
             </div>
           )}
         </div>
@@ -292,9 +306,9 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                             (pm) =>
                               pm.paymentMethod.id === paymentMethod.id
                                 ? {
-                                  ...pm,
-                                  isPaymentValidated: false,
-                                }
+                                    ...pm,
+                                    isPaymentValidated: false,
+                                  }
                                 : pm
                           );
 
@@ -321,6 +335,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                   className="payment-option-container__card-cvv-edit"
                   onClick={(event) => {
                     event.stopPropagation(); // Prevents triggering parent click events
+                    setIsCardEdit(true);
                     handlePaymentMethodEdit();
                   }}
                 >
@@ -349,6 +364,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
           onCancel={handleCancelNewCard}
           onAddNewCard={onAddNewCards}
           setCVVFieldValue={setCVVFieldValue}
+          isEditing={isCardEdit}
         />
       )}
     </div>

@@ -133,6 +133,24 @@
   }
 }
 
+.payment-option-add-container {
+  &__card {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    &-title {
+      font-weight: 500;
+    }
+    @media only screen and (max-width: 320px) {
+      .checkout-add-new-card {
+        display: none;
+      }
+    }
+  }
+}
+
 .payment-option-sub-container {
   @include flex-row;
   gap: 1rem;
@@ -144,6 +162,11 @@
   @media only screen and (max-width: 560px) {
     gap: 0px;
   }
+}
+
+.form-mode {
+  padding-bottom: 14px;
+  border-bottom: 1px solid #888888;
 }
 
 .payment-option-select-container {
