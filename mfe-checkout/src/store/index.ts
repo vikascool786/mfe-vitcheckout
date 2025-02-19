@@ -27,7 +27,7 @@ const initialPaymentMethods: IPaymentOption[] = [
     }),
     paymentAddress: {} as Address,
     isPaymentValidated: false,
-    isSelected: false,
+    isSelected: true,
     isVisible: true,
   },
   {

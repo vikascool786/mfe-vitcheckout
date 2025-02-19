@@ -109,10 +109,17 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       try {
         const response = await fetchShoppersPaymentMethods(shopperId);
 
+        let staticMethods = paymentMethods;
+
         const paymentOptions = response.map((paymentMethod) => {
-          const isOrderPaymentMethod =
-            paymentMethod.id === order?.paymentMethod?.id;
           const isPreferred = paymentMethod.preferred;
+
+          if (isPreferred) {
+            staticMethods = staticMethods.map((sm) => ({
+              ...sm,
+              isSelected: false,
+            }));
+          }
 
           // Handle single response case
           if (response.length === 1) {
@@ -122,29 +129,33 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
                 paymentMethod.addressId.toString()
               ),
               isVisible: true,
-              isSelected: true,
+              // isSelected: paymentMethod.preferred,
             } as IPaymentOption;
           }
 
           return {
             paymentMethod,
             paymentAddress: addressMap.get(paymentMethod.addressId.toString()),
-            isVisible: isOrderPaymentMethod || isPreferred,
-            isSelected: false, // Ensure only one selection later
+            isVisible: isPreferred,
+            isSelected: isPreferred, // Ensure only one selection later
           } as IPaymentOption;
         });
 
-        // Ensure only one card is selected
-        const selectedPaymentMethod =
-          paymentOptions.find(
-            (option) => option.paymentMethod.id === order?.paymentMethod?.id
-          ) || paymentOptions.find((option) => option.paymentMethod.preferred);
+        // // Ensure only one card is selected
+        // const selectedPaymentMethod =
+        //   paymentOptions.find(
+        //     (option) => option.paymentMethod.id === order?.paymentMethod?.id
+        //   ) || paymentOptions.find((option) => option.paymentMethod.preferred);
 
-        if (selectedPaymentMethod) {
-          selectedPaymentMethod.isSelected = true;
-        }
+        // if (selectedPaymentMethod) {
+        //   selectedPaymentMethod.isSelected = true;
+        // }
 
-        let updatedPaymentOptions = [...paymentOptions, ...paymentMethods];
+        console.log();
+
+        let updatedPaymentOptions = [...paymentOptions, ...staticMethods];
+
+        // console.log(updatedPaymentOptions);
 
         if (isPaypalOrderSuccess) {
           const paypalDetails = await generatePayPalTransactionDetails(
@@ -172,7 +183,9 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
           });
         }
 
-        setPaymentMethods(updatedPaymentOptions);
+        setTimeout(() => {
+          setPaymentMethods(updatedPaymentOptions);
+        }, 300);
       } catch (error) {
         if (isPaypalOrderSuccess) {
           await generatePayPalTransactionDetails(shopperId, token, true, false);
@@ -300,17 +313,18 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       setPaymentMethods(updatedPaymentMethods);
     } else {
       // Expand: Show all items
-      const updatedPaymentMethods = paymentMethods.map((paymentMethod) => ({
-        ...paymentMethod,
-        isVisible: true,
-      }));
 
-      setTimeout(() => {
-        setPaymentMethods(updatedPaymentMethods);
-      }, 300);
+      const updatedPaymentMethods = paymentMethods.map((paymentMethod) => {
+        return {
+          ...paymentMethod,
+          // isSelected: paymentMethod.isSelected,
+          isVisible: true,
+        };
+      });
+
+      setPaymentMethods(updatedPaymentMethods);
     }
 
-    // Toggle the state
     setIsExpanded(!isExpanded);
   };
 
@@ -399,14 +413,14 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     const updatedPaymentMethods = paymentMethods.map((method) =>
       method.paymentMethod.id === paymentId
         ? {
-          ...method,
-          isEditing: !method.isEditing, // Toggle editing state for the selected payment method
-        }
+            ...method,
+            isEditing: !method.isEditing, // Toggle editing state for the selected payment method
+          }
         : {
-          ...method,
-          isEditing: false,
-          isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
-        }
+            ...method,
+            isEditing: false,
+            isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
+          }
     );
     setPaymentMethods(updatedPaymentMethods);
   };

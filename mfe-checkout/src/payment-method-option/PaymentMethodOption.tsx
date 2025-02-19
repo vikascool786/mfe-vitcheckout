@@ -228,7 +228,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
           <RadioButton
             id={paymentMethod.accountName}
             onChange={onChangePaymentMethod}
-            checked={paymentOption.isSelected}
+            checked={!!isSelected}
           />
           {!isCard && (
             <div className="payment-option-name">
@@ -286,9 +286,9 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                             (pm) =>
                               pm.paymentMethod.id === paymentMethod.id
                                 ? {
-                                  ...pm,
-                                  isPaymentValidated: false,
-                                }
+                                    ...pm,
+                                    isPaymentValidated: false,
+                                  }
                                 : pm
                           );
 
