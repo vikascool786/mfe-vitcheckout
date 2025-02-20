@@ -1,6 +1,6 @@
 import { ErrorMessage } from "formik";
 import { useAtom, useSetAtom } from "jotai";
-import React, { ChangeEvent, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import { buildOrder } from "../api/service/Order";
 import {
   updateShopperDetails,
@@ -68,6 +68,13 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
       : ""
   );
 
+  //checking cvv input field is valid or dirty on stage changes
+  useEffect(() => {
+      setCvvError(!formik.touched.cvv && !formik.dirty && order?.shouldShowInvalidCVVMessage
+        ? "Required"
+        : "");
+  }, [order?.shouldShowInvalidCVVMessage]);
+  
   const maxLength = paymentMethod.typeID === 1 ? 4 : 3;
 
   const setLoading = useSetAtom(loadingAtom);
