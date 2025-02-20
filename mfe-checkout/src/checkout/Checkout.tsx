@@ -228,10 +228,6 @@ const Checkout: React.FC<ICheckout> = ({
             addressParams
           );
 
-          setShopperAddressBook(updatedAddresses);
-          setShippingAddress(validatedAddress);
-          setShowShipAddressForm(false);
-
           if (order) {
             const newOrder = await buildOrder(
               generateChangeStoreResponse({
@@ -253,6 +249,11 @@ const Checkout: React.FC<ICheckout> = ({
             setOrderNotifications(
               getOrderNotifications(newOrder.response.success)
             );
+
+            setShopperAddressBook(updatedAddresses);
+            setShippingAddress(validatedAddress);
+            setShowShipAddressForm(false);
+            setErrorMessage("");
           }
         } else {
           // Use POST request for new address (create)
@@ -293,9 +294,13 @@ const Checkout: React.FC<ICheckout> = ({
             setOrderNotifications(
               getOrderNotifications(newOrder.response.success)
             );
+            setShopperAddressBook(updatedAddresses);
+            setShippingAddress(newAddedAddress);
+            setShowShipAddressForm(false);
+            setIsExpanded(false);
+            setErrorMessage("");
           }
         }
-
         setLoading(false);
       } catch (error) {
         console.log(error);
@@ -330,7 +335,7 @@ const Checkout: React.FC<ICheckout> = ({
     setShowShipAddressForm(!showShipAddressForm);
     setShippingAddress(
       shopperAddressBook.find((address) => address.isShip === 1) ||
-      shippingAddress
+        shippingAddress
     );
     setIsExpanded(!isExpanded);
   };
@@ -456,10 +461,11 @@ const Checkout: React.FC<ICheckout> = ({
     <div>
       <form className="shipping-address-form">
         <div
-          className={`${!showAVS
+          className={`${
+            !showAVS
               ? "checkout-form-container"
               : "checkout-form-container__hide"
-            }`}
+          }`}
         >
           <div className="form-header">
             <FormHeading title="Shipping Address" />
