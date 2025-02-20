@@ -10,6 +10,8 @@ interface ICardInputProps {
   values: any;
   handleBlur: any;
   isEditing: boolean;
+  saveCardToWallet: boolean;
+  setSaveCardToWallet: any;
 }
 
 export const CardInputs: React.FC<ICardInputProps> = ({
@@ -18,6 +20,8 @@ export const CardInputs: React.FC<ICardInputProps> = ({
   handleChange,
   values,
   handleBlur,
+  saveCardToWallet,
+  setSaveCardToWallet,
   isEditing = false,
 }) => {
   const getYears = (startYear: number, endYear: number) =>
@@ -90,16 +94,27 @@ export const CardInputs: React.FC<ICardInputProps> = ({
           errorMessage={touched.cardInfo?.expYear && errors.cardInfo?.expYear}
         />
       </div>
-      <FormField
-        label="CVV"
-        required
-        name="cardInfo.cvv"
-        type="password"
-        value={values.cardInfo?.cvv || ""}
-        onChange={handleChange}
-        onBlur={handleBlur}
-        errorMessage={touched.cardInfo?.cvv && errors.cardInfo?.cvv}
-      />
+      <div className="form-field-container">
+        <FormField
+          label="CVV"
+          required
+          name="cardInfo.cvv"
+          type="password"
+          value={values.cardInfo?.cvv || ""}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          errorMessage={touched.cardInfo?.cvv && errors.cardInfo?.cvv}
+        />
+        <div className="save-for-later">
+          <input
+            type="checkbox"
+            className="checkbox"
+            checked={saveCardToWallet}
+            onChange={(e) => setSaveCardToWallet(!saveCardToWallet)}
+          />
+          <span>Save card for later</span>
+        </div>
+      </div>
     </>
   );
 };

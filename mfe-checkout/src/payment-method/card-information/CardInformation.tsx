@@ -488,17 +488,10 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                   handleBlur={handleBlur}
                   values={values}
                   isEditing={isEditing}
+                  saveCardToWallet={saveCardToWallet}
+                  setSaveCardToWallet={setSaveCardToWallet}
                 />
 
-                <div className="save-for-later">
-                  <input
-                    type="checkbox"
-                    className="checkbox"
-                    checked={saveCardToWallet}
-                    onChange={(e) => setSaveCardToWallet(!saveCardToWallet)}
-                  />
-                  <span>Save card for later</span>
-                </div>
                 {addressList.length > 0 && paymentMethod.id < 1 && (
                   <div className="billing">
                     <input
@@ -598,7 +591,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                     </div>
                   </form>
                 ) : (
-                  <div className="checkbox-text">
+                  <div className="address-saved-text">
                     {shippingAddress?.first} {shippingAddress?.last}{" "}
                     {shippingAddress?.address1}
                     {shippingAddress?.address2} {shippingAddress?.city}{" "}
