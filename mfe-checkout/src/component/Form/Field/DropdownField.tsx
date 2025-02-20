@@ -11,6 +11,9 @@ type DropdownProps = {
   onChange?: (value: string) => void; // Callback for handling selection changes
   errorMessage?: string | false | undefined;
   className?: string;
+  errorRefs?: React.MutableRefObject<{
+    [key: string]: HTMLInputElement | HTMLSelectElement | null;
+  }> | null;
 };
 
 export const DropdownField: React.FC<DropdownProps> = ({
@@ -22,6 +25,7 @@ export const DropdownField: React.FC<DropdownProps> = ({
   onChange,
   errorMessage,
   className,
+  errorRefs = null,
 }) => {
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
@@ -39,6 +43,11 @@ export const DropdownField: React.FC<DropdownProps> = ({
       <select
         className="input-container"
         name={formName}
+        ref={(el: HTMLSelectElement | null) =>
+          el && errorRefs && errorRefs.current
+            ? (errorRefs.current[formName!] = el)
+            : null
+        }
         value={selectedValue} // Controlled component behavior
         onChange={handleChange} // Handle change events
         required={required}

@@ -33,6 +33,7 @@ import { creditCardSchema } from "../../validation/creditcardSchema";
 import "./CardInformation.scss";
 import { CardInputs } from "./CardInputs";
 import { getTypeIdByAltName, isThirdPartyPayment } from "../PaymentType";
+import ScrollToError from "../../component/Form/ScrollToError/ScrollToError";
 
 interface ICardInformationProps {
   paymentMethod: IPaymentMethod;
@@ -66,6 +67,8 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   isEditing = false,
 }) => {
   const setLoading = useSetAtom(loadingAtom);
+
+  const errorRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
 
   const [isCardSavedInWallet, setIsCardSavedInWallet] = useState(
     paymentMethod.id !== 0
@@ -480,6 +483,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
         }) => {
           return (
             <form>
+              <ScrollToError errorRefs={errorRefs} />
               <div className="card-information-container">
                 <CardInputs
                   handleChange={handleChange}
@@ -488,10 +492,20 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                   handleBlur={handleBlur}
                   values={values}
                   isEditing={isEditing}
-                  saveCardToWallet={saveCardToWallet}
-                  setSaveCardToWallet={setSaveCardToWallet}
+                  // saveCardToWallet={saveCardToWallet}
+                  // setSaveCardToWallet={setSaveCardToWallet}
+                  errorRefs={errorRefs}
                 />
 
+                <div className="save-for-later">
+                  <input
+                    type="checkbox"
+                    className="checkbox"
+                    checked={saveCardToWallet}
+                    onChange={(e) => setSaveCardToWallet(!saveCardToWallet)}
+                  />
+                  <span>Save card for later</span>
+                </div>
                 {addressList.length > 0 && paymentMethod.id < 1 && (
                   <div className="billing">
                     <input
@@ -517,6 +531,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                         onChange={handleChange}
                         onBlur={handleBlur}
                         errorMessage={touched.first && errors.first}
+                        errorRefs={errorRefs}
                       />
                       <FormField
                         label="Last Name"
@@ -526,6 +541,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                         onChange={handleChange}
                         onBlur={handleBlur}
                         errorMessage={touched.last && errors.last}
+                        errorRefs={errorRefs}
                       />
                     </div>
                     <div className="form-field-container-full">
@@ -537,6 +553,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                         onChange={handleChange}
                         onBlur={handleBlur}
                         errorMessage={touched.address1 && errors.address1}
+                        errorRefs={errorRefs}
                       />
                     </div>
                     <div className="form-field-container-full">
@@ -545,6 +562,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                         name="address2"
                         value={values.address2}
                         onChange={handleChange}
+                        errorRefs={errorRefs}
                       />
                     </div>
                     <div className="form-field-container">
@@ -556,6 +574,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                         onChange={handleChange}
                         onBlur={handleBlur}
                         errorMessage={touched.city && errors.city}
+                        errorRefs={errorRefs}
                       />
                       <DropdownField
                         options={stateDropdownList}
@@ -565,6 +584,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                         formName="state"
                         onChange={(e) => setFieldValue("state", e)}
                         errorMessage={touched.state && errors.state}
+                        errorRefs={errorRefs}
                       />
                     </div>
                     <div className="form-field-container">
@@ -576,6 +596,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                         onChange={handleChange}
                         onBlur={handleBlur}
                         errorMessage={touched.zip && errors.zip}
+                        errorRefs={errorRefs}
                       />
                       <div className="save-for-later">
                         <input

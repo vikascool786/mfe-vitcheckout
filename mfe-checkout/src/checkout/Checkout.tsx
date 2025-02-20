@@ -335,7 +335,7 @@ const Checkout: React.FC<ICheckout> = ({
     setShowShipAddressForm(!showShipAddressForm);
     setShippingAddress(
       shopperAddressBook.find((address) => address.isShip === 1) ||
-        shippingAddress
+      shippingAddress
     );
     setIsExpanded(!isExpanded);
   };
@@ -461,11 +461,10 @@ const Checkout: React.FC<ICheckout> = ({
     <div>
       <form className="shipping-address-form">
         <div
-          className={`${
-            !showAVS
-              ? "checkout-form-container"
-              : "checkout-form-container__hide"
-          }`}
+          className={`${!showAVS
+            ? "checkout-form-container"
+            : "checkout-form-container__hide"
+            }`}
         >
           <div className="form-header">
             <FormHeading title="Shipping Address" />

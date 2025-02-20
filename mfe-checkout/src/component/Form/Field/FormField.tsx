@@ -7,6 +7,9 @@ interface IFormFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   required?: boolean;
   extraLabel?: string;
   errorMessage?: string | false | undefined;
+  errorRefs?: React.MutableRefObject<{
+    [key: string]: HTMLInputElement | null;
+  }> | null;
 }
 
 export const FormField: React.FC<IFormFieldProps> = ({
@@ -16,6 +19,7 @@ export const FormField: React.FC<IFormFieldProps> = ({
   errorMessage,
   renderCheckBox,
   name,
+  errorRefs = null,
   ...props
 }) => {
   return (
@@ -24,6 +28,11 @@ export const FormField: React.FC<IFormFieldProps> = ({
       <input
         className={`input-container ${errorMessage ? "error-border" : ""}`}
         name={name}
+        ref={(el: HTMLInputElement | null) =>
+          el && errorRefs && errorRefs.current
+            ? (errorRefs.current[name!] = el)
+            : null
+        }
         {...props}
       />
       {errorMessage && <div className="error-message">{errorMessage}</div>}
