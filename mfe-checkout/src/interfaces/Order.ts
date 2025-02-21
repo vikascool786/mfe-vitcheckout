@@ -14,7 +14,8 @@ export interface Order {
   paymentMethods: IPaymentMethod2[];
   userOptions: IUserOptions;
   isOrderValid?: boolean;
-  shouldShowInvalidCVVMessage: boolean;
+  hidePaymentMethods?: boolean;
+  shouldShowInvalidCVVMessage?: boolean;
 }
 
 interface OrderStores {

@@ -167,8 +167,8 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     () =>
       paymentMethods
         ? (paymentMethods?.find(
-          (payment) => payment?.preferred
-        ) as IPaymentMethod)
+            (payment) => payment?.preferred
+          ) as IPaymentMethod)
         : ({} as IPaymentMethod),
     [paymentMethods]
   );
@@ -322,6 +322,8 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
       </div>
     );
 
+  console.log(orderData);
+
   return (
     <div>
       {orderData && (
@@ -340,14 +342,16 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                   pcid={pcid}
                 />
                 <ShippingMethod loading={isLoading} shopperID={shopperId} />
-                <PaymentMethod
-                  cartId={cartId}
-                  shopperId={shopperId}
-                  siteId={siteId}
-                  pcid={pcid}
-                  updatePaymentTypeId={setPaymentTypeId}
-                  loading={isLoading}
-                />
+                {orderData.totals.price > 0 && (
+                  <PaymentMethod
+                    cartId={cartId}
+                    shopperId={shopperId}
+                    siteId={siteId}
+                    pcid={pcid}
+                    updatePaymentTypeId={setPaymentTypeId}
+                    loading={isLoading}
+                  />
+                )}
               </div>
               <div className="right-column">
                 <OrderSummary pcid={pcid} />

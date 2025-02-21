@@ -1,5 +1,5 @@
 import { useAtom } from "jotai";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { buildOrder, changeOrder } from "../api/service/Order";
 import { useShopperEWallet } from "../api/service/ShopperEWallet";
 import { Cashback } from "../assets/svgs/Cashback";
@@ -123,6 +123,19 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
 
   // Add gift card to the order
   const handleAddGiftCard = (isGCApplied: boolean) => {
+    if (gcState.gcNum?.trim() === "") {
+      setgcState((prevState) => ({
+        ...prevState,
+        gcError: "Please enter number",
+      }));
+    }
+
+    if (gcState.gcPin?.trim() === "") {
+      setgcState((prevState) => ({
+        ...prevState,
+        gcError: "Please enter pin",
+      }));
+    }
     if (order && isGCApplied) {
       setGCLoading(true);
       buildOrder(
@@ -361,8 +374,9 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               if (!store.totals) return null;
               return (
                 <div
-                  className={`order-charges-table ${isFirst ? "order-charges-table-first" : ""
-                    } ${isLast ? "order-charges-table-last" : ""}`}
+                  className={`order-charges-table ${
+                    isFirst ? "order-charges-table-first" : ""
+                  } ${isLast ? "order-charges-table-last" : ""}`}
                   key={store?.id || index}
                 >
                   <div className="shipping-catolog-name">
@@ -435,8 +449,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         ) : null}
 
         {order?.totals?.cashBack &&
-          order?.totals?.extraCashBack &&
-          order?.totals?.extraCashBack > 0 ? (
+        order?.totals?.extraCashBack &&
+        order?.totals?.extraCashBack > 0 ? (
           <>
             <div className="order-summary-cashback-container">
               <div className="order-cashback">
