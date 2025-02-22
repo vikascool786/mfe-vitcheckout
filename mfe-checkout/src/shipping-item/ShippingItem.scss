@@ -84,6 +84,13 @@
 
 .item-options {
   display: flex;
+  &__row {
+    word-break: break-all;
+    margin-bottom: 5px;
+    &:last-child {
+      margin-bottom: 10px;
+    }
+  }
 }
 
 .item-autoship {

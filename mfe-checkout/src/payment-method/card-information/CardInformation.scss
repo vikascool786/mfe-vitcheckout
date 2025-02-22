@@ -19,6 +19,13 @@
   justify-content: center;
   flex-direction: row;
   gap: 21px;
+
+  .form-field-half {
+    label {
+      font-size: 13px;
+      font-weight: 400;
+    }
+  }
 }
 
 .form-field-container-full {
@@ -65,8 +72,8 @@
 }
 
 .billing {
-  font-size: 18;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 400;
   display: flex;
   align-items: center;
   gap: 0.6rem;
@@ -125,7 +132,7 @@
   width: 100%;
   align-items: center;
   gap: 6px;
-  font-size: 16;
+  font-size: 16px;
   font-weight: 400;
   margin-top: -25px;
 }
@@ -143,4 +150,11 @@
   font-size: 18px;
   line-height: 21.09px;
   letter-spacing: 0%;
+}
+
+.form-field {
+  label {
+    font-size: 14px;
+    font-weight: 400;
+  }
 }

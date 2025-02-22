@@ -88,9 +88,9 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
     setLoading(false);
   };
 
-  // useEffect(() => {
-  //   setOrderConsolidateData(getOrderConsolidateData(orders));
-  // }, [orders]);
+  useEffect(() => {
+    setOrderConsolidateData(getOrderConsolidateData(orders));
+  }, [orders]);
 
   const handleChangeOOSConsolidate = (
     oosConsolidate: number,

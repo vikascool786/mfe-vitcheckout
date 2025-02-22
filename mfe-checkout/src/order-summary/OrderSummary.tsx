@@ -374,9 +374,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               if (!store.totals) return null;
               return (
                 <div
-                  className={`order-charges-table ${
-                    isFirst ? "order-charges-table-first" : ""
-                  } ${isLast ? "order-charges-table-last" : ""}`}
+                  className={`order-charges-table ${isFirst ? "order-charges-table-first" : ""
+                    } ${isLast ? "order-charges-table-last" : ""}`}
                   key={store?.id || index}
                 >
                   <div className="shipping-catolog-name">
@@ -449,8 +448,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         ) : null}
 
         {order?.totals?.cashBack &&
-        order?.totals?.extraCashBack &&
-        order?.totals?.extraCashBack > 0 ? (
+          order?.totals?.extraCashBack &&
+          order?.totals?.extraCashBack > 0 ? (
           <>
             <div className="order-summary-cashback-container">
               <div className="order-cashback">

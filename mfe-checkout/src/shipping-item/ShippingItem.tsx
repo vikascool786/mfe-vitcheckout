@@ -6,6 +6,7 @@ import { Item, StoreDetail } from "../interfaces/ShippingMethod";
 import { ITotal } from "../interfaces/ShopperCart";
 import { Portal } from "../interfaces/Portal";
 import { AutoshipIcon } from "../assets/icons/Autoship";
+import { truncate } from "../utils/helpers/Helper";
 
 interface IProduct {
   imageUrl: string;
@@ -102,8 +103,8 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
 
             {(item.autoshipFreq > 0 || item.autoShipId) &&
               (portalData?.autoShipDiscount > 0 &&
-                isMaProduct &&
-                item.hasAutoShipDiscount ? (
+              isMaProduct &&
+              item.hasAutoShipDiscount ? (
                 <div className="item-autoship">
                   <AutoshipIcon />
                   Saving {portalData.autoShipDiscount}% with Autoship
@@ -134,8 +135,8 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
         <div className="item-options">
           <ul>
             {options.map(([key, value]) => (
-              <div key={key}>
-                <strong>{key}</strong> {value}
+              <div key={key} className="item-options__row">
+                <strong>{key}</strong> {truncate(value, 200)}
               </div>
             ))}
           </ul>
