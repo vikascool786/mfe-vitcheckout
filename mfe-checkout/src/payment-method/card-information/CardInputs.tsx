@@ -101,7 +101,9 @@ export const CardInputs: React.FC<ICardInputProps> = ({
         required
         name="cardInfo.cvv"
         type="password"
+        inputMode="numeric"
         value={values.cardInfo?.cvv || ""}
+        maxLength={4}
         onChange={handleChange}
         onBlur={handleBlur}
         errorMessage={touched.cardInfo?.cvv && errors.cardInfo?.cvv}
