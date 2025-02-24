@@ -14,7 +14,17 @@ import { debounce } from "lodash";
 
 import { orderAtom, orderNotificationsAtom } from "../store";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
-import { updateProductQty } from "../api/service/Order";
+import {
+  buildOrder,
+  changeOrder,
+  OrderResponse,
+  updateProductQty,
+} from "../api/service/Order";
+import {
+  GET_API_ENDPOINT_BASE_URL_ONLY,
+  GET_API_KEY,
+} from "../utils/urlResolver";
+import { useApi } from "../hooks/useAPI";
 
 interface IProduct {
   imageUrl: string;
@@ -46,6 +56,9 @@ function createOptionMap(
 }
 
 const formattedNumber = (num: any) => Number(num).toFixed(2);
+
+const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
+const apiKey = GET_API_KEY();
 
 export const ShippingItem: React.FC<IShippingItemProps> = ({
   item,
@@ -97,7 +110,7 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
   };
 
   const onQuantityChange = debounce(async (item: Item, newQuantity: number) => {
-    let requestData = {
+    const requestData = {
       id: cartId,
       products: [
         {
@@ -110,17 +123,24 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
       ],
     };
 
-    console.log("requestData", requestData);
+    setIsUpdating(true);
+    setUpdateError(null);
 
     try {
-      setIsUpdating(true);
       const response = await updateProductQty(cartId, requestData);
-      console.log("=======requestData", response);
-      if (!response.ok) {
+
+      if (!response?.data?.response?.success?.data) {
         throw new Error("Failed to update quantity");
       }
+
+      if (order) {
+        const updatedOrder = await buildOrder(
+          generateChangeStoreResponse(order)
+        );
+        setOrder(updatedOrder.response.success.data);
+      }
     } catch (error) {
-      console.error("Error updating quantity:", error);
+      setUpdateError("Failed to update quantity");
     } finally {
       setIsUpdating(false);
     }

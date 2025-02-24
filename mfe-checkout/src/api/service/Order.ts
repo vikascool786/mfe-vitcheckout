@@ -35,7 +35,7 @@ export interface Success {
   notifications: Notification[];
 }
 
-export interface Data { }
+export interface Data {}
 
 export interface MetaData {
   status: string;
@@ -128,15 +128,10 @@ export const removeProductFromCart = async (
 //updating product item quantity
 export const updateProductQty = async (
   cartId: string,
-  walletData: any,
+  walletData: any
 ): Promise<any> => {
   const API_ENDPOINT = `${GET_API_ENDPOINT_BASE_URL_ONLY()}/cart-universal/v2/carts/id/${cartId}?api_key=c7f5de6a77644516b24c68fc4ac173fc`;
 
-  try {
-    const response = await axiosInstance(API_ENDPOINT).put("", walletData);
-    return response;
-  } catch (error) {
-    console.error("Error quantity product to cart", error);
-    throw error;
-  }
+  const response = await axiosInstance(API_ENDPOINT).put("", walletData);
+  return response;
 };
