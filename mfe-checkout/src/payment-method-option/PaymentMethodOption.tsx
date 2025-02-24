@@ -9,6 +9,7 @@ import {
 import { RadioButton } from "../component/RadioButton/RadioButton";
 import { CardInformation } from "../payment-method/card-information/CardInformation";
 import {
+  isThirdPartyPayment,
   PAYPAL,
   SEZZLE,
   thirdPartyPaymentTypeIdList,
@@ -76,7 +77,6 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
         ? "Required"
         : ""
     );
-    setOrderNotifications(isCardExpired() ? ["Card is expired"] : [""]);
   }, [order?.shouldShowInvalidCVVMessage]);
 
   const maxLength = paymentMethod.typeID === 1 ? 4 : 3;
@@ -92,6 +92,12 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   const getCardNumber = (ccNumber: any) => {
     return "*" + ccNumber?.slice(-4);
   };
+
+  useEffect(() => {
+    if (isCardExpired() && !isThirdPartyPayment(paymentMethod.typeID)) {
+      setOrderNotifications(["Card is expired"]);
+    }
+  }, [paymentMethod]);
 
   const handlePaymentMethodEdit = () => {
     if (isSelected && paymentMethod) {
