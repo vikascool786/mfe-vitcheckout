@@ -63,7 +63,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   );
 
   const shouldShowSezzle = order?.paymentMethods.some(
-    (method) => method.typeID === SEZZLE.typeId
+    (method) => method.typeID === SEZZLE.typeId && method.visible
   );
 
   const [showNewCard, setShowNewCard] = useState<boolean>(false);
@@ -117,17 +117,16 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       Object.keys(addresses).map((id) =>
         addressMap.set(id, addresses[parseInt(id)] as Address)
       );
+
       try {
         const response = await fetchShoppersPaymentMethods(shopperId);
 
-        let staticMethods = paymentMethods.map((pm) => ({
-          ...pm,
-          isSelected: false,
-          isVisible:
-            (pm.paymentMethod.typeID === PAYPAL.typeId && shouldShowPaypal) ||
-            (pm.paymentMethod.typeID === SEZZLE.typeId && shouldShowSezzle),
-        }));
-
+        let staticMethods = paymentMethods;
+        if (!shouldShowSezzle) {
+          staticMethods = staticMethods.filter(
+            (method) => method.paymentMethod.typeID !== SEZZLE.typeId
+          );
+        }
         const paymentOptions = response.map((paymentMethod) => {
           const isPreferred = paymentMethod.preferred;
 
@@ -302,15 +301,18 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   }, []);
 
   const toggleAccordion = () => {
+    const paymentString = ["Paypal"];
+
+    if (shouldShowSezzle) {
+      paymentString.push("Sezzle");
+    }
     if (isExpanded) {
       // Collapse: Only show preferred, PayPal, and Sezzle
       const updatedPaymentMethods = paymentMethods.map((paymentMethod) => ({
         ...paymentMethod,
         isVisible:
           paymentMethod.paymentMethod.preferred ||
-          ["Paypal", "Sezzle"].includes(
-            paymentMethod.paymentMethod.accountName
-          ),
+          paymentString.includes(paymentMethod.paymentMethod.accountName),
       }));
 
       setPaymentMethods(updatedPaymentMethods);
@@ -318,11 +320,16 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       // Expand: Show all items
 
       const updatedPaymentMethods = paymentMethods.map((paymentMethod) => {
-        return {
-          ...paymentMethod,
-          // isSelected: paymentMethod.isSelected,
-          isVisible: true,
-        };
+        if (shouldShowSezzle) {
+          return {
+            ...paymentMethod,
+            isVisible: true,
+          };
+        } else
+          return {
+            ...paymentMethod,
+            isVisible: true,
+          };
       });
 
       setPaymentMethods(updatedPaymentMethods);
@@ -527,7 +534,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         updatedPaymentMethods.find((pm) => pm.paymentMethod.id === id)
           ?.paymentMethod.typeID || 0
       );
-      setPaymentMethods(updatedPaymentMethods);
+      setPaymentMethods(updatedPaymentMethods as IPaymentOption[]);
       setIsExpanded(false);
     }, 300);
   };

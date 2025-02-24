@@ -48,7 +48,6 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   onAddNewCards,
   handleCancelNewCard,
   setCVVFieldValue,
-  updatePaymentTypeId,
 }) => {
   const [isCardEdit, setIsCardEdit] = useState<boolean>(false);
   const [order, setOrder] = useAtom(orderAtom);

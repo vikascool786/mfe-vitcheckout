@@ -27,8 +27,8 @@ const initialPaymentMethods: IPaymentOption[] = [
     }),
     paymentAddress: {} as Address,
     isPaymentValidated: false,
-    isSelected: false,
-    isVisible: false,
+    isSelected: true,
+    isVisible: true,
   },
   {
     paymentMethod: createPaymentMethod({
@@ -40,7 +40,7 @@ const initialPaymentMethods: IPaymentOption[] = [
     isPaymentValidated: false,
     paymentAddress: {} as Address,
     isSelected: false,
-    isVisible: false,
+    isVisible: true,
   },
 ];
 
