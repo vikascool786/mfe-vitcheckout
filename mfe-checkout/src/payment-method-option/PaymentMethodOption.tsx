@@ -17,6 +17,7 @@ import {
   IPaymentOption,
   loadingAtom,
   orderAtom,
+  orderNotificationsAtom,
   paymentMethodsAtom,
 } from "../store";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
@@ -53,6 +54,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   const [order, setOrder] = useAtom(orderAtom);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [paymentMethods] = useAtom(paymentMethodsAtom);
+  const setOrderNotifications = useSetAtom(orderNotificationsAtom);
 
   const {
     paymentMethod,
@@ -70,11 +72,14 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
 
   //checking cvv input field is valid or dirty on stage changes
   useEffect(() => {
-      setCvvError(!formik.touched.cvv && !formik.dirty && order?.shouldShowInvalidCVVMessage
+    setCvvError(
+      !formik.touched.cvv && !formik.dirty && order?.shouldShowInvalidCVVMessage
         ? "Required"
-        : "");
+        : ""
+    );
+    setOrderNotifications(isCardExpired() ? ["Card is expired"] : [""]);
   }, [order?.shouldShowInvalidCVVMessage]);
-  
+
   const maxLength = paymentMethod.typeID === 1 ? 4 : 3;
 
   const setLoading = useSetAtom(loadingAtom);
