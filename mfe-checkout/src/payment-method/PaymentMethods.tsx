@@ -51,9 +51,20 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   const [isExpanded, setIsExpanded] = useState(false);
   const { addresses } = useShopperEWalletAddresses(shopperId || "");
 
-  const [showClick2Pay, setShowClick2Pay] = useState(false);
-
   const [order] = useAtom(orderAtom);
+
+  const shouldShowClick2Pay = order?.paymentMethods.some(
+    (method) => method.typeID === CLICK2PAY.typeId
+  );
+  const [showClick2Pay, setShowClick2Pay] = useState(shouldShowClick2Pay);
+
+  const shouldShowPaypal = order?.paymentMethods.some(
+    (method) => method.typeID === PAYPAL.typeId
+  );
+
+  const shouldShowSezzle = order?.paymentMethods.some(
+    (method) => method.typeID === SEZZLE.typeId
+  );
 
   const [showNewCard, setShowNewCard] = useState<boolean>(false);
   const [portalData] = useAtom(portalApiData(shopperId));
@@ -109,7 +120,13 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       try {
         const response = await fetchShoppersPaymentMethods(shopperId);
 
-        let staticMethods = paymentMethods;
+        let staticMethods = paymentMethods.map((pm) => ({
+          ...pm,
+          isSelected: false,
+          isVisible:
+            (pm.paymentMethod.typeID === PAYPAL.typeId && shouldShowPaypal) ||
+            (pm.paymentMethod.typeID === SEZZLE.typeId && shouldShowSezzle),
+        }));
 
         const paymentOptions = response.map((paymentMethod) => {
           const isPreferred = paymentMethod.preferred;
@@ -399,14 +416,14 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     const updatedPaymentMethods = paymentMethods.map((method) =>
       method.paymentMethod.id === paymentId
         ? {
-          ...method,
-          isEditing: !method.isEditing, // Toggle editing state for the selected payment method
-        }
+            ...method,
+            isEditing: !method.isEditing, // Toggle editing state for the selected payment method
+          }
         : {
-          ...method,
-          isEditing: false,
-          isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
-        }
+            ...method,
+            isEditing: false,
+            isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
+          }
     );
     setPaymentMethods(updatedPaymentMethods);
   };
