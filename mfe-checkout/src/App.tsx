@@ -38,10 +38,10 @@ const App: React.FC<AppProps> = () => {
 
         {/* for old custoemr  */}
         <CheckoutContainer
-          cartId="cart_2282210204_W_USA_USA_ENG"
-          shopperId="WxxeWXwhzWUhmzhYXVzYzzezkexjewwqhpXkzehwpz"
-          pcid="2282210204"
-          siteId="260"
+          cartId="cart_2637612996_W_USA_USA_ENG"
+          shopperId="UmkepZWVzmqqVzhVqkzZmwqzWeXVYVWXWZZpzxhemz"
+          pcid="2637612996"
+          siteId="222"
           sessionId="3055249126"
         />
         {/* for vikas card custoemr  */}

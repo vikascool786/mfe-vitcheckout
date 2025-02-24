@@ -60,3 +60,34 @@
   font-size: 12px;
   padding: 5px 0 0 35px;
 }
+
+.shipping-option-office {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  border-top: 2px solid #aca8a8; // Added thickness for better visibility
+  padding-top: 10px;
+  margin-top: 10px; // Adds spacing after the border
+
+  ul {
+    list-style-type: decimal; // Makes the list numbered
+    padding-left: 10px; // Adds indentation for better alignment
+  }
+
+  li {
+    margin-bottom: 4px;
+  }
+}
+.shipping-option-office-title {
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 16.41px;
+  letter-spacing: 0%;
+}
+
+.shipping-option-office-address {
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 18px;
+  letter-spacing: 0%;
+}

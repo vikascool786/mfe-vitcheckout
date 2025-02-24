@@ -10,7 +10,7 @@ import { AutoshipIcon } from "../assets/icons/Autoship";
 import { truncate } from "../utils/helpers/Helper";
 import { DropdownField } from "../component/Form/Field/DropdownField";
 import { DropdownOption } from "../interfaces/DropdownOption";
-import { debounce } from 'lodash';
+import { debounce } from "lodash";
 
 import { orderAtom, orderNotificationsAtom } from "../store";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
@@ -56,8 +56,9 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
   isMaProduct,
   cartId,
 }) => {
-  console.log("cartId", cartId);
-  const [selectedQuantity, setSelectedQuantity] = useState(item.quantity.toString());
+  const [selectedQuantity, setSelectedQuantity] = useState(
+    item.quantity.toString()
+  );
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateError, setUpdateError] = useState<string | null>(null);
 
@@ -81,10 +82,9 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
   const createQuantityOptions = (maxQuantity: number): DropdownOption[] => {
     return Array.from({ length: maxQuantity + 1 }, (_, i) => ({
       value: i.toString(),
-      label: i === 0 ? "0 (Delete)" : i.toString()
+      label: i === 0 ? "0 (Delete)" : i.toString(),
     }));
   };
-
 
   const handleQuantityChange = async (value: string) => {
     setSelectedQuantity(value);
@@ -98,30 +98,29 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
 
   const onQuantityChange = debounce(async (item: Item, newQuantity: number) => {
     let requestData = {
-      "id": cartId,
-      "products": [
+      id: cartId,
+      products: [
         {
-          "id": item.prodId,
-          "type": "PROD",
-          "quantity": newQuantity,
-          "option": item.option,
-          "product_hash": item.product_hash
-        }
-      ]
-    }
+          id: item.prodId,
+          type: "PROD",
+          quantity: newQuantity,
+          option: item.option,
+          product_hash: item.product_hash,
+        },
+      ],
+    };
 
     console.log("requestData", requestData);
 
     try {
       setIsUpdating(true);
       const response = await updateProductQty(cartId, requestData);
-console.log("=======requestData", response);
+      console.log("=======requestData", response);
       if (!response.ok) {
-        throw new Error('Failed to update quantity');
+        throw new Error("Failed to update quantity");
       }
-
     } catch (error) {
-      console.error('Error updating quantity:', error);
+      console.error("Error updating quantity:", error);
     } finally {
       setIsUpdating(false);
     }
@@ -181,14 +180,16 @@ console.log("=======requestData", response);
                     disabled={isUpdating}
                   />
                 </div>
-                {isUpdating && <span className="updating-message">Updating...</span>}
+                {isUpdating && (
+                  <span className="updating-message">Updating...</span>
+                )}
               </div>
             </section>
 
             {(item.autoshipFreq > 0 || item.autoShipId) &&
               (portalData?.autoShipDiscount > 0 &&
-                isMaProduct &&
-                item.hasAutoShipDiscount ? (
+              isMaProduct &&
+              item.hasAutoShipDiscount ? (
                 <div className="item-autoship">
                   <AutoshipIcon />
                   Saving {portalData.autoShipDiscount}% with Autoship
