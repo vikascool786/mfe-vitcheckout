@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import { useAtom } from "jotai";
 import { Close } from "../assets/svgs/Close";
 import "./ShippingItem.scss";
 import { Cashback } from "../assets/svgs/Cashback";
@@ -7,6 +8,13 @@ import { ITotal } from "../interfaces/ShopperCart";
 import { Portal } from "../interfaces/Portal";
 import { AutoshipIcon } from "../assets/icons/Autoship";
 import { truncate } from "../utils/helpers/Helper";
+import { DropdownField } from "../component/Form/Field/DropdownField";
+import { DropdownOption } from "../interfaces/DropdownOption";
+import { debounce } from 'lodash';
+
+import { orderAtom, orderNotificationsAtom } from "../store";
+import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
+import { updateProductQty } from "../api/service/Order";
 
 interface IProduct {
   imageUrl: string;
@@ -24,6 +32,7 @@ interface IShippingItemProps {
   onRemove: () => void;
   portalData: Portal;
   isMaProduct: boolean;
+  cartId: string;
 }
 
 function createOptionMap(
@@ -45,7 +54,15 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
   onRemove,
   portalData,
   isMaProduct,
+  cartId,
 }) => {
+  console.log("cartId", cartId);
+  const [selectedQuantity, setSelectedQuantity] = useState(item.quantity.toString());
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [updateError, setUpdateError] = useState<string | null>(null);
+
+  const [order, setOrder] = useAtom(orderAtom);
+
   const { image, caption, catalogName, totals, quantity } = item;
   const { catalogId, isMA } = storeDetail || {};
   const { bv, ibv } = item.totals;
@@ -53,25 +70,76 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
   const isGiftCard = caption.toLowerCase().includes("email delivery");
 
   const options =
-    item.option && Array.from(createOptionMap(item.option).entries()); // Convert Map entries to an array
+    item.option && Array.from(createOptionMap(item.option).entries());
 
-  // remove html entities
-  const decodeHtmlEntities = (html: any) => {
+  const decodeHtmlEntities = (html: string) => {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, "text/html");
     return doc.body.textContent || "";
   };
+
+  const createQuantityOptions = (maxQuantity: number): DropdownOption[] => {
+    return Array.from({ length: maxQuantity + 1 }, (_, i) => ({
+      value: i.toString(),
+      label: i === 0 ? "0 (Delete)" : i.toString()
+    }));
+  };
+
+
+  const handleQuantityChange = async (value: string) => {
+    setSelectedQuantity(value);
+    if (value === "0") {
+      onRemove();
+      return;
+    } else {
+      onQuantityChange(item, parseInt(value));
+    }
+  };
+
+  const onQuantityChange = debounce(async (item: Item, newQuantity: number) => {
+    let requestData = {
+      "id": cartId,
+      "products": [
+        {
+          "id": item.prodId,
+          "type": "PROD",
+          "quantity": newQuantity,
+          "option": item.option,
+          "product_hash": item.product_hash
+        }
+      ]
+    }
+
+    console.log("requestData", requestData);
+
+    try {
+      setIsUpdating(true);
+      const response = await updateProductQty(cartId, requestData);
+console.log("=======requestData", response);
+      if (!response.ok) {
+        throw new Error('Failed to update quantity');
+      }
+
+    } catch (error) {
+      console.error('Error updating quantity:', error);
+    } finally {
+      setIsUpdating(false);
+    }
+  }, 500);
+
+  // Default max quantity - adjust as needed based on your requirements
+  const maxAvailableStock = 30;
+  const quantityOptions = createQuantityOptions(maxAvailableStock);
 
   return (
     <>
       <div className="item-container">
         <div className="item-detail-container">
           <div className="item-image">
-            <img src={image.url} alt="Product" />
+            <img src={image.url} alt={caption} />
           </div>
 
           <div className="item-info">
-            {/* first line */}
             <section className="header-section">
               <div className="header-block">
                 <div className="item-name">{decodeHtmlEntities(caption)}</div>
@@ -96,15 +164,31 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
                 ? ` ${formattedNumber(bv)} BV`
                 : ibv > 0 && ` ${formattedNumber(ibv)} IBV`}
             </section>
+
             <section className="price-section">
               <div className="shippingItem-priceStr">{totals?.priceStr}</div>
               <div>Quantity: {quantity}</div>
+              <div className="quantity-selector">
+                <p>Quantity</p>
+                <div className="quantity-dropdown-container">
+                  <DropdownField
+                    className="form-field"
+                    formName={`quantity-${catalogName}`}
+                    selectedValue={selectedQuantity}
+                    options={quantityOptions}
+                    onChange={handleQuantityChange}
+                    errorMessage={updateError}
+                    disabled={isUpdating}
+                  />
+                </div>
+                {isUpdating && <span className="updating-message">Updating...</span>}
+              </div>
             </section>
 
             {(item.autoshipFreq > 0 || item.autoShipId) &&
               (portalData?.autoShipDiscount > 0 &&
-              isMaProduct &&
-              item.hasAutoShipDiscount ? (
+                isMaProduct &&
+                item.hasAutoShipDiscount ? (
                 <div className="item-autoship">
                   <AutoshipIcon />
                   Saving {portalData.autoShipDiscount}% with Autoship
@@ -125,12 +209,8 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
             )}
           </div>
         </div>
-        {/* <div className="item-cancel" onClick={onRemove}>
-          <Close />
-          Quantity: {quantity}
-        </div> */}
       </div>
-      {/* Render options if they exist */}
+
       {isGiftCard && options && options.length > 0 && (
         <div className="item-options">
           <ul>

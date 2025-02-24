@@ -10,6 +10,7 @@ interface IFormFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   errorRefs?: React.MutableRefObject<{
     [key: string]: HTMLInputElement | null;
   }> | null;
+  maxLength?: number;
 }
 
 export const FormField: React.FC<IFormFieldProps> = ({
@@ -20,6 +21,7 @@ export const FormField: React.FC<IFormFieldProps> = ({
   renderCheckBox,
   name,
   errorRefs = null,
+  maxLength,
   ...props
 }) => {
   return (
@@ -34,6 +36,7 @@ export const FormField: React.FC<IFormFieldProps> = ({
             : null
         }
         {...props}
+        maxLength={maxLength}
       />
       {errorMessage && <div className="error-message">{errorMessage}</div>}
       {extraLabel && <div className="field-extra-label">{extraLabel}</div>}

@@ -16,7 +16,7 @@ export const AddressDisplay: React.FC<AppProps> = ({
       return (
         <>
           {address.last && address.first
-            ? `${address.last} ${address.first},`
+            ? `${address.last} ${address.first}, `
             : ""}
         </>
       );
@@ -24,7 +24,7 @@ export const AddressDisplay: React.FC<AppProps> = ({
       return (
         <>
           {address.first && address.last
-            ? `${address.first} ${address.last},`
+            ? `${address.first} ${address.last}, `
             : ""}
         </>
       );
@@ -32,11 +32,11 @@ export const AddressDisplay: React.FC<AppProps> = ({
   };
 
   const renderAddressLine1 = () => {
-    return address.address1 ? `${address.address1},` : "";
+    return address.address1 ? `${address.address1}, ` : "";
   };
 
   const renderAddressLine2 = () => {
-    return address.address2 ? `${address.address2},` : "";
+    return address.address2 ? `${address.address2}, ` : "";
   };
 
   const renderCityStateZip = () => {

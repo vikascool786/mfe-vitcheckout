@@ -205,6 +205,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
                             }
                             portalData={portalData}
                             isMaProduct={store?.store?.isMA === 1}
+                            cartId={orders.id}
                           />
                         </div>
                       ))}

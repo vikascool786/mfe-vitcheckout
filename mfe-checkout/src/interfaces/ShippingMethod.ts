@@ -57,6 +57,7 @@ export interface Item {
     cashBackStr?: string;
     priceStr?: string;
   };
+  product_hash: string;
 }
 export interface StoreDetail {
   catalogId: number;

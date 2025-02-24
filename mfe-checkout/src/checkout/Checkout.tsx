@@ -446,15 +446,15 @@ const Checkout: React.FC<ICheckout> = ({
   const validationSchema = Yup.object().shape({
     first: Yup.string().required("First name is required"),
     last: Yup.string().required("Last name is required"),
-    address1: Yup.string().required("Address Line 1 is required"),
-    city: Yup.string().required("City is required"),
-    state: Yup.string().required("State/Province is required"),
+    address1: Yup.string().required("Please enter your address"),
+    city: Yup.string().required("Please enter your city"),
+    state: Yup.string().required("Please enter your State/Province"),
     zip: Yup.string()
       .matches(/^\d{5}(-\d{4})?$/, "Invalid ZIP code format")
-      .required("Zip code is required"),
+      .required("Please enter your zip code"),
     phone: Yup.string()
-      .matches(/^\d{10}$/, "Phone number must be exactly 10 digits")
-      .required("Phone number is required"),
+      .matches(/^\d{10}$/, "Please enter a 10 digit number")
+      .required("Please enter your phone number"),
   });
 
   return (
