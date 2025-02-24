@@ -332,7 +332,6 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                     <FormField
                       value={gcState.gcNum}
                       onChange={handleGcNumChange}
-                      errorMessage={gcState.gcError}
                     />
                   </div>
                   <div className="gift-card-wrapper-field-2">
@@ -343,6 +342,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                     />
                   </div>
                 </div>
+
                 <div className="gift-card-apply">
                   <Button
                     label={!!gcState.gcApplied ? "Remove" : "Apply"}
@@ -351,6 +351,9 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                   />
                 </div>
               </div>
+            )}
+            {gcState.gcError && (
+              <div className="error-message">{gcState.gcError}</div>
             )}
             {!gcState.gcApplied && (
               <div
