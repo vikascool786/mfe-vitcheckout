@@ -109,15 +109,6 @@ export const CardInputs: React.FC<ICardInputProps> = ({
         errorMessage={touched.cardInfo?.cvv && errors.cardInfo?.cvv}
         errorRefs={errorRefs}
       />
-      {/* <div className="save-for-later">
-          <input
-            type="checkbox"
-            className="checkbox"
-            checked={saveCardToWallet}
-            onChange={(e) => setSaveCardToWallet(!saveCardToWallet)}
-          />
-          <span>Save card for later</span>
-        </div> */}
     </>
   );
 };

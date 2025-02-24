@@ -186,7 +186,7 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
 
             <section className="price-section">
               <div className="shippingItem-priceStr">{totals?.priceStr}</div>
-              <div>Quantity: {quantity}</div>
+              {/* <div>Quantity: {quantity}</div> */}
               <div className="quantity-selector">
                 <p>Quantity</p>
                 <div className="quantity-dropdown-container">
@@ -208,8 +208,8 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
 
             {(item.autoshipFreq > 0 || item.autoShipId) &&
               (portalData?.autoShipDiscount > 0 &&
-              isMaProduct &&
-              item.hasAutoShipDiscount ? (
+                isMaProduct &&
+                item.hasAutoShipDiscount ? (
                 <div className="item-autoship">
                   <AutoshipIcon />
                   Saving {portalData.autoShipDiscount}% with Autoship
