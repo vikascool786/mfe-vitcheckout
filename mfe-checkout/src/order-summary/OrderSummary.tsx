@@ -226,42 +226,49 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
 
   const handleAddCoupon = async () => {
     try {
-      if (order) {
-        const { coupons } = order?.userOptions || {};
-        const trimmedCoupon = coupon.coupon.trim();
+      if (coupon.coupon) {
+        if (order) {
+          const { coupons } = order?.userOptions || {};
+          const trimmedCoupon = coupon.coupon.trim();
 
-        if (trimmedCoupon && (!coupons || !coupons.includes(trimmedCoupon))) {
-          // Create a new coupons array with the new coupon
-          const updatedCoupons = coupons
-            ? [...coupons, trimmedCoupon]
-            : [trimmedCoupon];
+          if (trimmedCoupon && (!coupons || !coupons.includes(trimmedCoupon))) {
+            // Create a new coupons array with the new coupon
+            const updatedCoupons = coupons
+              ? [...coupons, trimmedCoupon]
+              : [trimmedCoupon];
 
-          const response = await changeOrder(
-            generateChangeStoreResponse({
-              ...order,
-              userOptions: {
-                ...order.userOptions,
-                coupons: updatedCoupons,
-              },
-            }),
-            order.id
-          );
+            const response = await changeOrder(
+              generateChangeStoreResponse({
+                ...order,
+                userOptions: {
+                  ...order.userOptions,
+                  coupons: updatedCoupons,
+                },
+              }),
+              order.id
+            );
 
-          if (response.response.success?.notifications) {
+            if (response.response.success?.notifications) {
+              setCoupon({
+                coupon: coupon.coupon,
+                couponError: response.response.success?.notifications[0]
+                  ?.reason as string,
+              });
+              return;
+            }
+
+            setOrder(response.response.success?.data);
             setCoupon({
-              coupon: coupon.coupon,
-              couponError: response.response.success?.notifications[0]
-                ?.reason as string,
+              coupon: "",
+              couponError: "",
             });
-            return;
           }
-
-          setOrder(response.response.success?.data);
-          setCoupon({
-            coupon: "",
-            couponError: "",
-          });
         }
+      } else {
+        setCoupon({
+          coupon: "",
+          couponError: "Please enter coupon",
+        });
       }
     } catch (error) {
       console.error("Error while adding coupon:", error);
@@ -377,8 +384,9 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               if (!store.totals) return null;
               return (
                 <div
-                  className={`order-charges-table ${isFirst ? "order-charges-table-first" : ""
-                    } ${isLast ? "order-charges-table-last" : ""}`}
+                  className={`order-charges-table ${
+                    isFirst ? "order-charges-table-first" : ""
+                  } ${isLast ? "order-charges-table-last" : ""}`}
                   key={store?.id || index}
                 >
                   <div className="shipping-catolog-name">
@@ -462,8 +470,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         ) : null}
 
         {order?.totals?.cashBack &&
-          order?.totals?.extraCashBack &&
-          order?.totals?.extraCashBack > 0 ? (
+        order?.totals?.extraCashBack &&
+        order?.totals?.extraCashBack > 0 ? (
           <>
             <div className="order-summary-cashback-container">
               <div className="order-cashback">
