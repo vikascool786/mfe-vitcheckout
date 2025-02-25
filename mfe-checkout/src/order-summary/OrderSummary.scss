@@ -265,6 +265,10 @@
     text-decoration-skip-ink: none;
     color: #118863;
   }
+  &__coupon {
+    align-items: center;
+    margin: 0;
+  }
 }
 
 .order-summary-total {
@@ -294,6 +298,23 @@
   align-items: center;
   gap: 6px;
   flex: 1;
+}
+
+.order-summary-coupon-applied {
+  display: flex;
+  align-items: center;
+  &__code {
+    margin-left: 10px;
+    background-color: #f0f1f7;
+    border-radius: 5px;
+    justify-content: space-between;
+    padding: 5px;
+    font-size: 14px;
+    line-height: 19.75px;
+    color: black;
+    gap: 2rem;
+    font-weight: 600;
+  }
 }
 
 .order-apply-cashback-container {

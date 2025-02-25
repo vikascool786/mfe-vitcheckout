@@ -13,3 +13,16 @@ export const fetchShopperDetail = async (
         throw new Error("Shopper detail not retrieved");
     }
 };
+
+export const fetchShopperAttributes = async (
+    shopperId: string
+): Promise<any> => {
+    try {
+        const shopperAttributesEndpoint = `${GET_API_ENDPOINT_BASE_URL_ONLY()}/shopper-attributes/v1/Attribute/${shopperId}?api_key=${GET_API_KEY()}`;
+        const customerResponse = await axiosInstance(shopperAttributesEndpoint).get("");
+        return customerResponse.data;
+    } catch (error) {
+        console.error(`Error getting shopper attributes for shopperId: ${shopperId}`, error);
+        throw new Error("Shopper attributes not retrieved");
+    }
+};

@@ -15,9 +15,15 @@ import "./OrderSummary.scss";
 import { formattedNumber } from "../utils/OrderUtils";
 import { Spinner } from "../component/Spinner/Spinner";
 import { VIFT } from "../assets/svgs/VIFT";
+import { fetchShopperAttributes } from "../api/service/ShopperDetail";
+import { ShopperAttribute } from "../interfaces/ShopperAttribute";
+import {getOrderValidatePromoCode} from "../api/service/PromoCodeAPI";
+import {portalApiData} from "../checkout/portalAtom";
+import {hideCouponCode} from "../utils/CouponUtils";
 
 interface IOrderSummary {
   pcid: string;
+  shopperId: string;
   hideCashback?: boolean;
 }
 
@@ -37,6 +43,7 @@ interface IGCState {
 export const OrderSummary: React.FC<IOrderSummary> = ({
   pcid,
   hideCashback,
+  shopperId,
 }) => {
   const [order, setOrder] = useAtom(orderAtom);
   const { eWalletData, loading, error } = useShopperEWallet(pcid);
@@ -56,6 +63,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
   });
 
   const [gcLoading, setGCLoading] = useState(false);
+  const [portalData] = useAtom(portalApiData(shopperId));
 
   // Handle input text change for coupon
   const handleCouponTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -285,6 +293,51 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
       return store;
     });
 
+  useEffect(() => {
+    fetchShopperAttributes(shopperId)
+        .then((response: ShopperAttribute[]) => {
+              const COUPON_CODE_SURVEY10 = "SURVEY10";
+              const hasTakenHealthSurvey = response.some(entry => entry.typeId === 609 && entry.value === 1);
+              if(hasTakenHealthSurvey){
+                //check if coupon has been redeemed
+                getOrderValidatePromoCode(pcid, portalData.distId, COUPON_CODE_SURVEY10)
+                    .then(response => {
+                        //TODO fix once CORS issue is resolved
+                        if(!response){
+                          //apply coupon to order
+                          if(order && !order?.userOptions?.coupons?.includes(COUPON_CODE_SURVEY10)){
+                            const updatedCoupons = [...(order?.userOptions?.coupons ?? []), COUPON_CODE_SURVEY10];
+                            const updatedOrder = buildOrder(
+                                  generateChangeStoreResponse({
+                                    ...order,
+                                    userOptions: {
+                                      ...order.userOptions,
+                                      coupons: updatedCoupons
+                                    },
+                                  })
+                              );
+                            updatedOrder
+                                .then(response => {
+                                  console.log("response: " + JSON.stringify(response));
+                                  setOrder(response.response?.success?.data);
+                                })
+                                .catch(error => {
+                                  console.error("Error updating order with coupon ", error);
+                                })
+                          }
+                        }
+                    })
+                    .catch(error => {
+                      console.error("Error with getOrderValidatePromoCode", error);
+                    })
+              }
+            })
+        .catch(error => {
+          console.error("Error getting shopper attribute fetch", error);
+        })
+
+  }, []);
+
   return (
     <div className="order-summary-container">
       {gcLoading && <Spinner />}
@@ -318,7 +371,9 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
             {order?.userOptions.coupons &&
               order?.userOptions.coupons?.length > 0 && (
                 <div className="order-applied-coupons">
-                  {order?.userOptions.coupons.map((appliedCoupon, index) => (
+                  {order?.userOptions.coupons
+                      ?.filter((appliedCoupon) => !hideCouponCode(appliedCoupon)) // Exclude hidden coupons
+                      .map((appliedCoupon, index) => (
                     <li key={index} className="order-applied-coupon">
                       {appliedCoupon}
                       <Close
@@ -396,21 +451,31 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                     <div>Items Subtotal</div>
                     <div>{store?.totals?.priceStr}</div>
                   </div>
+                  { store?.totals?.couponCode && (
+                      <div className="order-summary-row order-summary-row__coupon">
+                        <div className="order-summary-coupon-applied">Coupon
+                          <span key={index} className="order-summary-coupon-applied__code">
+                                {store?.totals?.couponCode}
+                              </span>
+                        </div>
+                        <div>{store?.totals?.couponsStr}</div>
+                      </div>
+                  )}
                   <div className="order-summary-row">
                     <div>Tax Total</div>
                     <div>{store?.totals?.taxStr}</div>
                   </div>
 
-                  <div className="order-summary-row">
-                    <div>Shipping</div>
-                    <div>{store?.totals?.shippingStr}</div>
+                    <div className="order-summary-row">
+                      <div>Shipping</div>
+                      <div>{store?.totals?.shippingStr}</div>
+                    </div>
                   </div>
-                </div>
               );
             })}
 
         {order?.userOptions?.applyEWallet && eWalletData?.totalCoaCBAvail && (
-          <div className="order-summary-row">
+            <div className="order-summary-row">
             <div className="order-summary-row-bold">
               VIFT
               <span className="order-summary-row-green checked">{` Cashback`}</span>
@@ -420,18 +485,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
             </div>
           </div>
         )}
-
-        {order?.userOptions?.coupons &&
-          order?.userOptions?.coupons.length > 0 &&
-          order?.totals?.couponsStr && (
-            <div className="order-summary-row">
-              <div className="order-summary-row-bold">Coupon discount</div>
-              <div className="order-summary-row-bold">
-                {order.totals?.couponsStr}
-              </div>
-            </div>
-          )}
-
+        
         {order?.totals?.gcApplied && order?.totals?.gcApplied < 0 ? (
           <div className="order-summary-row">
             <div className="order-summary-row-bold">Gift Card</div>

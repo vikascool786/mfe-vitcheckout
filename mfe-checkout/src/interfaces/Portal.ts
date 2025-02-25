@@ -3,4 +3,5 @@ export interface Portal {
     autoShipDiscount: number;
     hasFreeShipping: boolean;
     hasItransact: boolean;
+    distId: string;
 }

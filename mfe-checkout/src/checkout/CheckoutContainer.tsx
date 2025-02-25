@@ -354,7 +354,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                 )}
               </div>
               <div className="right-column">
-                <OrderSummary pcid={pcid} />
+                <OrderSummary pcid={pcid} shopperId={shopperId}/>
               </div>
             </div>
             <div className="place-order">

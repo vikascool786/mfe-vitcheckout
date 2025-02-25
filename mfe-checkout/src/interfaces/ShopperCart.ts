@@ -35,6 +35,7 @@ export interface ITotal {
   gcApplied?: number;
   gcAppliedStr?: string;
   extraCashBack: number;
+  couponCode?: string;
 }
 
 export interface IItem {
