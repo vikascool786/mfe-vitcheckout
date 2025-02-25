@@ -46,19 +46,31 @@
 
 .price-section {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   justify-content: space-between;
 }
-
-.quantity-selector{
+.quantity-dropdown-container {
+  .form-field {
+    .input-container {
+      width: 40px;
+      height: 24px;
+      min-height: auto;
+      padding: 0px;
+      margin-bottom: 0px;
+    }
+  }
+  .field-item-container {
+    margin-bottom: 0px;
+  }
+}
+.quantity-selector {
   display: flex;
   align-items: center;
-  gap: 10px;
-  background-color: bluexx;
+  gap: 5px;
 }
 
-.quantity-dropdown-container{
-  width: 80px;
+.quantity-dropdown-container {
+  // width: 80px;
   margin: 0px;
   padding: 0px;
   display: flex;
@@ -100,7 +112,7 @@
 
 .item-options {
   display: flex;
-  &__row { 
+  &__row {
     word-break: break-all;
     margin-bottom: 5px;
     &:last-child {

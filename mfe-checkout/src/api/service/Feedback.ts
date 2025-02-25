@@ -16,7 +16,7 @@ export const postFeedback = async (
     comments: feedback,
     httpreferrer: window.location.href,
     orderid: 0,
-    surveytypeid: 10,
+    surveytypeid: 17,
     siteid: siteId,
     userSessionId: sessionId || -1,
   };
