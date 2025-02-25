@@ -59,7 +59,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   const [showClick2Pay, setShowClick2Pay] = useState(shouldShowClick2Pay);
 
   const shouldShowPaypal = order?.paymentMethods.some(
-    (method) => method.typeID === PAYPAL.typeId
+    (method) => method.typeID === PAYPAL.typeId && method.visible
   );
 
   const shouldShowSezzle = order?.paymentMethods.some(
@@ -127,6 +127,13 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
             (method) => method.paymentMethod.typeID !== SEZZLE.typeId
           );
         }
+
+        if (!shouldShowPaypal) {
+          staticMethods = staticMethods.filter(
+            (method) => method.paymentMethod.typeID !== PAYPAL.typeId
+          );
+        }
+
         const paymentOptions = response.map((paymentMethod) => {
           const isPreferred = paymentMethod.preferred;
 
@@ -423,14 +430,14 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     const updatedPaymentMethods = paymentMethods.map((method) =>
       method.paymentMethod.id === paymentId
         ? {
-          ...method,
-          isEditing: !method.isEditing, // Toggle editing state for the selected payment method
-        }
+            ...method,
+            isEditing: !method.isEditing, // Toggle editing state for the selected payment method
+          }
         : {
-          ...method,
-          isEditing: false,
-          isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
-        }
+            ...method,
+            isEditing: false,
+            isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
+          }
     );
     setPaymentMethods(updatedPaymentMethods);
   };
