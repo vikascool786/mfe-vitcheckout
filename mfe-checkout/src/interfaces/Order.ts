@@ -58,6 +58,7 @@ export interface Permutation {
 }
 
 export interface ShippingSelection {
+  isSelected?: boolean;
   id: number;
   method: string;
   total: number;

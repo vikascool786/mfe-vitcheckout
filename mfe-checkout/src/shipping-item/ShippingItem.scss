@@ -46,7 +46,7 @@
 
 .price-section {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   justify-content: space-between;
 }
 .quantity-dropdown-container {
@@ -65,12 +65,14 @@
 }
 .quantity-selector {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 5px;
+  margin: 0px;
+  padding: 0px;
 }
 
-.quantity-dropdown-container {
-  // width: 80px;
+.quantity-dropdown-container99 {
+  width: 80px;
   margin: 0px;
   padding: 0px;
   display: flex;

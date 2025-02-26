@@ -36,11 +36,15 @@ export const ShippingOptionItem: React.FC<IShippingOptionItem> = ({
     <div className={`shipping-option-container ${select} ${isFirst} ${isLast}`}>
       <div className="shipping-option-wrapper">
         <div className="shipping-option-select-container">
-          <RadioButton
-            id={shippingOption.id.toString()}
-            onChange={onChange}
-            checked={shippingOption.isSelected}
-          />
+          {
+            size === 0 ? null : (
+              <RadioButton
+                id={shippingOption.id.toString()}
+                onChange={onChange}
+                checked={shippingOption.isSelected}
+              />
+            )
+          }
           <div className={`shipping-option-sub-container`}>
             <div>{shippingOption.method}</div>
             <div className="shipping-option-estShipDate">
