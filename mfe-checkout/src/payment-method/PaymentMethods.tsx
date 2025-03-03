@@ -430,14 +430,14 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     const updatedPaymentMethods = paymentMethods.map((method) =>
       method.paymentMethod.id === paymentId
         ? {
-          ...method,
-          isEditing: !method.isEditing, // Toggle editing state for the selected payment method
-        }
+            ...method,
+            isEditing: !method.isEditing, // Toggle editing state for the selected payment method
+          }
         : {
-          ...method,
-          isEditing: false,
-          isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
-        }
+            ...method,
+            isEditing: false,
+            isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
+          }
     );
     setPaymentMethods(updatedPaymentMethods);
   };
@@ -556,7 +556,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         <div className="pm-container" id="pm-main">
           <div className="pm-title-container">
             <FormHeading title="Payment Method" />
-            {paymentMethods.length >= 4 && (
+            {paymentMethods.length >= 1 && (
               <div className="pm-show-card" onClick={toggleAccordion}>
                 <div>{isExpanded ? "Hide other cards" : "See other cards"}</div>
                 <Back
