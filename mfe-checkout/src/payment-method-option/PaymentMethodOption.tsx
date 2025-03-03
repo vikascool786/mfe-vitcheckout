@@ -66,7 +66,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
 
   const [cvvError, setCvvError] = useState(
     !formik.touched.cvv && !formik.dirty && order?.shouldShowInvalidCVVMessage
-      ? "Required"
+      ? "CVV is required"
       : ""
   );
 
@@ -74,7 +74,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   useEffect(() => {
     setCvvError(
       !formik.touched.cvv && !formik.dirty && order?.shouldShowInvalidCVVMessage
-        ? "Required"
+        ? "CVV is required"
         : ""
     );
   }, [order?.shouldShowInvalidCVVMessage]);

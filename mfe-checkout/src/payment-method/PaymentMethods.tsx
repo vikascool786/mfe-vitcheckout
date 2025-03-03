@@ -164,8 +164,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
           } as IPaymentOption;
         });
 
-        console.log("paymentOptions", paymentOptions);
-
         let updatedPaymentOptions = [...paymentOptions, ...staticMethods];
 
         if (isPaypalOrderSuccess) {
