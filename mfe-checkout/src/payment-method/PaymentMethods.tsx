@@ -164,6 +164,8 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
           } as IPaymentOption;
         });
 
+        console.log("paymentOptions", paymentOptions);
+
         let updatedPaymentOptions = [...paymentOptions, ...staticMethods];
 
         if (isPaypalOrderSuccess) {
@@ -338,7 +340,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
             isVisible: true,
           };
       });
-
       setPaymentMethods(updatedPaymentMethods);
     }
 
@@ -502,6 +503,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
             ...paymentMethod.paymentMethod,
             preferred: true,
           },
+          paymentAddress: paymentMethod.paymentAddress,
           isSelected: true,
           isVisible: true,
         };

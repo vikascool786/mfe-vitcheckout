@@ -220,7 +220,6 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
             redirectToOrderConfirmation(orderId);
           }
         } else {
-          console.log("response: " + JSON.stringify(response));
           if (response?.data?.response?.errors[0]?.message) {
             setOrderErrorMessage(response?.data?.response?.errors[0]?.message);
             return;
@@ -236,7 +235,6 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
         }
       })
       .catch((error) => {
-        console.log(error);
         setOrderErrorMessage(error);
         setLoadingOrderConfirmation(false);
       });
@@ -328,8 +326,6 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
       </div>
     );
 
-  console.log(orderData);
-
   return (
     <div>
       {orderData && (
@@ -360,7 +356,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                 )}
               </div>
               <div className="right-column">
-                <OrderSummary pcid={pcid} shopperId={shopperId}/>
+                <OrderSummary pcid={pcid} shopperId={shopperId} />
               </div>
             </div>
             <div className="place-order">
