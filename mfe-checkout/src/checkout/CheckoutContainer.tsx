@@ -37,6 +37,7 @@ import { Notifications } from "./Notifications";
 import SessionTimeout from "./SessionTimeout";
 import { portalApiData } from "./portalAtom";
 import Skeleton from "../component/Skeleton/Skeleton";
+import { setDataObjectProperty } from "../utils/helpers/setDataObjectProperty";
 
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
@@ -116,6 +117,11 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     );
   }, [location.search]);
 
+  useEffect(() => {
+    setDataObjectProperty("pageName", "singlePage");
+    setDataObjectProperty("pageType", "checkout");
+  }, []);
+
   const {
     data: addresses = [],
     isLoading: loadingAddresses,
@@ -167,8 +173,8 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     () =>
       paymentMethods
         ? (paymentMethods?.find(
-          (payment) => payment?.preferred
-        ) as IPaymentMethod)
+            (payment) => payment?.preferred
+          ) as IPaymentMethod)
         : ({} as IPaymentMethod),
     [paymentMethods]
   );

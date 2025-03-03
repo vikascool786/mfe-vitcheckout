@@ -11,7 +11,7 @@ export const postAVS = async (
   shpPCode: string,
   addressHash: string
 ): Promise<any> => {
-  const apiEndpoint = `${apiDomain}/avs/v1/hash`;
+  const apiEndpoint = `${apiDomain}/avs/v2/hash`;
 
   try {
     const avsResponse = await axiosInstance(apiEndpoint).post("", {

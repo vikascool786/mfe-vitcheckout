@@ -26,6 +26,7 @@ import { GET_SHOP_CART_URL } from "../utils/urlResolver";
 import "./ShippingMethod.scss";
 import { decodeHtmlEntities } from "../utils/helpers/DecodeHtml";
 import { Warning } from "../assets/svgs/Warning";
+import { setDataObjectProperty } from "../utils/helpers/setDataObjectProperty";
 
 interface IShippingMethodProps {
   shopperID: string;
@@ -49,6 +50,29 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
   if (!orders) {
     return <p>Loading shipping methods...</p>;
   }
+
+  const setOrderInDataObject = () => {
+    const prodContainerId: string[] = [];
+    const mybuysCartItems: Array<{ sku: string; qty: string; price: string }> =
+      [];
+    const [items] = Object.entries(orders?.stores).map(
+      ([key, store]) => store.items
+    );
+    console.log("items,", items);
+    for (const [key, store] of Object.entries(orders?.stores)) {
+      console.log("stores", store);
+      store.items.forEach((item) => {
+        mybuysCartItems.push({
+          sku: `${item.prodId}-${item.catalogSku}`,
+          qty: item.quantity.toString(),
+          price: item.totals.price.toString(),
+        });
+        prodContainerId.push(item.prodContainerId);
+      });
+    }
+    setDataObjectProperty("prodContainerId", prodContainerId.join(","));
+    setDataObjectProperty("mybuysCartItems", mybuysCartItems);
+  };
 
   const handleRemoveProduct = (storeKey: string, itemKey: string) => {
     setLoading(true);
@@ -90,6 +114,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
 
   useEffect(() => {
     setOrderConsolidateData(getOrderConsolidateData(orders));
+    setOrderInDataObject();
   }, [orders]);
 
   const handleChangeOOSConsolidate = (
@@ -129,8 +154,9 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
       {orderConsolidateData?.showOrderConsolidate && (
         <div className="shipping-options-container">
           <div
-            className={`shipping-option-container start ${orderConsolidateData.oosConsolidate === 2 ? "selected" : ""
-              }`}
+            className={`shipping-option-container start ${
+              orderConsolidateData.oosConsolidate === 2 ? "selected" : ""
+            }`}
           >
             <div className="shipping-option-wrapper">
               <div className="shipping-option-select-container">
@@ -149,8 +175,9 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
             </div>
           </div>
           <div
-            className={`shipping-option-container end ${orderConsolidateData.oosConsolidate === 3 ? "selected" : ""
-              }`}
+            className={`shipping-option-container end ${
+              orderConsolidateData.oosConsolidate === 3 ? "selected" : ""
+            }`}
           >
             <div className="shipping-option-wrapper">
               <div className="shipping-option-select-container">

@@ -454,9 +454,11 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                   { store?.totals?.couponCode && (
                       <div className="order-summary-row order-summary-row__coupon">
                         <div className="order-summary-coupon-applied">Coupon
-                          <span key={index} className="order-summary-coupon-applied__code">
+                          { !hideCouponCode(store?.totals?.couponCode) && (
+                              <span key={index} className="order-summary-coupon-applied__code">
                                 {store?.totals?.couponCode}
                               </span>
+                          )}
                         </div>
                         <div>{store?.totals?.couponsStr}</div>
                       </div>

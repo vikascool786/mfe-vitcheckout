@@ -5,3 +5,7 @@ export type IFeedback = {
   siteId: string;
   pcId: string;
 };
+
+export type DataObject = {
+  [key: string]: any;
+};

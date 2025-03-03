@@ -47,6 +47,7 @@ export interface Item {
   totals: ITotal;
   permutation?: Permutation;
   shipWarningMessages?: string[];
+  prodContainerId: string;
 }
 
 export interface Image {
