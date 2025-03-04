@@ -37,7 +37,7 @@ import { Notifications } from "./Notifications";
 import SessionTimeout from "./SessionTimeout";
 import { portalApiData } from "./portalAtom";
 import Skeleton from "../component/Skeleton/Skeleton";
-import { setDataObjectProperty } from "../utils/helpers/setDataObjectProperty";
+import { setDataObjectProperty } from "../utils/helpers/SetDataObjectProperty";
 
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
@@ -173,8 +173,8 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     () =>
       paymentMethods
         ? (paymentMethods?.find(
-            (payment) => payment?.preferred
-          ) as IPaymentMethod)
+          (payment) => payment?.preferred
+        ) as IPaymentMethod)
         : ({} as IPaymentMethod),
     [paymentMethods]
   );
@@ -188,16 +188,6 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     }
     return false;
   };
-
-  // const defaultPaymentMethod: IPaymentMethod = useMemo<IPaymentMethod>(() => {
-  //   if (!paymentMethods || paymentMethods.length === 0) {
-  //     return {} as IPaymentMethod; // Return empty object if no payment methods exist
-  //   }
-  //   // Find the preferred payment method
-  //   const preferredPayment = paymentMethods.find(payment => payment?.preferred);
-  //   // If no preferred payment, fallback to the first available card
-  //   return preferredPayment || paymentMethods[0];
-  // }, [paymentMethods]);
 
   const confirmOrder = () => {
     commitOrder(cartId)

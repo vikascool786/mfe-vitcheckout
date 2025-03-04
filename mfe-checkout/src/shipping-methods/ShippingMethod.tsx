@@ -26,7 +26,7 @@ import { GET_SHOP_CART_URL } from "../utils/urlResolver";
 import "./ShippingMethod.scss";
 import { decodeHtmlEntities } from "../utils/helpers/DecodeHtml";
 import { Warning } from "../assets/svgs/Warning";
-import { setDataObjectProperty } from "../utils/helpers/setDataObjectProperty";
+import { setDataObjectProperty } from "../utils/helpers/SetDataObjectProperty";
 
 interface IShippingMethodProps {
   shopperID: string;
@@ -58,9 +58,8 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
     const [items] = Object.entries(orders?.stores).map(
       ([key, store]) => store.items
     );
-    console.log("items,", items);
+
     for (const [key, store] of Object.entries(orders?.stores)) {
-      console.log("stores", store);
       store.items.forEach((item) => {
         mybuysCartItems.push({
           sku: `${item.prodId}-${item.catalogSku}`,

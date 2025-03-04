@@ -42,19 +42,27 @@ export const AddressDisplay: React.FC<AppProps> = ({
   const renderCityStateZip = () => {
     const cityStateZip = [];
 
-    if (address.city) cityStateZip.push(address.city);
-    if (address.state) cityStateZip.push(address.state);
-    if (address.zip) cityStateZip.push(address.zip);
+    if (address.city)
+      cityStateZip.push(<span className="nowrap">{address.city}</span>);
+    if (address.state)
+      cityStateZip.push(<span className="nowrap">{address.state}</span>);
+    if (address.zip)
+      cityStateZip.push(<span className="nowrap">{address.zip}</span>);
 
-    return cityStateZip.join(", ");
+    return cityStateZip.map((element, index) => (
+      <React.Fragment key={index}>
+        {element}
+        {index < cityStateZip.length - 1 ? ", " : ""}
+      </React.Fragment>
+    ));
   };
 
   return (
     <div className="add-display">
-      {renderName()}
-      {renderAddressLine1()}
-      {renderAddressLine2()}
-      {renderCityStateZip()}
+      <span className="nowrap">{renderName()}</span>
+      <span className="nowrap">{renderAddressLine1()}</span>
+      <span className="nowrap">{renderAddressLine2()}</span>
+      <div>{renderCityStateZip()}</div>
     </div>
   );
 };

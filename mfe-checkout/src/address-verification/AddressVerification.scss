@@ -19,11 +19,14 @@
 }
 
 .add-display {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
   font-size: 18px;
   font-weight: 400;
-  line-height: 21.09px;
-  text-align: left;
-  text-underline-position: from-font;
-  text-decoration-skip-ink: none;
-  word-break: break-all;
+}
+
+.nowrap {
+  white-space: nowrap;
+  display: inline-block;
 }
