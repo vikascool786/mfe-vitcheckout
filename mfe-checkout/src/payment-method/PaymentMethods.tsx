@@ -134,6 +134,27 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
           );
         }
 
+        if (response.length === 0) {
+          const newCard = createPaymentMethod({
+            accountName: "",
+            imageUrl: CardOptions,
+            id: 0,
+            typeID: 9,
+            addressId: 0,
+          });
+
+          staticMethods = [
+            {
+              paymentMethod: newCard,
+              paymentAddress: {} as Address,
+              isPaymentValidated: false,
+              isSelected: true,
+              isVisible: true,
+              isEditing: true,
+            },
+          ];
+        }
+
         const paymentOptions = response.map((paymentMethod) => {
           const isPreferred = paymentMethod.preferred;
 
@@ -429,14 +450,14 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     const updatedPaymentMethods = paymentMethods.map((method) =>
       method.paymentMethod.id === paymentId
         ? {
-          ...method,
-          isEditing: !method.isEditing, // Toggle editing state for the selected payment method
-        }
+            ...method,
+            isEditing: !method.isEditing, // Toggle editing state for the selected payment method
+          }
         : {
-          ...method,
-          isEditing: false,
-          isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
-        }
+            ...method,
+            isEditing: false,
+            isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
+          }
     );
     setPaymentMethods(updatedPaymentMethods);
   };
