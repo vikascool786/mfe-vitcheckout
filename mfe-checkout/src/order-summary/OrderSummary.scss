@@ -265,6 +265,7 @@
     text-decoration-skip-ink: none;
     color: #118863;
   }
+
   &__coupon {
     align-items: center;
     margin: 0;
@@ -303,6 +304,7 @@
 .order-summary-coupon-applied {
   display: flex;
   align-items: center;
+
   &__code {
     margin-left: 10px;
     background-color: #f0f1f7;
@@ -481,6 +483,57 @@
   position: absolute;
   left: 80%;
   width: 22%;
+}
+
+.gcApplied {
+  width: 100%;
+  background-color: #F0F1F7;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px;
+}
+
+.gcLeft-cont {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+}
+
+
+
+.gcRight-cont {
+  display: flex;
+  align-items: center;
+
+}
+
+.cardName {
+  font-family: Roboto;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 14.06px;
+  letter-spacing: 0%;
+
+}
+
+.balanceCard {
+  font-family: Roboto;
+  font-weight: 300;
+  font-size: 12px;
+  line-height: 14.06px;
+  letter-spacing: 0%;
+
+}
+
+.appliedCash {
+  font-family: Roboto;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 18.75px;
+  letter-spacing: 0%;
+
 }
 
 @media only screen and (max-width: 768px) {

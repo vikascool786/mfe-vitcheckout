@@ -62,6 +62,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
       order?.userOptions.gcNum && order?.userOptions?.gcNum[0] ? true : false,
   });
 
+
   const [gcLoading, setGCLoading] = useState(false);
   const [portalData] = useAtom(portalApiData(shopperId));
 
@@ -349,6 +350,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
       });
   }, []);
 
+  
+
   return (
     <div className="order-summary-container">
       {gcLoading && <Spinner />}
@@ -425,7 +428,22 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                 </div>
               </div>
             )}
-            {!!gcState.gcApplied && <div>Add New UI Here</div>}
+
+            {!!gcState.gcApplied && 
+              <div className="gcApplied">
+                <div className="gcLeft-cont">
+                   <p className="cardName">{`CARD: ${gcState.gcNum}`}</p>
+                   <p className="balanceCard">{`$ 0.00 Balance`}</p>
+                </div>
+                <div className="gcRight-cont">
+                   <p className="appliedCash">
+                    {`${order?.totals.gcAppliedStr} Applied`}
+                   </p>
+        
+                   <Close />
+                  
+                </div>
+              </div>}
             {gcState.gcError && (
               <div className="error-message">{gcState.gcError}</div>
             )}
