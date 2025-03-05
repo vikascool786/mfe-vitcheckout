@@ -59,11 +59,11 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   const [showClick2Pay, setShowClick2Pay] = useState(shouldShowClick2Pay);
 
   const shouldShowPaypal = order?.paymentMethods.some(
-    (method) => method.typeID === PAYPAL.typeId && method.visible
+    (method) => method.type.toLowerCase() === PAYPAL.name.toLowerCase()
   );
 
   const shouldShowSezzle = order?.paymentMethods.some(
-    (method) => method.typeID === SEZZLE.typeId && method.visible
+    (method) => method.type.toLowerCase() === SEZZLE.name.toLowerCase()
   );
 
   const [showNewCard, setShowNewCard] = useState<boolean>(false);
@@ -122,6 +122,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         const response = await fetchShoppersPaymentMethods(shopperId);
 
         let staticMethods = paymentMethods;
+        console.log(staticMethods);
         if (!shouldShowSezzle) {
           staticMethods = staticMethods.filter(
             (method) => method.paymentMethod.typeID !== SEZZLE.typeId
@@ -152,6 +153,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
               isVisible: true,
               isEditing: true,
             },
+            ...paymentMethods,
           ];
 
           setPaymentMethods(staticMethods);
@@ -188,6 +190,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
           } as IPaymentOption;
         });
 
+        console.log(staticMethods);
         let updatedPaymentOptions = [...paymentOptions, ...staticMethods];
 
         console.log(updatedPaymentOptions);
@@ -256,6 +259,10 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     const sezzleSiteFlag = getSiteFlagDataForType(SEZZLE.siteflagTypeId || 0);
     if (!sezzleSiteFlag?.active) {
       updateVisibilityOfPaymentMethod(SEZZLE.typeId, false);
+      const updatedPaymentMethods = paymentMethods.filter(
+        (method) => method.paymentMethod.typeID !== SEZZLE.typeId
+      );
+      setPaymentMethods(updatedPaymentMethods);
       return;
     }
     //sezzle rules dependent on portal
@@ -264,6 +271,11 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         const jsonData = JSON.parse(sezzleSiteFlag.auxDataText);
         if (!jsonData.enableForItransact) {
           updateVisibilityOfPaymentMethod(SEZZLE.typeId, false);
+          updateVisibilityOfPaymentMethod(SEZZLE.typeId, false);
+          const updatedPaymentMethods = paymentMethods.filter(
+            (method) => method.paymentMethod.typeID !== SEZZLE.typeId
+          );
+          setPaymentMethods(updatedPaymentMethods);
           return;
         }
       }
@@ -281,6 +293,11 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       }
       if (!isAutoshipAllowed && orderHasAutoshipItems(order)) {
         updateVisibilityOfPaymentMethod(SEZZLE.typeId, false);
+        updateVisibilityOfPaymentMethod(SEZZLE.typeId, false);
+        const updatedPaymentMethods = paymentMethods.filter(
+          (method) => method.paymentMethod.typeID !== SEZZLE.typeId
+        );
+        setPaymentMethods(updatedPaymentMethods);
         return;
       }
       updateVisibilityOfPaymentMethod(
@@ -379,6 +396,13 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     );
 
     if (hasTemporaryCard) {
+      //  set the selected payment method this
+      const updatedPaymentOptions = paymentMethods.map((paymentOption) => ({
+        ...paymentOption,
+        isSelected: paymentOption.paymentMethod.id === 0,
+      }));
+      onCollapse(0);
+
       // If a card with id 0 already exists, do not update payment methods
       console.warn("Temporary card already exists. Cannot add a new one.");
       return;
@@ -416,7 +440,16 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     const isAddingNewCard = paymentMethods.find(
       (pm) => pm.paymentMethod.id === 0
     );
-    setShowNewCard(isAddingNewCard ? true : false);
+    const selectedPayment = paymentMethods.find((pm) => pm.isSelected);
+
+    if (isThirdPartyPayment(selectedPayment?.paymentMethod.typeID)) {
+      setShowNewCard(false);
+      return;
+    }
+
+    if (isAddingNewCard) {
+      setShowNewCard(isAddingNewCard ? true : false);
+    }
   }, [paymentMethods]);
 
   const isMethodDefault = (option: IPaymentOption) => {
@@ -550,7 +583,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
           isVisible: paymentMethod.paymentMethod.preferred || false,
         };
       }
-
       return {
         ...paymentMethod,
         paymentMethod: {
