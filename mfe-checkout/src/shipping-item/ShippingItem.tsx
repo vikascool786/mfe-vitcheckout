@@ -184,32 +184,34 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
                 : ibv > 0 && ` ${formattedNumber(ibv)} IBV`}
             </section>
 
-            <section className="price-section">
-              <div className="shippingItem-priceStr">{totals?.priceStr}</div>
-              {/* <div>Quantity: {quantity}</div> */}
-              <div className="quantity-selector">
-                <p>Quantity</p>
-                <div className="quantity-dropdown-container">
-                  <DropdownField
-                    className="form-field"
-                    formName={`quantity-${catalogName}`}
-                    selectedValue={selectedQuantity}
-                    options={quantityOptions}
-                    onChange={handleQuantityChange}
-                    errorMessage={updateError}
-                    disabled={isUpdating}
-                  />
+            {!isGiftCard && (
+              <section className="price-section">
+                <div className="shippingItem-priceStr">{totals?.priceStr}</div>
+                {/* <div>Quantity: {quantity}</div> */}
+                <div className="quantity-selector">
+                  <p>Quantity</p>
+                  <div className="quantity-dropdown-container">
+                    <DropdownField
+                      className="form-field"
+                      formName={`quantity-${catalogName}`}
+                      selectedValue={selectedQuantity}
+                      options={quantityOptions}
+                      onChange={handleQuantityChange}
+                      errorMessage={updateError}
+                      disabled={isUpdating}
+                    />
+                  </div>
+                  {isUpdating && (
+                    <span className="updating-message">Updating...</span>
+                  )}
                 </div>
-                {isUpdating && (
-                  <span className="updating-message">Updating...</span>
-                )}
-              </div>
-            </section>
+              </section>
+            )}
 
             {(item.autoshipFreq > 0 || item.autoShipId) &&
               (portalData?.autoShipDiscount > 0 &&
-                isMaProduct &&
-                item.hasAutoShipDiscount ? (
+              isMaProduct &&
+              item.hasAutoShipDiscount ? (
                 <div className="item-autoship">
                   <AutoshipIcon />
                   Saving {portalData.autoShipDiscount}% with Autoship
