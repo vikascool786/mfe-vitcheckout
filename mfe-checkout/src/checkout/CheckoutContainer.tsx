@@ -38,6 +38,7 @@ import SessionTimeout from "./SessionTimeout";
 import { portalApiData } from "./portalAtom";
 import Skeleton from "../component/Skeleton/Skeleton";
 import { setDataObjectProperty } from "../utils/helpers/SetDataObjectProperty";
+import { ADDRESS_BOOK, PORTAL_DATA, WALLET_DATA } from "../utils/MOCKS";
 
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
@@ -97,8 +98,8 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     orderNotificationsAtom
   );
 
-  const paymentMethodOptions = useAtomValue(paymentMethodsAtom);
-  const [portalData] = useAtom(portalApiData(shopperId));
+  // const paymentMethodOptions = useAtomValue(paymentMethodsAtom);
+  const portalData = PORTAL_DATA;
 
   const addressUrl = `${apiDomain}/shopper-addressbooks/v1/${shopperId}/AddressBook?siteId=${siteId}&api_key=${apiKey}`;
   const paymentUrl = `${apiDomain}/shopper-wallets/v1/Shopper/${shopperId}/Wallet?api_key=${apiKey}`;
@@ -122,25 +123,29 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     setDataObjectProperty("pageType", "checkout");
   }, []);
 
-  const {
-    data: addresses = [],
-    isLoading: loadingAddresses,
-    error: addressError,
-  } = useApi<Address[] | null>(addressUrl, "GET");
+  // const {
+  //   data: addresses = [],
+  //   isLoading: loadingAddresses,
+  //   error: addressError,
+  // } = useApi<Address[] | null>(addressUrl, "GET");
 
-  const {
-    data: paymentMethods = [],
-    isLoading: loadingPaymentMethods,
-    error: paymentError,
-  } = useApi<IPaymentMethod[] | null>(paymentUrl, "GET");
+  // const {
+  //   data: paymentMethods = [],
+  //   isLoading: loadingPaymentMethods,
+  //   error: paymentError,
+  // } = useApi<IPaymentMethod[] | null>(paymentUrl, "GET");
 
-  const {
-    data: order,
-    isLoading: loadingOrder,
-    postData,
-    error: orderError,
-    isComplete: isFetchOrderComplete,
-  } = useApi<OrderResponse>(fetchOrderUrl, "GET");
+  // const {
+  //   data: order,
+  //   isLoading: loadingOrder,
+  //   postData,
+  //   error: orderError,
+  //   isComplete: isFetchOrderComplete,
+  // } = useApi<OrderResponse>(fetchOrderUrl, "GET");
+
+  const addresses = ADDRESS_BOOK;
+
+  const paymentMethods = WALLET_DATA;
 
   const updateOrder = async (
     orderData: Order,
@@ -173,8 +178,8 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     () =>
       paymentMethods
         ? (paymentMethods?.find(
-          (payment) => payment?.preferred
-        ) as IPaymentMethod)
+            (payment) => payment?.preferred
+          ) as IPaymentMethod)
         : ({} as IPaymentMethod),
     [paymentMethods]
   );
@@ -234,66 +239,66 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     window.location.href = `/nbts/orderconfirmation-${orderId}`;
   };
 
-  useEffect(() => {
-    if (isFetchOrderComplete) {
-      if (!order) {
-        let buildOrderPayload = getInitialBuildOrderData(
-          cartId,
-          portalData?.portalId
-        );
-        if (defaultAddress?.id) {
-          buildOrderPayload.shipping = buildOrderPayload.shipping ?? { id: 0 };
-          buildOrderPayload.shipping.id = defaultAddress.id;
-        }
-        if (defaultPaymentMethod?.addressId) {
-          buildOrderPayload.billing = buildOrderPayload.billing ?? { id: 0 };
-          buildOrderPayload.billing.id = defaultPaymentMethod.addressId;
-        }
+  // useEffect(() => {
+  //   if (isFetchOrderComplete) {
+  //     if (!order) {
+  //       let buildOrderPayload = getInitialBuildOrderData(
+  //         cartId,
+  //         portalData?.portalId
+  //       );
+  //       if (defaultAddress?.id) {
+  //         buildOrderPayload.shipping = buildOrderPayload.shipping ?? { id: 0 };
+  //         buildOrderPayload.shipping.id = defaultAddress.id;
+  //       }
+  //       if (defaultPaymentMethod?.addressId) {
+  //         buildOrderPayload.billing = buildOrderPayload.billing ?? { id: 0 };
+  //         buildOrderPayload.billing.id = defaultPaymentMethod.addressId;
+  //       }
 
-        const orderResponse = buildOrder(buildOrderPayload);
-        orderResponse.then((response) => {
-          if (
-            response.response?.errors?.message ===
-            "There are no items in your cart."
-          ) {
-            window.location.href = GET_SHOP_CART_URL();
-          }
-          setOrderData(response?.response.success?.data || null);
-          setOrderNotifications(
-            getOrderNotifications(response?.response.success)
-          );
-        });
-      } else {
-        if (!order.response.success.data) return;
-        const orderResponse = order.response.success.data;
-        if (!orderResponse.billingAddress.id) {
-          orderResponse.billingAddress.id =
-            defaultPaymentMethod?.addressId || defaultAddress?.id;
-        }
-        if (!orderResponse.shippingAddress.id) {
-          orderResponse.shippingAddress.id = defaultAddress?.id;
-        }
+  //       const orderResponse = buildOrder(buildOrderPayload);
+  //       orderResponse.then((response) => {
+  //         if (
+  //           response.response?.errors?.message ===
+  //           "There are no items in your cart."
+  //         ) {
+  //           window.location.href = GET_SHOP_CART_URL();
+  //         }
+  //         setOrderData(response?.response.success?.data || null);
+  //         setOrderNotifications(
+  //           getOrderNotifications(response?.response.success)
+  //         );
+  //       });
+  //     } else {
+  //       if (!order.response.success.data) return;
+  //       const orderResponse = order.response.success.data;
+  //       if (!orderResponse.billingAddress.id) {
+  //         orderResponse.billingAddress.id =
+  //           defaultPaymentMethod?.addressId || defaultAddress?.id;
+  //       }
+  //       if (!orderResponse.shippingAddress.id) {
+  //         orderResponse.shippingAddress.id = defaultAddress?.id;
+  //       }
 
-        setOrderData(orderResponse);
-        setOrderNotifications(getOrderNotifications(order.response.success));
-      }
-    }
-  }, [isFetchOrderComplete, defaultAddress, defaultPaymentMethod]);
+  //       setOrderData(orderResponse);
+  //       setOrderNotifications(getOrderNotifications(order.response.success));
+  //     }
+  //   }
+  // }, [isFetchOrderComplete, defaultAddress, defaultPaymentMethod]);
 
-  useEffect(() => {
-    const currentOrderData = order ? order.response.success.data : orderData;
+  // useEffect(() => {
+  //   const currentOrderData = order ? order.response.success.data : orderData;
 
-    setOrderData(currentOrderData);
+  //   setOrderData(currentOrderData);
 
-    if (!hasInitializedOrder.current && currentOrderData && !order) {
-      hasInitializedOrder.current = true;
-      updateOrder(
-        currentOrderData,
-        defaultPaymentMethod?.addressId ?? defaultAddress?.id ?? 0,
-        defaultAddress?.id ?? 0
-      );
-    }
-  }, [defaultAddress, defaultPaymentMethod]);
+  //   if (!hasInitializedOrder.current && currentOrderData && !order) {
+  //     hasInitializedOrder.current = true;
+  //     updateOrder(
+  //       currentOrderData,
+  //       defaultPaymentMethod?.addressId ?? defaultAddress?.id ?? 0,
+  //       defaultAddress?.id ?? 0
+  //     );
+  //   }
+  // }, [defaultAddress, defaultPaymentMethod]);
 
   const handlePlaceOrderUpdate = (value: boolean) => {
     setLoadingOrderConfirmation(value);
@@ -303,10 +308,10 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     setOrderErrorMessage(message);
   };
 
-  if (loadingAddresses || loadingPaymentMethods || loadingOrder)
-    return <Skeleton />;
+  // if (loadingAddresses || loadingPaymentMethods || loadingOrder)
+  //   return <Skeleton />;
 
-  if (addressError || paymentError) return <div>Failed to load data</div>;
+  // if (addressError || paymentError) return <div>Failed to load data</div>;
 
   if (loadingOrderConfirmation)
     return (
@@ -349,7 +354,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                 <OrderSummary pcid={pcid} shopperId={shopperId} />
               </div>
             </div>
-            <div className="place-order">
+            {/* <div className="place-order">
               {paymentMethodOptions && (
                 <PlaceOrder
                   confirmOrder={confirmOrder}
@@ -368,20 +373,20 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                 />
               )}
               <Feedback siteId={siteId} pcId={pcid} sessionId={sessionId} />
-            </div>
+            </div> */}
             <HeadHelmet />
             <SessionTimeout />
           </div>
         </>
       )}
 
-      {order?.response.errors && (
+      {/* {orderData?.response.errors && (
         <ErrorMessage
           errorMessage={
             order?.response.errors && order?.response.errors.message
           }
         />
-      )}
+      )} */}
     </div>
   );
 };

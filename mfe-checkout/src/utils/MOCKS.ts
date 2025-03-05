@@ -1594,7 +1594,7 @@ export const WALLET_DATA = [
       },
     ],
   },
-  
+
   {
     id: 99298269,
     number: "411111******1111",
@@ -3013,4 +3013,36 @@ export const SHOPPER_WALLET_ADDRESS = {
     isoalpha3Code: "USA",
     mi: "",
   },
+};
+
+export const PORTAL_DATA = {
+  id: 0,
+  portalId: "3309812.COM",
+  name: "",
+  consultantName: "PETER AUTOMATION",
+  ownerCompanyName: "PETER AUTOMATION",
+  ownerEmail: "394686166668014@yahoo.com",
+  ownerPhone: "",
+  repId: "3309812",
+  distId: "443359799",
+  guaAccountId: "",
+  imageName:
+    "https://images.marketamerica.com/images/usa/webPortals/distImages/default.gif",
+  hasFreeShipping: true,
+  autoShipDiscount: 5,
+  hasItransact: false,
+  webCenterEnabled: false,
+  webCenterName: "",
+  isSiteBranded: false,
+  isPayPalDisabled: false,
+  hasAmex: false,
+  hasDiscover: false,
+  error: "",
+  minShipPercent: 6,
+  minShipChange: 6,
+  global: false,
+  npo: false,
+  merchantCountry: "USA",
+  productCountry: "USA",
+  active: true,
 };
