@@ -134,7 +134,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
           );
         }
 
-        if (response.length === 0) {
+        if (!response) {
           const newCard = createPaymentMethod({
             accountName: "",
             imageUrl: CardOptions,
@@ -153,6 +153,9 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
               isEditing: true,
             },
           ];
+
+          setPaymentMethods(staticMethods);
+          return;
         }
 
         const paymentOptions = response.map((paymentMethod) => {
@@ -187,6 +190,8 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
 
         let updatedPaymentOptions = [...paymentOptions, ...staticMethods];
 
+        console.log(updatedPaymentOptions);
+
         if (isPaypalOrderSuccess) {
           const paypalDetails = await generatePayPalTransactionDetails(
             shopperId,
@@ -217,6 +222,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
           setPaymentMethods(updatedPaymentOptions);
         }, 300);
       } catch (error) {
+        console.log("Error fetching payment methods", error);
         if (isPaypalOrderSuccess) {
           await generatePayPalTransactionDetails(shopperId, token, true, false);
 
@@ -571,13 +577,18 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     formik.setFieldValue("cvv", cvv);
   };
 
+  const showShouldToggleAccordian =
+    paymentMethods.filter(
+      (pm) => pm.paymentMethod.typeID === 9 || pm.paymentMethod.typeID === 6
+    ).length > 1;
+
   return (
     <FormikProvider value={formik}>
       <div className="pm-main-container">
         <div className="pm-container" id="pm-main">
           <div className="pm-title-container">
             <FormHeading title="Payment Method" />
-            {paymentMethods.length >= 1 && (
+            {showShouldToggleAccordian && (
               <div className="pm-show-card" onClick={toggleAccordion}>
                 <div>{isExpanded ? "Hide other cards" : "See other cards"}</div>
                 <Back
