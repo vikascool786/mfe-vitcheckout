@@ -122,7 +122,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         const response = await fetchShoppersPaymentMethods(shopperId);
 
         let staticMethods = paymentMethods;
-        console.log(staticMethods);
+
         if (!shouldShowSezzle) {
           staticMethods = staticMethods.filter(
             (method) => method.paymentMethod.typeID !== SEZZLE.typeId
@@ -160,7 +160,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
           return;
         }
 
-        const paymentOptions = response.map((paymentMethod) => {
+        let paymentOptions = response.map((paymentMethod) => {
           const isPreferred = paymentMethod.preferred;
 
           if (isPreferred) {
@@ -170,30 +170,25 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
             }));
           }
 
-          // Handle single response case
-          if (response.length === 1) {
-            return {
-              paymentMethod,
-              paymentAddress: addressMap.get(
-                paymentMethod.addressId.toString()
-              ),
-              isVisible: true,
-              isSelected: paymentMethod.preferred,
-            } as IPaymentOption;
-          }
-
           return {
             paymentMethod,
             paymentAddress: addressMap.get(paymentMethod.addressId.toString()),
             isVisible: isPreferred,
-            isSelected: isPreferred, // Ensure only one selection later
+            isSelected: isPreferred,
           } as IPaymentOption;
         });
 
-        console.log(staticMethods);
+        const preferredPaymentMethod = paymentOptions.find(
+          (option) => option.paymentMethod.preferred
+        );
+        if (!preferredPaymentMethod) {
+          paymentOptions = paymentOptions.map((option, index) => ({
+            ...option,
+            isVisible: index === 0,
+            isSelected: index === 0,
+          }));
+        }
         let updatedPaymentOptions = [...paymentOptions, ...staticMethods];
-
-        console.log(updatedPaymentOptions);
 
         if (isPaypalOrderSuccess) {
           const paypalDetails = await generatePayPalTransactionDetails(

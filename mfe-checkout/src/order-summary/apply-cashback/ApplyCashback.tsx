@@ -20,6 +20,7 @@ export const ApplyCashback: React.FC<IApplyCashbackContainer> = ({
     orderNotificationsAtom
   );
 
+  console.log("EWallet", cashbackData);
   const handleAddApplyCashback = () => {
     // Determine if cashback is being applied or removed
 
@@ -67,7 +68,7 @@ export const ApplyCashback: React.FC<IApplyCashbackContainer> = ({
                 : "Discount-price-text"
             }
           >
-            {`$${cashbackData.totalCoaCBAvail}`}
+            {`$${cashbackData.cashbackAvail}`}
           </p>
         </div>
         <div className="Right-part-middle-container">

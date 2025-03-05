@@ -27,6 +27,7 @@ import "./ShippingMethod.scss";
 import { decodeHtmlEntities } from "../utils/helpers/DecodeHtml";
 import { Warning } from "../assets/svgs/Warning";
 import { setDataObjectProperty } from "../utils/helpers/SetDataObjectProperty";
+import { Spinner } from "../component/Spinner/Spinner";
 
 interface IShippingMethodProps {
   shopperID: string;
@@ -34,7 +35,7 @@ interface IShippingMethodProps {
 
 const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
   const [orders, setOrder] = useAtom(orderAtom);
-  const setLoading = useSetAtom(loadingAtom);
+  const [loading, setLoading] = useAtom(loadingAtom);
   const [portalData] = useAtom(portalApiData(shopperID));
   const [orderConsolidateData, setOrderConsolidateData] =
     useState<OrderConsolidationData>({
@@ -73,7 +74,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
     setDataObjectProperty("mybuysCartItems", mybuysCartItems);
   };
 
-  const handleRemoveProduct = (storeKey: string, itemKey: string) => {
+  const handleRemoveProduct = async (storeKey: string, itemKey: string) => {
     setLoading(true);
     // Remove item from the store
     const updatedStores = { ...orders.stores };
@@ -94,21 +95,27 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
       stores: updatedStores,
     });
 
-    removeProductFromCart(orders.id, itemKey).then(() => {
+    await removeProductFromCart(orders.id, itemKey).then(() => {
       buildOrder(
         generateChangeStoreResponse({
           ...orders,
           stores: updatedStores,
         })
-      ).then((response) => {
-        if (response.response.errors) {
-          window.location.href = GET_SHOP_CART_URL();
-        }
-        setOrder(response.response.success.data);
-        setOrderNotifications(getOrderNotifications(response.response.success));
-      });
+      )
+        .then((response) => {
+          if (response.response.errors) {
+            window.location.href = GET_SHOP_CART_URL();
+          }
+          setOrder(response.response.success.data);
+          setOrderNotifications(
+            getOrderNotifications(response.response.success)
+          );
+          setLoading(false);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
     });
-    setLoading(false);
   };
 
   useEffect(() => {

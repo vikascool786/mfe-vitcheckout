@@ -1,5 +1,6 @@
 export interface EWallet {
     lifetimeCashbackEarned: string;
+    cashbackAvailable: string
     lifetimeCoaEarned: string;
     lifetimeTotalCashEarned: string;
     pendingCashbackAvail: string;

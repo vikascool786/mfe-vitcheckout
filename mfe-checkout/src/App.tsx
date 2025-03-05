@@ -46,22 +46,22 @@ const App: React.FC<AppProps> = () => {
         /> */}
 
         {/* for GC Card Customer */}
-        {/* <CheckoutContainer
-          cartId="cart_1543622147_W_USA_USA_ENG"
-          shopperId="UVzejhYXzpmqkzhexkzZZjqzZzWVWzwUZhezzeezph"
-          pcid="1543622147"
+        <CheckoutContainer
+          cartId="cart_1276588028_W_USA_USA_ENG"
+          shopperId="mwYmqmzmzZqpZzhzWezpjhjzexXVhUpxwzwXzxpep"
+          pcid="1276588028"
           siteId="66"
           sessionId="3055249126"
-        /> */}
+        />
         {/* for vikas card custoemr  */}
-        <CheckoutContainer
+        {/* <CheckoutContainer
           cartId="cart_1817046463_W_USA_USA_ENG"
           shopperId="mXeWpzjqzWkwhzhqzYzZWwwzZXjzpwhUpXqqzjjx"
           
           pcid="1817046463"
           siteId="66"
           sessionId="3055249126"
-        />
+        /> */}
         {/* <CheckoutContainer
           cartId="cart_1326748654_W_USA_USA_ENG"
           shopperId="hqwxZzYzzqpeVzhWmZzZmZpzzkxkjzmZWqqWzxzkzj"
