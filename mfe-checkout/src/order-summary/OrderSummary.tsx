@@ -108,11 +108,12 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
   const handleRemoveCoupon = async (couponToRemove: string) => {
     if (order?.userOptions.coupons) {
       const { coupons } = order.userOptions;
-
+  
       // Filter out the coupon to remove
       const updatedCoupons = coupons.filter(
         (appliedCoupon) => appliedCoupon !== couponToRemove
       );
+  
       try {
         const updatedOrder = await buildOrder(
           generateChangeStoreResponse({
@@ -120,118 +121,108 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
             userOptions: {
               ...order.userOptions,
               coupons: updatedCoupons, // Update the coupons array
+              gcNum: [], // Reset gift card number
+              gcPin: [], // Reset gift card pin
             },
           })
         );
+  
         setOrder(updatedOrder.response?.success?.data);
       } catch (error) {
         console.error("Error while removing coupon:", error);
       }
     }
   };
+  
 
   // Add gift card to the order
-  const handleAddGiftCard = (isGCApplied: boolean) => {
-    if (gcState.gcNum?.trim() === "") {
+  const handleAddGiftCard = async (isGCApplied: boolean) => {
+    if (!gcState.gcNum?.trim()) {
       setgcState((prevState) => ({
         ...prevState,
         gcError: "Please enter number",
       }));
+      return;
     }
-
-    if (gcState.gcPin?.trim() === "") {
+  
+    if (!gcState.gcPin?.trim()) {
       setgcState((prevState) => ({
         ...prevState,
         gcError: "Please enter pin",
       }));
-    }
-    if (order && isGCApplied) {
-      setGCLoading(true);
-      buildOrder(
-        generateChangeStoreResponse({
-          ...order,
-          userOptions: {
-            ...order.userOptions,
-            gcPin: [],
-            gcNum: [],
-          },
-        })
-      )
-        .then((response) => {
-          if (response) {
-            setgcState({
-              gcNum: "",
-              gcPin: "",
-              gcError: "",
-              gcApplied: false,
-              gcVisible: false,
-            });
-            setOrder(response.response.success.data);
-          }
-        })
-        .catch(() => {
-          setgcState({
-            ...gcState,
-            gcError:
-              "An unexpected error occurred while removing the gift card.",
-          });
-        })
-        .finally(() => {
-          setGCLoading(false);
-        });
       return;
     }
-
-    if (
-      order?.userOptions &&
-      gcState?.gcNum?.trim() &&
-      gcState?.gcPin?.trim()
-    ) {
-      setGCLoading(true);
-
-      changeOrder(
-        generateChangeStoreResponse({
-          ...order,
-          userOptions: {
-            ...order.userOptions,
-            gcPin: [gcState?.gcPin],
-            gcNum: [gcState?.gcNum],
-          },
-        }),
-        order.id
-      )
-        .then((response) => {
-          if (response.response.success?.notifications) {
-            setgcState({
-              ...gcState,
-              gcError: response.response.success?.notifications[0]
-                ?.reason as string,
-            });
-            console.warn(response.response.success.notifications);
-            return;
-          }
-
-          if (response) {
-            setgcState({
-              ...gcState,
-              gcError: "",
-              gcApplied: true,
-              gcVisible: true,
-            });
-            setOrder(response.response.success.data);
-          }
-        })
-        .catch(() => {
-          setgcState({
-            ...gcState,
-            gcError: "An unexpected error occurred while adding the gift card.",
-          });
-        })
-        .finally(() => {
-          setGCLoading(false);
-        });
+  
+    setGCLoading(true);
+  
+    try {
+      let updatedOrder;
+      if (isGCApplied) {
+        // Removing the gift card
+        updatedOrder = await buildOrder(
+          generateChangeStoreResponse({
+            ...order,
+            userOptions: {
+              ...order.userOptions,
+              gcPin: [],
+              gcNum: [],
+            },
+          })
+        );
+  
+        setgcState((prevState) => ({
+          ...prevState,
+          gcApplied: false,
+          gcVisible: false,
+        }));
+  
+      } else {
+        // **Optimistically update state before API call**
+        setgcState((prevState) => ({
+          ...prevState,
+          gcApplied: true,
+          gcVisible: true,
+          gcError: "",
+        }));
+  
+        // Deep clone `order` to trigger state updates
+        const newOrder = JSON.parse(JSON.stringify(order));
+        newOrder.userOptions.gcNum = [gcState.gcNum];
+        newOrder.userOptions.gcPin = [gcState.gcPin];
+        setOrder(newOrder); // Immediate update for UI
+  
+        // Applying the gift card via API
+        updatedOrder = await changeOrder(
+          generateChangeStoreResponse(newOrder),
+          order.id
+        );
+  
+        if (updatedOrder.response.success?.notifications) {
+          setgcState((prevState) => ({
+            ...prevState,
+            gcError: updatedOrder.response.success.notifications[0]?.reason || "",
+          }));
+          return;
+        }
+  
+        if (updatedOrder?.response?.success?.data) {
+          setOrder(updatedOrder.response.success.data);
+        }
+      }
+      setgcState((prevState) => ({
+        ...prevState,
+        gcError: "Please enter pin",
+      }));
+    } catch (error) {
+      setgcState((prevState) => ({
+        ...prevState,
+        gcError: "An unexpected error occurred while processing the gift card.",
+      }));
+    } finally {
+      setGCLoading(false);
     }
   };
+  
 
   const handleAddCoupon = async () => {
     try {
@@ -350,6 +341,14 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
       });
   }, []);
 
+
+  useEffect(() => {
+    setgcState((prevState) => ({
+      ...prevState,
+      gcApplied: order?.userOptions.gcNum?.length > 0,
+    }));
+  }, [order?.userOptions.gcNum]);
+  
   
 
   return (
@@ -440,7 +439,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                     {`${order?.totals.gcAppliedStr} Applied`}
                    </p>
         
-                   <Close />
+                   <Close onClick={() => handleAddGiftCard(!!gcState.gcApplied)}/>
                   
                 </div>
               </div>}
