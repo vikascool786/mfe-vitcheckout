@@ -136,93 +136,125 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
   
 
   // Add gift card to the order
-  const handleAddGiftCard = async (isGCApplied: boolean) => {
-    if (!gcState.gcNum?.trim()) {
+  // Add gift card to the order
+const handleAddGiftCard = async (isGCApplied: boolean) => {
+  if (!gcState.gcNum?.trim()) {
+    setgcState((prevState) => ({
+      ...prevState,
+      gcError: "Please enter number",
+    }));
+    return;
+  }
+
+  if (!gcState.gcPin?.trim()) {
+    setgcState((prevState) => ({
+      ...prevState,
+      gcError: "Please enter pin",
+    }));
+    return;
+  }
+
+  setGCLoading(true);
+
+  try {
+    if (isGCApplied) {
+      // Store the current values for potential use in the UI
+      const currentGcNum = gcState.gcNum;
+      const currentGcPin = gcState.gcPin;
+      
+      // First, immediately clear the input values for better user experience
+      // while keeping the fields visible and marked as applied
       setgcState((prevState) => ({
         ...prevState,
-        gcError: "Please enter number",
+        gcNum: "",
+        gcPin: "",
+        gcApplied: true,
+        gcVisible: true,
       }));
-      return;
-    }
-  
-    if (!gcState.gcPin?.trim()) {
+      
+      // Removing the gift card from the server
+      const updatedOrder = await buildOrder(
+        generateChangeStoreResponse({
+          ...order,
+          userOptions: {
+            ...order.userOptions,
+            gcPin: [],
+            gcNum: [],
+          },
+        })
+      );
+
+      // Update the order state with the server response
+      setOrder(updatedOrder.response?.success?.data);
+      
+      // Update the gift card state to reflect removal
+      setgcState({
+        gcNum: "",
+        gcPin: "",
+        gcApplied: false,
+        gcVisible: true,
+        gcError: "",
+      });
+    } else {
+      // Store current values for the API call
+      const currentGcNum = gcState.gcNum;
+      const currentGcPin = gcState.gcPin;
+      
+      // First, immediately clear the input values for better user experience
+      // while keeping the fields visible
       setgcState((prevState) => ({
         ...prevState,
-        gcError: "Please enter pin",
+        gcNum: "",
+        gcPin: "",
+        gcApplied: false,
+        gcVisible: true,
       }));
-      return;
-    }
-  
-    setGCLoading(true);
-  
-    try {
-      let updatedOrder;
-      if (isGCApplied) {
-        // Removing the gift card
-        updatedOrder = await buildOrder(
-          generateChangeStoreResponse({
-            ...order,
-            userOptions: {
-              ...order.userOptions,
-              gcPin: [],
-              gcNum: [],
-            },
-          })
-        );
-  
+
+      // Then apply the gift card via API
+      const updatedOrder = await changeOrder(
+        generateChangeStoreResponse({
+          ...order,
+          userOptions: {
+            ...order.userOptions,
+            gcNum: [currentGcNum],
+            gcPin: [currentGcPin],
+          },
+        }),
+        order.id
+      );
+
+      if (updatedOrder.response.success?.notifications) {
+        // If there's an error, update the state to show the error
         setgcState((prevState) => ({
           ...prevState,
-          gcApplied: false,
-          gcVisible: false,
+          gcError: updatedOrder.response.success.notifications[0]?.reason || "",
         }));
-  
-      } else {
-        // **Optimistically update state before API call**
-        setgcState((prevState) => ({
-          ...prevState,
+        return;
+      }
+
+      // Update order state with server response
+      if (updatedOrder?.response?.success?.data) {
+        setOrder(updatedOrder.response.success.data);
+        
+        // Update the gift card state to reflect application
+        setgcState({
+          gcNum: "",
+          gcPin: "",
           gcApplied: true,
           gcVisible: true,
           gcError: "",
-        }));
-  
-        // Deep clone `order` to trigger state updates
-        const newOrder = JSON.parse(JSON.stringify(order));
-        newOrder.userOptions.gcNum = [gcState.gcNum];
-        newOrder.userOptions.gcPin = [gcState.gcPin];
-        setOrder(newOrder); // Immediate update for UI
-  
-        // Applying the gift card via API
-        updatedOrder = await changeOrder(
-          generateChangeStoreResponse(newOrder),
-          order.id
-        );
-  
-        if (updatedOrder.response.success?.notifications) {
-          setgcState((prevState) => ({
-            ...prevState,
-            gcError: updatedOrder.response.success.notifications[0]?.reason || "",
-          }));
-          return;
-        }
-  
-        if (updatedOrder?.response?.success?.data) {
-          setOrder(updatedOrder.response.success.data);
-        }
+        });
       }
-      setgcState((prevState) => ({
-        ...prevState,
-        gcError: "Please enter pin",
-      }));
-    } catch (error) {
-      setgcState((prevState) => ({
-        ...prevState,
-        gcError: "An unexpected error occurred while processing the gift card.",
-      }));
-    } finally {
-      setGCLoading(false);
     }
-  };
-  
+  } catch (error) {
+    setgcState((prevState) => ({
+      ...prevState,
+      gcError: "An unexpected error occurred while processing the gift card.",
+    }));
+  } finally {
+    setGCLoading(false);
+  }
+};
 
   const handleAddCoupon = async () => {
     try {
@@ -406,7 +438,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                     </div>
                     <FormField
                       value={gcState.gcNum}
-                      onChange={handleGcNumChange}
+                      onChange={handleGcNumChange}  
                     />
                   </div>
                   <div className="gift-card-wrapper-field-2">

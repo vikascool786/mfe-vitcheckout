@@ -68,7 +68,10 @@ export const ApplyCashback: React.FC<IApplyCashbackContainer> = ({
                 : "Discount-price-text"
             }
           >
-            {`$${cashbackData.cashbackAvail}`}
+            {`$${Number(cashbackData.cashbackAvail).toLocaleString('en-US', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            })}`}
           </p>
         </div>
         <div className="Right-part-middle-container">
