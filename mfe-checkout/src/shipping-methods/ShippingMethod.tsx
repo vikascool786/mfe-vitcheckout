@@ -28,6 +28,7 @@ import { decodeHtmlEntities } from "../utils/helpers/DecodeHtml";
 import { Warning } from "../assets/svgs/Warning";
 import { setDataObjectProperty } from "../utils/helpers/SetDataObjectProperty";
 import { Spinner } from "../component/Spinner/Spinner";
+import { FreeShipMessage } from "./FreeShipMessage";
 
 interface IShippingMethodProps {
   shopperID: string;
@@ -160,9 +161,8 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
       {orderConsolidateData?.showOrderConsolidate && (
         <div className="shipping-options-container">
           <div
-            className={`shipping-option-container start ${
-              orderConsolidateData.oosConsolidate === 2 ? "selected" : ""
-            }`}
+            className={`shipping-option-container start ${orderConsolidateData.oosConsolidate === 2 ? "selected" : ""
+              }`}
           >
             <div className="shipping-option-wrapper">
               <div className="shipping-option-select-container">
@@ -181,9 +181,8 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
             </div>
           </div>
           <div
-            className={`shipping-option-container end ${
-              orderConsolidateData.oosConsolidate === 3 ? "selected" : ""
-            }`}
+            className={`shipping-option-container end ${orderConsolidateData.oosConsolidate === 3 ? "selected" : ""
+              }`}
           >
             <div className="shipping-option-wrapper">
               <div className="shipping-option-select-container">
@@ -212,6 +211,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
               return (
                 store && (
                   <div key={key}>
+                    <FreeShipMessage orderStore={store} portalData={portalData} />
                     <div className="shipping-catolog-name">
                       {orderConsolidateData?.oosConsolidate === 2 ? (
                         key.includes("*OOS*") ? (
