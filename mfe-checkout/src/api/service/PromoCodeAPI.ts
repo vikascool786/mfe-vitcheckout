@@ -1,31 +1,21 @@
-import { GET_DSB_MA } from "../../utils/urlResolver";
+import { GET_API_ENDPOINT_BASE_URL_ONLY, GET_API_KEY } from "../../utils/urlResolver";
 import axiosInstance from "../axios";
 
 export const getOrderValidatePromoCode = async (
-    pcid: string,
-    distId: string,
+    cartId: string,
     couponCode: string,
+    total: number,
 ): Promise<any> => {
     try {
         const postData = {
-            "couponCode": `${couponCode}`,
-            "pcID": `${pcid}`,
-            "maVendorCode": "00USA",
-            "countryCode": "USA",
-            "langCode": "ENG",
-            "siteType": "SHP",
-            "distID": `${distId}`,
-            "orderAmt": "",
-            "partyID": "",
-            "shipCountry": "USA"
+            id: cartId,
+            coupon: couponCode,
+            total: total
         };
-        console.log("post data: " + JSON.stringify(postData));
-        const orderValidatePromoCodeEndpoint = `${GET_DSB_MA()}/dataEngine/rest/dataretrieval/redback/dmc/ORDER/coupon/getOrderValidatePromoCode`;
-        const orderValidatePromoCodeResponse = await axiosInstance(orderValidatePromoCodeEndpoint).post("", postData, {
-            headers: { "Content-Type": "application/json" },
-        });
+        const orderValidatePromoCodeEndpoint = `${GET_API_ENDPOINT_BASE_URL_ONLY()}/checkout-universal/v1/coupons?api_key=${GET_API_KEY()}`;
+        const orderValidatePromoCodeResponse = await axiosInstance(orderValidatePromoCodeEndpoint).post("", postData);
         return orderValidatePromoCodeResponse.data;
     } catch (error) {
-        console.error(`Error getting orderValidatePromoCode pcid: ${pcid}`, error);
+        console.error(`Error getting orderValidatePromoCode coupon: ${couponCode} cartId: ${cartId}`, error);
     }
 };

@@ -25,6 +25,7 @@ interface IOrderSummary {
   pcid: string;
   shopperId: string;
   hideCashback?: boolean;
+  cartId: string;
 }
 
 interface ICouponState {
@@ -44,6 +45,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
   pcid,
   hideCashback,
   shopperId,
+  cartId
 }) => {
   const [order, setOrder] = useAtom(orderAtom);
   const { eWalletData, loading, error } = useShopperEWallet(pcid);
@@ -108,12 +110,12 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
   const handleRemoveCoupon = async (couponToRemove: string) => {
     if (order?.userOptions.coupons) {
       const { coupons } = order.userOptions;
-  
+
       // Filter out the coupon to remove
       const updatedCoupons = coupons.filter(
         (appliedCoupon) => appliedCoupon !== couponToRemove
       );
-  
+
       try {
         const updatedOrder = await buildOrder(
           generateChangeStoreResponse({
@@ -126,14 +128,14 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
             },
           })
         );
-  
+
         setOrder(updatedOrder.response?.success?.data);
       } catch (error) {
         console.error("Error while removing coupon:", error);
       }
     }
   };
-  
+
 
   // Add gift card to the order
   const handleAddGiftCard = async (isGCApplied: boolean) => {
@@ -144,7 +146,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
       }));
       return;
     }
-  
+
     if (!gcState.gcPin?.trim()) {
       setgcState((prevState) => ({
         ...prevState,
@@ -152,9 +154,9 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
       }));
       return;
     }
-  
+
     setGCLoading(true);
-  
+
     try {
       let updatedOrder;
       if (isGCApplied) {
@@ -169,13 +171,13 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
             },
           })
         );
-  
+
         setgcState((prevState) => ({
           ...prevState,
           gcApplied: false,
           gcVisible: false,
         }));
-  
+
       } else {
         // **Optimistically update state before API call**
         setgcState((prevState) => ({
@@ -184,19 +186,19 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           gcVisible: true,
           gcError: "",
         }));
-  
+
         // Deep clone `order` to trigger state updates
         const newOrder = JSON.parse(JSON.stringify(order));
         newOrder.userOptions.gcNum = [gcState.gcNum];
         newOrder.userOptions.gcPin = [gcState.gcPin];
         setOrder(newOrder); // Immediate update for UI
-  
+
         // Applying the gift card via API
         updatedOrder = await changeOrder(
           generateChangeStoreResponse(newOrder),
           order.id
         );
-  
+
         if (updatedOrder.response.success?.notifications) {
           setgcState((prevState) => ({
             ...prevState,
@@ -204,7 +206,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           }));
           return;
         }
-  
+
         if (updatedOrder?.response?.success?.data) {
           setOrder(updatedOrder.response.success.data);
         }
@@ -222,7 +224,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
       setGCLoading(false);
     }
   };
-  
+
 
   const handleAddCoupon = async () => {
     try {
@@ -284,62 +286,53 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
     Object.entries(order?.stores).map(([key, store], index) => {
       return store;
     });
-
   useEffect(() => {
     fetchShopperAttributes(shopperId)
       .then((response: ShopperAttribute[]) => {
         const COUPON_CODE_SURVEY10 = "SURVEY10";
-        const hasTakenHealthSurvey = response.some(
-          (entry) => entry.typeId === 609 && entry.value === 1
-        );
+        const hasTakenHealthSurvey = response.some(entry => entry.typeId === 609 && entry.value === 1);
         if (hasTakenHealthSurvey) {
           //check if coupon has been redeemed
-          getOrderValidatePromoCode(
-            pcid,
-            portalData.distId,
-            COUPON_CODE_SURVEY10
-          )
-            .then((response) => {
-              //TODO fix once CORS issue is resolved
-              if (!response) {
+          getOrderValidatePromoCode(cartId, COUPON_CODE_SURVEY10, order?.totals?.price || 0)
+            .then(response => {
+              console.log("promo response: " + JSON.stringify(response));
+              console.log("isCouponValid: " + JSON.stringify(response?.isCouponValid));
+              console.log("svrMessage: " + JSON.stringify(response?.svrMessage));
+              const canRedeem = response && response?.isCouponValid === "1" && (response?.svrMessage?.length ?? 0) <= 0;
+              if (canRedeem) {
                 //apply coupon to order
-                if (
-                  order &&
-                  !order?.userOptions?.coupons?.includes(COUPON_CODE_SURVEY10)
-                ) {
-                  const updatedCoupons = [
-                    ...(order?.userOptions?.coupons ?? []),
-                    COUPON_CODE_SURVEY10,
-                  ];
+                if (order && !order?.userOptions?.coupons?.includes(COUPON_CODE_SURVEY10)) {
+                  const updatedCoupons = [...(order?.userOptions?.coupons ?? []), COUPON_CODE_SURVEY10];
                   const updatedOrder = buildOrder(
                     generateChangeStoreResponse({
                       ...order,
                       userOptions: {
                         ...order.userOptions,
-                        coupons: updatedCoupons,
+                        coupons: updatedCoupons
                       },
                     })
                   );
                   updatedOrder
-                    .then((response) => {
-                      console.log("response: " + JSON.stringify(response));
+                    .then(response => {
                       setOrder(response.response?.success?.data);
                     })
-                    .catch((error) => {
+                    .catch(error => {
                       console.error("Error updating order with coupon ", error);
-                    });
+                    })
                 }
               }
             })
-            .catch((error) => {
+            .catch(error => {
               console.error("Error with getOrderValidatePromoCode", error);
-            });
+            })
         }
       })
-      .catch((error) => {
+      .catch(error => {
         console.error("Error getting shopper attribute fetch", error);
-      });
+      })
+
   }, []);
+
 
 
   useEffect(() => {
@@ -348,8 +341,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
       gcApplied: order?.userOptions.gcNum?.length > 0,
     }));
   }, [order?.userOptions.gcNum]);
-  
-  
+
+
 
   return (
     <div className="order-summary-container">
@@ -428,19 +421,19 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               </div>
             )}
 
-            {!!gcState.gcApplied && 
+            {!!gcState.gcApplied &&
               <div className="gcApplied">
                 <div className="gcLeft-cont">
-                   <p className="cardName">{`CARD: ${gcState.gcNum}`}</p>
-                   <p className="balanceCard">{`$ 0.00 Balance`}</p>
+                  <p className="cardName">{`CARD: ${gcState.gcNum}`}</p>
+                  <p className="balanceCard">{`$ 0.00 Balance`}</p>
                 </div>
                 <div className="gcRight-cont">
-                   <p className="appliedCash">
+                  <p className="appliedCash">
                     {`${order?.totals.gcAppliedStr} Applied`}
-                   </p>
-        
-                   <Close onClick={() => handleAddGiftCard(!!gcState.gcApplied)}/>
-                  
+                  </p>
+
+                  <Close onClick={() => handleAddGiftCard(!!gcState.gcApplied)} />
+
                 </div>
               </div>}
             {gcState.gcError && (
@@ -468,9 +461,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               if (!store.totals) return null;
               return (
                 <div
-                  className={`order-charges-table ${
-                    isFirst ? "order-charges-table-first" : ""
-                  } ${isLast ? "order-charges-table-last" : ""}`}
+                  className={`order-charges-table ${isFirst ? "order-charges-table-first" : ""
+                    } ${isLast ? "order-charges-table-last" : ""}`}
                   key={store?.id || index}
                 >
                   <div className="shipping-catolog-name">
@@ -559,8 +551,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         ) : null}
 
         {order?.totals?.cashBack &&
-        order?.totals?.extraCashBack &&
-        order?.totals?.extraCashBack > 0 ? (
+          order?.totals?.extraCashBack &&
+          order?.totals?.extraCashBack > 0 ? (
           <>
             <div className="order-summary-cashback-container">
               <div className="order-cashback">

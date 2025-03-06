@@ -32,11 +32,11 @@ export const AddressDisplay: React.FC<AppProps> = ({
   };
 
   const renderAddressLine1 = () => {
-    return address.address1 ? `${address.address1}, ` : "";
+    return address.address1 ? `${address.address1} ` : "";
   };
 
   const renderAddressLine2 = () => {
-    return address.address2 ? `${address.address2}, ` : "";
+    return address.address2 ? `${address.address2} ` : "";
   };
 
   const renderCityStateZip = () => {
@@ -45,9 +45,12 @@ export const AddressDisplay: React.FC<AppProps> = ({
     if (address.city)
       cityStateZip.push(<span className="nowrap">{address.city}</span>);
     if (address.state)
-      cityStateZip.push(<span className="nowrap">{address.state}</span>);
-    if (address.zip)
-      cityStateZip.push(<span className="nowrap">{address.zip}</span>);
+      cityStateZip.push(
+        <>
+          <span className="nowrap">{address.state}</span>{" "}
+          <span className="nowrap">{address.zip}</span>
+        </>
+      );
 
     return cityStateZip.map((element, index) => (
       <React.Fragment key={index}>
