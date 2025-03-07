@@ -29,7 +29,7 @@ import {
 } from "../../store";
 import { generateChangeStoreResponse } from "../../utils/helpers/GenerateChangeStoreResponse";
 import { getCardType } from "../../utils/helpers/GetCardType";
-import { creditCardSchema } from "../../validation/creditcardSchema";
+import { getCreditCardSchema } from "../../validation/creditcardSchema";
 import "./CardInformation.scss";
 import { CardInputs } from "./CardInputs";
 import { getTypeIdByAltName, isThirdPartyPayment } from "../PaymentType";
@@ -91,18 +91,18 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
 
   const validationSchema = Yup.object().shape({
     // Card Information Validation
-    cardInfo: creditCardSchema,
+    cardInfo: getCreditCardSchema(paymentMethod.id),
 
     // Conditionally apply address validation if sameShippingAddress is true
     ...(!sameShippingAddress
       ? {
-        first: Yup.string().required("First name is required"),
-        last: Yup.string().required("Last name is required"),
-        address1: Yup.string().required("Address is required"),
-        city: Yup.string().required("City is required"),
-        state: Yup.string().required("State is required"),
-        zip: Yup.string().required("Please enter your zip code"),
-      }
+          first: Yup.string().required("First name is required"),
+          last: Yup.string().required("Last name is required"),
+          address1: Yup.string().required("Address is required"),
+          city: Yup.string().required("City is required"),
+          state: Yup.string().required("State is required"),
+          zip: Yup.string().required("Please enter your zip code"),
+        }
       : {}),
   });
 
@@ -221,18 +221,24 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   ) => {
     setLoading(true);
 
-    const typeId = getTypeIdByAltName(getCardType(values.number).toLowerCase());
+    // if value is 0, item means it is a new card else old card is being edited
+    const typeId =
+      values.id !== 0
+        ? values.typeID
+        : getTypeIdByAltName(getCardType(values.number).toLowerCase());
 
     // check if paymentMethods accept the particular card type
 
     const acceptablePaymentMethods = order?.paymentMethods
-      .filter((pm) => pm.typeID === typeId && pm.visible)
+      .filter((pm) => pm.typeID === typeId)
       .map((pm) => pm.typeID);
     if (acceptablePaymentMethods?.length === 0) {
       setCardError("This card type is not accepted");
       setLoading(false);
       return;
     }
+
+    console.log("Acceptable Payment Methods", acceptablePaymentMethods);
 
     if (typeId && !acceptablePaymentMethods?.includes(typeId)) {
       setCardError("This card type is not accepted");
@@ -241,6 +247,8 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
     }
 
     setCVVFieldValue(values.cvv);
+
+    // create payload for api
     let requestData: any = {
       name: values.accountName,
       number: values.number,
@@ -251,6 +259,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
       cvv: values.cvv,
     };
 
+    // if same as put shipping address id
     if (sameShippingAddress) {
       requestData = {
         ...requestData,
@@ -265,20 +274,25 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
 
     try {
       if (type === "WALLET") {
+        // if we are editing the card
         if (values.id !== 0) {
           processCardUpdate(values, requestData, typeId as number);
           return;
         }
 
+        // we are adding a new card
         const cardTokenResponse = await generateCardToken(requestData.number);
         const token = cardTokenResponse?.token.id;
         const number = cardTokenResponse?.token.mask;
+        // api call to add card into the user's wallet
         const response = await addShoppersPaymentMethod(shopperId, {
           ...requestData,
           token,
           number,
         });
 
+        // since we do not have id for the card we are adding newly,
+        // we add the last card in the response to the payment methods
         const updatedPaymentMethods = [
           {
             paymentMethod: {
@@ -303,6 +317,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           })),
         ].filter((pm) => pm.paymentMethod?.id !== 0);
 
+        //update the order with the newly added payment method
         if (order && paymentMethod) {
           const updatedOrder = generateChangeStoreResponse({
             ...order,
@@ -315,6 +330,8 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
               id: response.at(-1)?.id as number,
             },
           });
+
+          // build the order to sync with the cart api
           const orderResponse = await buildOrder(updatedOrder);
 
           onAddNewCard(updatedPaymentMethods as IPaymentOption[]);
@@ -336,10 +353,10 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
         const response =
           token && number
             ? await addTempPaymentMethod(shopperId, {
-              ...requestData,
-              token,
-              number,
-            })
+                ...requestData,
+                token,
+                number,
+              })
             : await updateTempPaymentMethod(shopperId, requestData);
 
         if (response) {
@@ -459,17 +476,18 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
         initialValues={initialValues}
         validationSchema={validationSchema}
         onSubmit={(values) => {
+          console.log("Called On Submit");
           setCardError(null);
           const address = !sameShippingAddress
             ? {
-              first: values.first,
-              last: values.last,
-              address1: values.address1,
-              address2: values.address2,
-              city: values.city,
-              state: values.state,
-              zip: values.zip,
-            }
+                first: values.first,
+                last: values.last,
+                address1: values.address1,
+                address2: values.address2,
+                city: values.city,
+                state: values.state,
+                zip: values.zip,
+              }
             : (shippingAddress as Address);
           handleSaveCardInformation(
             {
@@ -510,6 +528,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                   handleBlur={handleBlur}
                   values={values}
                   isEditing={isEditing}
+                  isEditingExistingCard={paymentMethod.id !== 0}
                   // saveCardToWallet={saveCardToWallet}
                   // setSaveCardToWallet={setSaveCardToWallet}
                   errorRefs={errorRefs}

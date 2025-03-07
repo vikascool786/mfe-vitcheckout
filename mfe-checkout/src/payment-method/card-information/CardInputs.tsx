@@ -9,6 +9,7 @@ interface ICardInputProps {
   handleChange: any;
   values: any;
   handleBlur: any;
+  isEditingExistingCard: boolean;
   isEditing: boolean;
   errorRefs?: React.MutableRefObject<{
     [key: string]: HTMLInputElement | null;
@@ -21,6 +22,7 @@ export const CardInputs: React.FC<ICardInputProps> = ({
   handleChange,
   values,
   handleBlur,
+  isEditingExistingCard,
   isEditing = false,
   errorRefs = null,
 }) => {
