@@ -142,6 +142,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
             id: 0,
             typeID: 9,
             addressId: 0,
+            expMonth: new Date().getMonth() + 1,
           });
 
           staticMethods = [
@@ -410,6 +411,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       id: 0,
       typeID: 9,
       addressId: 0,
+      expMonth: new Date().getMonth() + 1,
     });
 
     // while adding new card makeing new credit card as selected

@@ -79,7 +79,7 @@ export const CardInputs: React.FC<ICardInputProps> = ({
           selectedValue={
             values.cardInfo?.expMonth
               ? values.cardInfo.expMonth.toString().padStart(2, "0")
-              : ""
+              : new Date().getMonth() + (1).toString().padStart(2, "0") // Default to the current month
           }
           options={[...Array(12)].map((_, i) => ({
             value: (i + 1).toString().padStart(2, "0"),
