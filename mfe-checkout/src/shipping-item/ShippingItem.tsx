@@ -114,7 +114,7 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
       id: cartId,
       products: [
         {
-          id: item.prodId,
+          id: item.prodId.toString(),
           type: "PROD",
           quantity: newQuantity,
           option: item.option,
