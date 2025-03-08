@@ -332,17 +332,20 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                   loading={isLoading}
                   pcid={pcid}
                 />
+
                 <ShippingMethod loading={isLoading} shopperID={shopperId} />
-                {orderData.totals.price > 0 && (
-                  <PaymentMethod
-                    cartId={cartId}
-                    shopperId={shopperId}
-                    siteId={siteId}
-                    pcid={pcid}
-                    updatePaymentTypeId={setPaymentTypeId}
-                    loading={isLoading}
-                  />
-                )}
+
+                {addresses?.some((address) => address.hasAddress === 1) &&
+                  orderData.totals.price > 0 && (
+                    <PaymentMethod
+                      cartId={cartId}
+                      shopperId={shopperId}
+                      siteId={siteId}
+                      pcid={pcid}
+                      updatePaymentTypeId={setPaymentTypeId}
+                      loading={isLoading}
+                    />
+                  )}
               </div>
               <div className="right-column">
                 <OrderSummary
@@ -353,24 +356,26 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                 />
               </div>
             </div>
+
             <div className="place-order">
-              {paymentMethodOptions && (
-                <PlaceOrder
-                  confirmOrder={confirmOrder}
-                  errorMessage={orderErrorMessage}
-                  paymentTypeId={paymentTypeId}
-                  paymentMethods={paymentMethodOptions}
-                  shopperId={shopperId}
-                  siteId={siteId}
-                  order={orderData}
-                  updateOrderErrorMessage={handleUpdateOrderErrorMessage}
-                  billingId={defaultAddress?.id || 0}
-                  setOrderData={setOrderData}
-                  shippingId={
-                    defaultPaymentMethod?.addressId ?? defaultAddress?.id ?? 0
-                  }
-                />
-              )}
+              {addresses?.some((address) => address.hasAddress === 1) &&
+                paymentMethodOptions && (
+                  <PlaceOrder
+                    confirmOrder={confirmOrder}
+                    errorMessage={orderErrorMessage}
+                    paymentTypeId={paymentTypeId}
+                    paymentMethods={paymentMethodOptions}
+                    shopperId={shopperId}
+                    siteId={siteId}
+                    order={orderData}
+                    updateOrderErrorMessage={handleUpdateOrderErrorMessage}
+                    billingId={defaultAddress?.id || 0}
+                    setOrderData={setOrderData}
+                    shippingId={
+                      defaultPaymentMethod?.addressId ?? defaultAddress?.id ?? 0
+                    }
+                  />
+                )}
               <Feedback siteId={siteId} pcId={pcid} sessionId={sessionId} />
             </div>
             <HeadHelmet />
