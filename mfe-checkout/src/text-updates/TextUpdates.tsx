@@ -14,8 +14,7 @@ import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStor
 const TextUpdatesSchema = Yup.object().shape({
   phone: Yup.string()
     .max(10, "Phone number must be exactly 10 digits")
-    .matches(/^\d{10}$/, "Phone number must be exactly 10 digits")
-    .required("Mobile Phone is required"),
+    .matches(/^\d{10}$/, "Phone number must be exactly 10 digits"),
   boxChecked: Yup.boolean(),
 });
 
@@ -104,6 +103,7 @@ export const TextUpdates = () => {
                   } as React.ChangeEvent<HTMLInputElement>);
                 }}
                 onBlur={handleBlur}
+                errorMessage={touched.phone && errors.phone}
               />
             </div>
             <div className="save-for-later">

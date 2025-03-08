@@ -252,6 +252,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                 shouldShowInvalidCVVMessage: true,
               });
             scrollToCVV(selectedPaymentMethod);
+            setIsLoading(false);
             return;
           }
           await handleFinalPlaceOrderUpdate();
