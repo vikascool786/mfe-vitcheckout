@@ -46,10 +46,18 @@ export const AddressForm: React.FC<IAddressFormProps> = ({
 
   // Yup validation schema
   const validationSchema = Yup.object({
-    first: Yup.string().required("First name is required"),
-    last: Yup.string().required("Last name is required"),
-    address1: Yup.string().required("Address Line 1 is required"),
-    city: Yup.string().required("City is required"),
+    first: Yup.string()
+      .required("First name is required")
+      .max(30, "First name cannot exceed 30 characters."),
+    last: Yup.string()
+      .required("Last name is required")
+      .max(30, "Last name cannot exceed 30 characters."),
+    address1: Yup.string()
+      .required("Address Line 1 is required")
+      .max(200, "Address cannot exceed 200 characters."),
+    city: Yup.string()
+      .required("City is required")
+      .max(100, "City name cannot exceed 100 characters."),
     state: Yup.string().required("State/Province is required"),
     zip: Yup.string()
       .matches(/^\d{5}$/, "Zip code must be 5 digits")

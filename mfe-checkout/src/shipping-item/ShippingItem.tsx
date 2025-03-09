@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useAtom } from "jotai";
 import { Close } from "../assets/svgs/Close";
 import "./ShippingItem.scss";
@@ -55,6 +55,19 @@ function createOptionMap(
   return optionMap;
 }
 
+const hasDenomination = (
+  option: Array<{ optionStringValue: string; name: string; type: string }>
+) => {
+  let denomination = false;
+  for (let i = 0; i < option.length; i++) {
+    if (option[i]?.type === "TEXT_BOX_CHECKOUT") {
+      denomination = true;
+      break;
+    }
+  }
+  return denomination;
+};
+
 const formattedNumber = (num: any) => Number(num).toFixed(2);
 
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
@@ -83,8 +96,21 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
 
   const isGiftCard = caption.toLowerCase().includes("email delivery");
 
-  const options =
-    item.option && Array.from(createOptionMap(item.option).entries());
+  const options = useMemo(() => {
+    if (item.option && item.option.length > 0) {
+      if (!isGiftCard || !hasDenomination(item.option)) {
+        return (
+          item.option && Array.from(createOptionMap(item.option).entries())
+        );
+      }
+      const filteredOption = item.option.filter(
+        (opt) => opt.type !== "POPUP_MENU"
+      );
+      return (
+        filteredOption && Array.from(createOptionMap(filteredOption).entries())
+      );
+    }
+  }, []);
 
   const decodeHtmlEntities = (html: string) => {
     const parser = new DOMParser();
@@ -209,8 +235,8 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
             )}
             {(item.autoshipFreq > 0 || item.autoShipId) &&
               (portalData?.autoShipDiscount > 0 &&
-                isMaProduct &&
-                item.hasAutoShipDiscount ? (
+              isMaProduct &&
+              item.hasAutoShipDiscount ? (
                 <div className="item-autoship">
                   <AutoshipIcon />
                   Saving {portalData.autoShipDiscount}% with Autoship

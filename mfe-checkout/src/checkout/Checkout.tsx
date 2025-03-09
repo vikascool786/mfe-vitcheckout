@@ -335,7 +335,7 @@ const Checkout: React.FC<ICheckout> = ({
     setShowShipAddressForm(!showShipAddressForm);
     setShippingAddress(
       shopperAddressBook.find((address) => address.isShip === 1) ||
-      shippingAddress
+        shippingAddress
     );
     setIsExpanded(!isExpanded);
   };
@@ -444,10 +444,18 @@ const Checkout: React.FC<ICheckout> = ({
   };
 
   const validationSchema = Yup.object().shape({
-    first: Yup.string().required("First name is required"),
-    last: Yup.string().required("Last name is required"),
-    address1: Yup.string().required("Please enter your address"),
-    city: Yup.string().required("Please enter your city"),
+    first: Yup.string()
+      .required("First name is required")
+      .max(30, "First name cannot exceed 30 characters."),
+    last: Yup.string()
+      .required("Last name is required")
+      .max(30, "Last name cannot exceed 30 characters."),
+    address1: Yup.string()
+      .required("Please enter your address")
+      .max(200, "Address cannot exceed 200 characters."),
+    city: Yup.string()
+      .required("Please enter your city")
+      .max(100, "City name cannot exceed 100 characters."),
     state: Yup.string().required("Please enter your State/Province"),
     zip: Yup.string()
       .matches(/^\d{5}(-\d{4})?$/, "Invalid ZIP code format")
@@ -461,10 +469,11 @@ const Checkout: React.FC<ICheckout> = ({
     <div>
       <form className="shipping-address-form">
         <div
-          className={`${!showAVS
-            ? "checkout-form-container"
-            : "checkout-form-container__hide"
-            }`}
+          className={`${
+            !showAVS
+              ? "checkout-form-container"
+              : "checkout-form-container__hide"
+          }`}
         >
           <div className="form-header">
             <FormHeading title="Shipping Address" />
