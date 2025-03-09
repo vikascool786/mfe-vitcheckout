@@ -46,7 +46,6 @@ export interface UserOptions {
   isOfAge: boolean;
   trackingID: string;
   deliveryDate: string;
-  deliveryTime: number;
   signatureRequired: boolean;
   oosConsolidate: number;
   userSessionId: string;

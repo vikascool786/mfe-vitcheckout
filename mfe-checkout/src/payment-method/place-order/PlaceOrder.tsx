@@ -434,8 +434,22 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             )}
             <div className="checkout-place-order-text">
               By clicking place order, you agree to the SHOP.COM{" "}
-              <a href="/info/terms-of-use">Terms of Use</a> and{" "}
-              <a href="/info/privacy-policy">Privacy Policy</a>.
+              <a
+                href="/info/terms-of-use"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Terms of Use
+              </a>{" "}
+              and{" "}
+              <a
+                href="/info/privacy-policy"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Privacy Policy
+              </a>
+              .
             </div>
             {errorMessage.length > 0 && (
               <div className="error-msg error-msg--padding">

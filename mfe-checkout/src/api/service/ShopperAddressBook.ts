@@ -99,7 +99,7 @@ export const useUpdateTextUpdatesForPhone = () => {
   const updateTextUpdatesForPhone = useCallback(async (phoneNumber: string) => {
     setLoading(true);
     setError(null);
-    const endpoint = `https://devapi2.shop.com/twilio/v1/lookups?type=carrier&to=${phoneNumber}&country=USA?api_key=${apiKey}`;
+    const endpoint = `${apiDomain}/twilio/v1/lookups?type=carrier&to=${phoneNumber}&country=USA?api_key=${apiKey}`;
     try {
       const response = await axiosInstance(endpoint).get("");
       setData(response.data);

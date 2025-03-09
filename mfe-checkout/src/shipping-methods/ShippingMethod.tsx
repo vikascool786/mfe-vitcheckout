@@ -9,7 +9,11 @@ import { portalApiData } from "../checkout/portalAtom";
 import { FormHeading } from "../component/Form/Heading/FormHeading";
 import { RadioButton } from "../component/RadioButton/RadioButton";
 import withLoader from "../hoc/withLoader";
-import { OrderConsolidationData } from "../interfaces/OrderConsolidationData";
+import {
+  OOS_CONSOLIDATE_CODE,
+  OOS_CONSOLIDATE_SPLIT_CODE,
+  OrderConsolidationData
+} from "../interfaces/OrderConsolidationData";
 import { ShippingItem } from "../shipping-item/ShippingItem";
 import { ShippingOptions } from "../shipping-options/ShippingOptions";
 import { loadingAtom, orderAtom, orderNotificationsAtom } from "../store";
@@ -29,6 +33,7 @@ import { Warning } from "../assets/svgs/Warning";
 import { setDataObjectProperty } from "../utils/helpers/SetDataObjectProperty";
 import { Spinner } from "../component/Spinner/Spinner";
 import { FreeShipMessage } from "./FreeShipMessage";
+import StoreHeading from "../component/StoreHeading";
 
 interface IShippingMethodProps {
   shopperID: string;
@@ -42,7 +47,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
     useState<OrderConsolidationData>({
       showOrderConsolidate: false,
       availabilityDate: "",
-      oosConsolidate: 3,
+      oosConsolidate: OOS_CONSOLIDATE_CODE,
       shipDateMessageMap: new Map<string, string>(),
     });
   const [orderNotifications, setOrderNotifications] = useAtom(
@@ -157,19 +162,19 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
   return (
     <div className="shipping-container">
       <FormHeading title="Shipping Methods & Review Items" />
-
       {orderConsolidateData?.showOrderConsolidate && (
         <div className="shipping-options-container">
           <div
-            className={`shipping-option-container start ${orderConsolidateData.oosConsolidate === 2 ? "selected" : ""
-              }`}
+            className={`shipping-option-container start ${
+              orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_SPLIT_CODE ? "selected" : ""
+            }`}
           >
             <div className="shipping-option-wrapper">
               <div className="shipping-option-select-container">
                 <RadioButton
                   id={"2"}
-                  onChange={(e) => handleChangeOOSConsolidate(2, e)}
-                  checked={orderConsolidateData.oosConsolidate === 2}
+                  onChange={(e) => handleChangeOOSConsolidate(OOS_CONSOLIDATE_SPLIT_CODE, e)}
+                  checked={orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_SPLIT_CODE}
                 />
                 <div className={`shipping-option-sub-container`}>
                   <div>
@@ -181,15 +186,16 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
             </div>
           </div>
           <div
-            className={`shipping-option-container end ${orderConsolidateData.oosConsolidate === 3 ? "selected" : ""
-              }`}
+            className={`shipping-option-container end ${
+              orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_CODE ? "selected" : ""
+            }`}
           >
             <div className="shipping-option-wrapper">
               <div className="shipping-option-select-container">
                 <RadioButton
                   id={"3"}
-                  onChange={(e) => handleChangeOOSConsolidate(3, e)}
-                  checked={orderConsolidateData.oosConsolidate === 3}
+                  onChange={(e) => handleChangeOOSConsolidate(OOS_CONSOLIDATE_CODE, e)}
+                  checked={orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_CODE}
                 />
                 <div className={`shipping-option-sub-container`}>
                   <div>Wait and ship together. Save on shipping.</div>
@@ -211,33 +217,21 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
               return (
                 store && (
                   <div key={key}>
-                    <FreeShipMessage orderStore={store} portalData={portalData} />
-                    <div className="shipping-catolog-name">
-                      {orderConsolidateData?.oosConsolidate === 2 ? (
-                        key.includes("*OOS*") ? (
-                          <span>
-                            {orderConsolidateData?.shipDateMessageMap.get(key)}
-                          </span>
-                        ) : (
-                          <span>Shipping Now</span>
-                        )
-                      ) : (
-                        <span>{getCatalogName(store)}</span>
-                      )}
-                    </div>
+                    <FreeShipMessage orderStore={store} portalData={portalData}/>
+                    <StoreHeading storeName={getCatalogName(store) || ""} storeKey={key} isMAStore={store.store.isMA === 1} order={orders} isOrderSummary={false} />
 
                     {store.items &&
-                      store.items.map((item, itemIndex) => (
-                        <div key={itemIndex}>
-                          <ShippingItem
-                            item={item}
-                            storeDetail={store?.store}
-                            total={store?.totals}
-                            onRemove={() =>
-                              handleRemoveProduct(key, item.product_hash)
-                            }
-                            portalData={portalData}
-                            isMaProduct={store?.store?.isMA === 1}
+                        store.items.map((item, itemIndex) => (
+                            <div key={itemIndex}>
+                              <ShippingItem
+                                  item={item}
+                                  storeDetail={store?.store}
+                                  total={store?.totals}
+                                  onRemove={() =>
+                                      handleRemoveProduct(key, item.product_hash)
+                                  }
+                                  portalData={portalData}
+                                  isMaProduct={store?.store?.isMA === 1}
                             cartId={orders.id}
                           />
                         </div>

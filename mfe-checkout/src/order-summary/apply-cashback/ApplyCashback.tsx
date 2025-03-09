@@ -7,20 +7,25 @@ import { changeOrder } from "../../api/service/Order";
 import { generateChangeStoreResponse } from "../../utils/helpers/GenerateChangeStoreResponse";
 import { VIFT } from "../../assets/svgs/VIFT";
 import { getOrderNotifications } from "../../utils/OrderUtils";
+import { siteApiData } from "../../checkout/siteAtom";
+import { getFormattedPrice } from "../../utils/helpers/CurrencyFormatterUtil";
 
 interface IApplyCashbackContainer {
   cashbackData: EWallet;
+  siteId: string;
 }
 
 export const ApplyCashback: React.FC<IApplyCashbackContainer> = ({
   cashbackData,
+  siteId,
 }) => {
   const [order, setOrder] = useAtom(orderAtom);
   const [notificationMessages, setOrderNotifications] = useAtom(
     orderNotificationsAtom
   );
 
-  console.log("EWallet", cashbackData);
+  const [siteData] = useAtom(siteApiData(siteId));
+
   const handleAddApplyCashback = () => {
     // Determine if cashback is being applied or removed
 
@@ -68,10 +73,7 @@ export const ApplyCashback: React.FC<IApplyCashbackContainer> = ({
                 : "Discount-price-text"
             }
           >
-            {`$${Number(cashbackData.cashbackAvail).toLocaleString('en-US', {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2
-            })}`}
+            {getFormattedPrice(siteData, cashbackData.cashbackAvail)}
           </p>
         </div>
         <div className="Right-part-middle-container">

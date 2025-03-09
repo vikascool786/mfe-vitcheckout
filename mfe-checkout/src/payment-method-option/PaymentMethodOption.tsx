@@ -95,7 +95,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
 
   useEffect(() => {
     if (isCardExpired() && !isThirdPartyPayment(paymentMethod.typeID)) {
-      setOrderNotifications(["Card is expired"]);
+      setOrderNotifications(["The credit card has expired"]);
     }
   }, [paymentMethod]);
 
@@ -126,7 +126,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     if (isCardExpired()) {
       setTimeout(() => {
         formik.setFieldValue("cvv", "", false);
-        formik.setFieldError("cvv", "Card is expired");
+        formik.setFieldError("cvv", "The credit card has expired");
       }, 300);
       setLoading(false);
       return;
@@ -249,8 +249,9 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
       id={`[id=${paymentMethod.id}]`}
     >
       <div
-        className={`payment-option-select-container ${isEditing ? "form-mode" : ""
-          }`}
+        className={`payment-option-select-container ${
+          isEditing ? "form-mode" : ""
+        }`}
       >
         <div className="payment-option-sub-container">
           <RadioButton
@@ -322,9 +323,9 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                             (pm) =>
                               pm.paymentMethod.id === paymentMethod.id
                                 ? {
-                                  ...pm,
-                                  isPaymentValidated: false,
-                                }
+                                    ...pm,
+                                    isPaymentValidated: false,
+                                  }
                                 : pm
                           );
 

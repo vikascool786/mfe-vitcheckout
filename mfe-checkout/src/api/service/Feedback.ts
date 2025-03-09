@@ -10,14 +10,17 @@ export const postFeedback = async (
   sessionId?: string | number | undefined,
   siteId?: string | number | undefined
 ): Promise<any> => {
-  const apiEndpoint = baseUrl.replace("{{path}}", getFeedbackPath(pcId));
+  const baseUrlWithSiteId = baseUrl + `&siteId=${siteId}`;
+  const apiEndpoint = baseUrlWithSiteId.replace(
+    "{{path}}",
+    getFeedbackPath(pcId)
+  );
   const feedbackPayload = {
     classid: 36,
     comments: feedback,
     httpreferrer: window.location.href,
     orderid: 0,
     surveytypeid: 17,
-    siteid: siteId,
     userSessionId: sessionId || -1,
   };
 

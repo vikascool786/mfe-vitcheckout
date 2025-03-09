@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import "./FeedbackForm.scss";
 import { Spinner } from "../component/Spinner/Spinner";
 import { postFeedback } from "../api/service/Feedback";
@@ -13,10 +13,20 @@ const FeedbackForm: React.FC<IFeedback> = ({ pcId, sessionId, siteId }) => {
   const [isFeebbackSubmitted, setFeedbackSubmitted] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [error, setError] = useState("");
+  const feedbackFormRef = useRef<HTMLDivElement>(null);
 
   const apiMode = useMemo(() => GET_API_MODE(), []);
   const apiBaseUrl = useMemo(() => {
     return GET_API_ENDPOINT_BASE_URL(apiMode);
+  }, []);
+
+  useEffect(() => {
+    if (feedbackFormRef.current) {
+      feedbackFormRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
   }, []);
 
   if (isloading) return <Spinner />;
@@ -47,7 +57,7 @@ const FeedbackForm: React.FC<IFeedback> = ({ pcId, sessionId, siteId }) => {
   };
 
   return (
-    <div className="feedback-form">
+    <div className="feedback-form" ref={feedbackFormRef}>
       {!isFeebbackSubmitted ? (
         <>
           <p className="feedback-form__text">

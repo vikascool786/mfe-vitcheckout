@@ -48,6 +48,7 @@ export interface Item {
   permutation?: Permutation;
   shipWarningMessages?: string[];
   prodContainerId: string;
+  volumeId: string;
 }
 
 export interface Image {
@@ -86,7 +87,6 @@ export interface IUserOptions {
   isOfAge: boolean;
   trackingID: string;
   deliveryDate: string;
-  deliveryTime: number;
   signatureRequired: boolean;
   oosConsolidate: number;
   userSessionId: string;

@@ -1,7 +1,12 @@
 import { ChangeOrder } from "../interfaces/ChangeOrder";
 import { Order } from "../interfaces/Order";
-import { OrderConsolidationData } from "../interfaces/OrderConsolidationData";
+import {
+    OOS_CONSOLIDATE_CODE,
+    OOS_CONSOLIDATE_SPLIT_CODE,
+    OrderConsolidationData
+} from "../interfaces/OrderConsolidationData";
 import { Success } from "../api/service/Order";
+import {GIFT_CARD_STORE_CATALOGS, GIFT_CARD_STORE_VOLUMES} from "./StoreUtils";
 
 export function updatePaymentMethod(
     order: ChangeOrder,
@@ -32,7 +37,7 @@ export const getOrderConsolidateData = (
     let orderConsolidateData = {
         showOrderConsolidate: false,
         availabilityDate: "",
-        oosConsolidate: 3,
+        oosConsolidate: OOS_CONSOLIDATE_CODE,
         shipDateMessageMap: new Map<string, string>(),
     };
     if (!order) return orderConsolidateData;
@@ -64,7 +69,7 @@ export const getOrderConsolidateData = (
         );
         orderConsolidateData.availabilityDate = latestDate.toLocaleDateString();
     }
-    if (orderConsolidateData.oosConsolidate === 2) {
+    if (orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_SPLIT_CODE) {
         Object.entries(order.stores).forEach(([key, value]) => {
             const dateAvailable = value.items?.[0]?.available || "";
             const shipStatusMessage =
@@ -91,4 +96,24 @@ export const getOrderNotifications = (
         orderNotifications.push(n.reason);
     });
     return orderNotifications;
+};
+
+/**
+ * Order only contains MA prods/stores
+ * @param order
+ */
+export const orderIsMAOnly = (order: Order | null): boolean => {
+    if (!order) return false;
+
+    return Object.values(order.stores).every(store => store.store.isMA === 1);
+};
+
+export const orderHasGiftCards = (order: Order | null): boolean => {
+    if (!order) return false;
+    const hasGCCatalogs = Object.values(order.stores).some(store =>
+        GIFT_CARD_STORE_CATALOGS.includes(store.store?.catalogId));
+    const hasGCVolumes = Object.values(order.stores).some(store =>
+        store.items.some(item => GIFT_CARD_STORE_VOLUMES.includes(Number(item.volumeId)))
+    );
+    return hasGCCatalogs || hasGCVolumes;
 };

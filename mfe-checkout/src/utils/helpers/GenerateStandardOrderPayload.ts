@@ -16,7 +16,6 @@ export const generateStandardOrderPayload = (cartId: string, countryCode: string
             isOfAge: true,
             trackingID: "",
             deliveryDate: "",
-            deliveryTime: 1,
             signatureRequired: false,
             oosConsolidate: 3,
             userSessionId: ""

@@ -262,7 +262,6 @@ export const ORDER_DATA = {
     isOfAge: false,
     trackingID: "",
     deliveryDate: "",
-    deliveryTime: 1234567890,
     signatureRequired: false,
     oosConsolidate: 3,
     userSessionId: "",

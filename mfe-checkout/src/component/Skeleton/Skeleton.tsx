@@ -1,8 +1,14 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./Skeleton.scss";
 
 interface SkeletonProps {}
 const Skeleton: React.FC<SkeletonProps> = () => {
+
+    useEffect(() => {
+        const event = new Event("CheckoutSkeletonRendered");
+        window.dispatchEvent(event);
+    }, []);
+
   return (
     <div className="mfe-checkout-skeleton-container">
       <div className="skeleton-col-1">

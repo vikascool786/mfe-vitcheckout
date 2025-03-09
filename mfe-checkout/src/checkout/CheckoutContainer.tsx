@@ -60,7 +60,6 @@ const getInitialBuildOrderData = (
     isOfAge: false,
     trackingID: "",
     deliveryDate: "",
-    deliveryTime: 1234567890,
     signatureRequired: false,
     oosConsolidate: 3,
     userSessionId: "",
@@ -173,8 +172,8 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     () =>
       paymentMethods
         ? (paymentMethods?.find(
-          (payment) => payment?.preferred
-        ) as IPaymentMethod)
+            (payment) => payment?.preferred
+          ) as IPaymentMethod)
         : ({} as IPaymentMethod),
     [paymentMethods]
   );
@@ -346,7 +345,12 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                 )}
               </div>
               <div className="right-column">
-                <OrderSummary pcid={pcid} shopperId={shopperId} />
+                <OrderSummary
+                  pcid={pcid}
+                  shopperId={shopperId}
+                  cartId={cartId}
+                  siteId={siteId}
+                />
               </div>
             </div>
             <div className="place-order">

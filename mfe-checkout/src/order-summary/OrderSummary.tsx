@@ -20,11 +20,14 @@ import { ShopperAttribute } from "../interfaces/ShopperAttribute";
 import { getOrderValidatePromoCode } from "../api/service/PromoCodeAPI";
 import { portalApiData } from "../checkout/portalAtom";
 import { hideCouponCode } from "../utils/CouponUtils";
+import StoreHeading from "../component/StoreHeading";
 
 interface IOrderSummary {
   pcid: string;
   shopperId: string;
   hideCashback?: boolean;
+  cartId: string;
+  siteId: string;
 }
 
 interface ICouponState {
@@ -44,6 +47,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
   pcid,
   hideCashback,
   shopperId,
+  cartId,
+  siteId,
 }) => {
   const [order, setOrder] = useAtom(orderAtom);
   const { eWalletData, loading, error } = useShopperEWallet(pcid);
@@ -61,7 +66,6 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
     gcApplied:
       order?.userOptions.gcNum && order?.userOptions?.gcNum[0] ? true : false,
   });
-
 
   const [gcLoading, setGCLoading] = useState(false);
   const [portalData] = useAtom(portalApiData(shopperId));
@@ -108,12 +112,12 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
   const handleRemoveCoupon = async (couponToRemove: string) => {
     if (order?.userOptions.coupons) {
       const { coupons } = order.userOptions;
-  
+
       // Filter out the coupon to remove
       const updatedCoupons = coupons.filter(
         (appliedCoupon) => appliedCoupon !== couponToRemove
       );
-  
+
       try {
         const updatedOrder = await buildOrder(
           generateChangeStoreResponse({
@@ -126,14 +130,13 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
             },
           })
         );
-  
+
         setOrder(updatedOrder.response?.success?.data);
       } catch (error) {
         console.error("Error while removing coupon:", error);
       }
     }
   };
-  
 
   // Add gift card to the order
   const handleAddGiftCard = async (isGCApplied: boolean) => {
@@ -144,7 +147,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
       }));
       return;
     }
-  
+
     if (!gcState.gcPin?.trim()) {
       setgcState((prevState) => ({
         ...prevState,
@@ -152,9 +155,9 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
       }));
       return;
     }
-  
+
     setGCLoading(true);
-  
+
     try {
       let updatedOrder;
       if (isGCApplied) {
@@ -169,13 +172,13 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
             },
           })
         );
-  
+
         setgcState((prevState) => ({
           ...prevState,
           gcApplied: false,
           gcVisible: false,
         }));
-  
+
       } else {
         // **Optimistically update state before API call**
         setgcState((prevState) => ({
@@ -184,19 +187,19 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           gcVisible: true,
           gcError: "",
         }));
-  
+
         // Deep clone `order` to trigger state updates
         const newOrder = JSON.parse(JSON.stringify(order));
         newOrder.userOptions.gcNum = [gcState.gcNum];
         newOrder.userOptions.gcPin = [gcState.gcPin];
         setOrder(newOrder); // Immediate update for UI
-  
+
         // Applying the gift card via API
         updatedOrder = await changeOrder(
           generateChangeStoreResponse(newOrder),
           order.id
         );
-  
+
         if (updatedOrder.response.success?.notifications) {
           setgcState((prevState) => ({
             ...prevState,
@@ -204,7 +207,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           }));
           return;
         }
-  
+
         if (updatedOrder?.response?.success?.data) {
           setOrder(updatedOrder.response.success.data);
         }
@@ -222,7 +225,6 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
       setGCLoading(false);
     }
   };
-  
 
   const handleAddCoupon = async () => {
     try {
@@ -284,7 +286,6 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
     Object.entries(order?.stores).map(([key, store], index) => {
       return store;
     });
-
   useEffect(() => {
     fetchShopperAttributes(shopperId)
       .then((response: ShopperAttribute[]) => {
@@ -295,13 +296,23 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         if (hasTakenHealthSurvey) {
           //check if coupon has been redeemed
           getOrderValidatePromoCode(
-            pcid,
-            portalData.distId,
-            COUPON_CODE_SURVEY10
+            cartId,
+            COUPON_CODE_SURVEY10,
+            order?.totals?.price || 0
           )
             .then((response) => {
-              //TODO fix once CORS issue is resolved
-              if (!response) {
+              console.log("promo response: " + JSON.stringify(response));
+              console.log(
+                "isCouponValid: " + JSON.stringify(response?.isCouponValid)
+              );
+              console.log(
+                "svrMessage: " + JSON.stringify(response?.svrMessage)
+              );
+              const canRedeem =
+                response &&
+                response?.isCouponValid === "1" &&
+                (response?.svrMessage?.length ?? 0) <= 0;
+              if (canRedeem) {
                 //apply coupon to order
                 if (
                   order &&
@@ -322,7 +333,6 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                   );
                   updatedOrder
                     .then((response) => {
-                      console.log("response: " + JSON.stringify(response));
                       setOrder(response.response?.success?.data);
                     })
                     .catch((error) => {
@@ -341,15 +351,12 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
       });
   }, []);
 
-
   useEffect(() => {
     setgcState((prevState) => ({
       ...prevState,
       gcApplied: order?.userOptions.gcNum?.length > 0,
     }));
   }, [order?.userOptions.gcNum]);
-  
-  
 
   return (
     <div className="order-summary-container">
@@ -362,7 +369,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               !error &&
               eWalletData &&
               parseInt(eWalletData.totalCoaCBAvail) > 0 && (
-                <ApplyCashback cashbackData={eWalletData} />
+                <ApplyCashback cashbackData={eWalletData} siteId={siteId} />
               )}
             <div className="order-redeem-coupon-text">Redeem Coupon</div>
             <div className="order-summary-coupon-container">
@@ -406,7 +413,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                     </div>
                     <FormField
                       value={gcState.gcNum}
-                      onChange={handleGcNumChange}  
+                      onChange={handleGcNumChange}
                     />
                   </div>
                   <div className="gift-card-wrapper-field-2">
@@ -428,21 +435,23 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               </div>
             )}
 
-            {!!gcState.gcApplied && 
+            {!!gcState.gcApplied && (
               <div className="gcApplied">
                 <div className="gcLeft-cont">
-                   <p className="cardName">{`CARD: ${gcState.gcNum}`}</p>
-                   <p className="balanceCard">{`$ 0.00 Balance`}</p>
+                  <p className="cardName">{`CARD: ${gcState.gcNum}`}</p>
+                  <p className="balanceCard">{`$ 0.00 Balance`}</p>
                 </div>
                 <div className="gcRight-cont">
-                   <p className="appliedCash">
+                  <p className="appliedCash">
                     {`${order?.totals.gcAppliedStr} Applied`}
-                   </p>
-        
-                   <Close onClick={() => handleAddGiftCard(!!gcState.gcApplied)}/>
-                  
+                  </p>
+
+                  <Close
+                    onClick={() => handleAddGiftCard(!!gcState.gcApplied)}
+                  />
                 </div>
-              </div>}
+              </div>
+            )}
             {gcState.gcError && (
               <div className="error-message">{gcState.gcError}</div>
             )}
@@ -460,50 +469,59 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         {storesTotals &&
           storesTotals
             .sort((storeA, storeB) => {
-              return (storeB?.store?.isMA ?? 0) - (storeA?.store?.isMA ?? 0);
+              return (
+                (storeB?.store?.store?.isMA ?? 0) -
+                (storeA?.store?.store?.isMA ?? 0)
+              );
             })
             .map((store, index) => {
               const isFirst = index === 0;
-              const isLast = index === storesTotals.length - 1;
-              if (!store.totals) return null;
+              const isLast = index === storesTotals?.length - 1;
+              if (!store.store?.totals) return null;
               return (
                 <div
-                  className={`order-charges-table ${
-                    isFirst ? "order-charges-table-first" : ""
-                  } ${isLast ? "order-charges-table-last" : ""}`}
+                  className={`order-charges-table ${isFirst ? "order-charges-table-first" : ""
+                    } ${isLast ? "order-charges-table-last" : ""}`}
                   key={store?.id || index}
                 >
-                  <div className="shipping-catolog-name">
-                    {getCatalogName(store)}
-                  </div>
+                  <StoreHeading
+                    storeName={getCatalogName(store?.store) || ""}
+                    storeKey={store?.key}
+                    isMAStore={store?.store?.store.isMA === 1}
+                    order={order}
+                    isOrderSummary={true}
+                  />
+
                   <div className="order-summary-row">
                     <div>Items Subtotal</div>
-                    <div>{store?.totals?.priceStr}</div>
+                    <div>{store?.store?.totals?.priceStr}</div>
                   </div>
-                  {store?.totals?.couponCode && (
+                  {store?.store?.totals?.couponCode && (
                     <div className="order-summary-row order-summary-row__coupon">
                       <div className="order-summary-coupon-applied">
                         Coupon
-                        {!hideCouponCode(store?.totals?.couponCode) && (
-                          <span
-                            key={index}
-                            className="order-summary-coupon-applied__code"
-                          >
-                            {store?.totals?.couponCode}
-                          </span>
-                        )}
+                        {!hideCouponCode(
+                          store?.store?.totals?.couponCode || ""
+                        ) && (
+                            <span
+                              key={index}
+                              className="order-summary-coupon-applied__code"
+                            >
+                              {store?.store?.totals?.couponCode}
+                            </span>
+                          )}
                       </div>
-                      <div>{store?.totals?.couponsStr}</div>
+                      <div>{store?.store?.totals?.couponsStr}</div>
                     </div>
                   )}
                   <div className="order-summary-row">
                     <div>Tax Total</div>
-                    <div>{store?.totals?.taxStr}</div>
+                    <div>{store?.store?.totals?.taxStr}</div>
                   </div>
 
                   <div className="order-summary-row">
                     <div>Shipping</div>
-                    <div>{store?.totals?.shippingStr}</div>
+                    <div>{store?.store?.totals?.shippingStr}</div>
                   </div>
                 </div>
               );
@@ -559,8 +577,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         ) : null}
 
         {order?.totals?.cashBack &&
-        order?.totals?.extraCashBack &&
-        order?.totals?.extraCashBack > 0 ? (
+          order?.totals?.extraCashBack &&
+          order?.totals?.extraCashBack > 0 ? (
           <>
             <div className="order-summary-cashback-container">
               <div className="order-cashback">

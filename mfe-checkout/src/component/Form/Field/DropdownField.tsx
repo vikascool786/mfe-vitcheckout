@@ -14,6 +14,7 @@ type DropdownProps = {
   errorRefs?: React.MutableRefObject<{
     [key: string]: HTMLInputElement | HTMLSelectElement | null;
   }> | null;
+  disabled?: boolean;
 };
 
 export const DropdownField: React.FC<DropdownProps> = ({
@@ -26,6 +27,7 @@ export const DropdownField: React.FC<DropdownProps> = ({
   errorMessage,
   className,
   errorRefs = null,
+  disabled = false,
 }) => {
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
@@ -51,6 +53,7 @@ export const DropdownField: React.FC<DropdownProps> = ({
         value={selectedValue} // Controlled component behavior
         onChange={handleChange} // Handle change events
         required={required}
+        disabled={disabled}
       >
         <option value="" disabled>
           {`Select ${label || "an option"}`}

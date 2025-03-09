@@ -25,7 +25,6 @@ export const generateChangeStoreResponse = (order: Order): ChangeOrder => {
       isOfAge: order.userOptions.isOfAge,
       trackingID: order.userOptions.trackingID,
       deliveryDate: order.userOptions.deliveryDate,
-      deliveryTime: order.userOptions.deliveryTime,
       signatureRequired: order.userOptions.signatureRequired,
       oosConsolidate: Number(order.userOptions.oosConsolidate),
       userSessionId: order.userOptions.userSessionId,

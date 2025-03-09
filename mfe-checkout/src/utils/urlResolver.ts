@@ -209,21 +209,6 @@ export const GET_AJAX_ENDPOINT_BASE_URL = () => {
   }
 };
 
-export const GET_DSB_MA = () => {
-  switch (GET_API_MODE()) {
-    case "localhost":
-      return "http://dev-dsb.marketamerica.com:80";
-    case "dev":
-      return "http://dev-dsb.marketamerica.com:80";
-    case "staging":
-      return "http://stg-dsb.marketamerica.com:80";
-    case "prod":
-      return "http://dsb.marketamerica.com:80";
-    default:
-      return "";
-  }
-};
-
 export const GET_BASE_URL =
   window.location.href.match(
     /^(https:\/\/)?(www\.)?([a-zA-Z0-9-]+(\.[a-zA-Z]+)+)/
