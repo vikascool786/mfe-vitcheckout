@@ -37,27 +37,26 @@ const App: React.FC<AppProps> = () => {
         /> */}
 
         {/* for old custoemr  */}
-        {/* <CheckoutContainer
+        <CheckoutContainer
           cartId="cart_2637612996_W_USA_USA_ENG"
           shopperId="UmkepZWVzmqqVzhVqkzZmwqzWeXVYVWXWZZpzxhemz"
           pcid="2637612996"
           siteId="222"
           sessionId="3055249126"
-        /> */}
+        />
 
         {/* for GC Card Customer */}
-        <CheckoutContainer
+        {/* <CheckoutContainer
           cartId="cart_1778511302_W_USA_USA_ENG"
           shopperId="zWUVXxqjzwWqWzhZjqzZYUWzwWxWzhUmwVwUzehzpp"
           pcid="1778511302"
           siteId="66"
           sessionId="3055249126"
-        />
+        /> */}
         {/* for vikas card custoemr  */}
         {/* <CheckoutContainer
           cartId="cart_1817046463_W_USA_USA_ENG"
           shopperId="mXeWpzjqzWkwhzhqzYzZWwwzZXjzpwhUpXqqzjjx"
-          
           pcid="1817046463"
           siteId="66"
           sessionId="3055249126"

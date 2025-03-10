@@ -178,7 +178,6 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           gcApplied: false,
           gcVisible: false,
         }));
-
       } else {
         // **Optimistically update state before API call**
         setgcState((prevState) => ({
@@ -203,7 +202,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         if (updatedOrder.response.success?.notifications) {
           setgcState((prevState) => ({
             ...prevState,
-            gcError: updatedOrder.response.success.notifications[0]?.reason || "",
+            gcError:
+              updatedOrder.response.success.notifications[0]?.reason || "",
           }));
           return;
         }
@@ -469,59 +469,55 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         {storesTotals &&
           storesTotals
             .sort((storeA, storeB) => {
-              return (
-                (storeB?.store?.store?.isMA ?? 0) -
-                (storeA?.store?.store?.isMA ?? 0)
-              );
+              return (storeB?.store?.isMA ?? 0) - (storeA?.store?.isMA ?? 0);
             })
             .map((store, index) => {
               const isFirst = index === 0;
               const isLast = index === storesTotals?.length - 1;
-              if (!store.store?.totals) return null;
+              if (!store?.totals) return null;
               return (
                 <div
-                  className={`order-charges-table ${isFirst ? "order-charges-table-first" : ""
-                    } ${isLast ? "order-charges-table-last" : ""}`}
+                  className={`order-charges-table ${
+                    isFirst ? "order-charges-table-first" : ""
+                  } ${isLast ? "order-charges-table-last" : ""}`}
                   key={store?.id || index}
                 >
                   <StoreHeading
-                    storeName={getCatalogName(store?.store) || ""}
+                    storeName={getCatalogName(store) || ""}
                     storeKey={store?.key}
-                    isMAStore={store?.store?.store.isMA === 1}
+                    isMAStore={store?.store?.isMA === 1}
                     order={order}
                     isOrderSummary={true}
                   />
 
                   <div className="order-summary-row">
                     <div>Items Subtotal</div>
-                    <div>{store?.store?.totals?.priceStr}</div>
+                    <div>{store?.totals?.priceStr}</div>
                   </div>
-                  {store?.store?.totals?.couponCode && (
+                  {store?.totals?.couponCode && (
                     <div className="order-summary-row order-summary-row__coupon">
                       <div className="order-summary-coupon-applied">
                         Coupon
-                        {!hideCouponCode(
-                          store?.store?.totals?.couponCode || ""
-                        ) && (
-                            <span
-                              key={index}
-                              className="order-summary-coupon-applied__code"
-                            >
-                              {store?.store?.totals?.couponCode}
-                            </span>
-                          )}
+                        {!hideCouponCode(store?.totals?.couponCode || "") && (
+                          <span
+                            key={index}
+                            className="order-summary-coupon-applied__code"
+                          >
+                            {store?.totals?.couponCode}
+                          </span>
+                        )}
                       </div>
-                      <div>{store?.store?.totals?.couponsStr}</div>
+                      <div>{store?.totals?.couponsStr}</div>
                     </div>
                   )}
                   <div className="order-summary-row">
                     <div>Tax Total</div>
-                    <div>{store?.store?.totals?.taxStr}</div>
+                    <div>{store?.totals?.taxStr}</div>
                   </div>
 
                   <div className="order-summary-row">
                     <div>Shipping</div>
-                    <div>{store?.store?.totals?.shippingStr}</div>
+                    <div>{store?.totals?.shippingStr}</div>
                   </div>
                 </div>
               );
@@ -577,8 +573,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         ) : null}
 
         {order?.totals?.cashBack &&
-          order?.totals?.extraCashBack &&
-          order?.totals?.extraCashBack > 0 ? (
+        order?.totals?.extraCashBack &&
+        order?.totals?.extraCashBack > 0 ? (
           <>
             <div className="order-summary-cashback-container">
               <div className="order-cashback">
