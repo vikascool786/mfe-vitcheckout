@@ -18,6 +18,7 @@ import PaymentMethod from "../payment-method/PaymentMethods";
 import PlaceOrder from "../payment-method/place-order/PlaceOrder";
 import ShippingMethod from "../shipping-methods/ShippingMethod";
 import {
+  addressAtom,
   loadingAtom,
   orderAtom,
   orderNotificationsAtom,
@@ -96,6 +97,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     orderNotificationsAtom
   );
 
+  const addressList = useAtomValue(addressAtom);
   const paymentMethodOptions = useAtomValue(paymentMethodsAtom);
   const [portalData] = useAtom(portalApiData(shopperId));
 
@@ -335,7 +337,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
 
                 <ShippingMethod loading={isLoading} shopperID={shopperId} />
 
-                {addresses?.some((address) => address.hasAddress === 1) &&
+                {addressList?.some((address) => address.hasAddress === 1) &&
                   orderData.totals.price > 0 && (
                     <PaymentMethod
                       cartId={cartId}
@@ -358,7 +360,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
             </div>
 
             <div className="place-order">
-              {addresses?.some((address) => address.hasAddress === 1) &&
+              {addressList?.some((address) => address.hasAddress === 1) &&
                 paymentMethodOptions && (
                   <PlaceOrder
                     confirmOrder={confirmOrder}
