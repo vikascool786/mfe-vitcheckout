@@ -295,7 +295,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
           <img src={paymentMethod.imageUrl} alt={paymentMethod.accountName} />
         )}
         {!isEditing && isCard ? (
-          <form id="card-form">
+          <form id="card-form" className={`qa-payment-form`}>
             <div className="payment-option-container__card-cvv-container">
               {isSelected && (
                 <div className="payment-option-container__card-cvv">
@@ -303,7 +303,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                   <div>
                     <input
                       name="cvv"
-                      className="payment-option-container__card-cvv-form"
+                      className="qa-cvv payment-option-container__card-cvv-form"
                       value={formik.values.cvv}
                       type="password"
                       onChange={(e: ChangeEvent<HTMLInputElement>) => {
@@ -349,7 +349,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
               )}
               {isSelected && isCard && (
                 <div
-                  className="payment-option-container__card-cvv-edit"
+                  className="qa-edit-payment payment-option-container__card-cvv-edit"
                   onClick={(event) => {
                     event.stopPropagation(); // Prevents triggering parent click events
                     setIsCardEdit(true);

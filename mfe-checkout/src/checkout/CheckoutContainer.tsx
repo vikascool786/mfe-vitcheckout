@@ -174,8 +174,8 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     () =>
       paymentMethods
         ? (paymentMethods?.find(
-            (payment) => payment?.preferred
-          ) as IPaymentMethod)
+          (payment) => payment?.preferred
+        ) as IPaymentMethod)
         : ({} as IPaymentMethod),
     [paymentMethods]
   );
@@ -321,7 +321,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     <div>
       {orderData && (
         <>
-          <div className="container">
+          <div className="qa-checkout container">
             <div className="checkout-container">
               <div className="left-column">
                 <Notifications

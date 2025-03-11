@@ -261,12 +261,14 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
     // create payload for api
     let requestData: any = {
       name: values.accountName,
+      ...(paymentMethod.id === 0
+        ? { number: values.number, cvv: values.cvv }
+        : {}),
       number: values.number,
       month: values.expMonth,
       year: values.expYear,
       preferred: true,
       type: typeId,
-      cvv: values.cvv,
     };
 
     // if same as put shipping address id
@@ -547,7 +549,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                 <div className="save-for-later">
                   <input
                     type="checkbox"
-                    className="checkbox"
+                    className="qa-save checkbox"
                     checked={saveCardToWallet}
                     onChange={(e) => setSaveCardToWallet(!saveCardToWallet)}
                   />
@@ -557,7 +559,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                   <div className="billing">
                     <input
                       type="checkbox"
-                      className="checkbox"
+                      className="qa-same-shipping checkbox"
                       checked={sameShippingAddress}
                       onChange={() => {
                         setSameShippingAddress(!sameShippingAddress);
@@ -669,6 +671,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                 {cardError && <div className="error-message">{cardError}</div>}
                 <div className="button-container">
                   <Button
+                    qaTag="qa-cancel"
                     btnType="secondary"
                     label="Cancel"
                     onClick={(e) => {
@@ -677,6 +680,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                     }}
                   />
                   <Button
+                    qaTag="qa-submit"
                     btnType="primary"
                     label={saveCardToWallet ? "Save to Wallet" : "Save"}
                     onClick={(e) => {

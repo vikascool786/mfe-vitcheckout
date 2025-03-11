@@ -15,6 +15,7 @@ type DropdownProps = {
     [key: string]: HTMLInputElement | HTMLSelectElement | null;
   }> | null;
   disabled?: boolean;
+  qaTag?: string;
 };
 
 export const DropdownField: React.FC<DropdownProps> = ({
@@ -26,6 +27,7 @@ export const DropdownField: React.FC<DropdownProps> = ({
   onChange,
   errorMessage,
   className,
+  qaTag = "",
   errorRefs = null,
   disabled = false,
 }) => {

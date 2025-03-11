@@ -39,10 +39,11 @@ interface IShippingItemProps {
   item: Item;
   storeDetail: StoreDetail;
   total: ITotal;
-  onRemove: () => void;
+  onRemove: (storeKey: string, itemKey: string) => void;
   portalData: Portal;
   isMaProduct: boolean;
   cartId: string;
+  storeKey: string;
 }
 
 function createOptionMap(
@@ -81,6 +82,7 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
   portalData,
   isMaProduct,
   cartId,
+  storeKey,
 }) => {
   const [selectedQuantity, setSelectedQuantity] = useState(
     item.quantity.toString()
@@ -126,51 +128,49 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
   };
 
   const handleQuantityChange = async (value: string) => {
-    setSelectedQuantity(value);
-    if (value === "0") {
-      onRemove();
-      return;
-    } else {
-      onQuantityChange(item, parseInt(value));
-    }
-  };
-
-  const onQuantityChange = debounce(async (item: Item, newQuantity: number) => {
-    const requestData = {
-      id: cartId,
-      products: [
-        {
-          id: item.prodId.toString(),
-          type: "PROD",
-          quantity: newQuantity,
-          option: item.option,
-          product_hash: item.product_hash,
-        },
-      ],
-    };
-
-    setIsUpdating(true);
-    setUpdateError(null);
-
     try {
-      const response = await updateProductQty(cartId, requestData);
+      const newQuantity = parseInt(value);
+      setSelectedQuantity(value);
 
-      if (!response?.data?.response?.success?.data) {
-        throw new Error("Failed to update quantity");
-      }
+      if (value === "0") {
+        onRemove(storeKey, item.product_hash);
+      } else {
+        setIsUpdating(true);
+        setUpdateError(null);
 
-      if (order) {
-        const updatedOrder = await buildOrder(
-          generateChangeStoreResponse(order)
-        );
-        setOrder(updatedOrder.response.success.data);
+        const requestData = {
+          id: cartId,
+          products: [
+            {
+              id: item.prodId.toString(),
+              type: "PROD",
+              quantity: newQuantity,
+              option: item.option,
+              product_hash: item.product_hash,
+            },
+          ],
+        };
+
+        const response = await updateProductQty(cartId, requestData);
+
+        if (!response?.data?.response?.success?.data) {
+          throw new Error("Failed to update quantity");
+        }
+
+        if (order) {
+          const updatedOrder = await buildOrder(
+            generateChangeStoreResponse(order)
+          );
+          setOrder(updatedOrder.response.success.data);
+        }
       }
     } catch (error) {
       setUpdateError("Failed to update quantity");
+      setSelectedQuantity(item.quantity.toString()); // Reset to original quantity on error
     } finally {
       setIsUpdating(false);
     }
-  }, 500);
+  };
 
   // Default max quantity - adjust as needed based on your requirements
   const maxAvailableStock = 30;
@@ -190,7 +190,7 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
                 <div className="item-name">{decodeHtmlEntities(caption)}</div>
               </div>
 
-              <div onClick={onRemove}>
+              <div onClick={() => onRemove(storeKey, item.product_hash)}>
                 <Close />
               </div>
             </section>

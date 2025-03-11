@@ -5,5 +5,5 @@ export const getFormattedPrice = (siteData: Site, price: string): string => {
   return new Intl.NumberFormat(locale, {
     style: "currency",
     currency: siteData.locale.currencyCode,
-  }).format(parseInt(price));
+  }).format(Number(price));
 };

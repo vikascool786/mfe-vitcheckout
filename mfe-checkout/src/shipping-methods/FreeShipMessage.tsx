@@ -40,34 +40,36 @@ export const FreeShipMessage: React.FC<IShippingMessageProps> = ({
       isMA: Boolean(orderStore.store?.isMA),
       storeName: orderStore.store?.catalogName,
     };
-    if (isMAFreeShip || !orderStore.store?.isMA) {
+    if ((isMAFreeShip || !orderStore.store.isMA) && !isGiftCardStore(orderStore)) {
       const catalogId = String(orderStore.store?.catalogId);
         doShippingCalc(portalData.portalId, orderStore.items)
         .then((response) => {
-          if (!orderStore.store?.isMA) {
-            freeShipData.hasFreeShipping =
-              response.quotes[catalogId]?.[0]?.hasFreeShipping ?? false;
-            setFreeShipPolicy(
-              buildFreeShipPolicy(response.quotes[catalogId]?.[0]?.storeMessage)
-            );
+            if(response){
+                if (!orderStore.store?.isMA) {
+                    freeShipData.hasFreeShipping =
+                        response.quotes[catalogId]?.[0]?.hasFreeShipping ?? false;
+                    setFreeShipPolicy(
+                        buildFreeShipPolicy(response.quotes[catalogId]?.[0]?.storeMessage)
+                    );
                 }
                 if(freeShipData.hasFreeShipping){
                     const currency = response.quotes[catalogId]?.[0]?.currency;
-            let freeShipDiff = freeShipData?.isMA
-              ? response.quotes[catalogId]?.[0]?.freeShipDiff
-              : response.quotes[catalogId]?.[0]?.freeShippingThreshold
-                  ?.freeShipDiff;
-            freeShipData.freeShipDifference = `${currency}${formattedNumber(
-              freeShipDiff
-            )}`;
-            freeShipData.isFreeShipMet = freeShipData?.isMA
-              ? response.quotes[catalogId]?.[0]?.freeShipMet ||
-                freeShipDiff <= 0
-              : freeShipDiff <= 0;
+                    let freeShipDiff = freeShipData?.isMA
+                        ? response.quotes[catalogId]?.[0]?.freeShipDiff
+                        : response.quotes[catalogId]?.[0]?.freeShippingThreshold
+                            ?.freeShipDiff;
+                    freeShipData.freeShipDifference = `${currency}${formattedNumber(
+                        freeShipDiff
+                    )}`;
+                    freeShipData.isFreeShipMet = freeShipData?.isMA
+                        ? response.quotes[catalogId]?.[0]?.freeShipMet ||
+                        freeShipDiff <= 0
+                        : freeShipDiff <= 0;
 
                     setFreeShippingData(freeShipData);
                     setFreeShipMessage(buildFreeShipMessage(freeShipData));
                 }
+            }
             })
         .catch((error) => {
                 console.error("Error with shipping calc", error);

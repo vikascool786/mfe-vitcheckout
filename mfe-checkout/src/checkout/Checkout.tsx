@@ -467,7 +467,7 @@ const Checkout: React.FC<ICheckout> = ({
 
   return (
     <div>
-      <form className="shipping-address-form">
+      <form className="qa-address-section shipping-address-form">
         <div
           className={`${
             !showAVS
@@ -479,7 +479,7 @@ const Checkout: React.FC<ICheckout> = ({
             <FormHeading title="Shipping Address" />
             {shopperAddressBook.length > 0 && (
               <Back
-                className={`accordion ${isExpanded ? "open" : "close"}`}
+                className={`qa-expand accordion ${isExpanded ? "open" : "close"}`}
                 onClick={toggleAccordion}
               />
             )}
@@ -529,6 +529,7 @@ const Checkout: React.FC<ICheckout> = ({
                   {familyNameFirst ? (
                     <div className="form-field-container">
                       <FormField
+                        qaTag="qa-last-name"
                         name="last"
                         label="Last Name"
                         required
@@ -538,6 +539,7 @@ const Checkout: React.FC<ICheckout> = ({
                         errorMessage={touched.last && errors.last}
                       />
                       <FormField
+                        qaTag="qa-first-name"
                         name="first"
                         label="First Name"
                         required
@@ -550,6 +552,7 @@ const Checkout: React.FC<ICheckout> = ({
                   ) : (
                     <div className="form-field-container">
                       <FormField
+                        qaTag="qa-first-name"
                         name="first"
                         label="First Name"
                         required
@@ -559,6 +562,7 @@ const Checkout: React.FC<ICheckout> = ({
                         errorMessage={touched.first && errors.first}
                       />
                       <FormField
+                        qaTag="qa-last-name"
                         name="last"
                         label="Last Name"
                         required
@@ -572,6 +576,7 @@ const Checkout: React.FC<ICheckout> = ({
 
                   <div className="form-field-container-full">
                     <FormField
+                      className="qa-address"
                       name="address1"
                       label="Address Line 1"
                       required
@@ -584,6 +589,7 @@ const Checkout: React.FC<ICheckout> = ({
 
                   <div className="form-field-container-full">
                     <FormField
+                      qaTag="qa-address-2"
                       name="address2"
                       label="Address Line 2"
                       value={values.address2}
@@ -595,6 +601,7 @@ const Checkout: React.FC<ICheckout> = ({
 
                   <div className="form-field-container">
                     <FormField
+                      qaTag="qa-city"
                       name="city"
                       label="City"
                       required
@@ -604,6 +611,7 @@ const Checkout: React.FC<ICheckout> = ({
                       errorMessage={touched.city && errors.city}
                     />
                     <DropdownField
+                      qaTag="qa-state"
                       options={stateDropdownList}
                       label="State/Province"
                       required
@@ -616,6 +624,7 @@ const Checkout: React.FC<ICheckout> = ({
 
                   <div className="form-field-container">
                     <FormField
+                      className="qa-zipcode"
                       name="zip"
                       label="Zip Code"
                       required
@@ -624,6 +633,7 @@ const Checkout: React.FC<ICheckout> = ({
                       onBlur={handleBlur}
                       renderCheckBox={
                         <Checkbox
+                          qaTag="qa-po-box"
                           title="This address is a PO box"
                           checked={values.isPoBox}
                           name="isPoBox"
@@ -635,6 +645,7 @@ const Checkout: React.FC<ICheckout> = ({
                       errorMessage={touched.zip && errors.zip}
                     />
                     <FormField
+                      qaTag="qa-phone"
                       name="phone"
                       label="Phone"
                       required
@@ -644,6 +655,7 @@ const Checkout: React.FC<ICheckout> = ({
                       onBlur={handleBlur}
                       renderCheckBox={
                         <Checkbox
+                          qaTag="qa-text-updates"
                           title="Get Text Updates for this Order"
                           subtitle="Messaging data rates may apply."
                           checked={values.isUpdateEnabled}
@@ -662,11 +674,13 @@ const Checkout: React.FC<ICheckout> = ({
                   {shopperAddressBook.length > 0 ? (
                     <div className="form-footer form-footer__dual-button">
                       <Button
+                        qaTag="qa-cancel"
                         label="Cancel"
                         btnType="secondary"
                         onClick={onCancelClick}
                       />
                       <Button
+                        qaTag="qa-submit"
                         label="Save & Continue"
                         btnType="primary"
                         onClick={submitForm}
@@ -675,6 +689,7 @@ const Checkout: React.FC<ICheckout> = ({
                   ) : (
                     <div className="form-footer">
                       <Button
+                        qaTag="qa-submit"
                         label="Save Shipping Address & Continue"
                         btnType="primary"
                         onClick={submitForm}

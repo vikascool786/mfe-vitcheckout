@@ -8,7 +8,7 @@ import "./AddressList.scss";
 interface AppProps {
   addressBook: Address[];
   familyNameFirst: boolean;
-  onSelectChange: (id: number) => void;
+  onSelectChange: (id: number | undefined) => void;
   onAddNewAddressClick: () => void;
   onEditAddressClick: (address: Address) => void;
 }
@@ -21,7 +21,7 @@ export const AddressList: React.FC<AppProps> = ({
   onAddNewAddressClick,
 }) => {
   return (
-    <div className="addresslist">
+    <div className="qa-addresses addresslist">
       {addressBook.map((address, index) => {
         const isSelected = address.isShip === 1 ? "selected" : "";
         const isFirst = index === 0 ? "start" : "";
@@ -42,14 +42,14 @@ export const AddressList: React.FC<AppProps> = ({
                 familyNameFirst={familyNameFirst}
               />
             </div>
-            <span className="edit" onClick={() => onEditAddressClick(address)}>
+            <span className="qa-edit edit" onClick={() => onEditAddressClick(address)}>
               edit
             </span>
           </div>
         );
       })}
       {/* Add New Address Section */}
-      <div className="addresslist-container end" onClick={onAddNewAddressClick}>
+      <div className="qa-new-address addresslist-container end" onClick={onAddNewAddressClick}>
         <div className="address-center">
           <Add /> Add New Address
         </div>

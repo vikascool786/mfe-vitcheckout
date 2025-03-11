@@ -12,7 +12,7 @@ import withLoader from "../hoc/withLoader";
 import {
   OOS_CONSOLIDATE_CODE,
   OOS_CONSOLIDATE_SPLIT_CODE,
-  OrderConsolidationData
+  OrderConsolidationData,
 } from "../interfaces/OrderConsolidationData";
 import { ShippingItem } from "../shipping-item/ShippingItem";
 import { ShippingOptions } from "../shipping-options/ShippingOptions";
@@ -81,47 +81,54 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
   };
 
   const handleRemoveProduct = async (storeKey: string, itemKey: string) => {
-    setLoading(true);
-    // Remove item from the store
-    const updatedStores = { ...orders.stores };
-    if (!updatedStores[storeKey]) {
-      return;
+    try {
+      setLoading(true);
+
+      // Remove item from the store
+      const updatedStores = { ...orders.stores };
+      if (!updatedStores[storeKey]) {
+        return;
+      }
+
+      const itemToRemove = updatedStores[storeKey].items.find(
+        (item) => item.product_hash === itemKey
+      );
+
+      if (!itemToRemove) {
+        return;
+      }
+
+      updatedStores[storeKey].items = updatedStores[storeKey].items.filter(
+        (item) => item.product_hash !== itemKey
+      );
+
+      if (updatedStores[storeKey].items.length === 0) {
+        delete updatedStores[storeKey];
+      }
+
+      const updatedOrder = {
+        ...orders,
+        stores: updatedStores,
+      };
+
+      await removeProductFromCart(orders.id, itemKey);
+
+      const response = await buildOrder(
+        generateChangeStoreResponse(updatedOrder)
+      );
+
+      if (response.response.errors) {
+        window.location.href = GET_SHOP_CART_URL();
+        return;
+      }
+
+      setOrder(response.response.success.data);
+      setOrderNotifications(getOrderNotifications(response.response.success));
+    } catch (error) {
+      console.error("Error removing product:", error);
+    } finally {
+      setLoading(false);
     }
-    updatedStores[storeKey].items = updatedStores[storeKey].items.filter(
-      (item) => item.product_hash !== itemKey
-    );
-
-    // Update the order atom, if the store is empty, remove the store
-    if (updatedStores[storeKey].items.length === 0) {
-      delete updatedStores[storeKey];
-    }
-
-    setOrder({
-      ...orders,
-      stores: updatedStores,
-    });
-
-    await removeProductFromCart(orders.id, itemKey).then(() => {
-      buildOrder(
-        generateChangeStoreResponse({
-          ...orders,
-          stores: updatedStores,
-        })
-      )
-        .then((response) => {
-          if (response.response.errors) {
-            window.location.href = GET_SHOP_CART_URL();
-          }
-          setOrder(response.response.success.data);
-          setOrderNotifications(
-            getOrderNotifications(response.response.success)
-          );
-          setLoading(false);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    });
   };
 
   useEffect(() => {
@@ -166,15 +173,22 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
         <div className="shipping-options-container">
           <div
             className={`shipping-option-container start ${
-              orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_SPLIT_CODE ? "selected" : ""
+              orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_SPLIT_CODE
+                ? "selected"
+                : ""
             }`}
           >
             <div className="shipping-option-wrapper">
               <div className="shipping-option-select-container">
                 <RadioButton
                   id={"2"}
-                  onChange={(e) => handleChangeOOSConsolidate(OOS_CONSOLIDATE_SPLIT_CODE, e)}
-                  checked={orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_SPLIT_CODE}
+                  onChange={(e) =>
+                    handleChangeOOSConsolidate(OOS_CONSOLIDATE_SPLIT_CODE, e)
+                  }
+                  checked={
+                    orderConsolidateData.oosConsolidate ===
+                    OOS_CONSOLIDATE_SPLIT_CODE
+                  }
                 />
                 <div className={`shipping-option-sub-container`}>
                   <div>
@@ -187,15 +201,21 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
           </div>
           <div
             className={`shipping-option-container end ${
-              orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_CODE ? "selected" : ""
+              orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_CODE
+                ? "selected"
+                : ""
             }`}
           >
             <div className="shipping-option-wrapper">
               <div className="shipping-option-select-container">
                 <RadioButton
                   id={"3"}
-                  onChange={(e) => handleChangeOOSConsolidate(OOS_CONSOLIDATE_CODE, e)}
-                  checked={orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_CODE}
+                  onChange={(e) =>
+                    handleChangeOOSConsolidate(OOS_CONSOLIDATE_CODE, e)
+                  }
+                  checked={
+                    orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_CODE
+                  }
                 />
                 <div className={`shipping-option-sub-container`}>
                   <div>Wait and ship together. Save on shipping.</div>
@@ -217,21 +237,29 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
               return (
                 store && (
                   <div key={key}>
-                    <FreeShipMessage orderStore={store} portalData={portalData}/>
-                    <StoreHeading storeName={getCatalogName(store) || ""} storeKey={key} isMAStore={store.store?.isMA === 1} order={orders} isOrderSummary={false} />
+                    <FreeShipMessage
+                      orderStore={store}
+                      portalData={portalData}
+                    />
+                    <StoreHeading
+                      storeName={getCatalogName(store) || ""}
+                      storeKey={key}
+                      isMAStore={store.store?.isMA === 1}
+                      order={orders}
+                      isOrderSummary={false}
+                    />
 
                     {store.items &&
-                        store.items.map((item, itemIndex) => (
-                            <div key={itemIndex}>
-                              <ShippingItem
-                                  item={item}
-                                  storeDetail={store?.store}
-                                  total={store?.totals}
-                                  onRemove={() =>
-                                      handleRemoveProduct(key, item.product_hash)
-                                  }
-                                  portalData={portalData}
-                                  isMaProduct={store?.store?.isMA === 1}
+                      store.items.map((item, itemIndex) => (
+                        <div key={`${item.product_hash}-${itemIndex}`}>
+                          <ShippingItem
+                            item={item}
+                            storeDetail={store?.store}
+                            total={store?.totals}
+                            onRemove={handleRemoveProduct}
+                            storeKey={key}
+                            portalData={portalData}
+                            isMaProduct={store?.store?.isMA === 1}
                             cartId={orders.id}
                           />
                         </div>

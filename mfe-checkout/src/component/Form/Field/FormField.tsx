@@ -11,6 +11,7 @@ interface IFormFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
     [key: string]: HTMLInputElement | null;
   }> | null;
   maxLength?: number;
+  qaTag?: string;
 }
 
 export const FormField: React.FC<IFormFieldProps> = ({
@@ -22,13 +23,14 @@ export const FormField: React.FC<IFormFieldProps> = ({
   name,
   errorRefs = null,
   maxLength,
+  qaTag = "",
   ...props
 }) => {
   return (
     <div className="field-item-container">
       {label && <div className={required ? "required-field" : ""}>{label}</div>}
       <input
-        className={`input-container ${errorMessage ? "error-border" : ""}`}
+        className={`${qaTag} input-container ${errorMessage ? "error-border" : ""}`}
         name={name}
         ref={(el: HTMLInputElement | null) =>
           el && errorRefs && errorRefs.current

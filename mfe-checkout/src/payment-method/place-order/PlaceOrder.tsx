@@ -137,7 +137,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
               order?.id
             );
 
-            // confirmOrder();
+            confirmOrder();
           }
         } catch (error) {
           console.error("Error processing PayPal order:", error);
@@ -475,7 +475,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
               <Button
                 label={
                   paymentTypeId === SEZZLE.typeId ||
-                  paymentTypeId === PAYPAL.typeId
+                    paymentTypeId === PAYPAL.typeId
                     ? "Pay with"
                     : "Place Order"
                 }
@@ -485,8 +485,8 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                   paymentTypeId === SEZZLE.typeId
                     ? "https://img.shop.com/Image/resources/checkout/Sezzle-Color-White-Logo.svg"
                     : paymentTypeId === PAYPAL.typeId
-                    ? "https://img.shop.com/Image/resources/checkout/PayPal-White-Logo.svg"
-                    : ""
+                      ? "https://img.shop.com/Image/resources/checkout/PayPal-White-Logo.svg"
+                      : ""
                 }
               />
             )}

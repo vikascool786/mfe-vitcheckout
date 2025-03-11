@@ -5,7 +5,7 @@ import CheckoutContainer from "./checkout/CheckoutContainer";
 import { Provider, useAtom } from "jotai";
 import { loadingAtom, OrderStore } from "./store";
 
-interface AppProps {}
+interface AppProps { }
 
 const App: React.FC<AppProps> = () => {
   const [loading] = useAtom(loadingAtom);
@@ -29,28 +29,27 @@ const App: React.FC<AppProps> = () => {
         /> */}
 
         {/* for old custoemr  */}
-        <CheckoutContainer
-          cartId="cart_1918885741_W_USA_USA_ENG"
-          shopperId="YUXUeYeqzeYzUzhkYVzZhUezzwUwUmqUpVmYzjqzz"
-          pcid="1918885741"
+        {/* <CheckoutContainer
+          cartId="cart_1090703739_W_USA_USA_ENG"
+          shopperId="ZVkVwkWkzpqXmzheqezpXYxzkzZYkeeZUZVqzxpqkk"
+          pcid="1090703739"
           siteId="66"
-          sessionId="09249274"
-        />
+        /> */}
 
         {/* for old custoemr  */}
-        {/* <CheckoutContainer
+        <CheckoutContainer
           cartId="cart_2637612996_W_USA_USA_ENG"
           shopperId="UmkepZWVzmqqVzhVqkzZmwqzWeXVYVWXWZZpzxhemz"
           pcid="2637612996"
           siteId="222"
           sessionId="3055249126"
-        /> */}
+        />
 
         {/* for GC Card Customer */}
         {/* <CheckoutContainer
-          cartId="cart_6565841_W_USA_USA_ENG"
-          shopperId="ZpXYpYwzzXVYUzhkZhzYpYmzYxpUmjmejWpqzjqzz"
-          pcid="6565841"
+          cartId="cart_1778511302_W_USA_USA_ENG"
+          shopperId="zWUVXxqjzwWqWzhZjqzZYUWzwWxWzhUmwVwUzehzpp"
+          pcid="1778511302"
           siteId="66"
           sessionId="3055249126"
         /> */}
@@ -58,7 +57,6 @@ const App: React.FC<AppProps> = () => {
         {/* <CheckoutContainer
           cartId="cart_1817046463_W_USA_USA_ENG"
           shopperId="mXeWpzjqzWkwhzhqzYzZWwwzZXjzpwhUpXqqzjjx"
-          
           pcid="1817046463"
           siteId="66"
           sessionId="3055249126"
@@ -68,7 +66,6 @@ const App: React.FC<AppProps> = () => {
           shopperId="hqwxZzYzzqpeVzhWmZzZmZpzzkxkjzmZWqqWzxzkzj"
           pcid="1326748654"
           siteId="222"
-          sessionId="sdad"
         /> */}
       </Provider>
     </div>

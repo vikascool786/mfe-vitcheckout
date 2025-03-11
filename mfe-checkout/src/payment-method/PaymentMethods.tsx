@@ -486,14 +486,14 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     const updatedPaymentMethods = paymentMethods.map((method) =>
       method.paymentMethod.id === paymentId
         ? {
-          ...method,
-          isEditing: !method.isEditing, // Toggle editing state for the selected payment method
-        }
+            ...method,
+            isEditing: !method.isEditing, // Toggle editing state for the selected payment method
+          }
         : {
-          ...method,
-          isEditing: false,
-          isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
-        }
+            ...method,
+            isEditing: false,
+            isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
+          }
     );
     setPaymentMethods(updatedPaymentMethods);
   };
@@ -611,6 +611,15 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       (pm) => pm.paymentMethod.typeID === 9 || pm.paymentMethod.typeID === 6
     ).length > 1;
 
+  const getCardOptionsImages = (imgTag: string) => {
+    if (!imgTag.includes("http")) {
+      let newPath = imgTag.replace("^imageserver", "Image");
+      let fullUrl = "https://img.shop.com/" + newPath;
+      return fullUrl;
+    }
+    return imgTag;
+  };
+
   return (
     <FormikProvider value={formik}>
       <div className="pm-main-container">
@@ -656,7 +665,17 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
                   <div>Add New Card</div>
                 </div>
                 <div>
-                  <img className="checkout-add-new-card" src={CardOptions} />
+                  {order?.paymentMethods
+                    ?.filter((pm) => pm.visible)
+                    ?.map(
+                      (pm) =>
+                        pm.imageTag && (
+                          <img
+                            className="checkout-add-new-card "
+                            src={getCardOptionsImages(pm.imageTag)}
+                          />
+                        )
+                    )}
                 </div>
               </div>
             )}

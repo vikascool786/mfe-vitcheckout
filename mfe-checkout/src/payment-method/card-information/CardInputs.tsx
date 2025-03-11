@@ -47,6 +47,7 @@ export const CardInputs: React.FC<ICardInputProps> = ({
     <>
       {!isEditing && (
         <FormField
+          qaTag="qa-name"
           label="Name on Card"
           required
           name="cardInfo.accountName"
@@ -61,6 +62,7 @@ export const CardInputs: React.FC<ICardInputProps> = ({
       )}
       {!isEditing && (
         <FormField
+          qaTag="qa-card-number"
           label="Card Number"
           required
           name="cardInfo.number"
@@ -73,6 +75,7 @@ export const CardInputs: React.FC<ICardInputProps> = ({
       )}
       <div className="form-field-container">
         <DropdownField
+          qaTag="qa-expiration-month"
           className="form-field-half"
           label="Expiration Month"
           formName="cardInfo.expMonth"
@@ -89,6 +92,7 @@ export const CardInputs: React.FC<ICardInputProps> = ({
           errorMessage={touched.cardInfo?.expMonth && errors.cardInfo?.expMonth}
         />
         <DropdownField
+          qaTag="qa-expiration-year"
           className="form-field-half"
           label="Expiration Year"
           formName="cardInfo.expYear"
@@ -98,19 +102,22 @@ export const CardInputs: React.FC<ICardInputProps> = ({
           errorMessage={touched.cardInfo?.expYear && errors.cardInfo?.expYear}
         />
       </div>
-      <FormField
-        label="CVV"
-        required
-        name="cardInfo.cvv"
-        type="password"
-        inputMode="numeric"
-        value={values.cardInfo?.cvv || ""}
-        maxLength={4}
-        onChange={handleChange}
-        onBlur={handleBlur}
-        errorMessage={touched.cardInfo?.cvv && errors.cardInfo?.cvv}
-        errorRefs={errorRefs}
-      />
+      {!isEditing && (
+        <FormField
+          qaTag="qa-cvv"
+          label="CVV"
+          required
+          name="cardInfo.cvv"
+          type="password"
+          inputMode="numeric"
+          value={values.cardInfo?.cvv || ""}
+          maxLength={4}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          errorMessage={touched.cardInfo?.cvv && errors.cardInfo?.cvv}
+          errorRefs={errorRefs}
+        />
+      )}
     </>
   );
 };
