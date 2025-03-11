@@ -218,7 +218,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
                 store && (
                   <div key={key}>
                     <FreeShipMessage orderStore={store} portalData={portalData}/>
-                    <StoreHeading storeName={getCatalogName(store) || ""} storeKey={key} isMAStore={store.store.isMA === 1} order={orders} isOrderSummary={false} />
+                    <StoreHeading storeName={getCatalogName(store) || ""} storeKey={key} isMAStore={store.store?.isMA === 1} order={orders} isOrderSummary={false} />
 
                     {store.items &&
                         store.items.map((item, itemIndex) => (

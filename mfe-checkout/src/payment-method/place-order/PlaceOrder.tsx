@@ -22,6 +22,7 @@ import Click2PayPlaceOrder from "../../payment-method-click2pay/Click2PayPlaceOr
 import {
   // cvvValidAtom,
   IPaymentOption,
+  loadingAtom,
 } from "../../store";
 import { generateChangeStoreResponse } from "../../utils/helpers/GenerateChangeStoreResponse";
 import { generateOrderTrackingId } from "../../utils/helpers/GenerateOrderTrackingId";
@@ -70,7 +71,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   order,
   updateOrderErrorMessage,
 }) => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useAtom(loadingAtom);
   const trackingData = new Map<string, string>();
   const [siteData] = useAtom(siteApiData(siteId));
 
@@ -136,7 +137,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
               order?.id
             );
 
-            confirmOrder();
+            // confirmOrder();
           }
         } catch (error) {
           console.error("Error processing PayPal order:", error);
@@ -178,15 +179,12 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   };
 
   const handlePlaceOrder = async (paymentMethods: IPaymentOption[]) => {
-    try {
-      setIsLoading(true);
+    setIsLoading(true);
 
+    try {
       const isOrderCoveredUnderVIFT =
         order?.userOptions.applyEWallet && order.totals.price === 0;
 
-      if (isOrderCoveredUnderVIFT) {
-        confirmOrder();
-      }
       if (!order?.shippingAddress.address1) {
         window.scrollTo(0, 0);
         return;
@@ -238,6 +236,12 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
           // console.log("handle place order");
           // console.log("paymentMethods: " + JSON.stringify(paymentMethods));
           // console.log("selectedPaymentMethod: " + JSON.stringify(selectedPaymentMethod));
+
+          if (isOrderCoveredUnderVIFT) {
+            confirmOrder();
+            break;
+          }
+
           const selectedPaymentMethod = paymentMethods.find(
             (pm) => pm.isSelected
           );
@@ -394,6 +398,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
 
   return (
     <div className="checkout-place-order">
+      <>{isLoading && <Spinner />}</>
       <Formik
         initialValues={{ autoshipTerms: !orderHasAutoshipItems(order || null) }}
         validationSchema={placeOrderSchema}

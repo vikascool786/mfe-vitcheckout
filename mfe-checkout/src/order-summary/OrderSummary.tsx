@@ -219,6 +219,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
     } catch (error) {
       setgcState((prevState) => ({
         ...prevState,
+        gcApplied: false,
+        gcVisible: false,
         gcError: "An unexpected error occurred while processing the gift card.",
       }));
     } finally {

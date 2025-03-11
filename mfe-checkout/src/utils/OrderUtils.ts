@@ -105,7 +105,7 @@ export const getOrderNotifications = (
 export const orderIsMAOnly = (order: Order | null): boolean => {
     if (!order) return false;
 
-    return Object.values(order.stores).every(store => store.store.isMA === 1);
+    return Object.values(order.stores).every(store => store.store?.isMA === 1);
 };
 
 export const orderHasGiftCards = (order: Order | null): boolean => {
