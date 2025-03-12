@@ -14,13 +14,15 @@ export const getCatalogName = (storeData: OrderStore): string | undefined => {
 export const getShipWarningMessage = (
   storeData: OrderStore
 ): string | undefined => {
-  if (!storeData || !storeData.items || storeData.items.length === 0) {
+  if (!storeData?.items?.length) {
     return undefined;
   }
 
-  const firstItem = storeData.items[0];
+  for (const item of storeData.items) {
+    if (item.shipWarningMessages?.length) {
+      return item.shipWarningMessages[0]; // Return the first warning found
+    }
+  }
 
-  return firstItem?.shipWarningMessages?.length
-    ? firstItem.shipWarningMessages[0]
-    : undefined;
+  return undefined; // No warnings found
 };
