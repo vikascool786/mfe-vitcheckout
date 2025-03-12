@@ -300,11 +300,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
       key,
       store,
     }));
-    order?.stores &&
-    Object.entries(order?.stores).map(([key, store]) => ({
-      key,
-      store,
-    }));
+
   useEffect(() => {
     fetchShopperAttributes(shopperId)
       .then((response: ShopperAttribute[]) => {
@@ -489,9 +485,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               if (!store?.store?.totals) return null;
               return (
                 <div
-                  className={`order-charges-table ${
-                    isLast ? "order-charges-table-last" : ""
-                  }`}
+                  className={`order-charges-table ${isLast ? "order-charges-table-last" : ""
+                    }`}
                   key={store?.id || index}
                 >
                   <StoreHeading
@@ -513,13 +508,13 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                         {!hideCouponCode(
                           store?.store?.totals?.couponCode || ""
                         ) && (
-                          <span
-                            key={index}
-                            className="order-summary-coupon-applied__code"
-                          >
-                            {store?.store?.totals?.couponCode}
-                          </span>
-                        )}
+                            <span
+                              key={index}
+                              className="order-summary-coupon-applied__code"
+                            >
+                              {store?.store?.totals?.couponCode}
+                            </span>
+                          )}
                       </div>
                       <div>{store?.store?.totals?.couponsStr}</div>
                     </div>
@@ -587,8 +582,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         ) : null}
 
         {order?.totals?.cashBack &&
-        order?.totals?.extraCashBack &&
-        order?.totals?.extraCashBack > 0 ? (
+          order?.totals?.extraCashBack &&
+          order?.totals?.extraCashBack > 0 ? (
           <>
             <div className="order-summary-cashback-container">
               <div className="order-cashback">

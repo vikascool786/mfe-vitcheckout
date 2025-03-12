@@ -37,11 +37,11 @@ const App: React.FC<AppProps> = () => {
           sessionId="3055290977"
         /> */}
 
-        {/* for old customer  */}
+        {/* for old custoemr  */}
         <CheckoutContainer
-          cartId="cart_1918885741_W_USA_USA_ENG"
-          shopperId="YUXUeYeqzeYzUzhkYVzZhUezzwUwUmqUpVmYzjqzz"
-          pcid="1918885741"
+          cartId="cart_1000091972_W_USA_USA_ENG"
+          shopperId="xhzpWqkmzxmmxzhUWpzqjWUzhzkZjWXzUUjzzehjjp"
+          pcid="1000091972"
           siteId="66"
           sessionId="3055285588"
         />
