@@ -250,13 +250,13 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
                     <StoreHeading
                       storeName={getCatalogName(store) || ""}
                       storeKey={key}
-                      isMAStore={store.store.isMA === 1}
+                      isMAStore={store.store?.isMA === 1}
                       order={orders}
                       isOrderSummary={false}
                     />
 
                     { isGiftCardStore(store) && (
-                        <div className="shipping-email-delivery">{store?.store.isMA ? "Email Delivery - Within 5 minutes" : "Email Delivery"}</div>
+                        <div className="shipping-email-delivery">{store?.store?.isMA ? "Email Delivery - Within 5 minutes" : "Email Delivery"}</div>
                     )}
 
                     {store.items &&

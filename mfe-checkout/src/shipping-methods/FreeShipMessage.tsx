@@ -40,7 +40,7 @@ export const FreeShipMessage: React.FC<IShippingMessageProps> = ({
       isMA: Boolean(orderStore.store?.isMA),
       storeName: orderStore.store?.catalogName,
     };
-    if ((isMAFreeShip || !orderStore.store.isMA) && !isGiftCardStore(orderStore)) {
+    if ((isMAFreeShip || !orderStore.store?.isMA) && !isGiftCardStore(orderStore)) {
       const catalogId = String(orderStore.store?.catalogId);
         doShippingCalc(portalData.portalId, orderStore.items)
         .then((response) => {

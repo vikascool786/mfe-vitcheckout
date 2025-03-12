@@ -22,6 +22,7 @@ import Click2PayPlaceOrder from "../../payment-method-click2pay/Click2PayPlaceOr
 import {
   // cvvValidAtom,
   IPaymentOption,
+  orderNotificationsAtom,
 } from "../../store";
 import { generateChangeStoreResponse } from "../../utils/helpers/GenerateChangeStoreResponse";
 import { generateOrderTrackingId } from "../../utils/helpers/GenerateOrderTrackingId";
@@ -73,6 +74,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   const [isLoading, setIsLoading] = useState(false);
   const trackingData = new Map<string, string>();
   const [siteData] = useAtom(siteApiData(siteId));
+  const [orderNotifications] = useAtom(orderNotificationsAtom);
 
   const selectedPaymentMethod = paymentMethods.find((pm) => pm.isSelected);
 
@@ -181,12 +183,19 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     try {
       setIsLoading(true);
 
+      if (orderNotifications && orderNotifications?.length > 0) {
+        window.scrollTo(0, 0);
+        setIsLoading(false)
+        return;
+      }
+
       const isOrderCoveredUnderVIFT =
         order?.userOptions.applyEWallet && order.totals.price === 0;
 
       if (isOrderCoveredUnderVIFT) {
         confirmOrder();
       }
+
       if (!order?.shippingAddress.address1) {
         window.scrollTo(0, 0);
         return;
@@ -235,9 +244,6 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
           window.open(url, "_self");
           break;
         default:
-          // console.log("handle place order");
-          // console.log("paymentMethods: " + JSON.stringify(paymentMethods));
-          // console.log("selectedPaymentMethod: " + JSON.stringify(selectedPaymentMethod));
           const selectedPaymentMethod = paymentMethods.find(
             (pm) => pm.isSelected
           );
