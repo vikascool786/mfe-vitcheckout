@@ -263,7 +263,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               order.id
             );
 
-            if (response.response.success?.notifications) {
+            if (response.response.success?.notifications.length > 0) {
               setCoupon({
                 coupon: coupon.coupon,
                 couponError: response.response.success?.notifications[0]
