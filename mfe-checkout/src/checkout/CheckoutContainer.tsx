@@ -143,6 +143,18 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     isComplete: isFetchOrderComplete,
   } = useApi<OrderResponse>(fetchOrderUrl, "GET");
 
+  const [width, setWidth] = useState<number>(window.innerWidth);
+
+  function handleWindowSizeChange() {
+    setWidth(window.innerWidth);
+  }
+  useEffect(() => {
+    window.addEventListener("resize", handleWindowSizeChange);
+    return () => {
+      window.removeEventListener("resize", handleWindowSizeChange);
+    };
+  }, []);
+
   const updateOrder = async (
     orderData: Order,
     billingId: number,
@@ -174,8 +186,8 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     () =>
       paymentMethods
         ? (paymentMethods?.find(
-          (payment) => payment?.preferred
-        ) as IPaymentMethod)
+            (payment) => payment?.preferred
+          ) as IPaymentMethod)
         : ({} as IPaymentMethod),
     [paymentMethods]
   );
@@ -356,6 +368,33 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                   cartId={cartId}
                   siteId={siteId}
                 />
+                {width >= 1024 && (
+                  <div className="place-order">
+                    {addressList?.some((address) => address.hasAddress === 1) &&
+                      paymentMethodOptions && (
+                        <PlaceOrder
+                          confirmOrder={confirmOrder}
+                          errorMessage={orderErrorMessage}
+                          paymentTypeId={paymentTypeId}
+                          paymentMethods={paymentMethodOptions}
+                          shopperId={shopperId}
+                          siteId={siteId}
+                          order={orderData}
+                          updateOrderErrorMessage={
+                            handleUpdateOrderErrorMessage
+                          }
+                          billingId={defaultAddress?.id || 0}
+                          setOrderData={setOrderData}
+                          shippingId={
+                            defaultPaymentMethod?.addressId ??
+                            defaultAddress?.id ??
+                            0
+                          }
+                        />
+                      )}
+                  </div>
+                )}
+                ;
               </div>
             </div>
 
