@@ -158,71 +158,84 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
 
     setGCLoading(true);
 
-    try {
-      let updatedOrder;
-      if (isGCApplied) {
-        // Removing the gift card
-        updatedOrder = await buildOrder(
+    if (isGCApplied && order) {
+      // Remove gift card from the order
+      try {
+        const updatedOrder = await buildOrder(
           generateChangeStoreResponse({
             ...order,
             userOptions: {
               ...order.userOptions,
-              gcPin: [],
               gcNum: [],
+              gcPin: [],
             },
           })
         );
 
         setgcState((prevState) => ({
           ...prevState,
-          gcApplied: false,
-          gcVisible: false,
-        }));
-      } else {
-        // **Optimistically update state before API call**
-        setgcState((prevState) => ({
-          ...prevState,
-          gcApplied: true,
-          gcVisible: true,
+          gcNum: "",
           gcError: "",
+          gcPin: "",
+          gcVisible: false,
+          gcApplied: false,
         }));
 
-        // Deep clone `order` to trigger state updates
-        const newOrder = JSON.parse(JSON.stringify(order));
-        newOrder.userOptions.gcNum = [gcState.gcNum];
-        newOrder.userOptions.gcPin = [gcState.gcPin];
-        setOrder(newOrder); // Immediate update for UI
+        setOrder(updatedOrder.response?.success?.data);
+        setGCLoading(false);
+        return;
+      } catch (error) {
+        console.error("Error while removing gift card:", error);
+      }
+    }
 
-        // Applying the gift card via API
-        updatedOrder = await changeOrder(
-          generateChangeStoreResponse(newOrder),
-          order.id
+    if (order) {
+      try {
+        const updatedOrder = await buildOrder(
+          generateChangeStoreResponse({
+            ...order,
+            userOptions: {
+              ...order.userOptions,
+              gcNum: [gcState.gcNum],
+              gcPin: [gcState.gcPin],
+            },
+          })
         );
 
-        if (updatedOrder.response.success?.notifications) {
+        if (
+          updatedOrder.response.success.notifications &&
+          updatedOrder.response.success.notifications.length > 0
+        ) {
           setgcState((prevState) => ({
             ...prevState,
-            gcError:
-              updatedOrder.response.success.notifications[0]?.reason || "",
+            gcError: updatedOrder.response.success.notifications[0].reason,
+            gcVisible: true,
+            gcApplied: false,
           }));
+
+          buildOrder(
+            generateChangeStoreResponse({
+              ...order,
+              userOptions: {
+                ...order.userOptions,
+                gcNum: [],
+                gcPin: [],
+              },
+            })
+          );
           return;
         }
-
-        if (updatedOrder?.response?.success?.data) {
-          setOrder(updatedOrder.response.success.data);
-        }
+        setOrder(updatedOrder.response?.success?.data);
+        setGCLoading(false);
+      } catch (error) {
+        console.error("Error while adding gift card:", error);
+        setgcState((prevState) => ({
+          ...prevState,
+          gcError: "An unexpected error occurred while adding the gift card.",
+        }));
+      } finally {
+        setGCLoading(false);
       }
-      setgcState((prevState) => ({
-        ...prevState,
-        gcError: "Please enter pin",
-      }));
-    } catch (error) {
-      setgcState((prevState) => ({
-        ...prevState,
-        gcError: "An unexpected error occurred while processing the gift card.",
-      }));
-    } finally {
-      setGCLoading(false);
     }
   };
 
@@ -282,11 +295,11 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
   };
 
   const storesTotals =
-      order?.stores &&
-      Object.entries(order?.stores).map(([key, store]) => ({
-        key,
-        store
-      }));
+    order?.stores &&
+    Object.entries(order?.stores).map(([key, store]) => ({
+      key,
+      store,
+    }));
   useEffect(() => {
     fetchShopperAttributes(shopperId)
       .then((response: ShopperAttribute[]) => {
@@ -398,7 +411,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                 </div>
               )}
 
-            {gcState.gcVisible && (
+            {gcState.gcVisible && !gcState.gcApplied && (
               <div className="gift-card-wrapper">
                 <div className="gift-card-wrapper-fields">
                   <div className="gift-card-wrapper-field-1">
@@ -429,20 +442,18 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               </div>
             )}
 
-            {!!gcState.gcApplied && (
+            {gcState.gcApplied && (
               <div className="gcApplied">
                 <div className="gcLeft-cont">
-                  <p className="cardName">{`CARD: ${gcState.gcNum}`}</p>
-                  <p className="balanceCard">{`$ 0.00 Balance`}</p>
+                  <p className="cardName">{`Card: ${gcState.gcNum}`}</p>
+                  <p className="balanceCard">{`$${order?.totals.gcBalance} Balance`}</p>
                 </div>
                 <div className="gcRight-cont">
                   <p className="appliedCash">
                     {`${order?.totals.gcAppliedStr} Applied`}
                   </p>
 
-                  <Close
-                    onClick={() => handleAddGiftCard(!!gcState.gcApplied)}
-                  />
+                  <Close onClick={() => handleAddGiftCard(true)} />
                 </div>
               </div>
             )}
@@ -463,7 +474,10 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         {storesTotals &&
           storesTotals
             .sort((storeA, storeB) => {
-              return (storeB?.store?.store?.isMA ?? 0) - (storeA?.store?.store?.isMA ?? 0);
+              return (
+                (storeB?.store?.store?.isMA ?? 0) -
+                (storeA?.store?.store?.isMA ?? 0)
+              );
             })
             .map((store, index) => {
               const isFirst = index === 0;
@@ -471,8 +485,9 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               if (!store?.store?.totals) return null;
               return (
                 <div
-                  className={`order-charges-table ${isFirst ? "order-charges-table-first" : ""
-                    } ${isLast ? "order-charges-table-last" : ""}`}
+                  className={`order-charges-table ${
+                    isFirst ? "order-charges-table-first" : ""
+                  } ${isLast ? "order-charges-table-last" : ""}`}
                   key={store?.id || index}
                 >
                   <StoreHeading
@@ -491,7 +506,9 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                     <div className="order-summary-row order-summary-row__coupon">
                       <div className="order-summary-coupon-applied">
                         Coupon
-                        {!hideCouponCode(store?.store?.totals?.couponCode || "") && (
+                        {!hideCouponCode(
+                          store?.store?.totals?.couponCode || ""
+                        ) && (
                           <span
                             key={index}
                             className="order-summary-coupon-applied__code"
@@ -566,8 +583,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         ) : null}
 
         {order?.totals?.cashBack &&
-          order?.totals?.extraCashBack &&
-          order?.totals?.extraCashBack > 0 ? (
+        order?.totals?.extraCashBack &&
+        order?.totals?.extraCashBack > 0 ? (
           <>
             <div className="order-summary-cashback-container">
               <div className="order-cashback">

@@ -26,6 +26,7 @@ export interface ITotal {
   shipping: number;
   tax: number;
   priceStr: string;
+  gcBalance: string;
   cashBackStr: string;
   taxStr: string;
   shippingStr: string;
