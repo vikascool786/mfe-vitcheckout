@@ -30,6 +30,16 @@
   border: 1px solid #202340; // Optional: adding border for better contrast
 }
 
+.custom-button.paypal {
+  background-color: #0065b1; // White background for secondary
+  color: #ffffff; // Dark text
+}
+
+.custom-button.sezzle {
+  background-color: #4d3e69; // White background for secondary
+  color: #ffffff; // Dark text
+}
+
 // Secondary Button Styles
 .custom-button.disabled,
 .custom-button:disabled {

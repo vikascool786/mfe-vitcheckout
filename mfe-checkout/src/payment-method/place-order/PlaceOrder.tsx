@@ -185,7 +185,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
 
       if (orderNotifications && orderNotifications?.length > 0) {
         window.scrollTo(0, 0);
-        setIsLoading(false)
+        setIsLoading(false);
         return;
       }
 
@@ -480,7 +480,13 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                     ? "Pay with"
                     : "Place Order"
                 }
-                btnType="primary"
+                btnType={
+                  paymentTypeId === SEZZLE.typeId
+                    ? "sezzle"
+                    : paymentTypeId === PAYPAL.typeId
+                    ? "paypal"
+                    : "primary"
+                }
                 onClick={submitForm}
                 logo={
                   paymentTypeId === SEZZLE.typeId

@@ -6,7 +6,7 @@ interface IButtonProps
     React.ButtonHTMLAttributes<HTMLButtonElement>,
     HTMLButtonElement
   > {
-  btnType: "primary" | "secondary" | "disabled";
+  btnType: "primary" | "secondary" | "disabled" | "paypal" | "sezzle";
   label: string;
   logo?: string;
   qaTag?: string;
@@ -20,7 +20,11 @@ export const Button: React.FC<IButtonProps> = ({
   ...props
 }) => {
   return (
-    <button className={`${qaTag} custom-button ${btnType}`} type="button" {...props}>
+    <button
+      className={`${qaTag} custom-button ${btnType}`}
+      type="button"
+      {...props}
+    >
       {label}
       {logo && <img src={logo} alt={label} />}
     </button>
