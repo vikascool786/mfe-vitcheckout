@@ -22,7 +22,6 @@ import Click2PayPlaceOrder from "../../payment-method-click2pay/Click2PayPlaceOr
 import {
   // cvvValidAtom,
   IPaymentOption,
-  loadingAtom,
 } from "../../store";
 import { generateChangeStoreResponse } from "../../utils/helpers/GenerateChangeStoreResponse";
 import { generateOrderTrackingId } from "../../utils/helpers/GenerateOrderTrackingId";
@@ -71,7 +70,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   order,
   updateOrderErrorMessage,
 }) => {
-  const [isLoading, setIsLoading] = useAtom(loadingAtom);
+  const [isLoading, setIsLoading] = useState(false);
   const trackingData = new Map<string, string>();
   const [siteData] = useAtom(siteApiData(siteId));
 
@@ -179,12 +178,15 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   };
 
   const handlePlaceOrder = async (paymentMethods: IPaymentOption[]) => {
-    setIsLoading(true);
-
     try {
+      setIsLoading(true);
+
       const isOrderCoveredUnderVIFT =
         order?.userOptions.applyEWallet && order.totals.price === 0;
 
+      if (isOrderCoveredUnderVIFT) {
+        confirmOrder();
+      }
       if (!order?.shippingAddress.address1) {
         window.scrollTo(0, 0);
         return;
@@ -236,12 +238,6 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
           // console.log("handle place order");
           // console.log("paymentMethods: " + JSON.stringify(paymentMethods));
           // console.log("selectedPaymentMethod: " + JSON.stringify(selectedPaymentMethod));
-
-          if (isOrderCoveredUnderVIFT) {
-            confirmOrder();
-            break;
-          }
-
           const selectedPaymentMethod = paymentMethods.find(
             (pm) => pm.isSelected
           );
@@ -398,7 +394,6 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
 
   return (
     <div className="checkout-place-order">
-      <>{isLoading && <Spinner />}</>
       <Formik
         initialValues={{ autoshipTerms: !orderHasAutoshipItems(order || null) }}
         validationSchema={placeOrderSchema}
@@ -475,7 +470,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
               <Button
                 label={
                   paymentTypeId === SEZZLE.typeId ||
-                    paymentTypeId === PAYPAL.typeId
+                  paymentTypeId === PAYPAL.typeId
                     ? "Pay with"
                     : "Place Order"
                 }
@@ -485,8 +480,8 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                   paymentTypeId === SEZZLE.typeId
                     ? "https://img.shop.com/Image/resources/checkout/Sezzle-Color-White-Logo.svg"
                     : paymentTypeId === PAYPAL.typeId
-                      ? "https://img.shop.com/Image/resources/checkout/PayPal-White-Logo.svg"
-                      : ""
+                    ? "https://img.shop.com/Image/resources/checkout/PayPal-White-Logo.svg"
+                    : ""
                 }
               />
             )}

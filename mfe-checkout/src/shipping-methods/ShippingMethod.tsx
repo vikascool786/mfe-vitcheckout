@@ -34,6 +34,8 @@ import { setDataObjectProperty } from "../utils/helpers/SetDataObjectProperty";
 import { Spinner } from "../component/Spinner/Spinner";
 import { FreeShipMessage } from "./FreeShipMessage";
 import StoreHeading from "../component/StoreHeading";
+import {OrderStore} from "../interfaces/Order";
+import {isGiftCardStore} from "../utils/StoreUtils";
 
 interface IShippingMethodProps {
   shopperID: string;
@@ -129,6 +131,10 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const showShippingOptions = (store: OrderStore): boolean => {
+    return store.shippingSelections && !isGiftCardStore(store);
   };
 
   useEffect(() => {
@@ -244,10 +250,14 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
                     <StoreHeading
                       storeName={getCatalogName(store) || ""}
                       storeKey={key}
-                      isMAStore={store.store?.isMA === 1}
+                      isMAStore={store.store.isMA === 1}
                       order={orders}
                       isOrderSummary={false}
                     />
+
+                    { isGiftCardStore(store) && (
+                        <div className="shipping-email-delivery">{store?.store.isMA ? "Email Delivery - Within 5 minutes" : "Email Delivery"}</div>
+                    )}
 
                     {store.items &&
                       store.items.map((item, itemIndex) => (
@@ -277,7 +287,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
                         />
                       </div>
                     )}
-                    {store.shippingSelections && (
+                    {showShippingOptions(store) && (
                       <ShippingOptions store={store} storeKey={key} />
                     )}
                   </div>

@@ -2,6 +2,7 @@ import React from "react";
 import { Provider } from "jotai";
 import CheckoutContainer from "./checkout/CheckoutContainer";
 import { OrderStore } from "./store";
+import "./checkout/Checkout.scss"
 
 const CheckoutContainerWrapper = (appConfig: {
   cartId: string;
@@ -11,7 +12,7 @@ const CheckoutContainerWrapper = (appConfig: {
   sessionId: string;
 }) => {
   return (
-    <div>
+    <div className="checkout-container-wrapper">
       <Provider store={OrderStore}>
         <CheckoutContainer
           cartId={appConfig.cartId}

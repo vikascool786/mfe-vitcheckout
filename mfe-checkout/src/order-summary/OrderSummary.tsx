@@ -219,8 +219,6 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
     } catch (error) {
       setgcState((prevState) => ({
         ...prevState,
-        gcApplied: false,
-        gcVisible: false,
         gcError: "An unexpected error occurred while processing the gift card.",
       }));
     } finally {
@@ -435,7 +433,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               <div className="gcApplied">
                 <div className="gcLeft-cont">
                   <p className="cardName">{`CARD: ${gcState.gcNum}`}</p>
-                  {/* <p className="balanceCard">{`$ 0.00 Balance`}</p> */}
+                  <p className="balanceCard">{`$ 0.00 Balance`}</p>
                 </div>
                 <div className="gcRight-cont">
                   <p className="appliedCash">

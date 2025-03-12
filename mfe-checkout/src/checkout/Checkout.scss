@@ -2,6 +2,10 @@ body {
   font-family: "Roboto", "Inter", Arial, Helvetica, sans-serif;
 }
 
+.checkout-container-wrapper {
+  min-height: 500px;
+}
+
 .checkout-form-container {
   display: flex;
   background-color: white;
