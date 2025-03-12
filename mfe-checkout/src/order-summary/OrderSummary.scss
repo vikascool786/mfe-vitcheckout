@@ -217,25 +217,18 @@
   margin-bottom: 10px;
 }
 
-.order-charges-table {
+div.order-charges-table {
   display: flex;
   flex-direction: column;
-  margin-top: 6px;
-  margin-bottom: 6px;
   gap: 9px;
-
-  &-first {
-    padding-top: 10px;
-    padding-bottom: 10px;
-    border-top: 0.5px solid #939393;
-    border-bottom: 0.5px solid #939393; // Adds bottom border
-    // Adds top border
-  }
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border-top: 0.5px solid #939393;
+  // Adds top border
 
   &-last {
-    padding-bottom: 10px;
     border-bottom: 0.5px solid #939393; // Adds bottom border
-    // Adds top border
+    margin-bottom: 6px;
   }
 }
 

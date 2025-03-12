@@ -34,14 +34,18 @@ import { setDataObjectProperty } from "../utils/helpers/SetDataObjectProperty";
 import { Spinner } from "../component/Spinner/Spinner";
 import { FreeShipMessage } from "./FreeShipMessage";
 import StoreHeading from "../component/StoreHeading";
-import {OrderStore} from "../interfaces/Order";
-import {isGiftCardStore} from "../utils/StoreUtils";
+import { OrderStore } from "../interfaces/Order";
+import { isGiftCardStore } from "../utils/StoreUtils";
 
 interface IShippingMethodProps {
   shopperID: string;
+  isAddressSaved: boolean;
 }
 
-const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
+const ShippingMethod: React.FC<IShippingMethodProps> = ({
+  shopperID,
+  isAddressSaved,
+}) => {
   const [orders, setOrder] = useAtom(orderAtom);
   const [loading, setLoading] = useAtom(loadingAtom);
   const [portalData] = useAtom(portalApiData(shopperID));
@@ -175,7 +179,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
   return (
     <div className="shipping-container">
       <FormHeading title="Shipping Methods & Review Items" />
-      {orderConsolidateData?.showOrderConsolidate && (
+      {isAddressSaved && orderConsolidateData?.showOrderConsolidate && (
         <div className="shipping-options-container">
           <div
             className={`shipping-option-container start ${
@@ -255,8 +259,12 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
                       isOrderSummary={false}
                     />
 
-                    { isGiftCardStore(store) && (
-                        <div className="shipping-email-delivery">{store?.store?.isMA ? "Email Delivery - Within 5 minutes" : "Email Delivery"}</div>
+                    {isGiftCardStore(store) && (
+                      <div className="shipping-email-delivery">
+                        {store?.store?.isMA
+                          ? "Email Delivery - Within 5 minutes"
+                          : "Email Delivery"}
+                      </div>
                     )}
 
                     {store.items &&
@@ -271,6 +279,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
                             portalData={portalData}
                             isMaProduct={store?.store?.isMA === 1}
                             cartId={orders.id}
+                            isAddressSaved={isAddressSaved}
                           />
                         </div>
                       ))}
@@ -287,7 +296,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({ shopperID }) => {
                         />
                       </div>
                     )}
-                    {showShippingOptions(store) && (
+                    {isAddressSaved && showShippingOptions(store) && (
                       <ShippingOptions store={store} storeKey={key} />
                     )}
                   </div>

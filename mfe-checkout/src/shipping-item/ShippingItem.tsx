@@ -44,6 +44,7 @@ interface IShippingItemProps {
   isMaProduct: boolean;
   cartId: string;
   storeKey: string;
+  isAddressSaved: boolean;
 }
 
 function createOptionMap(
@@ -83,6 +84,7 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
   isMaProduct,
   cartId,
   storeKey,
+  isAddressSaved,
 }) => {
   const [selectedQuantity, setSelectedQuantity] = useState(
     item.quantity.toString()
@@ -190,9 +192,11 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
                 <div className="item-name">{decodeHtmlEntities(caption)}</div>
               </div>
 
-              <div onClick={() => onRemove(storeKey, item.product_hash)}>
-                <Close />
-              </div>
+              {isAddressSaved && (
+                <div onClick={() => onRemove(storeKey, item.product_hash)}>
+                  <Close />
+                </div>
+              )}
             </section>
 
             <section className="item-cashback">

@@ -30,6 +30,7 @@ import { SiteFlags } from "../interfaces/SiteFlags";
 import { portalApiData } from "../checkout/portalAtom";
 import { orderHasAutoshipItems } from "../utils/OrderUtils";
 import { FormikProvider, useFormik } from "formik";
+import { getVisibleCardOptionsImages } from "../utils/helpers/GetVisibleCardImages";
 
 interface IPaymentMethod {
   shopperId: string;
@@ -123,11 +124,11 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
 
         let staticMethods = paymentMethods;
 
-        // if (!shouldShowSezzle) {
-        //   staticMethods = staticMethods.filter(
-        //     (method) => method.paymentMethod.typeID !== SEZZLE.typeId
-        //   );
-        // }
+        if (!shouldShowSezzle) {
+          staticMethods = staticMethods.filter(
+            (method) => method.paymentMethod.typeID !== SEZZLE.typeId
+          );
+        }
 
         if (!shouldShowPaypal) {
           staticMethods = staticMethods.filter(
@@ -250,58 +251,58 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     }
   }, [shopperId, addresses]);
 
-  // useEffect(() => {
-  //   //sezzle rules dependent on site
-  //   const sezzleSiteFlag = getSiteFlagDataForType(SEZZLE.siteflagTypeId || 0);
-  //   if (!sezzleSiteFlag?.active) {
-  //     updateVisibilityOfPaymentMethod(SEZZLE.typeId, false);
-  //     const updatedPaymentMethods = paymentMethods.filter(
-  //       (method) => method.paymentMethod.typeID !== SEZZLE.typeId
-  //     );
-  //     setPaymentMethods(updatedPaymentMethods);
-  //     return;
-  //   }
-  //   //sezzle rules dependent on portal
-  //   if (portalData?.hasItransact) {
-  //     if (sezzleSiteFlag.auxDataText) {
-  //       const jsonData = JSON.parse(sezzleSiteFlag.auxDataText);
-  //       if (!jsonData.enableForItransact) {
-  //         updateVisibilityOfPaymentMethod(SEZZLE.typeId, false);
-  //         updateVisibilityOfPaymentMethod(SEZZLE.typeId, false);
-  //         const updatedPaymentMethods = paymentMethods.filter(
-  //           (method) => method.paymentMethod.typeID !== SEZZLE.typeId
-  //         );
-  //         setPaymentMethods(updatedPaymentMethods);
-  //         return;
-  //       }
-  //     }
-  //   }
-  //   //sezzle rules dependent on order, min order, autohship
-  //   //filter payment method types from order response
-  //   if (order) {
-  //     const isSezzleInAcceptedPayments =
-  //       order.paymentMethods.filter((method) => method.typeID === SEZZLE.typeId)
-  //         .length > 0;
-  //     let isAutoshipAllowed = false;
-  //     if (sezzleSiteFlag?.auxDataText) {
-  //       const jsonData = JSON.parse(sezzleSiteFlag.auxDataText);
-  //       isAutoshipAllowed = jsonData.supportedForAutoship;
-  //     }
-  //     if (!isAutoshipAllowed && orderHasAutoshipItems(order)) {
-  //       updateVisibilityOfPaymentMethod(SEZZLE.typeId, false);
-  //       updateVisibilityOfPaymentMethod(SEZZLE.typeId, false);
-  //       const updatedPaymentMethods = paymentMethods.filter(
-  //         (method) => method.paymentMethod.typeID !== SEZZLE.typeId
-  //       );
-  //       setPaymentMethods(updatedPaymentMethods);
-  //       return;
-  //     }
-  //     updateVisibilityOfPaymentMethod(
-  //       SEZZLE.typeId,
-  //       isSezzleInAcceptedPayments
-  //     );
-  //   }
-  // }, [order, thirdPartySiteFlagData, portalData]);
+  useEffect(() => {
+    //sezzle rules dependent on site
+    const sezzleSiteFlag = getSiteFlagDataForType(SEZZLE.siteflagTypeId || 0);
+    if (!sezzleSiteFlag?.active) {
+      updateVisibilityOfPaymentMethod(SEZZLE.typeId, false);
+      const updatedPaymentMethods = paymentMethods.filter(
+        (method) => method.paymentMethod.typeID !== SEZZLE.typeId
+      );
+      setPaymentMethods(updatedPaymentMethods);
+      return;
+    }
+    //sezzle rules dependent on portal
+    if (portalData?.hasItransact) {
+      if (sezzleSiteFlag.auxDataText) {
+        const jsonData = JSON.parse(sezzleSiteFlag.auxDataText);
+        if (!jsonData.enableForItransact) {
+          updateVisibilityOfPaymentMethod(SEZZLE.typeId, false);
+          updateVisibilityOfPaymentMethod(SEZZLE.typeId, false);
+          const updatedPaymentMethods = paymentMethods.filter(
+            (method) => method.paymentMethod.typeID !== SEZZLE.typeId
+          );
+          setPaymentMethods(updatedPaymentMethods);
+          return;
+        }
+      }
+    }
+    //sezzle rules dependent on order, min order, autohship
+    //filter payment method types from order response
+    if (order) {
+      const isSezzleInAcceptedPayments =
+        order.paymentMethods.filter((method) => method.typeID === SEZZLE.typeId)
+          .length > 0;
+      let isAutoshipAllowed = false;
+      if (sezzleSiteFlag?.auxDataText) {
+        const jsonData = JSON.parse(sezzleSiteFlag.auxDataText);
+        isAutoshipAllowed = jsonData.supportedForAutoship;
+      }
+      if (!isAutoshipAllowed && orderHasAutoshipItems(order)) {
+        updateVisibilityOfPaymentMethod(SEZZLE.typeId, false);
+        updateVisibilityOfPaymentMethod(SEZZLE.typeId, false);
+        const updatedPaymentMethods = paymentMethods.filter(
+          (method) => method.paymentMethod.typeID !== SEZZLE.typeId
+        );
+        setPaymentMethods(updatedPaymentMethods);
+        return;
+      }
+      updateVisibilityOfPaymentMethod(
+        SEZZLE.typeId,
+        isSezzleInAcceptedPayments
+      );
+    }
+  }, [order, thirdPartySiteFlagData, portalData]);
 
   const getSiteFlagDataForType = (siteflagTypeId: number) => {
     if (thirdPartySiteFlagData) {
@@ -611,15 +612,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       (pm) => pm.paymentMethod.typeID === 9 || pm.paymentMethod.typeID === 6
     ).length > 1;
 
-  const getCardOptionsImages = (imgTag: string) => {
-    if (!imgTag.includes("http")) {
-      let newPath = imgTag.replace("^imageserver", "Image");
-      let fullUrl = "https://img.shop.com/" + newPath;
-      return fullUrl;
-    }
-    return imgTag;
-  };
-
   return (
     <FormikProvider value={formik}>
       <div className="pm-main-container">
@@ -672,7 +664,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
                         pm.imageTag && (
                           <img
                             className="checkout-add-new-card "
-                            src={getCardOptionsImages(pm.imageTag)}
+                            src={getVisibleCardOptionsImages(pm.imageTag)}
                           />
                         )
                     )}

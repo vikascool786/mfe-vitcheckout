@@ -282,11 +282,11 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
   };
 
   const storesTotals =
-      order?.stores &&
-      Object.entries(order?.stores).map(([key, store]) => ({
-        key,
-        store
-      }));
+    order?.stores &&
+    Object.entries(order?.stores).map(([key, store]) => ({
+      key,
+      store,
+    }));
   useEffect(() => {
     fetchShopperAttributes(shopperId)
       .then((response: ShopperAttribute[]) => {
@@ -463,16 +463,19 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         {storesTotals &&
           storesTotals
             .sort((storeA, storeB) => {
-              return (storeB?.store?.store?.isMA ?? 0) - (storeA?.store?.store?.isMA ?? 0);
+              return (
+                (storeB?.store?.store?.isMA ?? 0) -
+                (storeA?.store?.store?.isMA ?? 0)
+              );
             })
             .map((store, index) => {
-              const isFirst = index === 0;
-              const isLast = index === storesTotals?.length - 1;
+              const isLast = index === storesTotals.length - 1;
               if (!store?.store?.totals) return null;
               return (
                 <div
-                  className={`order-charges-table ${isFirst ? "order-charges-table-first" : ""
-                    } ${isLast ? "order-charges-table-last" : ""}`}
+                  className={`order-charges-table ${
+                    isLast ? "order-charges-table-last" : ""
+                  }`}
                   key={store?.id || index}
                 >
                   <StoreHeading
@@ -491,7 +494,9 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                     <div className="order-summary-row order-summary-row__coupon">
                       <div className="order-summary-coupon-applied">
                         Coupon
-                        {!hideCouponCode(store?.store?.totals?.couponCode || "") && (
+                        {!hideCouponCode(
+                          store?.store?.totals?.couponCode || ""
+                        ) && (
                           <span
                             key={index}
                             className="order-summary-coupon-applied__code"
@@ -566,8 +571,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         ) : null}
 
         {order?.totals?.cashBack &&
-          order?.totals?.extraCashBack &&
-          order?.totals?.extraCashBack > 0 ? (
+        order?.totals?.extraCashBack &&
+        order?.totals?.extraCashBack > 0 ? (
           <>
             <div className="order-summary-cashback-container">
               <div className="order-cashback">

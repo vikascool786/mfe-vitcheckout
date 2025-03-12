@@ -25,6 +25,7 @@ import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStor
 import "./PaymentMethodOption.scss";
 import { ThirdPartyLinkOff } from "./ThirdPartyLinkOff";
 import CardOptions from "../assets/images/CardOptions.png";
+import { getVisibleCardOptionsImages } from "../utils/helpers/GetVisibleCardImages";
 
 export interface IPaymentOptionProps {
   handleCancelNewCard: () => void;
@@ -55,7 +56,6 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [paymentMethods] = useAtom(paymentMethodsAtom);
   const setOrderNotifications = useSetAtom(orderNotificationsAtom);
-
   const {
     paymentMethod,
     paymentAddress,
@@ -286,7 +286,19 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
               <div className="payment-option-add-container__card-title">
                 Credit or Debit Card
               </div>
-              <img className="checkout-add-new-card" src={CardOptions} />
+              <div>
+                {order?.paymentMethods
+                  ?.filter((pm) => pm.visible)
+                  ?.map(
+                    (pm) =>
+                      pm.imageTag && (
+                        <img
+                          className="checkout-add-new-card "
+                          src={getVisibleCardOptionsImages(pm.imageTag)}
+                        />
+                      )
+                  )}
+              </div>
             </div>
           )}
         </div>

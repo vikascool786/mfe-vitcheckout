@@ -39,6 +39,7 @@ import SessionTimeout from "./SessionTimeout";
 import { portalApiData } from "./portalAtom";
 import Skeleton from "../component/Skeleton/Skeleton";
 import { setDataObjectProperty } from "../utils/helpers/SetDataObjectProperty";
+import PaymentMethodHeading from "../payment-method/PaymentMethodHeading";
 
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
@@ -100,6 +101,9 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   const addressList = useAtomValue(addressAtom);
   const paymentMethodOptions = useAtomValue(paymentMethodsAtom);
   const [portalData] = useAtom(portalApiData(shopperId));
+  const isAddressSaved = addressList?.some(
+    (address) => address.hasAddress === 1
+  );
 
   const addressUrl = `${apiDomain}/shopper-addressbooks/v1/${shopperId}/AddressBook?siteId=${siteId}&api_key=${apiKey}`;
   const paymentUrl = `${apiDomain}/shopper-wallets/v1/Shopper/${shopperId}/Wallet?api_key=${apiKey}`;
@@ -143,6 +147,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     isComplete: isFetchOrderComplete,
   } = useApi<OrderResponse>(fetchOrderUrl, "GET");
 
+
   const [width, setWidth] = useState<number>(window.innerWidth);
 
   function handleWindowSizeChange() {
@@ -154,6 +159,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
       window.removeEventListener("resize", handleWindowSizeChange);
     };
   }, []);
+
 
   const updateOrder = async (
     orderData: Order,
@@ -186,8 +192,8 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     () =>
       paymentMethods
         ? (paymentMethods?.find(
-            (payment) => payment?.preferred
-          ) as IPaymentMethod)
+          (payment) => payment?.preferred
+        ) as IPaymentMethod)
         : ({} as IPaymentMethod),
     [paymentMethods]
   );
@@ -347,9 +353,13 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                   pcid={pcid}
                 />
 
-                <ShippingMethod loading={isLoading} shopperID={shopperId} />
+                <ShippingMethod
+                  loading={isLoading}
+                  shopperID={shopperId}
+                  isAddressSaved={isAddressSaved}
+                />
 
-                {addressList?.some((address) => address.hasAddress === 1) &&
+                {isAddressSaved ? (
                   orderData.totals.price > 0 && (
                     <PaymentMethod
                       cartId={cartId}
@@ -359,7 +369,10 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                       updatePaymentTypeId={setPaymentTypeId}
                       loading={isLoading}
                     />
-                  )}
+                  )
+                ) : (
+                  <PaymentMethodHeading />
+                )}
               </div>
               <div className="right-column">
                 <OrderSummary
@@ -370,7 +383,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                 />
                 {width >= 1024 && (
                   <div className="place-order">
-                    {addressList?.some((address) => address.hasAddress === 1) &&
+                    { isAddressSaved &&
                       paymentMethodOptions && (
                         <PlaceOrder
                           confirmOrder={confirmOrder}
@@ -393,30 +406,28 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                         />
                       )}
                   </div>
-                )}
-                ;
+                )};
               </div>
             </div>
 
             <div className="place-order">
-              {addressList?.some((address) => address.hasAddress === 1) &&
-                paymentMethodOptions && (
-                  <PlaceOrder
-                    confirmOrder={confirmOrder}
-                    errorMessage={orderErrorMessage}
-                    paymentTypeId={paymentTypeId}
-                    paymentMethods={paymentMethodOptions}
-                    shopperId={shopperId}
-                    siteId={siteId}
-                    order={orderData}
-                    updateOrderErrorMessage={handleUpdateOrderErrorMessage}
-                    billingId={defaultAddress?.id || 0}
-                    setOrderData={setOrderData}
-                    shippingId={
-                      defaultPaymentMethod?.addressId ?? defaultAddress?.id ?? 0
-                    }
-                  />
-                )}
+              {isAddressSaved && paymentMethodOptions && (
+                <PlaceOrder
+                  confirmOrder={confirmOrder}
+                  errorMessage={orderErrorMessage}
+                  paymentTypeId={paymentTypeId}
+                  paymentMethods={paymentMethodOptions}
+                  shopperId={shopperId}
+                  siteId={siteId}
+                  order={orderData}
+                  updateOrderErrorMessage={handleUpdateOrderErrorMessage}
+                  billingId={defaultAddress?.id || 0}
+                  setOrderData={setOrderData}
+                  shippingId={
+                    defaultPaymentMethod?.addressId ?? defaultAddress?.id ?? 0
+                  }
+                />
+              )}
               <Feedback siteId={siteId} pcId={pcid} sessionId={sessionId} />
             </div>
             <HeadHelmet />
