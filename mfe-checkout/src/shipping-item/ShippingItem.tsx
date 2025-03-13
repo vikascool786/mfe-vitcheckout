@@ -256,8 +256,8 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
             )}
             {(item.autoshipFreq > 0 || item.autoShipId) &&
               (portalData?.autoShipDiscount > 0 &&
-              isMaProduct &&
-              item.hasAutoShipDiscount ? (
+                isMaProduct &&
+                item.hasAutoShipDiscount ? (
                 <div className="item-autoship">
                   <AutoshipIcon />
                   Saving {portalData.autoShipDiscount}% with Autoship

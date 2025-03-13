@@ -69,8 +69,8 @@ export const DropdownField: React.FC<DropdownProps> = ({
         <div className="dropdown-selected">
           {selected ? options.find((opt) => opt.value === selected)?.label : `Select ${label || "an option"}`}
           <Back
-                  className={`accordion ${isOpen ? "open" : "close"}`}
-                />
+            className={`accordion ${isOpen ? "open" : "close"}`}
+          />
         </div>
 
         {isOpen && (

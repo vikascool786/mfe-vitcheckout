@@ -13,15 +13,15 @@ export const getCreditCardSchema = (paymentId: number) =>
     number:
       paymentId === 0
         ? Yup.string()
-            .test(
-              "valid-card-number",
-              "Card Number must be 15 digits for Amex or 16 digits for other cards",
-              (value) => {
-                if (!value) return false;
-                return amexRegex.test(value) || genericCardRegex.test(value);
-              }
-            )
-            .required("Card Number is required")
+          .test(
+            "valid-card-number",
+            "Card Number must be 15 digits for Amex or 16 digits for other cards",
+            (value) => {
+              if (!value) return false;
+              return amexRegex.test(value) || genericCardRegex.test(value);
+            }
+          )
+          .required("Card Number is required")
         : Yup.string(),
 
     expMonth: Yup.number()
@@ -36,21 +36,21 @@ export const getCreditCardSchema = (paymentId: number) =>
     cvv:
       paymentId === 0
         ? Yup.string()
-            .test(
-              "valid-cvv",
-              "CVV must be 4 digits for Amex or 3 digits for other cards",
-              function (value) {
-                if (!value) return false;
-                const cardNumber = this.parent.number || "";
-                if (amexRegex.test(cardNumber)) {
-                  return /^[0-9]{4}$/.test(value); // Amex requires exactly 4 digits
-                }
-                return /^[0-9]{3}$/.test(value); // Other cards require exactly 3 digits
+          .test(
+            "valid-cvv",
+            "CVV must be 4 digits for Amex or 3 digits for other cards",
+            function (value) {
+              if (!value) return false;
+              const cardNumber = this.parent.number || "";
+              if (amexRegex.test(cardNumber)) {
+                return /^[0-9]{4}$/.test(value); // Amex requires exactly 4 digits
               }
-            )
-            .min(3, "CVV must be at least 3 digits")
-            .max(4, "CVV cannot exceed 4 digits")
-            .required("CVV is required")
+              return /^[0-9]{3}$/.test(value); // Other cards require exactly 3 digits
+            }
+          )
+          .min(3, "CVV must be at least 3 digits")
+          .max(4, "CVV cannot exceed 4 digits")
+          .required("CVV is required")
         : Yup.string(),
   }).test("card-not-expired", "Card is expired", function (values) {
     const { expMonth, expYear } = values;

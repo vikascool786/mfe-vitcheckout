@@ -214,6 +214,7 @@ const Checkout: React.FC<ICheckout> = ({
             .filter((address) => address.id !== validatedAddress.id) // Exclude the validated address
             .map((address) => ({ ...address, isShip: 0 })), // Reset isShip for other addresses
         ];
+
         setShowAVS(!isValidAddress);
 
         const addressParams = new URLSearchParams(
@@ -294,7 +295,7 @@ const Checkout: React.FC<ICheckout> = ({
             setOrderNotifications(
               getOrderNotifications(newOrder.response.success)
             );
-            setShopperAddressBook(updatedAddresses);
+            setShopperAddressBook(updatedAddressList);
             setShippingAddress(newAddedAddress);
             setShowShipAddressForm(false);
             setIsExpanded(false);

@@ -28,6 +28,7 @@ interface IOrderSummary {
   hideCashback?: boolean;
   cartId: string;
   siteId: string;
+  isAddressSaved: boolean;
 }
 
 interface ICouponState {
@@ -49,6 +50,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
   shopperId,
   cartId,
   siteId,
+  isAddressSaved,
 }) => {
   const [order, setOrder] = useAtom(orderAtom);
   const { eWalletData, loading, error } = useShopperEWallet(pcid);
@@ -371,7 +373,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
       {gcLoading && <Spinner />}
       <>
         <FormHeading title="Order Summary" />
-        {!hideCashback && (
+        {isAddressSaved && !hideCashback && (
           <>
             {!loading &&
               !error &&
@@ -485,8 +487,9 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               if (!store?.store?.totals) return null;
               return (
                 <div
-                  className={`order-charges-table ${isLast ? "order-charges-table-last" : ""
-                    }`}
+                  className={`order-charges-table ${
+                    isLast ? "order-charges-table-last" : ""
+                  }`}
                   key={store?.id || index}
                 >
                   <StoreHeading
@@ -508,13 +511,13 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                         {!hideCouponCode(
                           store?.store?.totals?.couponCode || ""
                         ) && (
-                            <span
-                              key={index}
-                              className="order-summary-coupon-applied__code"
-                            >
-                              {store?.store?.totals?.couponCode}
-                            </span>
-                          )}
+                          <span
+                            key={index}
+                            className="order-summary-coupon-applied__code"
+                          >
+                            {store?.store?.totals?.couponCode}
+                          </span>
+                        )}
                       </div>
                       <div>{store?.store?.totals?.couponsStr}</div>
                     </div>
@@ -582,8 +585,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         ) : null}
 
         {order?.totals?.cashBack &&
-          order?.totals?.extraCashBack &&
-          order?.totals?.extraCashBack > 0 ? (
+        order?.totals?.extraCashBack &&
+        order?.totals?.extraCashBack > 0 ? (
           <>
             <div className="order-summary-cashback-container">
               <div className="order-cashback">

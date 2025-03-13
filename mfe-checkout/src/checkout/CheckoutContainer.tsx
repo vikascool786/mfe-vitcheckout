@@ -101,8 +101,10 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   const addressList = useAtomValue(addressAtom);
   const paymentMethodOptions = useAtomValue(paymentMethodsAtom);
   const [portalData] = useAtom(portalApiData(shopperId));
-  const isAddressSaved = addressList?.some(
-    (address) => address.hasAddress === 1
+
+  const isAddressSaved = useMemo(
+    () => addressList?.some((address) => address.hasAddress === 1),
+    [addressList]
   );
 
   const addressUrl = `${apiDomain}/shopper-addressbooks/v1/${shopperId}/AddressBook?siteId=${siteId}&api_key=${apiKey}`;
@@ -147,7 +149,6 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     isComplete: isFetchOrderComplete,
   } = useApi<OrderResponse>(fetchOrderUrl, "GET");
 
-
   const [width, setWidth] = useState<number>(window.innerWidth);
 
   function handleWindowSizeChange() {
@@ -159,7 +160,6 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
       window.removeEventListener("resize", handleWindowSizeChange);
     };
   }, []);
-
 
   const updateOrder = async (
     orderData: Order,
@@ -192,8 +192,8 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     () =>
       paymentMethods
         ? (paymentMethods?.find(
-          (payment) => payment?.preferred
-        ) as IPaymentMethod)
+            (payment) => payment?.preferred
+          ) as IPaymentMethod)
         : ({} as IPaymentMethod),
     [paymentMethods]
   );
@@ -380,31 +380,29 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                   shopperId={shopperId}
                   cartId={cartId}
                   siteId={siteId}
+                  isAddressSaved={isAddressSaved}
                 />
                 {width >= 1024 && (
                   <div className="place-order">
-                    { isAddressSaved &&
-                      paymentMethodOptions && (
-                        <PlaceOrder
-                          confirmOrder={confirmOrder}
-                          errorMessage={orderErrorMessage}
-                          paymentTypeId={paymentTypeId}
-                          paymentMethods={paymentMethodOptions}
-                          shopperId={shopperId}
-                          siteId={siteId}
-                          order={orderData}
-                          updateOrderErrorMessage={
-                            handleUpdateOrderErrorMessage
-                          }
-                          billingId={defaultAddress?.id || 0}
-                          setOrderData={setOrderData}
-                          shippingId={
-                            defaultPaymentMethod?.addressId ??
-                            defaultAddress?.id ??
-                            0
-                          }
-                        />
-                      )}
+                    {isAddressSaved && paymentMethodOptions && (
+                      <PlaceOrder
+                        confirmOrder={confirmOrder}
+                        errorMessage={orderErrorMessage}
+                        paymentTypeId={paymentTypeId}
+                        paymentMethods={paymentMethodOptions}
+                        shopperId={shopperId}
+                        siteId={siteId}
+                        order={orderData}
+                        updateOrderErrorMessage={handleUpdateOrderErrorMessage}
+                        billingId={defaultAddress?.id || 0}
+                        setOrderData={setOrderData}
+                        shippingId={
+                          defaultPaymentMethod?.addressId ??
+                          defaultAddress?.id ??
+                          0
+                        }
+                      />
+                    )}
                   </div>
                 )}
               </div>
