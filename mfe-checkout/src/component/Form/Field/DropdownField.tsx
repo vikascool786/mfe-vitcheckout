@@ -1,19 +1,18 @@
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { DropdownOption } from "../../../interfaces/DropdownOption";
 import "./DropdownField.scss";
+import { Back } from "../../../assets/svgs/Back";
 
 type DropdownProps = {
-  options: DropdownOption[]; // Array of options to populate the dropdown
-  label?: string; // Optional label for the dropdown
-  required?: boolean; // Whether the field is required
-  selectedValue?: string; // Default selected value
-  formName?: string; // Form name for the dropdown
-  onChange?: (value: string) => void; // Callback for handling selection changes
+  options: DropdownOption[];
+  label?: string;
+  required?: boolean;
+  selectedValue?: string;
+  formName?: string;
+  onChange?: (value: string) => void;
   errorMessage?: string | false | undefined;
   className?: string;
-  errorRefs?: React.MutableRefObject<{
-    [key: string]: HTMLInputElement | HTMLSelectElement | null;
-  }> | null;
+  errorRefs?: React.MutableRefObject<{ [key: string]: HTMLInputElement | null }> | null;
   disabled?: boolean;
   qaTag?: string;
 };
@@ -31,41 +30,60 @@ export const DropdownField: React.FC<DropdownProps> = ({
   errorRefs = null,
   disabled = false,
 }) => {
-  const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = event.target.value;
+  const [isOpen, setIsOpen] = useState(false);
+  const [selected, setSelected] = useState<string | undefined>(selectedValue);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const handleSelect = (value: string) => {
+    setSelected(value);
+    setIsOpen(false);
     if (onChange) {
-      onChange(value); // Pass the selected value to the parent
+      onChange(value);
     }
   };
+
+  // Handle clicks outside the dropdown to close it
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
-    <div className={`${className || ""} field-item-container`}>
+    <div className={`${className || ""} field-item-container`} ref={dropdownRef}>
       {label && (
         <label htmlFor={formName} className={required ? "required-field" : ""}>
           {label}
         </label>
       )}
-      <select
-        className="input-container"
-        name={formName}
-        ref={(el: HTMLSelectElement | null) =>
-          el && errorRefs && errorRefs.current
-            ? (errorRefs.current[formName!] = el)
-            : null
-        }
-        value={selectedValue} // Controlled component behavior
-        onChange={handleChange} // Handle change events
-        required={required}
-        disabled={disabled}
+
+      <div
+        className={`dropdown-container ${disabled ? "disabled" : ""}`}
+        onClick={() => !disabled && setIsOpen((prev) => !prev)}
       >
-        <option value="" disabled>
-          {`Select ${label || "an option"}`}
-        </option>
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
+        <div className="dropdown-selected">
+          {selected ? options.find((opt) => opt.value === selected)?.label : `Select ${label || "an option"}`}
+          <Back
+                  className={`accordion ${isOpen ? "open" : "close"}`}
+                />
+        </div>
+
+        {isOpen && (
+          <ul className="dropdown-options">
+            {options.map((option) => (
+              <li key={option.value} onClick={() => handleSelect(option.value)} className="dropdown-option">
+                {option.label}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
       {errorMessage && <div className="error-message">{errorMessage}</div>}
     </div>
   );
