@@ -4,6 +4,8 @@ body {
 
 .checkout-container-wrapper {
   min-height: 500px;
+  background: #f6f6f6;
+  margin-top: -10px;
 }
 
 .checkout-form-container {
@@ -46,6 +48,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 1rem;
 }
 
 .form-field-container {

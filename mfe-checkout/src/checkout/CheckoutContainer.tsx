@@ -406,7 +406,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                         />
                       )}
                   </div>
-                )};
+                )}
               </div>
             </div>
 

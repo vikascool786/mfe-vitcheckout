@@ -17,7 +17,7 @@ export interface IPaymentOption {
   isSelected: boolean;
 }
 
-const initialPaymentMethods: IPaymentOption[] = [
+export const initialPaymentMethods: IPaymentOption[] = [
   {
     paymentMethod: createPaymentMethod({
       accountName: PAYPAL.name,

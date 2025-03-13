@@ -479,7 +479,9 @@ const Checkout: React.FC<ICheckout> = ({
             <FormHeading title="Shipping Address" />
             {shopperAddressBook.length > 0 && (
               <Back
-                className={`qa-expand accordion ${isExpanded ? "open" : "close"}`}
+                className={`qa-expand accordion ${
+                  isExpanded ? "open" : "close"
+                }`}
                 onClick={toggleAccordion}
               />
             )}
@@ -576,7 +578,7 @@ const Checkout: React.FC<ICheckout> = ({
 
                   <div className="form-field-container-full">
                     <FormField
-                      className="qa-address"
+                      className="qa-address input-container"
                       name="address1"
                       label="Address Line 1"
                       required
@@ -624,7 +626,7 @@ const Checkout: React.FC<ICheckout> = ({
 
                   <div className="form-field-container">
                     <FormField
-                      className="qa-zipcode"
+                      className="qa-zipcode input-container"
                       name="zip"
                       label="Zip Code"
                       required

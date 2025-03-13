@@ -14,7 +14,7 @@ import withLoader from "../hoc/withLoader";
 import { Address } from "../interfaces/Address";
 import { PaymentOptionClick2Pay } from "../payment-method-click2pay/PaymentMethodOptionClick2Pay";
 import { PaymentOption } from "../payment-method-option/PaymentMethodOption";
-import { IPaymentOption, orderAtom, paymentMethodsAtom } from "../store";
+import {initialPaymentMethods, IPaymentOption, orderAtom, paymentMethodsAtom} from "../store";
 import { TextUpdates } from "../text-updates/TextUpdates";
 import { createPaymentMethod } from "../utils/helpers/GeneratePaymentMethod";
 import "./PaymentMethods.scss";
@@ -31,6 +31,7 @@ import { portalApiData } from "../checkout/portalAtom";
 import { orderHasAutoshipItems } from "../utils/OrderUtils";
 import { FormikProvider, useFormik } from "formik";
 import { getVisibleCardOptionsImages } from "../utils/helpers/GetVisibleCardImages";
+import {IPaymentMethod2} from "../interfaces/Order";
 
 interface IPaymentMethod {
   shopperId: string;
@@ -63,9 +64,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     (method) => method.type.toLowerCase() === PAYPAL.name.toLowerCase()
   );
 
-  const shouldShowSezzle = order?.paymentMethods.some(
-    (method) => method.type.toLowerCase() === SEZZLE.name.toLowerCase()
-  );
+  const [isPaymentsFetched, setIsPaymentsFetched] = useState<boolean>(false);
 
   const [showNewCard, setShowNewCard] = useState<boolean>(false);
   const [portalData] = useAtom(portalApiData(shopperId));
@@ -124,7 +123,8 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
 
         let staticMethods = paymentMethods;
 
-        if (!shouldShowSezzle) {
+
+        if (!isSezzleAllowed()) {
           staticMethods = staticMethods.filter(
             (method) => method.paymentMethod.typeID !== SEZZLE.typeId
           );
@@ -159,6 +159,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
           ];
 
           setPaymentMethods(staticMethods);
+          setIsPaymentsFetched(true);
           return;
         }
 
@@ -220,6 +221,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
 
         setTimeout(() => {
           setPaymentMethods(updatedPaymentOptions);
+          setIsPaymentsFetched(true);
         }, 300);
       } catch (error) {
         console.log("Error fetching payment methods", error);
@@ -242,6 +244,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
           });
 
           setPaymentMethods(updatedPaymentOptions);
+          setIsPaymentsFetched(true);
         }
       }
     };
@@ -252,28 +255,34 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   }, [shopperId, addresses]);
 
   useEffect(() => {
+    let updatedPMs = paymentMethods
+    if (!isSezzleAllowed()) {
+      updatedPMs = paymentMethods.filter(
+          (method) => method.paymentMethod.typeID !== SEZZLE.typeId
+      );
+    } else if (!paymentMethods.some((method) => method.paymentMethod.typeID === SEZZLE.typeId)) {
+      const sezzlePayment = initialPaymentMethods.find(
+          (method) => method.paymentMethod.typeID === SEZZLE.typeId
+      ) || null;
+      if(sezzlePayment){
+        updatedPMs = [...paymentMethods, sezzlePayment];
+      }
+    }
+    setPaymentMethods(updatedPMs);
+  }, [order, isPaymentsFetched]);
+
+  const isSezzleAllowed = (): boolean => {
     //sezzle rules dependent on site
     const sezzleSiteFlag = getSiteFlagDataForType(SEZZLE.siteflagTypeId || 0);
     if (!sezzleSiteFlag?.active) {
-      updateVisibilityOfPaymentMethod(SEZZLE.typeId, false);
-      const updatedPaymentMethods = paymentMethods.filter(
-        (method) => method.paymentMethod.typeID !== SEZZLE.typeId
-      );
-      setPaymentMethods(updatedPaymentMethods);
-      return;
+      return false;
     }
     //sezzle rules dependent on portal
     if (portalData?.hasItransact) {
       if (sezzleSiteFlag.auxDataText) {
         const jsonData = JSON.parse(sezzleSiteFlag.auxDataText);
         if (!jsonData.enableForItransact) {
-          updateVisibilityOfPaymentMethod(SEZZLE.typeId, false);
-          updateVisibilityOfPaymentMethod(SEZZLE.typeId, false);
-          const updatedPaymentMethods = paymentMethods.filter(
-            (method) => method.paymentMethod.typeID !== SEZZLE.typeId
-          );
-          setPaymentMethods(updatedPaymentMethods);
-          return;
+          return false;
         }
       }
     }
@@ -281,28 +290,20 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     //filter payment method types from order response
     if (order) {
       const isSezzleInAcceptedPayments =
-        order.paymentMethods.filter((method) => method.typeID === SEZZLE.typeId)
-          .length > 0;
+          order.paymentMethods.filter((method: IPaymentMethod2) => method.typeID === SEZZLE.typeId)
+              .length > 0;
       let isAutoshipAllowed = false;
       if (sezzleSiteFlag?.auxDataText) {
         const jsonData = JSON.parse(sezzleSiteFlag.auxDataText);
         isAutoshipAllowed = jsonData.supportedForAutoship;
       }
       if (!isAutoshipAllowed && orderHasAutoshipItems(order)) {
-        updateVisibilityOfPaymentMethod(SEZZLE.typeId, false);
-        updateVisibilityOfPaymentMethod(SEZZLE.typeId, false);
-        const updatedPaymentMethods = paymentMethods.filter(
-          (method) => method.paymentMethod.typeID !== SEZZLE.typeId
-        );
-        setPaymentMethods(updatedPaymentMethods);
-        return;
+        return false;
       }
-      updateVisibilityOfPaymentMethod(
-        SEZZLE.typeId,
-        isSezzleInAcceptedPayments
-      );
+      return isSezzleInAcceptedPayments;
     }
-  }, [order, thirdPartySiteFlagData, portalData]);
+    return false;
+  };
 
   const getSiteFlagDataForType = (siteflagTypeId: number) => {
     if (thirdPartySiteFlagData) {
@@ -311,25 +312,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       );
     }
     return null;
-  };
-
-  const updateVisibilityOfPaymentMethod = (
-    paymentTypeId: number,
-    isVisible: boolean
-  ) => {
-    const updatedPaymentOptions = paymentMethods.map((paymentOption) => {
-      if (paymentOption.paymentMethod.typeID === paymentTypeId) {
-        return {
-          ...paymentOption,
-          isVisible: isVisible,
-        };
-      } else {
-        return {
-          ...paymentOption,
-        };
-      }
-    });
-    setPaymentMethods(updatedPaymentOptions);
   };
 
   useEffect(() => {
@@ -351,7 +333,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   const toggleAccordion = () => {
     const paymentString = ["Paypal"];
 
-    if (shouldShowSezzle) {
+    if (isSezzleAllowed()) {
       paymentString.push("Sezzle");
     }
     if (isExpanded) {
@@ -368,7 +350,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       // Expand: Show all items
 
       const updatedPaymentMethods = paymentMethods.map((paymentMethod) => {
-        if (shouldShowSezzle) {
+        if (isSezzleAllowed()) {
           return {
             ...paymentMethod,
             isVisible: true,
