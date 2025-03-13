@@ -42,14 +42,20 @@ export const AddressList: React.FC<AppProps> = ({
                 familyNameFirst={familyNameFirst}
               />
             </div>
-            <span className="qa-edit edit" onClick={() => onEditAddressClick(address)}>
+            <span
+              className="qa-edit edit"
+              onClick={() => onEditAddressClick(address)}
+            >
               edit
             </span>
           </div>
         );
       })}
       {/* Add New Address Section */}
-      <div className="qa-new-address addresslist-container end" onClick={onAddNewAddressClick}>
+      <div
+        className="qa-new-address addresslist-container end"
+        onClick={onAddNewAddressClick}
+      >
         <div className="address-center">
           <Add /> Add New Address
         </div>
