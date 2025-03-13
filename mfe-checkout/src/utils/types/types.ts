@@ -9,3 +9,10 @@ export type IFeedback = {
 export type DataObject = {
   [key: string]: any;
 };
+
+export interface IOrderNotification {
+  message: string;
+  code: number;
+  developer_message: string;
+  product_id: string;
+}

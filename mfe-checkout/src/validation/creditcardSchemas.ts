@@ -52,4 +52,20 @@ export const getCreditCardSchema = (paymentId: number) =>
             .max(4, "CVV cannot exceed 4 digits")
             .required("CVV is required")
         : Yup.string(),
+  }).test("card-not-expired", "Card is expired", function (values) {
+    const { expMonth, expYear } = values;
+    if (!expMonth || !expYear) return true; // Skip check if values are missing
+
+    const currentDate = new Date();
+    const enteredDate = new Date(expYear, expMonth - 1); // Month is 0-based in JS
+
+    // ❌ Expired if year is past OR same year but past month
+    if (
+      expYear < currentDate.getFullYear() ||
+      (expYear === currentDate.getFullYear() && expMonth < currentDate.getMonth() + 1)
+    ) {
+      return this.createError({ path: "cardInfo.expMonth", message: "Card is expired" });
+    }
+
+    return true;
   });

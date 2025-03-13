@@ -84,7 +84,9 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   const [paymentMethods, setPaymentMethods] = useAtom(paymentMethodsAtom);
   const [order, setOrder] = useAtom(orderAtom);
 
-  const shippingAddress = addressList.find((address) => address.isShip);
+  const shippingAddress =
+    addressList.find((address) => address.isShip || address.isPrimary) ??
+    addressList[0];
   const [sameShippingAddress, setSameShippingAddress] = useState<boolean>(
     paymentMethod.id < 1
   );
@@ -256,8 +258,6 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
       return;
     }
 
-    setCVVFieldValue(values.cvv);
-
     // create payload for api
     let requestData: any = {
       name: values.accountName,
@@ -296,6 +296,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
         const cardTokenResponse = await generateCardToken(requestData.number);
         const token = cardTokenResponse?.token.id;
         const number = cardTokenResponse?.token.mask;
+        setCVVFieldValue(values.cvv);
         // api call to add card into the user's wallet
         const response = await addShoppersPaymentMethod(shopperId, {
           ...requestData,
@@ -401,6 +402,8 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
             })),
           ].filter((pm) => pm.paymentMethod.id !== 0);
 
+          setCVVFieldValue(values.cvv);
+
           if (order && response.id) {
             const updatedOrder = generateChangeStoreResponse({
               ...order,
@@ -488,7 +491,6 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
         initialValues={initialValues}
         validationSchema={validationSchema}
         onSubmit={(values) => {
-          console.log("Called On Submit");
           setCardError(null);
           const address = !sameShippingAddress
             ? {

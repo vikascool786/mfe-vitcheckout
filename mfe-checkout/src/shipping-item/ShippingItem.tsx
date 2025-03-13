@@ -25,6 +25,7 @@ import {
   GET_API_KEY,
 } from "../utils/urlResolver";
 import { useApi } from "../hooks/useAPI";
+import { IOrderNotification } from "../utils/types/types";
 
 interface IProduct {
   imageUrl: string;
@@ -94,6 +95,7 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
 
   const [order, setOrder] = useAtom(orderAtom);
 
+  const [itemError, setItemError] = useState<string | null>(null);
   const { image, caption, catalogName, totals, quantity } = item;
   const { catalogId, isMA } = storeDetail || {};
   const { bv, ibv } = item.totals;
@@ -155,6 +157,19 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
 
         const response = await updateProductQty(cartId, requestData);
 
+        if (response.data.response.notifications) {
+          const notifications: IOrderNotification[] =
+            response.data.response.notifications;
+          if (notifications.length > 0) {
+            const orderNotification = notifications.at(0)?.message;
+            // setSelectedQuantity(
+            //   response.data.response.success.data.quantity.toString()
+            // );
+            setItemError(orderNotification);
+            return;
+          }
+        }
+
         if (!response?.data?.response?.success?.data) {
           throw new Error("Failed to update quantity");
         }
@@ -163,6 +178,7 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
           const updatedOrder = await buildOrder(
             generateChangeStoreResponse(order)
           );
+          setItemError(null);
           setOrder(updatedOrder.response.success.data);
         }
       }
@@ -180,6 +196,7 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
 
   return (
     <>
+      {itemError && <div className="error-message">{itemError}</div>}
       <div className="item-container">
         <div className="item-detail-container">
           <div className="item-image">
