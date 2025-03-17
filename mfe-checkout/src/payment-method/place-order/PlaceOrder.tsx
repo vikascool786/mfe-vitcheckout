@@ -474,6 +474,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
               <div>Processing Order...</div>
             ) : (
               <Button
+                qaTag={'qa-order'}
                 label={
                   paymentTypeId === SEZZLE.typeId ||
                     paymentTypeId === PAYPAL.typeId

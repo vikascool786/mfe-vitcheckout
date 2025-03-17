@@ -238,7 +238,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
       )}
 
       {orders?.stores && (
-        <div className="shipping-item-container">
+        <div className="qa-shipping-item shipping-item-container">
           {Object.entries(orders?.stores)
             .sort(([, storeA], [, storeB]) => {
               return (storeB?.store?.isMA ?? 0) - (storeA?.store?.isMA ?? 0);
@@ -252,6 +252,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
                       portalData={portalData}
                     />
                     <StoreHeading
+                      qaTag={'qa-catalog'}
                       storeName={getCatalogName(store) || ""}
                       storeKey={key}
                       isMAStore={store.store?.isMA === 1}

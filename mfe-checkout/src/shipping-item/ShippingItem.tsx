@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useAtom } from "jotai";
 import { Close } from "../assets/svgs/Close";
 import "./ShippingItem.scss";
@@ -26,6 +26,8 @@ import {
 } from "../utils/urlResolver";
 import { useApi } from "../hooks/useAPI";
 import { IOrderNotification } from "../utils/types/types";
+import { CustomDropdownField } from "../component/Form/Field/CustomDropdownField";
+import { getOptionStringValue } from "../utils/helpers/GetOptionStringValue";
 
 interface IProduct {
   imageUrl: string;
@@ -90,12 +92,19 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
   const [selectedQuantity, setSelectedQuantity] = useState(
     item.quantity.toString()
   );
+  const [pendingQuantity, setPendingQuantity] = useState(
+    item.quantity.toString()
+  );
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateError, setUpdateError] = useState<string | null>(null);
-
+  const [itemError, setItemError] = useState<string | null>(null);
   const [order, setOrder] = useAtom(orderAtom);
 
-  const [itemError, setItemError] = useState<string | null>(null);
+  useEffect(() => {
+    setSelectedQuantity(item.quantity.toString());
+    setPendingQuantity(item.quantity.toString());
+  }, [item.quantity]);
+
   const { image, caption, catalogName, totals, quantity } = item;
   const { catalogId, isMA } = storeDetail || {};
   const { bv, ibv } = item.totals;
@@ -134,13 +143,14 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
   const handleQuantityChange = async (value: string) => {
     try {
       const newQuantity = parseInt(value);
-      setSelectedQuantity(value);
+      setPendingQuantity(value);
 
       if (value === "0") {
         onRemove(storeKey, item.product_hash);
       } else {
         setIsUpdating(true);
         setUpdateError(null);
+        setItemError(null);
 
         const requestData = {
           id: cartId,
@@ -165,7 +175,8 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
             // setSelectedQuantity(
             //   response.data.response.success.data.quantity.toString()
             // );
-            setItemError(orderNotification);
+            setItemError(orderNotification as string);
+            setPendingQuantity(selectedQuantity);
             return;
           }
         }
@@ -173,6 +184,9 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
         if (!response?.data?.response?.success?.data) {
           throw new Error("Failed to update quantity");
         }
+
+        setSelectedQuantity(value);
+        setPendingQuantity(value);
 
         if (order) {
           const updatedOrder = await buildOrder(
@@ -184,7 +198,7 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
       }
     } catch (error) {
       setUpdateError("Failed to update quantity");
-      setSelectedQuantity(item.quantity.toString()); // Reset to original quantity on error
+      setPendingQuantity(selectedQuantity);
     } finally {
       setIsUpdating(false);
     }
@@ -194,6 +208,25 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
   const maxAvailableStock = 30;
   const quantityOptions = createQuantityOptions(maxAvailableStock);
 
+  const optionStringValue = () => {
+    if (item.option) {
+      const OptionStringValueData = getOptionStringValue(item.option);
+      if (typeof OptionStringValueData === "string") {
+        return OptionStringValueData;
+      } else {
+        return (
+          <>
+            {OptionStringValueData?.map((item, index) => (
+              <p key={index} className="item-option-string-value">
+                {item.label} {item.value}
+              </p>
+            ))}
+          </>
+        );
+      }
+    }
+    return null;
+  };
   return (
     <>
       {itemError && <div className="error-message">{itemError}</div>}
@@ -206,16 +239,17 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
           <div className="item-info">
             <section className="header-section">
               <div className="header-block">
-                <div className="item-name">{decodeHtmlEntities(caption)}</div>
+                <div className="qa-name item-name">
+                  {decodeHtmlEntities(caption)}
+                </div>
+
+                <div>{optionStringValue()}</div>
               </div>
 
               {isAddressSaved && (
-                <div onClick={() => onRemove(storeKey, item.product_hash)}>
-                  <Close />
-                </div>
+                <div className="shippingItem-priceStr">{totals?.priceStr}</div>
               )}
             </section>
-
             <section className="item-cashback">
               {totals?.cashBack > 0 && (
                 <>
@@ -231,17 +265,17 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
                 : ibv > 0 && ` ${formattedNumber(ibv)} IBV`}
             </section>
 
-            {!isGiftCard && (
-              <section className="price-section">
-                <div className="shippingItem-priceStr">{totals?.priceStr}</div>
-                {/* <div>Quantity: {quantity}</div> */}
+            <section className="price-section">
+              {!isGiftCard && (
                 <div className="quantity-selector">
-                  <p>Quantity</p>
+                  <p className="item-quantity">Quantity</p>
                   <div className="quantity-dropdown-container">
-                    <DropdownField
+                    <CustomDropdownField
+                      key={`${item.product_hash}-${pendingQuantity}`}
+                      qaTag={"qa-qty"}
                       className="form-field"
                       formName={`quantity-${catalogName}`}
-                      selectedValue={selectedQuantity}
+                      selectedValue={pendingQuantity}
                       options={quantityOptions}
                       onChange={handleQuantityChange}
                       errorMessage={updateError}
@@ -252,12 +286,12 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
                     <span className="updating-message">Updating...</span>
                   )}
                 </div>
-              </section>
-            )}
+              )}
+            </section>
             {(item.autoshipFreq > 0 || item.autoShipId) &&
               (portalData?.autoShipDiscount > 0 &&
-                isMaProduct &&
-                item.hasAutoShipDiscount ? (
+              isMaProduct &&
+              item.hasAutoShipDiscount ? (
                 <div className="item-autoship">
                   <AutoshipIcon />
                   Saving {portalData.autoShipDiscount}% with Autoship

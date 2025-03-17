@@ -18,6 +18,7 @@ interface IShippingOptionItem {
   isSelected: boolean;
   onChange: () => void;
   hasAutoship: boolean;
+  qaTag?: string;
 }
 
 export const ShippingOptionItem: React.FC<IShippingOptionItem> = ({
@@ -27,24 +28,26 @@ export const ShippingOptionItem: React.FC<IShippingOptionItem> = ({
   index,
   size,
   hasAutoship,
+  qaTag = "",
 }) => {
   const select = isSelected ? "selected" : "";
   const isFirst = index === 0 ? "start" : "";
   const isLast = index === size ? "end" : "";
 
   return (
-    <div className={`shipping-option-container ${select} ${isFirst} ${isLast}`}>
+    <div
+      className={`qa-selection shipping-option-container ${select} ${isFirst} ${isLast}`}
+      id={shippingOption.id.toString()}
+      onClick={!shippingOption.isSelected ? () => onChange() : undefined}
+    >
       <div className="shipping-option-wrapper">
         <div className="shipping-option-select-container">
-          {
-            size === 0 ? null : (
-              <RadioButton
-                id={shippingOption.id.toString()}
-                onChange={onChange}
-                checked={shippingOption.isSelected}
-              />
-            )
-          }
+          {size === 0 ? null : (
+            <RadioButton
+              id={shippingOption.id.toString()}
+              checked={shippingOption.isSelected}
+            />
+          )}
           <div className={`shipping-option-sub-container`}>
             <div>{shippingOption.method}</div>
             <div className="shipping-option-estShipDate">

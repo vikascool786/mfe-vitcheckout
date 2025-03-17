@@ -38,6 +38,7 @@ export interface IPaymentOptionProps {
   formik: any;
   setCVVFieldValue: any;
   updatePaymentTypeId: (newValue: number) => void;
+  updateCvvError: (error: string) => void;
 }
 
 export const PaymentOption: React.FC<IPaymentOptionProps> = ({
@@ -50,6 +51,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   onAddNewCards,
   handleCancelNewCard,
   setCVVFieldValue,
+  updateCvvError,
 }) => {
   const [isCardEdit, setIsCardEdit] = useState<boolean>(false);
   const [order, setOrder] = useAtom(orderAtom);
@@ -64,19 +66,12 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     isEditing,
   } = paymentOption;
 
-  const [cvvError, setCvvError] = useState(
-    !formik.touched.cvv && !formik.dirty && order?.shouldShowInvalidCVVMessage
-      ? "CVV is required"
-      : ""
-  );
-
-  //checking cvv input field is valid or dirty on stage changes
   useEffect(() => {
-    setCvvError(
-      !formik.touched.cvv && !formik.dirty && order?.shouldShowInvalidCVVMessage
-        ? "CVV is required"
-        : ""
-    );
+    if (order?.shouldShowInvalidCVVMessage) {
+      updateCvvError("CVV is required");
+    } else {
+      updateCvvError("");
+    }
   }, [order?.shouldShowInvalidCVVMessage]);
 
   const maxLength = paymentMethod.typeID === 1 ? 4 : 3;
@@ -353,8 +348,10 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                       component="div"
                       className="error-message"
                     />
-                    {cvvError && (
-                      <div className="error-message">{cvvError}</div>
+                    {formik.values.cvvError && !formik.errors.cvv && (
+                      <div className="error-message">
+                        {formik.values.cvvError}
+                      </div>
                     )}
                   </div>
                 </div>

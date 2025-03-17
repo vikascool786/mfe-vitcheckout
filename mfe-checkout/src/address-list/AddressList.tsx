@@ -29,13 +29,17 @@ export const AddressList: React.FC<AppProps> = ({
           <div
             key={address.id}
             className={`addresslist-container ${isSelected} ${isFirst}`}
+            onClick={
+              address.isShip !== 1
+                ? () => onSelectChange(address.id)
+                : undefined
+            }
           >
             <div className="addresslist-item-holder">
               <RadioButton
                 id={String(address.id)}
                 name={"ship-address"}
                 checked={address.isShip === 1}
-                onChange={() => onSelectChange(address.id)}
               />
               <AddressDisplay
                 address={address}

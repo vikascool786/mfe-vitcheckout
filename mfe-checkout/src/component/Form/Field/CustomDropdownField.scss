@@ -1,51 +1,7 @@
 .field-item-container {
+  position: relative;
   display: flex;
   flex-direction: column;
-  margin-bottom: 1rem;
-  width: 100%;
-
-  label {
-    margin-bottom: 0.5rem;
-    font-size: 0.9rem;
-
-    &.required-field::after {
-      content: "*";
-      color: red;
-      margin-left: 4px;
-    }
-  }
-
-  .input-container {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1rem;
-
-    &:focus {
-      outline: none;
-      border-color: #0066cc;
-    }
-  }
-
-  .error-message {
-    color: black;
-    font-size: 0.8rem;
-    margin-top: 0.25rem;
-  }
-}
-
-@media screen and (max-width: 480px) {
-  .field-item-container {
-    .input-container {
-      padding: 0.5rem;
-      font-size: 0.9rem;
-    }
-
-    label {
-      font-size: 0.8rem;
-    }
-  }
 }
 
 .dropdown-container {
@@ -53,15 +9,27 @@
   cursor: pointer;
   border-radius: 8px;
   transition: 0.3s ease;
+
+  .accordion {
+    width: 13px !important;
+    height: 14px !important;
+    display: block;
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
 }
 
 .dropdown-selected {
-  padding: 5px;
-  border: 1px solid #000000;
-  border-radius: 2px;
+  padding: 2px;
+  border: 0.5px solid #000000;
+  border-radius: 0.5px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 35px;
 }
 
 .dropdown-options {

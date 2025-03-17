@@ -64,7 +64,10 @@ export const getCreditCardSchema = (paymentId: number) =>
       expYear < currentDate.getFullYear() ||
       (expYear === currentDate.getFullYear() && expMonth < currentDate.getMonth() + 1)
     ) {
-      return this.createError({ path: "cardInfo.expMonth", message: "Card is expired" });
+      return this.createError({
+        path: "cardInfo.expMonth",
+        message: "Please enter a valid expiration date.",
+      });
     }
 
     return true;

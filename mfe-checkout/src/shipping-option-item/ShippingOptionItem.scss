@@ -3,6 +3,7 @@
 .shipping-option-container {
   @extend %container-base;
   gap: 9rem;
+  cursor: pointer;
 
   &.end {
     @include rounded-borders(bottom);

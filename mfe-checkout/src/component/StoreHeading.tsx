@@ -18,9 +18,10 @@ interface IStoreHeadingProps {
     isMAStore: boolean;
     order: Order;
     isOrderSummary: boolean;
+    qaTag?: string;
 }
 
-const StoreHeading: React.FC<IStoreHeadingProps> = ({ storeName, storeKey, isMAStore, order, isOrderSummary }) => {
+const StoreHeading: React.FC<IStoreHeadingProps> = ({ storeName, storeKey, isMAStore, order, isOrderSummary, qaTag = "" }) => {
     const [showStoreShipmentHeading, setShowStoreShipmentHeading] = useState(false);
     const [orderConsolidateData, setOrderConsolidateData] =
         useState<OrderConsolidationData>({
@@ -58,7 +59,7 @@ const StoreHeading: React.FC<IStoreHeadingProps> = ({ storeName, storeKey, isMAS
 
     return (
         showStoreShipmentHeading && (
-            <div className="shipping-catolog-name">
+            <div className={`${qaTag} shipping-catolog-name`}>
                 <span>{buildStoreHeading(orderConsolidateData)}</span>
             </div>
         )

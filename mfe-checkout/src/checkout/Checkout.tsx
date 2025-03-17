@@ -11,7 +11,6 @@ import { buildOrder } from "../api/service/Order";
 import {
   useCreateShopperAddressBookEntry,
   useUpdateShopperAddressBookEntry,
-  useUpdateTextUpdatesForPhone,
 } from "../api/service/ShopperAddressBook";
 import { fetchSiteData } from "../api/service/Site";
 import { Back } from "../assets/svgs/Back";
@@ -32,7 +31,6 @@ import {
 } from "../store";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import "./Checkout.scss";
-import { siteApiData } from "./siteAtom";
 import { customerApiData } from "./customerAtom";
 import { getOrderNotifications } from "../utils/OrderUtils";
 
@@ -66,7 +64,6 @@ const Checkout: React.FC<ICheckout> = ({
 
   const { createShopperAddressBookEntry } = useCreateShopperAddressBookEntry();
   const { updateShopperAddressBookEntry } = useUpdateShopperAddressBookEntry();
-  const { updateTextUpdatesForPhone } = useUpdateTextUpdatesForPhone();
 
   const [shippingAddress, setShippingAddress] =
     useState<Address>(defaultAddress);
@@ -190,7 +187,6 @@ const Checkout: React.FC<ICheckout> = ({
     zip: string;
     phone: string;
     isPoBox: boolean;
-    isUpdateEnabled: boolean;
   }) => {
     const addressEntered = {
       ...defaultAddress,
@@ -237,12 +233,6 @@ const Checkout: React.FC<ICheckout> = ({
                   ...order.shippingAddress,
                   id: validatedAddress.id,
                 },
-                userOptions: {
-                  ...order.userOptions,
-                  smsMessageType: address.isUpdateEnabled
-                    ? "order-shipped"
-                    : "",
-                },
               })
             );
 
@@ -281,12 +271,6 @@ const Checkout: React.FC<ICheckout> = ({
                   id:
                     updatedAddressList.find((add) => add.isBill)?.id ||
                     newAddedAddress.id,
-                },
-                userOptions: {
-                  ...order.userOptions,
-                  smsMessageType: address.isUpdateEnabled
-                    ? "order-shipped"
-                    : "",
                 },
               })
             );
@@ -405,32 +389,6 @@ const Checkout: React.FC<ICheckout> = ({
     setIsExpanded(false);
   };
 
-  const handleEnableTextUpdates = async (
-    shouldEnable: boolean,
-    phone: string
-  ) => {
-    if (shouldEnable && order) {
-      try {
-        const orderResponse = await buildOrder(
-          generateChangeStoreResponse({
-            ...order,
-            userOptions: {
-              ...order?.userOptions,
-              smsMessageType: "order-shipped",
-            },
-          })
-        );
-
-        setOrder(orderResponse.response.success.data);
-        setOrderNotifications(
-          getOrderNotifications(orderResponse.response.success)
-        );
-      } catch (error) {
-        alert("Failed to update text updates");
-      }
-    }
-  };
-
   const initialValues = {
     first: shippingAddress.first || customerData?.first_name || "",
     last: shippingAddress.last || customerData?.last_name || "",
@@ -441,7 +399,6 @@ const Checkout: React.FC<ICheckout> = ({
     zip: shippingAddress.zip || "",
     phone: shippingAddress.phone || "",
     isPoBox: shippingAddress.isPoBox || false,
-    isUpdateEnabled: shippingAddress.isUpdateEnabled || false,
   };
 
   const validationSchema = Yup.object().shape({
@@ -656,20 +613,6 @@ const Checkout: React.FC<ICheckout> = ({
                       value={values.phone}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      renderCheckBox={
-                        <Checkbox
-                          qaTag="qa-text-updates"
-                          title="Get Text Updates for this Order"
-                          subtitle="Messaging data rates may apply."
-                          checked={values.isUpdateEnabled}
-                          onChange={() => {
-                            setFieldValue(
-                              "isUpdateEnabled",
-                              !values.isUpdateEnabled
-                            );
-                          }}
-                        />
-                      }
                       errorMessage={touched.phone && errors.phone}
                     />
                   </div>

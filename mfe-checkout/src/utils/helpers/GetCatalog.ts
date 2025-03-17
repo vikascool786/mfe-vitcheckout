@@ -20,9 +20,13 @@ export const getShipWarningMessage = (
 
   for (const item of storeData.items) {
     if (item.shipWarningMessages?.length) {
-      return item.shipWarningMessages[0]; // Return the first warning found
+      const warningMessage = item.shipWarningMessages[0]?.replace(
+        /""([^""]+)""/g,
+        '"$1"'
+      );
+      return warningMessage;
     }
   }
 
-  return undefined; // No warnings found
+  return undefined;
 };

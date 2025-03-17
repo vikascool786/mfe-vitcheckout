@@ -29,16 +29,15 @@
     height: 100%;
     display: block;
     margin-top: 0;
-    padding-top: 100px;
     z-index: 999;
     text-align: center;
     overflow-y: auto;
+    align-items: center;
   }
   &__iframe-modal {
     padding: 0;
     border: none;
     max-width: 500px;
-    height: 80%;
     text-align: center;
     background: #fff;
     margin: 0 auto;

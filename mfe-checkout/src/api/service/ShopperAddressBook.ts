@@ -89,32 +89,3 @@ export const useUpdateShopperAddressBookEntry = () => {
 
   return { loading, error, updateShopperAddressBookEntry };
 };
-
-// Hook for updating text updates for phone
-export const useUpdateTextUpdatesForPhone = () => {
-  const [data, setData] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-
-  const updateTextUpdatesForPhone = useCallback(async (phoneNumber: string) => {
-    setLoading(true);
-    setError(null);
-    const endpoint = `${apiDomain}/twilio/v1/lookups?type=carrier&to=${phoneNumber}&country=USA?api_key=${apiKey}`;
-    try {
-      const response = await axiosInstance(endpoint).get("");
-      setData(response.data);
-      return response.data;
-    } catch (err) {
-      console.error(
-        `Error updating text updates for phone: ${phoneNumber}`,
-        err
-      );
-      setError(err as Error);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  return { data, loading, error, updateTextUpdatesForPhone };
-};

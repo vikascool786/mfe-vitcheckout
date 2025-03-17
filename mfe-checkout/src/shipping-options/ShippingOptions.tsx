@@ -93,6 +93,7 @@ export const ShippingOptions: React.FC<IShippingOptions> = ({
         .sort((a, b) => a.total - b.total)
         .map((shippingOption, index) => (
           <ShippingOptionItem
+
             key={shippingOption.id}
             shippingOption={shippingOption}
             index={index}

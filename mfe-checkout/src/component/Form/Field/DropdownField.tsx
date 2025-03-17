@@ -1,18 +1,19 @@
-import React, { useState, useRef, useEffect } from "react";
+import React from "react";
 import { DropdownOption } from "../../../interfaces/DropdownOption";
 import "./DropdownField.scss";
-import { Back } from "../../../assets/svgs/Back";
 
 type DropdownProps = {
-  options: DropdownOption[];
-  label?: string;
-  required?: boolean;
-  selectedValue?: string;
-  formName?: string;
-  onChange?: (value: string) => void;
+  options: DropdownOption[]; // Array of options to populate the dropdown
+  label?: string; // Optional label for the dropdown
+  required?: boolean; // Whether the field is required
+  selectedValue?: string; // Default selected value
+  formName?: string; // Form name for the dropdown
+  onChange?: (value: string) => void; // Callback for handling selection changes
   errorMessage?: string | false | undefined;
   className?: string;
-  errorRefs?: React.MutableRefObject<{ [key: string]: HTMLInputElement | null }> | null;
+  errorRefs?: React.MutableRefObject<{
+    [key: string]: HTMLInputElement | HTMLSelectElement | null;
+  }> | null;
   disabled?: boolean;
   qaTag?: string;
 };
@@ -30,60 +31,41 @@ export const DropdownField: React.FC<DropdownProps> = ({
   errorRefs = null,
   disabled = false,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [selected, setSelected] = useState<string | undefined>(selectedValue);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  const handleSelect = (value: string) => {
-    setSelected(value);
-    setIsOpen(false);
+  const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = event.target.value;
     if (onChange) {
-      onChange(value);
+      onChange(value); // Pass the selected value to the parent
     }
   };
-
-  // Handle clicks outside the dropdown to close it
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
   return (
-    <div className={`${className || ""} field-item-container`} ref={dropdownRef}>
+    <div className={`${className || ""} field-item-container`}>
       {label && (
         <label htmlFor={formName} className={required ? "required-field" : ""}>
           {label}
         </label>
       )}
-
-      <div
-        className={`dropdown-container ${disabled ? "disabled" : ""}`}
-        onClick={() => !disabled && setIsOpen((prev) => !prev)}
+      <select
+        className="input-container"
+        name={formName}
+        ref={(el: HTMLSelectElement | null) =>
+          el && errorRefs && errorRefs.current
+            ? (errorRefs.current[formName!] = el)
+            : null
+        }
+        value={selectedValue} // Controlled component behavior
+        onChange={handleChange} // Handle change events
+        required={required}
+        disabled={disabled}
       >
-        <div className="dropdown-selected">
-          {selected ? options.find((opt) => opt.value === selected)?.label : `Select ${label || "an option"}`}
-          <Back
-            className={`accordion ${isOpen ? "open" : "close"}`}
-          />
-        </div>
-
-        {isOpen && (
-          <ul className="dropdown-options">
-            {options.map((option) => (
-              <li key={option.value} onClick={() => handleSelect(option.value)} className="dropdown-option">
-                {option.label}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
+        <option value="" disabled>
+          {`Select ${label || "an option"}`}
+        </option>
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
       {errorMessage && <div className="error-message">{errorMessage}</div>}
     </div>
   );

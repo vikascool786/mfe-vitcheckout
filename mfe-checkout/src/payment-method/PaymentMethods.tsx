@@ -31,7 +31,7 @@ import { portalApiData } from "../checkout/portalAtom";
 import { orderHasAutoshipItems } from "../utils/OrderUtils";
 import { FormikProvider, useFormik } from "formik";
 import { getVisibleCardOptionsImages } from "../utils/helpers/GetVisibleCardImages";
-import {IPaymentMethod2} from "../interfaces/Order";
+import { IPaymentMethod2 } from "../interfaces/Order";
 
 interface IPaymentMethod {
   shopperId: string;
@@ -594,6 +594,9 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       (pm) => pm.paymentMethod.typeID === 9 || pm.paymentMethod.typeID === 6
     ).length > 1;
 
+  const updateCvvError = (error: string) => {
+    formik.setFieldValue("cvvError", error, false);
+  };
   return (
     <FormikProvider value={formik}>
       <div className="pm-main-container">
@@ -624,6 +627,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
                   updatePaymentTypeId={updatePaymentTypeId}
                   onCollapse={onCollapse}
                   formik={formik}
+                  updateCvvError={updateCvvError}
                   setCVVFieldValue={setCVVFieldValue}
                 />
               ))}
@@ -655,7 +659,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
             )}
           </div>
         </div>
-        <TextUpdates />
+        <TextUpdates pcid={pcid} siteId={siteId} />
       </div>
     </FormikProvider>
   );

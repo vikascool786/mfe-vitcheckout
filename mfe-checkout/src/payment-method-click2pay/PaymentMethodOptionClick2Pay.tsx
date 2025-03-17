@@ -363,7 +363,7 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({ pcid, order 
                          click-to-pay__iframe-modal--scrollable">
                                 <div>
                                     <button
-                                        className="overlay-simple__close overlay-simple__close--dark margin-top"
+                                        className="overlay-simple__close overlay-simple__close--dark margin-top margin-right"
                                         onClick={closeAddCardOverlay}>
                                         <span className="collapse-text">Close</span>
                                         <span className="material-icons" aria-hidden="true">close</span>
@@ -375,7 +375,7 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({ pcid, order 
                                         <div className="click-to-pay__heading">Card Information</div>
                                         <div>
                                             <src-card-list card-brands={cardBrandsString}/>
-                                            <div className="checkout-method-click-to-pay-text">Save my information with
+                                            <div className="checkout-method-click-to-pay-text margin-bottom">Save my information with
                                                 Click to
                                                 Pay
                                                 for

@@ -13,4 +13,5 @@ export interface Locale {
   languageCode: string;
   id: string;
   familyNameFirst: boolean;
+  maLanguageCode: string;
 }

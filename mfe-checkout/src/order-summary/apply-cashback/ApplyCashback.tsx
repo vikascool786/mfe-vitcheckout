@@ -73,7 +73,7 @@ export const ApplyCashback: React.FC<IApplyCashbackContainer> = ({
                 : "Discount-price-text"
             }
           >
-            {getFormattedPrice(siteData, cashbackData.cashbackAvail)}
+            {getFormattedPrice(siteData, cashbackData.totalCoaCBAvail)}
           </p>
         </div>
         <div className="Right-part-middle-container">

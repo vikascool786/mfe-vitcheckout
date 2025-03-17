@@ -369,7 +369,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
   }, [order?.userOptions.gcNum]);
 
   return (
-    <div className="order-summary-container">
+    <div className="qa-order-summary order-summary-container">
       {gcLoading && <Spinner />}
       <>
         <FormHeading title="Order Summary" />
@@ -382,9 +382,10 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                 <ApplyCashback cashbackData={eWalletData} siteId={siteId} />
               )}
             <div className="order-redeem-coupon-text">Redeem Coupon</div>
-            <div className="order-summary-coupon-container">
+            <div className="qa-order-coupon order-summary-coupon-container">
               <div className="order-input-container">
                 <FormField
+                  qaTag={'qa-input'}
                   value={coupon.coupon}
                   onChange={handleCouponTextChange}
                   errorMessage={coupon.couponError}
@@ -392,6 +393,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               </div>
               <div className="order-apply-container">
                 <Button
+                  qaTag={'qa-button'}
                   label="Apply"
                   btnType="secondary"
                   onClick={handleAddCoupon}
@@ -404,7 +406,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                   {order?.userOptions.coupons
                     ?.filter((appliedCoupon) => !hideCouponCode(appliedCoupon)) // Exclude hidden coupons
                     .map((appliedCoupon, index) => (
-                      <li key={index} className="order-applied-coupon">
+                      <li key={index} className="qa-cancel order-applied-coupon">
                         {appliedCoupon}
                         <Close
                           onClick={() => handleRemoveCoupon(appliedCoupon)}
@@ -415,13 +417,14 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               )}
 
             {gcState.gcVisible && !gcState.gcApplied && (
-              <div className="gift-card-wrapper">
+              <div className="qa-order-gift gift-card-wrapper">
                 <div className="gift-card-wrapper-fields">
                   <div className="gift-card-wrapper-field-1">
                     <div className="order-redeem-coupon-text">
                       Gift Card Number
                     </div>
                     <FormField
+                      qaTag={'qa-card-number'}
                       value={gcState.gcNum}
                       onChange={handleGcNumChange}
                     />
@@ -429,6 +432,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                   <div className="gift-card-wrapper-field-2">
                     <div className="order-redeem-coupon-text">PIN</div>
                     <FormField
+                      qaTag={'qa-input'}
                       value={gcState.gcPin}
                       onChange={handleGcPinChange}
                     />
@@ -437,6 +441,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
 
                 <div className="gift-card-apply">
                   <Button
+                    qaTag={'qa-button'}
                     label={!!gcState.gcApplied ? "Remove" : "Apply"}
                     btnType="secondary"
                     onClick={() => handleAddGiftCard(!!gcState.gcApplied)}
@@ -465,7 +470,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
             )}
             {!gcState.gcApplied && (
               <div
-                className="order-sub-text underlined"
+                className="qa-link order-sub-text underlined"
                 onClick={handleApplyGiftCard}
               >
                 {gcState.gcVisible ? "Hide Gift Card" : "Apply Gift Card"}
@@ -502,7 +507,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
 
                   <div className="order-summary-row">
                     <div>Items Subtotal</div>
-                    <div>{store?.store?.totals?.priceStr}</div>
+                    <div className={'qa-subtotal'}>{store?.store?.totals?.priceStr}</div>
                   </div>
                   {store?.store?.totals?.couponCode && (
                     <div className="order-summary-row order-summary-row__coupon">
@@ -524,12 +529,12 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                   )}
                   <div className="order-summary-row">
                     <div>Tax Total</div>
-                    <div>{store?.store?.totals?.taxStr}</div>
+                    <div className={'qa-tax'}>{store?.store?.totals?.taxStr}</div>
                   </div>
 
                   <div className="order-summary-row">
                     <div>Shipping</div>
-                    <div>{store?.store?.totals?.shippingStr}</div>
+                    <div className={'qa-shipping'}>{store?.store?.totals?.shippingStr}</div>
                   </div>
                 </div>
               );
@@ -556,7 +561,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
 
         <div className="order-summary-total">
           <div>Total Due</div>
-          <div>{order?.totals?.priceStr}</div>
+          <div className={'qa-total'}>{order?.totals?.priceStr}</div>
         </div>
         {Number(order?.totals?.cashBack) > 0 && (
           <>
@@ -579,7 +584,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                 <VIFT />
                 You earned 1% extra Cash using VIFT
               </div>
-              <div>{`$${formattedNumber(order.totals.extraCashBack)}`}</div>
+              <div className={'qa-cashback'}>{`$${formattedNumber(order.totals.extraCashBack)}`}</div>
             </div>
           </>
         ) : null}

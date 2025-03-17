@@ -145,6 +145,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   ) => {
     setLoading(true);
     try {
+      let updatedPaymentAddress: string = "";
       const response = await updateShopperDetails(
         shopperId,
         values.id,
@@ -160,28 +161,6 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
       );
 
       // Ensure the updated payment method is selected, visible, and validated
-      const updatedPaymentMethods = [
-        {
-          ...values,
-          paymentMethod: {
-            ...updatedMethod,
-          },
-          isEditing: false,
-          isSelected: true,
-          isVisible: true,
-          isPaymentValidated: true,
-        },
-        ...otherMethods.map((pm) => ({
-          ...pm,
-          paymentMethod: {
-            ...pm.paymentMethod,
-            preferred: false,
-          },
-          isSelected: false,
-          isEditing: false,
-          isPaymentValidated: false, // Reset validation for other cards
-        })),
-      ];
 
       if (order && values.id) {
         const updatedOrder = generateChangeStoreResponse({
@@ -197,6 +176,9 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           },
         });
         const orderResponse = await buildOrder(updatedOrder);
+
+        updatedPaymentAddress = orderResponse.response.success.data
+          .billingAddress as unknown as string;
         setOrder(orderResponse.response.success.data);
         // updatePaymentValidationStatus(values.id as number);
         onCancel();
@@ -210,6 +192,31 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
       }
 
       setLoading(false);
+
+      const updatedPaymentMethods = [
+        {
+          paymentAddress: updatedPaymentAddress,
+          paymentMethod: {
+            ...updatedMethod,
+          },
+          isEditing: false,
+          isSelected: true,
+          isVisible: true,
+          isPaymentValidated: true,
+        },
+        ...otherMethods.map((pm) => ({
+          ...pm,
+          paymentMethod: {
+            ...pm.paymentMethod,
+            preferred: false,
+          },
+
+          isSelected: false,
+          isEditing: false,
+          isPaymentValidated: false, // Reset validation for other cards
+        })),
+      ];
+
       onAddNewCard(updatedPaymentMethods as IPaymentOption[]);
       // onCancel();
     } catch (error: any) {

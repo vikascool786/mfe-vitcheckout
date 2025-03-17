@@ -25,7 +25,7 @@ const Click2PayNewCard = (function () {
     function toggleNewCardOverlay(showOverlay){
         const overlay = document.querySelector(addCardOverlay);
         if(overlay){
-            overlay.style.display = showOverlay ? "block" : "none";
+            overlay.style.display = showOverlay ? "inline-flex" : "none";
         }
     }
 
