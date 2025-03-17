@@ -288,6 +288,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                     (pm) =>
                       pm.imageTag && (
                         <img
+                          key={pm.typeID}
                           className="checkout-add-new-card "
                           src={getVisibleCardOptionsImages(pm.imageTag)}
                         />

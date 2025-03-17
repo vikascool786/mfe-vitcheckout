@@ -14,7 +14,12 @@ import withLoader from "../hoc/withLoader";
 import { Address } from "../interfaces/Address";
 import { PaymentOptionClick2Pay } from "../payment-method-click2pay/PaymentMethodOptionClick2Pay";
 import { PaymentOption } from "../payment-method-option/PaymentMethodOption";
-import {initialPaymentMethods, IPaymentOption, orderAtom, paymentMethodsAtom} from "../store";
+import {
+  initialPaymentMethods,
+  IPaymentOption,
+  orderAtom,
+  paymentMethodsAtom,
+} from "../store";
 import { TextUpdates } from "../text-updates/TextUpdates";
 import { createPaymentMethod } from "../utils/helpers/GeneratePaymentMethod";
 import "./PaymentMethods.scss";
@@ -122,7 +127,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         const response = await fetchShoppersPaymentMethods(shopperId);
 
         let staticMethods = paymentMethods;
-
 
         if (!isSezzleAllowed()) {
           staticMethods = staticMethods.filter(
@@ -255,16 +259,21 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   }, [shopperId, addresses]);
 
   useEffect(() => {
-    let updatedPMs = paymentMethods
+    let updatedPMs = paymentMethods;
     if (!isSezzleAllowed()) {
       updatedPMs = paymentMethods.filter(
-          (method) => method.paymentMethod.typeID !== SEZZLE.typeId
+        (method) => method.paymentMethod.typeID !== SEZZLE.typeId
       );
-    } else if (!paymentMethods.some((method) => method.paymentMethod.typeID === SEZZLE.typeId)) {
-      const sezzlePayment = initialPaymentMethods.find(
+    } else if (
+      !paymentMethods.some(
+        (method) => method.paymentMethod.typeID === SEZZLE.typeId
+      )
+    ) {
+      const sezzlePayment =
+        initialPaymentMethods.find(
           (method) => method.paymentMethod.typeID === SEZZLE.typeId
-      ) || null;
-      if(sezzlePayment){
+        ) || null;
+      if (sezzlePayment) {
         updatedPMs = [...paymentMethods, sezzlePayment];
       }
     }
@@ -290,8 +299,9 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     //filter payment method types from order response
     if (order) {
       const isSezzleInAcceptedPayments =
-          order.paymentMethods.filter((method: IPaymentMethod2) => method.typeID === SEZZLE.typeId)
-              .length > 0;
+        order.paymentMethods.filter(
+          (method: IPaymentMethod2) => method.typeID === SEZZLE.typeId
+        ).length > 0;
       let isAutoshipAllowed = false;
       if (sezzleSiteFlag?.auxDataText) {
         const jsonData = JSON.parse(sezzleSiteFlag.auxDataText);
@@ -370,17 +380,14 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   const onAddNewCard = () => {
     // Check if a card with id 0 is already present
     setShowNewCard(true);
+    updatePaymentTypeId(0);
     const hasTemporaryCard = paymentMethods.some(
       (paymentOption) => paymentOption.paymentMethod.id === 0
     );
 
     if (hasTemporaryCard) {
-      //  set the selected payment method this
-      const updatedPaymentOptions = paymentMethods.map((paymentOption) => ({
-        ...paymentOption,
-        isSelected: paymentOption.paymentMethod.id === 0,
-      }));
       onCollapse(0);
+      updatePaymentTypeId(0);
 
       // If a card with id 0 already exists, do not update payment methods
       console.warn("Temporary card already exists. Cannot add a new one.");
@@ -534,45 +541,51 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   };
 
   const onCollapse = (id: number) => {
-    const updatedPaymentMethods = paymentMethods.map((paymentMethod) => {
-      if (paymentMethod.paymentMethod.id === id) {
+    if (id > 0) {
+      setShowNewCard(false);
+    }
+    const updatedPaymentMethods = paymentMethods
+      .map((paymentMethod) => {
+        if (paymentMethod.paymentMethod.id === id) {
+          return {
+            paymentMethod: {
+              ...paymentMethod.paymentMethod,
+              preferred: true,
+            },
+            paymentAddress: paymentMethod.paymentAddress,
+            isSelected: true,
+            isVisible: true,
+          };
+        }
+
+        if (isThirdPartyPayment(paymentMethod.paymentMethod.typeID)) {
+          return {
+            ...paymentMethod,
+            isSelected: false,
+            isVisible: true,
+          };
+        }
+
+        if (id === -1001 || id === -1002) {
+          updatePaymentTypeId(id);
+          return {
+            ...paymentMethod,
+            isPaymentValidated: false,
+            isSelected: paymentMethod.paymentMethod.id === id,
+            isVisible: paymentMethod.paymentMethod.preferred || false,
+          };
+        }
         return {
+          ...paymentMethod,
           paymentMethod: {
             ...paymentMethod.paymentMethod,
-            preferred: true,
+            preferred: false,
           },
-          paymentAddress: paymentMethod.paymentAddress,
-          isSelected: true,
-          isVisible: true,
-        };
-      }
-
-      if (isThirdPartyPayment(paymentMethod.paymentMethod.typeID)) {
-        return {
-          ...paymentMethod,
           isSelected: false,
-          isVisible: true,
+          isVisible: false,
         };
-      }
-
-      if (id === -1001 || id === -1002) {
-        return {
-          ...paymentMethod,
-          isPaymentValidated: false,
-          isSelected: paymentMethod.paymentMethod.id === id,
-          isVisible: paymentMethod.paymentMethod.preferred || false,
-        };
-      }
-      return {
-        ...paymentMethod,
-        paymentMethod: {
-          ...paymentMethod.paymentMethod,
-          preferred: false,
-        },
-        isSelected: false,
-        isVisible: false,
-      };
-    });
+      })
+      .filter((method) => method.paymentMethod.id !== 0);
 
     setTimeout(() => {
       formik.resetForm();
@@ -617,7 +630,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
               .filter((method) => method.isVisible)
               .map((paymentOption, index) => (
                 <PaymentOption
-                  key={index}
+                  key={paymentOption.paymentMethod.id}
                   paymentOption={paymentOption}
                   index={index}
                   shopperId={shopperId}
@@ -649,6 +662,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
                       (pm) =>
                         pm.imageTag && (
                           <img
+                            key={pm.typeID}
                             className="checkout-add-new-card "
                             src={getVisibleCardOptionsImages(pm.imageTag)}
                           />
