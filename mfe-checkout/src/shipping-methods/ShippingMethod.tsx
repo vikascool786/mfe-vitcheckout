@@ -5,6 +5,7 @@ import {
   OrderResponse,
   removeProductFromCart,
 } from "../api/service/Order";
+
 import { portalApiData } from "../checkout/portalAtom";
 import { FormHeading } from "../component/Form/Heading/FormHeading";
 import { RadioButton } from "../component/RadioButton/RadioButton";
@@ -16,7 +17,12 @@ import {
 } from "../interfaces/OrderConsolidationData";
 import { ShippingItem } from "../shipping-item/ShippingItem";
 import { ShippingOptions } from "../shipping-options/ShippingOptions";
-import { loadingAtom, orderAtom, orderNotificationsAtom } from "../store";
+import {
+  loadingAtom,
+  orderAtom,
+  orderNotificationsAtom,
+  paymentMethodsAtom,
+} from "../store";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import {
   getCatalogName,
@@ -36,6 +42,11 @@ import { FreeShipMessage } from "./FreeShipMessage";
 import StoreHeading from "../component/StoreHeading";
 import { OrderStore } from "../interfaces/Order";
 import { isGiftCardStore } from "../utils/StoreUtils";
+import { PAYPAL } from "../payment-method/PaymentType";
+import { createPaymentMethod } from "../utils/helpers/GeneratePaymentMethod";
+import { Address } from "../interfaces/Address";
+import PaypalIcon from "../assets/images/PayPal.png";
+import SezzleIcon from "../assets/images/Sezzle.png";
 
 interface IShippingMethodProps {
   shopperID: string;
@@ -56,6 +67,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
       oosConsolidate: OOS_CONSOLIDATE_CODE,
       shipDateMessageMap: new Map<string, string>(),
     });
+  const [paymentMethods, setPaymentMethods] = useAtom(paymentMethodsAtom);
   const [orderNotifications, setOrderNotifications] = useAtom(
     orderNotificationsAtom
   );
@@ -128,7 +140,57 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
         return;
       }
 
+      const orderData = response.response.success.data;
+      // add paypal back if it exists in the payment methods
+
+      const shouldShowPaypal = orderData?.paymentMethods.some(
+        (method) => method.type.toLowerCase() === PAYPAL.name.toLowerCase()
+      );
+
+      if (shouldShowPaypal) {
+        // add paypal back if it exists in the payment methods on the 2nd last position if sezzle is present
+        const sezzleIndex = orderData?.paymentMethods.findIndex(
+          (method) => method.type.toLowerCase() === "sezzle"
+        );
+
+        if (sezzleIndex > -1) {
+          // add to second last position
+          const updatedPaymentMethods = paymentMethods;
+
+          updatedPaymentMethods.splice(sezzleIndex, 0, {
+            paymentMethod: createPaymentMethod({
+              accountName: PAYPAL.name,
+              typeID: PAYPAL.typeId,
+              imageUrl: PaypalIcon,
+              id: -1001,
+            }),
+            paymentAddress: {} as Address,
+            isPaymentValidated: false,
+            isSelected: false,
+            isVisible: true,
+          });
+
+          setPaymentMethods(updatedPaymentMethods);
+        } else {
+          setPaymentMethods([
+            ...paymentMethods,
+            {
+              paymentMethod: createPaymentMethod({
+                accountName: PAYPAL.name,
+                typeID: PAYPAL.typeId,
+                imageUrl: PaypalIcon,
+                id: -1001,
+              }),
+              paymentAddress: {} as Address,
+              isPaymentValidated: false,
+              isSelected: false,
+              isVisible: true,
+            },
+          ]);
+        }
+      }
       setOrder(response.response.success.data);
+
       setOrderNotifications(getOrderNotifications(response.response.success));
     } catch (error) {
       console.error("Error removing product:", error);
@@ -252,7 +314,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
                       portalData={portalData}
                     />
                     <StoreHeading
-                      qaTag={'qa-catalog'}
+                      qaTag={"qa-catalog"}
                       storeName={getCatalogName(store) || ""}
                       storeKey={key}
                       isMAStore={store.store?.isMA === 1}

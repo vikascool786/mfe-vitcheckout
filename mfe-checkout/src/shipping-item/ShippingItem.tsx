@@ -3,16 +3,21 @@ import { useAtom } from "jotai";
 import { Close } from "../assets/svgs/Close";
 import "./ShippingItem.scss";
 import { Cashback } from "../assets/svgs/Cashback";
-import { Item, StoreDetail } from "../interfaces/ShippingMethod";
+import { Address, Item, StoreDetail } from "../interfaces/ShippingMethod";
 import { ITotal } from "../interfaces/ShopperCart";
 import { Portal } from "../interfaces/Portal";
 import { AutoshipIcon } from "../assets/icons/Autoship";
 import { truncate } from "../utils/helpers/Helper";
 import { DropdownField } from "../component/Form/Field/DropdownField";
 import { DropdownOption } from "../interfaces/DropdownOption";
-import { debounce } from "lodash";
+import PaypalIcon from "../assets/images/PayPal.png";
+import SezzleIcon from "../assets/images/Sezzle.png";
 
-import { orderAtom, orderNotificationsAtom } from "../store";
+import {
+  orderAtom,
+  orderNotificationsAtom,
+  paymentMethodsAtom,
+} from "../store";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import {
   buildOrder,
@@ -28,6 +33,8 @@ import { useApi } from "../hooks/useAPI";
 import { IOrderNotification } from "../utils/types/types";
 import { CustomDropdownField } from "../component/Form/Field/CustomDropdownField";
 import { getOptionStringValue } from "../utils/helpers/GetOptionStringValue";
+import { PAYPAL } from "../payment-method/PaymentType";
+import { createPaymentMethod } from "../utils/helpers/GeneratePaymentMethod";
 
 interface IProduct {
   imageUrl: string;
@@ -99,6 +106,7 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
   const [updateError, setUpdateError] = useState<string | null>(null);
   const [itemError, setItemError] = useState<string | null>(null);
   const [order, setOrder] = useAtom(orderAtom);
+  const [paymentMethods, setPaymentMethods] = useAtom(paymentMethodsAtom);
 
   useEffect(() => {
     setSelectedQuantity(item.quantity.toString());
@@ -193,7 +201,57 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
             generateChangeStoreResponse(order)
           );
           setItemError(null);
+          const orderData = updatedOrder.response.success.data;
           setOrder(updatedOrder.response.success.data);
+
+          // add paypal back if it exists in the payment methods
+
+          const shouldShowPaypal = orderData?.paymentMethods.some(
+            (method) => method.type.toLowerCase() === PAYPAL.name.toLowerCase()
+          );
+
+          if (shouldShowPaypal) {
+            // add paypal back if it exists in the payment methods on the 2nd last position if sezzle is present
+            const sezzleIndex = orderData?.paymentMethods.findIndex(
+              (method) => method.type.toLowerCase() === "sezzle"
+            );
+
+            if (sezzleIndex > -1) {
+              // add to second last position
+              const updatedPaymentMethods = paymentMethods;
+
+              updatedPaymentMethods.splice(sezzleIndex, 0, {
+                paymentMethod: createPaymentMethod({
+                  accountName: PAYPAL.name,
+                  typeID: PAYPAL.typeId,
+                  imageUrl: PaypalIcon,
+                  id: -1001,
+                }),
+                paymentAddress: {} as Address,
+                isPaymentValidated: false,
+                isSelected: false,
+                isVisible: true,
+              });
+
+              setPaymentMethods(updatedPaymentMethods);
+            } else {
+              setPaymentMethods([
+                ...paymentMethods,
+                {
+                  paymentMethod: createPaymentMethod({
+                    accountName: PAYPAL.name,
+                    typeID: PAYPAL.typeId,
+                    imageUrl: PaypalIcon,
+                    id: -1001,
+                  }),
+                  paymentAddress: {} as Address,
+                  isPaymentValidated: false,
+                  isSelected: false,
+                  isVisible: true,
+                },
+              ]);
+            }
+          }
         }
       }
     } catch (error) {
