@@ -78,6 +78,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     SiteFlags[]
   >([]);
 
+  console.log("setShowNewCard", showNewCard);
   useEffect(() => {
     const paymentSiteFlagList = thirdPartyPaymentFlagList().join(",");
     const fetchSiteFlagInfo = async () => {
@@ -380,7 +381,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
 
   const onAddNewCard = () => {
     // Check if a card with id 0 is already present
-    setShowNewCard(true);
     updatePaymentTypeId(0);
     const hasTemporaryCard = paymentMethods.some(
       (paymentOption) => paymentOption.paymentMethod.id === 0
@@ -405,6 +405,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       expMonth: new Date().getMonth() + 1,
     });
 
+    setShowNewCard(true);
     // while adding new card makeing new credit card as selected
     const updatedPaymentOptions = paymentMethods.map((paymentOption) => ({
       ...paymentOption,
@@ -425,18 +426,11 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   };
 
   useEffect(() => {
-    const isAddingNewCard = paymentMethods.find(
-      (pm) => pm.paymentMethod.id === 0
-    );
     const selectedPayment = paymentMethods.find((pm) => pm.isSelected);
 
     if (isThirdPartyPayment(selectedPayment?.paymentMethod.typeID)) {
       setShowNewCard(false);
       return;
-    }
-
-    if (isAddingNewCard) {
-      setShowNewCard(isAddingNewCard ? true : false);
     }
   }, [paymentMethods]);
 
@@ -537,14 +531,12 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
 
   const onAddNewCards = (payments: IPaymentOption[]) => {
     setTimeout(() => {
+      setShowNewCard(false);
       setPaymentMethods(payments);
     }, 300);
   };
 
   const onCollapse = (id: number) => {
-    if (id > 0) {
-      setShowNewCard(false);
-    }
     const updatedPaymentMethods = paymentMethods
       .map((paymentMethod) => {
         if (paymentMethod.paymentMethod.id === id) {
@@ -595,6 +587,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
           ?.paymentMethod.typeID || 0
       );
       setPaymentMethods(updatedPaymentMethods as IPaymentOption[]);
+      setShowNewCard(false);
       setIsExpanded(false);
     }, 300);
   };
@@ -604,8 +597,10 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   };
 
   const showShouldToggleAccordian =
-    paymentMethods.filter((pm) =>
-      creditCardTypeIds.includes(pm.paymentMethod.typeID)
+    paymentMethods.filter(
+      (pm) =>
+        pm.paymentMethod.id > 0 &&
+        creditCardTypeIds.includes(pm.paymentMethod.typeID)
     ).length > 1;
 
   const updateCvvError = (error: string) => {
