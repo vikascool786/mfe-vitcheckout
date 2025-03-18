@@ -31,7 +31,7 @@ export const FreeShipMessage: React.FC<IShippingMessageProps> = ({
     useEffect(() => {
         //free ship portal settings only apply to MA products
         let isMAFreeShip =
-            portalData.hasFreeShipping && Boolean(orderStore.store?.isMA);
+            portalData?.hasFreeShipping && Boolean(orderStore.store?.isMA);
         const freeShipData: FreeShipData = {
             hasFreeShipping: isMAFreeShip,
             shipFreeMessage: "",

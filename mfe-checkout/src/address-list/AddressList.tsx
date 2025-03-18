@@ -21,7 +21,7 @@ export const AddressList: React.FC<AppProps> = ({
   onAddNewAddressClick,
 }) => {
   return (
-    <div className="addresslist">
+    <div className="qa-addresses addresslist">
       {addressBook.map((address, index) => {
         const isSelected = address.isShip === 1 ? "selected" : "";
         const isFirst = index === 0 ? "start" : "";

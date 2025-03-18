@@ -218,6 +218,8 @@ const Checkout: React.FC<ICheckout> = ({
         setShowAVS(!isValidAddress);
       } catch (error) {
         setLoading(false);
+      } finally {
+        setErrorMessage("");
       }
     }
   };
@@ -325,9 +327,9 @@ const Checkout: React.FC<ICheckout> = ({
       setShowAVS(!showAVS);
       setIsExpanded(false);
       setLoading(false);
-    } catch (error) {
+    } catch (error: any) {
       setLoading(false);
-      setErrorMessage("Failed to update address");
+      setErrorMessage(error.response.data);
     }
   };
 
@@ -336,7 +338,7 @@ const Checkout: React.FC<ICheckout> = ({
     setShowShipAddressForm(!showShipAddressForm);
     setShippingAddress(
       shopperAddressBook.find((address) => address.isShip === 1) ||
-        shippingAddress
+      shippingAddress
     );
     setIsExpanded(!isExpanded);
   };
@@ -488,7 +490,11 @@ const Checkout: React.FC<ICheckout> = ({
             )}
           </div>
 
-          {errorMessage && <div className="error-message">{errorMessage}</div>}
+          {errorMessage && (
+            <div className="error-message error-address-verification">
+              {errorMessage}
+            </div>
+          )}
 
           {/* show details fields based on accordion state close  */}
           {!showShipAddressForm && (
@@ -710,6 +716,7 @@ const Checkout: React.FC<ICheckout> = ({
         showAvs={showAVS}
         onClick={handleEditClick}
         onSelectAddress={handleUseSelectedAddress}
+        errorMessage={errorMessage}
       />
     </div>
   );

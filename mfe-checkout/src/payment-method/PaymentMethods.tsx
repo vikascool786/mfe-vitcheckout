@@ -10,7 +10,6 @@ import { Add } from "../assets/icons/Add";
 import CardOptions from "../assets/images/CardOptions.png";
 import { Back } from "../assets/svgs/Back";
 import { FormHeading } from "../component/Form/Heading/FormHeading";
-import withLoader from "../hoc/withLoader";
 import { Address } from "../interfaces/Address";
 import { PaymentOptionClick2Pay } from "../payment-method-click2pay/PaymentMethodOptionClick2Pay";
 import { PaymentOption } from "../payment-method-option/PaymentMethodOption";
@@ -117,9 +116,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         };
       };
 
-      // wallet {addressid: number}
-      // address {id: address}
-
       // checking paypal order success
       const { token, payerId } = getQueryParams();
 
@@ -158,7 +154,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
             expMonth: new Date().getMonth() + 1,
           });
 
-          // [new card,paypal, sezzle]
+          // [new card, paypal, sezzle]
           staticMethods = [
             {
               paymentMethod: newCard,
@@ -486,14 +482,14 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     const updatedPaymentMethods = paymentMethods.map((method) =>
       method.paymentMethod.id === paymentId
         ? {
-            ...method,
-            isEditing: !method.isEditing, // Toggle editing state for the selected payment method
-          }
+          ...method,
+          isEditing: !method.isEditing, // Toggle editing state for the selected payment method
+        }
         : {
-            ...method,
-            isEditing: false,
-            isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
-          }
+          ...method,
+          isEditing: false,
+          isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
+        }
     );
     setPaymentMethods(updatedPaymentMethods);
   };

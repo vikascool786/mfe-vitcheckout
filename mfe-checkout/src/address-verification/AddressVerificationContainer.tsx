@@ -11,6 +11,7 @@ interface MyComponentProps {
   showAvs: boolean;
   onClick: () => void;
   onSelectAddress: () => void;
+  errorMessage: string;
 }
 
 export const AddressVerificationContainer = forwardRef<
@@ -78,11 +79,17 @@ export const AddressVerificationContainer = forwardRef<
 
   return (
     <div
-      className={`${!props.showAvs
+      className={`${
+        !props.showAvs
           ? "checkout-form-container__hide"
           : "checkout-form-container"
-        }`}
+      }`}
     >
+      {props.errorMessage && (
+        <div className="error-message error-address-verification">
+          {props.errorMessage}
+        </div>
+      )}
       <AddressVerification
         addressList={addressList}
         addressToVerify={addressToVerify}
