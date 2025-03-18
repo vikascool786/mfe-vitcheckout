@@ -54,9 +54,12 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   pcid,
   updatePaymentTypeId,
 }) => {
+  // initial payment methods
   const [paymentMethods, setPaymentMethods] = useAtom(paymentMethodsAtom);
 
   const [isExpanded, setIsExpanded] = useState(false);
+
+  // addresses for user wallet
   const { addresses } = useShopperEWalletAddresses(shopperId || "");
 
   const [order] = useAtom(orderAtom);
@@ -78,7 +81,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     SiteFlags[]
   >([]);
 
-  console.log("setShowNewCard", showNewCard);
   useEffect(() => {
     const paymentSiteFlagList = thirdPartyPaymentFlagList().join(",");
     const fetchSiteFlagInfo = async () => {
@@ -115,6 +117,9 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         };
       };
 
+      // wallet {addressid: number}
+      // address {id: address}
+
       // checking paypal order success
       const { token, payerId } = getQueryParams();
 
@@ -142,6 +147,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
           );
         }
 
+        // case when user does not have any payment methods
         if (!response) {
           const newCard = createPaymentMethod({
             accountName: "",
@@ -152,6 +158,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
             expMonth: new Date().getMonth() + 1,
           });
 
+          // [new card,paypal, sezzle]
           staticMethods = [
             {
               paymentMethod: newCard,
@@ -178,9 +185,10 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
               isSelected: false,
             }));
           }
-
+          // fetch saved cards from wallet
           return {
             paymentMethod,
+            // set address based on the address id
             paymentAddress: addressMap.get(paymentMethod.addressId.toString()),
             isVisible: isPreferred,
             isSelected: isPreferred,
@@ -207,13 +215,17 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
             false
           );
 
+          // set paypal as selected and only show items visible which are true
+
           updatedPaymentOptions = updatedPaymentOptions.map((paymentOption) => {
             if (paymentOption.paymentMethod.typeID === PAYPAL.typeId) {
+              // set paypal true
               return {
                 ...paymentOption,
                 isSelected: true,
               };
             } else {
+              // rest will set as false
               return {
                 ...paymentOption,
                 isSelected: false,
@@ -231,6 +243,8 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         }, 300);
       } catch (error) {
         console.log("Error fetching payment methods", error);
+        // in case fetching payment api fails and user has a successful paypal transaction
+        // let user proceed with paypal
         if (isPaypalOrderSuccess) {
           await generatePayPalTransactionDetails(shopperId, token, true, false);
 
@@ -410,6 +424,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     const updatedPaymentOptions = paymentMethods.map((paymentOption) => ({
       ...paymentOption,
       isSelected: false,
+      isEditing: false,
     }));
 
     setPaymentMethods([
@@ -530,9 +545,10 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   };
 
   const onAddNewCards = (payments: IPaymentOption[]) => {
+    console.log("payments", payments);
     setTimeout(() => {
-      setShowNewCard(false);
       setPaymentMethods(payments);
+      setShowNewCard(false);
     }, 300);
   };
 
@@ -559,6 +575,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
           };
         }
 
+        // when selected paypal or sezzle, set editing false
         if (id === -1001 || id === -1002) {
           updatePaymentTypeId(id);
           return {
@@ -566,6 +583,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
             isPaymentValidated: false,
             isSelected: paymentMethod.paymentMethod.id === id,
             isVisible: paymentMethod.paymentMethod.preferred || false,
+            isEditing: false,
           };
         }
         return {
@@ -586,6 +604,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         updatedPaymentMethods.find((pm) => pm.paymentMethod.id === id)
           ?.paymentMethod.typeID || 0
       );
+      console.log("updatedPaymentMethods", updatedPaymentMethods);
       setPaymentMethods(updatedPaymentMethods as IPaymentOption[]);
       setShowNewCard(false);
       setIsExpanded(false);
