@@ -31,6 +31,7 @@ import {
 } from "../store";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import "./Checkout.scss";
+import { siteApiData } from "./siteAtom";
 import { customerApiData } from "./customerAtom";
 import { getOrderNotifications } from "../utils/OrderUtils";
 
@@ -187,6 +188,7 @@ const Checkout: React.FC<ICheckout> = ({
     zip: string;
     phone: string;
     isPoBox: boolean;
+    isUpdateEnabled: boolean;
   }) => {
     const addressEntered = {
       ...defaultAddress,
@@ -202,6 +204,7 @@ const Checkout: React.FC<ICheckout> = ({
         const isValidAddress = await childRef.current.verifyAddress({
           ...addressEntered,
         });
+
         const validatedAddress = { ...addressEntered, defaultaddr: true };
 
         const updatedAddresses = [
@@ -210,86 +213,10 @@ const Checkout: React.FC<ICheckout> = ({
             .filter((address) => address.id !== validatedAddress.id) // Exclude the validated address
             .map((address) => ({ ...address, isShip: 0 })), // Reset isShip for other addresses
         ];
-
+        setShopperAddressBook(updatedAddresses);
+        setShippingAddress(validatedAddress);
         setShowAVS(!isValidAddress);
-
-        const addressParams = new URLSearchParams(
-          Object.entries(validatedAddress as Address)
-        ).toString();
-
-        if (validatedAddress?.id && validatedAddress.id > 0) {
-          // Use PUT request for existing address (update)
-          await updateShopperAddressBookEntry(
-            shopperId,
-            validatedAddress.id,
-            addressParams
-          );
-
-          if (order) {
-            const newOrder = await buildOrder(
-              generateChangeStoreResponse({
-                ...order,
-                shippingAddress: {
-                  ...order.shippingAddress,
-                  id: validatedAddress.id,
-                },
-              })
-            );
-
-            setOrder(newOrder.response.success.data);
-            setOrderNotifications(
-              getOrderNotifications(newOrder.response.success)
-            );
-
-            setShopperAddressBook(updatedAddresses);
-            setShippingAddress(validatedAddress);
-            setShowShipAddressForm(false);
-            setErrorMessage("");
-          }
-        } else {
-          // Use POST request for new address (create)
-          const updatedAddressList: Address[] =
-            await createShopperAddressBookEntry(shopperId, addressParams);
-          //update address atom with new addresslist
-          setShopperAddressBook(
-            filterValidShippingAddresses(updatedAddressList)
-          );
-          const newAddedAddress = updatedAddressList.find(
-            (address) => address.isShip
-          );
-
-          if (newAddedAddress && order) {
-            const newOrder = await buildOrder(
-              generateChangeStoreResponse({
-                ...order,
-                shippingAddress: {
-                  ...newAddedAddress,
-                  id: newAddedAddress.id,
-                },
-                billingAddress: {
-                  ...order?.billingAddress,
-                  id:
-                    updatedAddressList.find((add) => add.isBill)?.id ||
-                    newAddedAddress.id,
-                },
-              })
-            );
-
-            setOrder(newOrder.response.success.data);
-            setOrderNotifications(
-              getOrderNotifications(newOrder.response.success)
-            );
-            setShopperAddressBook(updatedAddressList);
-            setShippingAddress(newAddedAddress);
-            setShowShipAddressForm(false);
-            setIsExpanded(false);
-            setErrorMessage("");
-          }
-        }
-        setLoading(false);
       } catch (error) {
-        console.log(error);
-        setErrorMessage(error.response.data);
         setLoading(false);
       }
     }
@@ -311,8 +238,97 @@ const Checkout: React.FC<ICheckout> = ({
     setShowShipAddressForm(!showShipAddressForm);
   };
 
-  const handleUseSelectedAddress = () => {
-    setShowAVS(!showAVS);
+  const handleUseSelectedAddress = async () => {
+    try {
+      setLoading(true);
+      const addressParams = new URLSearchParams(
+        Object.entries(shippingAddress as Address)
+      ).toString();
+
+      if (shippingAddress?.id && shippingAddress.id > 0) {
+        // Use PUT request for existing address (update)
+        const updatedAddresses = await updateShopperAddressBookEntry(
+          shopperId,
+          shippingAddress.id,
+          addressParams
+        );
+
+        if (order) {
+          const newOrder = await buildOrder(
+            generateChangeStoreResponse({
+              ...order,
+              shippingAddress: {
+                ...order.shippingAddress,
+                id: shippingAddress.id,
+              },
+              userOptions: {
+                ...order.userOptions,
+                smsMessageType: shippingAddress.isUpdateEnabled
+                  ? "order-shipped"
+                  : "",
+              },
+            })
+          );
+
+          setOrder(newOrder.response.success.data);
+          setOrderNotifications(
+            getOrderNotifications(newOrder.response.success)
+          );
+
+          setShopperAddressBook(filterValidShippingAddresses(updatedAddresses));
+          setShowShipAddressForm(false);
+          setErrorMessage("");
+        }
+      } else {
+        // Use POST request for new address (create)
+        const updatedAddressList: Address[] =
+          await createShopperAddressBookEntry(shopperId, addressParams);
+        //update address atom with new addresslist
+        setShopperAddressBook(filterValidShippingAddresses(updatedAddressList));
+        const newAddedAddress = updatedAddressList.find(
+          (address) => address.isShip
+        );
+
+        if (newAddedAddress && order) {
+          const newOrder = await buildOrder(
+            generateChangeStoreResponse({
+              ...order,
+              shippingAddress: {
+                ...newAddedAddress,
+                id: newAddedAddress.id,
+              },
+              billingAddress: {
+                ...order?.billingAddress,
+                id:
+                  updatedAddressList.find((add) => add.isBill)?.id ||
+                  newAddedAddress.id,
+              },
+              userOptions: {
+                ...order.userOptions,
+                smsMessageType: newAddedAddress.isUpdateEnabled
+                  ? "order-shipped"
+                  : "",
+              },
+            })
+          );
+
+          setOrder(newOrder.response.success.data);
+          setOrderNotifications(
+            getOrderNotifications(newOrder.response.success)
+          );
+          setShippingAddress(newAddedAddress);
+          setShowShipAddressForm(false);
+          setIsExpanded(false);
+          setErrorMessage("");
+        }
+      }
+      setShowAVS(!showAVS);
+      setIsExpanded(false);
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      setErrorMessage("Failed to update address");
+    }
   };
 
   const onCancelClick = () => {
@@ -389,6 +405,32 @@ const Checkout: React.FC<ICheckout> = ({
     setIsExpanded(false);
   };
 
+  const handleEnableTextUpdates = async (
+    shouldEnable: boolean,
+    phone: string
+  ) => {
+    if (shouldEnable && order) {
+      try {
+        const orderResponse = await buildOrder(
+          generateChangeStoreResponse({
+            ...order,
+            userOptions: {
+              ...order?.userOptions,
+              smsMessageType: "order-shipped",
+            },
+          })
+        );
+
+        setOrder(orderResponse.response.success.data);
+        setOrderNotifications(
+          getOrderNotifications(orderResponse.response.success)
+        );
+      } catch (error) {
+        alert("Failed to update text updates");
+      }
+    }
+  };
+
   const initialValues = {
     first: shippingAddress.first || customerData?.first_name || "",
     last: shippingAddress.last || customerData?.last_name || "",
@@ -399,6 +441,7 @@ const Checkout: React.FC<ICheckout> = ({
     zip: shippingAddress.zip || "",
     phone: shippingAddress.phone || "",
     isPoBox: shippingAddress.isPoBox || false,
+    isUpdateEnabled: shippingAddress.isUpdateEnabled || false,
   };
 
   const validationSchema = Yup.object().shape({
@@ -536,7 +579,7 @@ const Checkout: React.FC<ICheckout> = ({
 
                   <div className="form-field-container-full">
                     <FormField
-                      className="qa-address input-container"
+                      className="qa-address"
                       name="address1"
                       label="Address Line 1"
                       required
@@ -584,7 +627,7 @@ const Checkout: React.FC<ICheckout> = ({
 
                   <div className="form-field-container">
                     <FormField
-                      className="qa-zipcode input-container"
+                      className="qa-zipcode"
                       name="zip"
                       label="Zip Code"
                       required
@@ -613,6 +656,20 @@ const Checkout: React.FC<ICheckout> = ({
                       value={values.phone}
                       onChange={handleChange}
                       onBlur={handleBlur}
+                      renderCheckBox={
+                        <Checkbox
+                          qaTag="qa-text-updates"
+                          title="Get Text Updates for this Order"
+                          subtitle="Messaging data rates may apply."
+                          checked={values.isUpdateEnabled}
+                          onChange={() => {
+                            setFieldValue(
+                              "isUpdateEnabled",
+                              !values.isUpdateEnabled
+                            );
+                          }}
+                        />
+                      }
                       errorMessage={touched.phone && errors.phone}
                     />
                   </div>
@@ -658,4 +715,4 @@ const Checkout: React.FC<ICheckout> = ({
   );
 };
 
-export default withLoader(Checkout);
+export default Checkout;

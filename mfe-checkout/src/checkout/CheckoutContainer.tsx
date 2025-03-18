@@ -337,6 +337,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
 
   return (
     <div>
+      {isLoading && <Spinner />}
       {orderData && (
         <>
           <div className="qa-checkout container">
@@ -349,12 +350,10 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                   shopperId={shopperId}
                   siteId={siteId}
                   addresses={addresses || []}
-                  loading={isLoading}
                   pcid={pcid}
                 />
 
                 <ShippingMethod
-                  loading={isLoading}
                   shopperID={shopperId}
                   isAddressSaved={isAddressSaved}
                 />
@@ -367,7 +366,6 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                       siteId={siteId}
                       pcid={pcid}
                       updatePaymentTypeId={setPaymentTypeId}
-                      loading={isLoading}
                     />
                   )
                 ) : (

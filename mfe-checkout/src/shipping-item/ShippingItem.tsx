@@ -217,10 +217,13 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
             );
 
             if (sezzleIndex > -1) {
-              // add to second last position
-              const updatedPaymentMethods = paymentMethods;
+              // Clone the array to avoid mutating state directly
+              const updatedPaymentMethods = [...paymentMethods];
 
-              updatedPaymentMethods.splice(sezzleIndex, 0, {
+              // Ensure we don't insert at a negative index
+              const insertIndex = Math.max(sezzleIndex - 1, 0);
+
+              updatedPaymentMethods.splice(insertIndex, 0, {
                 paymentMethod: createPaymentMethod({
                   accountName: PAYPAL.name,
                   typeID: PAYPAL.typeId,
@@ -234,6 +237,7 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
               });
 
               setPaymentMethods(updatedPaymentMethods);
+              console.log("updatedPaymentMethods", updatedPaymentMethods);
             } else {
               setPaymentMethods([
                 ...paymentMethods,
@@ -334,7 +338,7 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
                       selectedValue={pendingQuantity}
                       options={quantityOptions}
                       onChange={handleQuantityChange}
-                      errorMessage={updateError}
+                      errorMessage={updateError as string}
                       disabled={isUpdating}
                     />
                   </div>
@@ -346,8 +350,8 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
             </section>
             {(item.autoshipFreq > 0 || item.autoShipId) &&
               (portalData?.autoShipDiscount > 0 &&
-                isMaProduct &&
-                item.hasAutoShipDiscount ? (
+              isMaProduct &&
+              item.hasAutoShipDiscount ? (
                 <div className="item-autoship">
                   <AutoshipIcon />
                   Saving {portalData.autoShipDiscount}% with Autoship

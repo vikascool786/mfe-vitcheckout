@@ -149,27 +149,78 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
 
       if (shouldShowPaypal) {
         // add paypal back if it exists in the payment methods on the 2nd last position if sezzle is present
-        const sezzleIndex = orderData?.paymentMethods.findIndex(
-          (method) => method.type.toLowerCase() === "sezzle"
+        const sezzleIndex = paymentMethods.findIndex(
+          (method) =>
+            method.paymentMethod.accountName.toLowerCase() === "sezzle"
         );
 
         if (sezzleIndex > -1) {
-          // add to second last position
-          const updatedPaymentMethods = paymentMethods;
+          // Clone the array to avoid mutating state directly
+          const updatedPaymentMethods = [...paymentMethods];
 
-          updatedPaymentMethods.splice(sezzleIndex, 0, {
-            paymentMethod: createPaymentMethod({
-              accountName: PAYPAL.name,
-              typeID: PAYPAL.typeId,
-              imageUrl: PaypalIcon,
-              id: -1001,
-            }),
-            paymentAddress: {} as Address,
-            isPaymentValidated: false,
-            isSelected: false,
-            isVisible: true,
-          });
+          // Remove existing PayPal if already present to prevent duplicates
+          const existingPayPalIndex = updatedPaymentMethods.findIndex(
+            (method) =>
+              method.paymentMethod.accountName.toLowerCase() === "paypal"
+          );
 
+          if (existingPayPalIndex > -1) {
+            updatedPaymentMethods.splice(existingPayPalIndex, 1);
+          }
+
+          // Find the updated Sezzle index (since removing PayPal may shift indices)
+          const newSezzleIndex = updatedPaymentMethods.findIndex(
+            (method) =>
+              method.paymentMethod.accountName.toLowerCase() === "sezzle"
+          );
+
+          // If only two elements exist, insert PayPal in the middle
+          if (updatedPaymentMethods.length === 2) {
+            updatedPaymentMethods.splice(1, 0, {
+              paymentMethod: createPaymentMethod({
+                accountName: PAYPAL.name,
+                typeID: PAYPAL.typeId,
+                imageUrl: PaypalIcon,
+                id: -1001,
+              }),
+              paymentAddress: {} as Address,
+              isPaymentValidated: false,
+              isSelected: false,
+              isVisible: true,
+            });
+          } else {
+            // Move the element before Sezzle to index 0
+            if (newSezzleIndex > 1) {
+              const elementBeforeSezzle = updatedPaymentMethods.splice(
+                newSezzleIndex - 1,
+                1
+              )[0];
+              updatedPaymentMethods.unshift(elementBeforeSezzle);
+            }
+
+            // Recalculate Sezzle index after modifying array
+            const finalSezzleIndex = updatedPaymentMethods.findIndex(
+              (method) =>
+                method.paymentMethod.accountName.toLowerCase() === "sezzle"
+            );
+
+            // Insert PayPal before Sezzle
+            const insertIndex = Math.max(finalSezzleIndex - 1, 1);
+            updatedPaymentMethods.splice(insertIndex, 0, {
+              paymentMethod: createPaymentMethod({
+                accountName: PAYPAL.name,
+                typeID: PAYPAL.typeId,
+                imageUrl: PaypalIcon,
+                id: -1001,
+              }),
+              paymentAddress: {} as Address,
+              isPaymentValidated: false,
+              isSelected: false,
+              isVisible: true,
+            });
+          }
+
+          // Set updated state
           setPaymentMethods(updatedPaymentMethods);
         } else {
           setPaymentMethods([
@@ -244,10 +295,11 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
       {isAddressSaved && orderConsolidateData?.showOrderConsolidate && (
         <div className="shipping-options-container">
           <div
-            className={`shipping-option-container start ${orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_SPLIT_CODE
+            className={`shipping-option-container start ${
+              orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_SPLIT_CODE
                 ? "selected"
                 : ""
-              }`}
+            }`}
           >
             <div className="shipping-option-wrapper">
               <div className="shipping-option-select-container">
@@ -271,10 +323,11 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
             </div>
           </div>
           <div
-            className={`shipping-option-container end ${orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_CODE
+            className={`shipping-option-container end ${
+              orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_CODE
                 ? "selected"
                 : ""
-              }`}
+            }`}
           >
             <div className="shipping-option-wrapper">
               <div className="shipping-option-select-container">
@@ -352,7 +405,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
                         <span
                           className="warning-span"
                           dangerouslySetInnerHTML={{
-                            __html: getShipWarningMessage(store),
+                            __html: getShipWarningMessage(store) as string,
                           }}
                         />
                       </div>
@@ -370,4 +423,4 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
   );
 };
 
-export default withLoader(ShippingMethod);
+export default ShippingMethod;

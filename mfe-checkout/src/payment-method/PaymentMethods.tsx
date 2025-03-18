@@ -14,13 +14,19 @@ import withLoader from "../hoc/withLoader";
 import { Address } from "../interfaces/Address";
 import { PaymentOptionClick2Pay } from "../payment-method-click2pay/PaymentMethodOptionClick2Pay";
 import { PaymentOption } from "../payment-method-option/PaymentMethodOption";
-import { initialPaymentMethods, IPaymentOption, orderAtom, paymentMethodsAtom } from "../store";
+import {
+  initialPaymentMethods,
+  IPaymentOption,
+  orderAtom,
+  paymentMethodsAtom,
+} from "../store";
 import { TextUpdates } from "../text-updates/TextUpdates";
 import { createPaymentMethod } from "../utils/helpers/GeneratePaymentMethod";
 import "./PaymentMethods.scss";
 import * as Yup from "yup";
 import {
-  CLICK2PAY, creditCardTypeIds,
+  CLICK2PAY,
+  creditCardTypeIds,
   isThirdPartyPayment,
   PAYPAL,
   SEZZLE,
@@ -122,7 +128,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         const response = await fetchShoppersPaymentMethods(shopperId);
 
         let staticMethods = paymentMethods;
-
 
         if (!isSezzleAllowed()) {
           staticMethods = staticMethods.filter(
@@ -255,15 +260,20 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   }, [shopperId, addresses]);
 
   useEffect(() => {
-    let updatedPMs = paymentMethods
+    let updatedPMs = paymentMethods;
     if (!isSezzleAllowed()) {
       updatedPMs = paymentMethods.filter(
         (method) => method.paymentMethod.typeID !== SEZZLE.typeId
       );
-    } else if (!paymentMethods.some((method) => method.paymentMethod.typeID === SEZZLE.typeId)) {
-      const sezzlePayment = initialPaymentMethods.find(
+    } else if (
+      !paymentMethods.some(
         (method) => method.paymentMethod.typeID === SEZZLE.typeId
-      ) || null;
+      )
+    ) {
+      const sezzlePayment =
+        initialPaymentMethods.find(
+          (method) => method.paymentMethod.typeID === SEZZLE.typeId
+        ) || null;
       if (sezzlePayment) {
         updatedPMs = [...paymentMethods, sezzlePayment];
       }
@@ -290,8 +300,9 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     //filter payment method types from order response
     if (order) {
       const isSezzleInAcceptedPayments =
-        order.paymentMethods.filter((method: IPaymentMethod2) => method.typeID === SEZZLE.typeId)
-          .length > 0;
+        order.paymentMethods.filter(
+          (method: IPaymentMethod2) => method.typeID === SEZZLE.typeId
+        ).length > 0;
       let isAutoshipAllowed = false;
       if (sezzleSiteFlag?.auxDataText) {
         const jsonData = JSON.parse(sezzleSiteFlag.auxDataText);
@@ -466,14 +477,14 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     const updatedPaymentMethods = paymentMethods.map((method) =>
       method.paymentMethod.id === paymentId
         ? {
-          ...method,
-          isEditing: !method.isEditing, // Toggle editing state for the selected payment method
-        }
+            ...method,
+            isEditing: !method.isEditing, // Toggle editing state for the selected payment method
+          }
         : {
-          ...method,
-          isEditing: false,
-          isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
-        }
+            ...method,
+            isEditing: false,
+            isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
+          }
     );
     setPaymentMethods(updatedPaymentMethods);
   };
@@ -481,42 +492,42 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   const handleCancelNewCard = () => {
     setShowNewCard(false);
 
+    // Find the previously selected payment method
+    const previouslySelectedMethod = paymentMethods.find((pm) => pm.isSelected);
+
+    // Filter out the temporary card (id === 0)
     let updatedPayments = paymentMethods
       .filter((pm) => pm.paymentMethod.id !== 0)
       .map((po) => ({
         ...po,
         isEditing: false,
-        isSelected: false, // Reset selection
+        isSelected: false, // Reset selection for all
       }));
 
-    // Check if any payment method is already selected
-    const selectedPayment = updatedPayments.find((pm) => pm.isSelected);
+    let selectedPaymentId = previouslySelectedMethod?.paymentMethod.id;
 
-    if (!selectedPayment) {
-      // If no selection, set preferred card as selected
-      updatedPayments = updatedPayments.map((po) => ({
-        ...po,
-        isSelected: po.paymentMethod.preferred || false,
-        isPaymentValidated: false,
-        isVisible:
-          po.paymentMethod.preferred ||
-          po.paymentMethod.accountName === PAYPAL.name ||
-          po.paymentMethod.accountName === SEZZLE.name ||
-          false,
-        isEditing: false,
-      }));
-    } else {
-      updatedPayments = updatedPayments.map((po) => ({
-        ...po,
-        isSelected: po.paymentMethod.id === selectedPayment.paymentMethod.id,
-        isPaymentValidated: false,
-        isVisible:
-          po.paymentMethod.accountName === PAYPAL.name ||
-          po.paymentMethod.accountName === SEZZLE.name ||
-          false,
-        isEditing: false,
-      }));
+    // If the previously selected method was a new card (id === 0), select the preferred method
+    if (selectedPaymentId === 0) {
+      const preferredMethod = updatedPayments.find(
+        (po) => po.paymentMethod.preferred
+      );
+      if (preferredMethod) {
+        selectedPaymentId = preferredMethod.paymentMethod.id;
+      }
     }
+
+    // Ensure only one payment method is selected
+    updatedPayments = updatedPayments.map((po) => ({
+      ...po,
+      isSelected: po.paymentMethod.id === selectedPaymentId,
+      isPaymentValidated: false,
+      isVisible:
+        po.paymentMethod.preferred ||
+        po.paymentMethod.accountName === PAYPAL.name ||
+        po.paymentMethod.accountName === SEZZLE.name ||
+        false,
+      isEditing: false,
+    }));
 
     setTimeout(() => {
       setPaymentMethods(updatedPayments);
@@ -593,8 +604,8 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   };
 
   const showShouldToggleAccordian =
-    paymentMethods.filter(
-      (pm) => creditCardTypeIds.includes(pm.paymentMethod.typeID)
+    paymentMethods.filter((pm) =>
+      creditCardTypeIds.includes(pm.paymentMethod.typeID)
     ).length > 1;
 
   const updateCvvError = (error: string) => {
@@ -669,4 +680,4 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   );
 };
 
-export default withLoader(PaymentMethod);
+export default PaymentMethod;
