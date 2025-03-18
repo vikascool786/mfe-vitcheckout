@@ -304,9 +304,7 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
                 <div>{optionStringValue()}</div>
               </div>
 
-              {isAddressSaved && (
-                <div className="shippingItem-priceStr">{totals?.priceStr}</div>
-              )}
+              <div className="shippingItem-priceStr">{totals?.priceStr}</div>
             </section>
             <section className="item-cashback">
               {totals?.cashBack > 0 && (
@@ -348,8 +346,8 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
             </section>
             {(item.autoshipFreq > 0 || item.autoShipId) &&
               (portalData?.autoShipDiscount > 0 &&
-              isMaProduct &&
-              item.hasAutoShipDiscount ? (
+                isMaProduct &&
+                item.hasAutoShipDiscount ? (
                 <div className="item-autoship">
                   <AutoshipIcon />
                   Saving {portalData.autoShipDiscount}% with Autoship

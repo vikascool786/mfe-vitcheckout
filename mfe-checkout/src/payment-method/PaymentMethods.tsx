@@ -14,18 +14,13 @@ import withLoader from "../hoc/withLoader";
 import { Address } from "../interfaces/Address";
 import { PaymentOptionClick2Pay } from "../payment-method-click2pay/PaymentMethodOptionClick2Pay";
 import { PaymentOption } from "../payment-method-option/PaymentMethodOption";
-import {
-  initialPaymentMethods,
-  IPaymentOption,
-  orderAtom,
-  paymentMethodsAtom,
-} from "../store";
+import { initialPaymentMethods, IPaymentOption, orderAtom, paymentMethodsAtom } from "../store";
 import { TextUpdates } from "../text-updates/TextUpdates";
 import { createPaymentMethod } from "../utils/helpers/GeneratePaymentMethod";
 import "./PaymentMethods.scss";
 import * as Yup from "yup";
 import {
-  CLICK2PAY,
+  CLICK2PAY, creditCardTypeIds,
   isThirdPartyPayment,
   PAYPAL,
   SEZZLE,
@@ -127,6 +122,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         const response = await fetchShoppersPaymentMethods(shopperId);
 
         let staticMethods = paymentMethods;
+
 
         if (!isSezzleAllowed()) {
           staticMethods = staticMethods.filter(
@@ -259,20 +255,15 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   }, [shopperId, addresses]);
 
   useEffect(() => {
-    let updatedPMs = paymentMethods;
+    let updatedPMs = paymentMethods
     if (!isSezzleAllowed()) {
       updatedPMs = paymentMethods.filter(
         (method) => method.paymentMethod.typeID !== SEZZLE.typeId
       );
-    } else if (
-      !paymentMethods.some(
+    } else if (!paymentMethods.some((method) => method.paymentMethod.typeID === SEZZLE.typeId)) {
+      const sezzlePayment = initialPaymentMethods.find(
         (method) => method.paymentMethod.typeID === SEZZLE.typeId
-      )
-    ) {
-      const sezzlePayment =
-        initialPaymentMethods.find(
-          (method) => method.paymentMethod.typeID === SEZZLE.typeId
-        ) || null;
+      ) || null;
       if (sezzlePayment) {
         updatedPMs = [...paymentMethods, sezzlePayment];
       }
@@ -299,9 +290,8 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     //filter payment method types from order response
     if (order) {
       const isSezzleInAcceptedPayments =
-        order.paymentMethods.filter(
-          (method: IPaymentMethod2) => method.typeID === SEZZLE.typeId
-        ).length > 0;
+        order.paymentMethods.filter((method: IPaymentMethod2) => method.typeID === SEZZLE.typeId)
+          .length > 0;
       let isAutoshipAllowed = false;
       if (sezzleSiteFlag?.auxDataText) {
         const jsonData = JSON.parse(sezzleSiteFlag.auxDataText);
@@ -476,14 +466,14 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     const updatedPaymentMethods = paymentMethods.map((method) =>
       method.paymentMethod.id === paymentId
         ? {
-            ...method,
-            isEditing: !method.isEditing, // Toggle editing state for the selected payment method
-          }
+          ...method,
+          isEditing: !method.isEditing, // Toggle editing state for the selected payment method
+        }
         : {
-            ...method,
-            isEditing: false,
-            isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
-          }
+          ...method,
+          isEditing: false,
+          isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
+        }
     );
     setPaymentMethods(updatedPaymentMethods);
   };
@@ -604,7 +594,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
 
   const showShouldToggleAccordian =
     paymentMethods.filter(
-      (pm) => pm.paymentMethod.typeID === 9 || pm.paymentMethod.typeID === 6
+      (pm) => creditCardTypeIds.includes(pm.paymentMethod.typeID)
     ).length > 1;
 
   const updateCvvError = (error: string) => {

@@ -71,3 +71,5 @@ export const creditCards = [
 export const getTypeIdByAltName = (altName: string): number | undefined => {
     return creditCards.find(payment => payment.altName === altName)?.typeId;
 }
+
+export const creditCardTypeIds = creditCards.map(card => card.typeId);

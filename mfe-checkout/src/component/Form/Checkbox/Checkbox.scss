@@ -1,7 +1,6 @@
 .checkbox-container {
   display: flex;
   flex-direction: row;
-  align-items: center;
   padding-top: 10px;
   gap: 4px;
 }
@@ -30,7 +29,6 @@
   text-align: left;
   text-underline-position: from-font;
   text-decoration-skip-ink: none;
-
 }
 
 .checkbox-sub-container {

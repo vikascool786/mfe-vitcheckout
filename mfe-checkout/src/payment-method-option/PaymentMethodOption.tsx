@@ -244,9 +244,8 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
       id={`[id=${paymentMethod.id}]`}
     >
       <div
-        className={`payment-option-select-container ${
-          isEditing ? "form-mode" : ""
-        }`}
+        className={`payment-option-select-container ${isEditing ? "form-mode" : ""
+          }`}
       >
         <div className="payment-option-sub-container">
           <RadioButton
@@ -331,9 +330,9 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                             (pm) =>
                               pm.paymentMethod.id === paymentMethod.id
                                 ? {
-                                    ...pm,
-                                    isPaymentValidated: false,
-                                  }
+                                  ...pm,
+                                  isPaymentValidated: false,
+                                }
                                 : pm
                           );
 

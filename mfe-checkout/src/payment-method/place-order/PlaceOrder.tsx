@@ -398,8 +398,6 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     return <Spinner />;
   }
 
-
-  console.log(paymentTypeId)
   return (
     <div className="checkout-place-order">
       <Formik

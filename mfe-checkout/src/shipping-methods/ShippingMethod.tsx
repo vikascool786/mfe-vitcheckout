@@ -244,11 +244,10 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
       {isAddressSaved && orderConsolidateData?.showOrderConsolidate && (
         <div className="shipping-options-container">
           <div
-            className={`shipping-option-container start ${
-              orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_SPLIT_CODE
+            className={`shipping-option-container start ${orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_SPLIT_CODE
                 ? "selected"
                 : ""
-            }`}
+              }`}
           >
             <div className="shipping-option-wrapper">
               <div className="shipping-option-select-container">
@@ -272,11 +271,10 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
             </div>
           </div>
           <div
-            className={`shipping-option-container end ${
-              orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_CODE
+            className={`shipping-option-container end ${orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_CODE
                 ? "selected"
                 : ""
-            }`}
+              }`}
           >
             <div className="shipping-option-wrapper">
               <div className="shipping-option-select-container">
