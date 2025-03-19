@@ -223,18 +223,24 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
               // Ensure we don't insert at a negative index
               const insertIndex = Math.max(sezzleIndex - 1, 0);
 
-              updatedPaymentMethods.splice(insertIndex, 0, {
-                paymentMethod: createPaymentMethod({
-                  accountName: PAYPAL.name,
-                  typeID: PAYPAL.typeId,
-                  imageUrl: PaypalIcon,
-                  id: -1001,
-                }),
-                paymentAddress: {} as Address,
-                isPaymentValidated: false,
-                isSelected: false,
-                isVisible: true,
-              });
+              // Check if the PayPal account is already in the updatedPaymentMethods array
+              const isPaypalAlreadyAdded = updatedPaymentMethods.some(method => method.paymentMethod.accountName === PAYPAL.name);
+
+              if (!isPaypalAlreadyAdded) {
+                updatedPaymentMethods.splice(insertIndex, 0, {
+                  paymentMethod: createPaymentMethod({
+                    accountName: PAYPAL.name,
+                    typeID: PAYPAL.typeId,
+                    imageUrl: PaypalIcon,
+                    id: -1001,
+                  }),
+                  paymentAddress: {} as Address,
+                  isPaymentValidated: false,
+                  isSelected: false,
+                  isVisible: true,
+                });
+              }
+
 
               setPaymentMethods(updatedPaymentMethods);
             } else {
