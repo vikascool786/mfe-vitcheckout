@@ -206,9 +206,14 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
 
           // add paypal back if it exists in the payment methods
 
-          const shouldShowPaypal = orderData?.paymentMethods.some(
-            (method) => method.type.toLowerCase() === PAYPAL.name.toLowerCase()
-          );
+          const shouldShowPaypal =
+            orderData?.paymentMethods.some(
+              (method) =>
+                method.type.toLowerCase() === PAYPAL.name.toLowerCase()
+            ) &&
+            paymentMethods.some(
+              (method) => method.paymentMethod.typeID === PAYPAL.typeId
+            );
 
           if (shouldShowPaypal) {
             // add paypal back if it exists in the payment methods on the 2nd last position if sezzle is present
@@ -349,8 +354,8 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
             </section>
             {(item.autoshipFreq > 0 || item.autoShipId) &&
               (portalData?.autoShipDiscount > 0 &&
-                isMaProduct &&
-                item.hasAutoShipDiscount ? (
+              isMaProduct &&
+              item.hasAutoShipDiscount ? (
                 <div className="item-autoship">
                   <AutoshipIcon />
                   Saving {portalData.autoShipDiscount}% with Autoship
