@@ -14,6 +14,7 @@ import PaypalIcon from "../assets/images/PayPal.png";
 import SezzleIcon from "../assets/images/Sezzle.png";
 
 import {
+  initialPaymentMethods,
   orderAtom,
   orderNotificationsAtom,
   paymentMethodsAtom,
@@ -222,6 +223,11 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
               (method) => method.type.toLowerCase() === "sezzle"
             );
 
+            const paypalPayment =
+                initialPaymentMethods.find(
+                    (method) => method.paymentMethod.typeID === PAYPAL.typeId
+                ) || null;
+
             if (sezzleIndex > -1) {
               // Clone the array to avoid mutating state directly
               const updatedPaymentMethods = [...paymentMethods];
@@ -232,38 +238,18 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
               // Check if the PayPal account is already in the updatedPaymentMethods array
               const isPaypalAlreadyAdded = updatedPaymentMethods.some(method => method.paymentMethod.accountName === PAYPAL.name);
 
-              if (!isPaypalAlreadyAdded) {
-                updatedPaymentMethods.splice(insertIndex, 0, {
-                  paymentMethod: createPaymentMethod({
-                    accountName: PAYPAL.name,
-                    typeID: PAYPAL.typeId,
-                    imageUrl: PaypalIcon,
-                    id: -1001,
-                  }),
-                  paymentAddress: {} as Address,
-                  isPaymentValidated: false,
-                  isSelected: false,
-                  isVisible: true,
-                });
+              if (!isPaypalAlreadyAdded && paypalPayment) {
+                updatedPaymentMethods.splice(insertIndex, 0, paypalPayment);
               }
 
               setPaymentMethods(updatedPaymentMethods);
             } else {
-              setPaymentMethods([
-                ...paymentMethods,
-                {
-                  paymentMethod: createPaymentMethod({
-                    accountName: PAYPAL.name,
-                    typeID: PAYPAL.typeId,
-                    imageUrl: PaypalIcon,
-                    id: -1001,
-                  }),
-                  paymentAddress: {} as Address,
-                  isPaymentValidated: false,
-                  isSelected: false,
-                  isVisible: true,
-                },
-              ]);
+              if(paypalPayment){
+                setPaymentMethods([
+                  ...paymentMethods,
+                  paypalPayment,
+                ])
+              }
             }
           }
         }

@@ -98,6 +98,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     orderNotificationsAtom
   );
 
+  const [isAutoShipChecked, setIsAutoShipChecked] = useState<boolean>(false);
   const addressList = useAtomValue(addressAtom);
   const paymentMethodOptions = useAtomValue(paymentMethodsAtom);
   const [portalData] = useAtom(portalApiData(shopperId));
@@ -394,6 +395,8 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                         updateOrderErrorMessage={handleUpdateOrderErrorMessage}
                         billingId={defaultAddress?.id || 0}
                         setOrderData={setOrderData}
+                        setIsAutoShipChecked={setIsAutoShipChecked}
+                        isAutoShipChecked={isAutoShipChecked}
                         shippingId={
                           defaultPaymentMethod?.addressId ??
                           defaultAddress?.id ??
@@ -419,6 +422,8 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                   updateOrderErrorMessage={handleUpdateOrderErrorMessage}
                   billingId={defaultAddress?.id || 0}
                   setOrderData={setOrderData}
+                  setIsAutoShipChecked={setIsAutoShipChecked}
+                  isAutoShipChecked={isAutoShipChecked}
                   shippingId={
                     defaultPaymentMethod?.addressId ?? defaultAddress?.id ?? 0
                   }

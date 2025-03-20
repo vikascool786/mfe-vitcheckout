@@ -1,7 +1,7 @@
 import { loadScript } from "@paypal/paypal-js";
 import { Formik } from "formik";
 import { useAtom } from "jotai/index";
-import React, { memo, useEffect, useState } from "react";
+import React, { memo, SetStateAction, useEffect, useState } from "react";
 import { fetchSezzleUrl } from "../../api/ajaxaction/Sezzle";
 import { getTransactionData } from "../../api/service/Click2PayTransaction";
 import { buildOrder, changeOrder } from "../../api/service/Order";
@@ -53,6 +53,8 @@ interface IPlaceOrder {
   paymentMethods: IPaymentOption[];
   setOrderData: any;
   updateOrderErrorMessage: (newMessage: string) => void;
+  setIsAutoShipChecked: React.Dispatch<SetStateAction<boolean>>;
+  isAutoShipChecked: boolean;
 }
 
 const PAYPAL_TOKEN_URL = (shopperId: string, totalAmountDue: number) =>
@@ -70,6 +72,8 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   siteId,
   order,
   updateOrderErrorMessage,
+  setIsAutoShipChecked,
+  isAutoShipChecked,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const trackingData = new Map<string, string>();
@@ -88,9 +92,9 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   }, [order]);
 
   const { data: paypalToken } = useApi<{ tokenId: string }>(
-    hasPaypalToken(location.search) && order
+    !hasPaypalToken(location.search) && order
       ? PAYPAL_TOKEN_URL(shopperId, order.totals.price)
-      : PAYPAL_TOKEN_URL(shopperId, order?.totals.price),
+      : "",
     "GET"
   );
 
@@ -238,7 +242,6 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
 
           if (!paypalToken) {
             alert("Failed to fetch PayPal token, check console for message");
-            setIsLoading(false);
             return;
           }
           const url = `https://www.sandbox.paypal.com/checkoutnow?token=${paypalToken.tokenId}`;
@@ -432,9 +435,11 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                 <Checkbox
                   name="autoshipTerms"
                   title="I agree to the Autoship Terms & Conditions"
-                  onChange={() =>
-                    setFieldValue("autoshipTerms", !values.autoshipTerms)
-                  }
+                  checked={isAutoShipChecked}
+                  onChange={() => {
+                    setIsAutoShipChecked(!values.autoshipTerms);
+                    setFieldValue("autoshipTerms", !values.autoshipTerms);
+                  }}
                   errorMessage={touched.autoshipTerms && errors.autoshipTerms}
                 />
               </div>
