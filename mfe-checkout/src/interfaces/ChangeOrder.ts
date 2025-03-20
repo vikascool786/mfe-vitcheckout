@@ -41,7 +41,6 @@ export interface StoreMethods {
 }
 
 export interface UserOptions {
-  applyCashback: boolean;
   applyEWallet: boolean;
   isOfAge: boolean;
   trackingID: string;

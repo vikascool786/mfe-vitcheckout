@@ -11,7 +11,6 @@ export const generateStandardOrderPayload = (cartId: string, countryCode: string
         site_type: "W",
         application: "cart",
         userOptions: {
-            applyCashback: false,
             applyEWallet: false,
             isOfAge: true,
             trackingID: "",

@@ -215,7 +215,7 @@ const Checkout: React.FC<ICheckout> = ({
         ];
         setShopperAddressBook(updatedAddresses);
         setShippingAddress(validatedAddress);
-        setShowAVS(true);
+        setShowAVS(!isValidAddress);
       } catch (error) {
         setLoading(false);
       } finally {

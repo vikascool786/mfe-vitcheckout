@@ -84,7 +84,6 @@ export interface ResponseData {
   stores: Record<string, Store>;
   paymentMethods: PaymentMethod[];
   userOptions: {
-    applyCashback: boolean;
     applyEWallet: boolean;
     isOfAge: boolean;
     coupons: number[];

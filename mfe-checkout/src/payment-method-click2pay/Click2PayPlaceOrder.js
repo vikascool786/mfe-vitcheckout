@@ -67,7 +67,7 @@ const Click2PayPlaceOrder = (function () {
     function openIframe(){
         const iFrameContainer = document.querySelector(c2pIframe);
         if(iFrameContainer){
-            iFrameContainer.style.display = "block";
+            iFrameContainer.style.display = "inline-flex";
         }
     }
 

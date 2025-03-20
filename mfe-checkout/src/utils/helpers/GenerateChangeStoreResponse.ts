@@ -20,7 +20,6 @@ export const generateChangeStoreResponse = (order: Order): ChangeOrder => {
       return acc;
     }, {} as ChangeOrder["stores"]),
     userOptions: {
-      applyCashback: order.userOptions.applyCashback,
       applyEWallet: order.userOptions.applyEWallet,
       isOfAge: order.userOptions.isOfAge,
       trackingID: order.userOptions.trackingID,

@@ -82,7 +82,6 @@ export interface IPaymentMethod2 {
 }
 
 export interface IUserOptions {
-  applyCashback: boolean;
   applyEWallet: boolean;
   isOfAge: boolean;
   trackingID: string;

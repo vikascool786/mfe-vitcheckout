@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useRef, useState} from "react";
 import Click2PayInitializer from "./Click2PayInitializer";
 import Click2PayCards from "./Click2PayCards";
 import Click2PayNewCard from "./Click2PayNewCard";
@@ -54,6 +54,7 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({ pcid, order 
     const [cardData, setCardData] = useState([]);
     const [c2pData, setC2pData] = useState(c2pCustomerData);
     const [customerData] = useAtom(customerApiData(pcid));
+    const buttonRef = useRef<HTMLButtonElement>(null);
     const [showLearnMoreModal, setShowLearnMoreModal] = useState(false);
 
     const cardBrandsString = c2pData.cardBrands.join(",");
@@ -214,6 +215,12 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({ pcid, order 
         Click2PayNewCard.openAddCardOverlay();
     }
 
+    useEffect(() => {
+        if (showLearnMoreModal && buttonRef.current) {
+            buttonRef.current.focus();
+        }
+    }, [showLearnMoreModal]);
+
     const closeAddCardOverlay = (event: React.MouseEvent<HTMLButtonElement> | React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         Click2PayNewCard.closeAddCardOverlay();
@@ -279,6 +286,7 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({ pcid, order 
                                                          click-to-pay__iframe-modal--error click-to-pay__iframe-modal--scrollable">
                                             <div>
                                                 <button
+                                                    ref={buttonRef}
                                                     className="overlay-simple__close overlay-simple__close--dark margin-top"
                                                     onClick={closeLearnMoreButton}>
                                                     <span className="collapse-text">Close</span>
@@ -383,7 +391,7 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({ pcid, order 
                                                 secure checkout.
                                             </div>
                                         </div>
-                                        <CardInputs handleChange={handleChange} touched={touched} errors={errors} handleBlur={handleBlur} values={values} />
+                                        <CardInputs handleChange={handleChange} touched={touched} errors={errors} handleBlur={handleBlur} values={values} isEditingExistingCard={false} isEditing={false} />
                                     </div>
                                     <div className="form-footer form-footer__dual-button">
                                         <Button

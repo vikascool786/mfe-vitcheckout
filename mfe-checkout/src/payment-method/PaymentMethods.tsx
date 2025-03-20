@@ -37,6 +37,7 @@ import { orderHasAutoshipItems } from "../utils/OrderUtils";
 import { FormikProvider, useFormik } from "formik";
 import { getVisibleCardOptionsImages } from "../utils/helpers/GetVisibleCardImages";
 import { IPaymentMethod2 } from "../interfaces/Order";
+import Click2PayCardLoader from "../payment-method-click2pay/Click2PayCardLoader";
 
 interface IPaymentMethod {
   shopperId: string;
@@ -79,6 +80,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   const [thirdPartySiteFlagData, setThirdPartySiteFlagData] = useState<
     SiteFlags[]
   >([]);
+  const [isClick2PayCardSelected, setIsClick2PayCardSelected] =  useState<boolean>(false);
 
   useEffect(() => {
     const paymentSiteFlagList = thirdPartyPaymentFlagList().join(",");
@@ -338,19 +340,28 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
 
   useEffect(() => {
     const handleDeselectPaymentMethodsEvent = () => {
+      let filteredPaymentMethods = paymentMethods;
+      //remove cc entry option
+      filteredPaymentMethods = paymentMethods.filter(
+          (payment) => payment.paymentMethod.id !== 0
+      );
       setPaymentMethods(
-        paymentMethods.map((item) => ({
+          filteredPaymentMethods.map((item) => ({
           ...item,
           isSelected: false,
         }))
       );
       updatePaymentTypeId(CLICK2PAY.typeId);
+      setIsClick2PayCardSelected(true);
     };
     document.addEventListener(
       "c2pSelectedCard",
       handleDeselectPaymentMethodsEvent
     );
-  }, []);
+    return () => {
+      document.removeEventListener("c2pSelectedCard", handleDeselectPaymentMethodsEvent);
+    };
+  }, [paymentMethods.length]);
 
   const toggleAccordion = () => {
     const paymentString = ["Paypal"];
@@ -438,6 +449,13 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
 
   useEffect(() => {
     const selectedPayment = paymentMethods.find((pm) => pm.isSelected);
+
+    setShowNewCard(selectedPayment?.paymentMethod.id === 0);
+
+    if(isClick2PayCardSelected && selectedPayment && showClick2Pay && selectedPayment?.paymentMethod.typeID !== CLICK2PAY.typeId){
+      Click2PayCardLoader.deselectC2PCard();
+      setIsClick2PayCardSelected(false);
+    }
 
     if (isThirdPartyPayment(selectedPayment?.paymentMethod.typeID)) {
       setShowNewCard(false);
@@ -611,12 +629,13 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     formik.setFieldValue("cvv", cvv);
   };
 
-  const showShouldToggleAccordian =
-    paymentMethods.filter(
+  const getSavedCreditCardsFromWallet = paymentMethods.filter(
       (pm) =>
-        pm.paymentMethod.id > 0 &&
-        creditCardTypeIds.includes(pm.paymentMethod.typeID)
-    ).length > 1;
+          pm.paymentMethod.id > 0 &&
+          creditCardTypeIds.includes(pm.paymentMethod.typeID)
+  )
+
+  const showShouldToggleAccordian = getSavedCreditCardsFromWallet.length > 1;
 
   const updateCvvError = (error: string) => {
     formik.setFieldValue("cvvError", error, false);

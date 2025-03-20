@@ -20,7 +20,7 @@ const Click2PayCardLoader = (function(){
         clickToPayCardList = Array(cardList);
         srcCardList.loadCards(cardList);
         if(deselectCard){
-            //checkoutClick2payUtil.deselectC2PCard();
+            deselectC2PCard();
         }
         if(showSignout){
             srcCardList.setAttribute("display-sign-out", "true");
@@ -44,12 +44,7 @@ const Click2PayCardLoader = (function(){
             srcCardList.addEventListener('selectSrcDigitalCardId', event => {
                 const selectedCardId = event.detail;
                 paymentData.setAttribute(CUSTOM_ATTR_SELECTED_CARD, selectedCardId);
-                //placeOrderButton.setAttribute(CUSTOM_ATTR_SELECTED_CARD, event.detail);
-                //checkoutPaymentMethods.deselectAllExistingShopperCreditCards();
-                //checkoutPaymentMethods.deselectAllInstallmentPaymentOptions();
-                //checkoutPaymentUtil.enableC2PPlaceOrderButton();
-                //validatorUtils.hideValidationMessages();
-                //triggerSelectionChange(selectedCardId);
+                Click2PayEventUtil.triggerClick2PaySelectedCardEvent();
             });
         }
     }
@@ -68,9 +63,18 @@ const Click2PayCardLoader = (function(){
         }
     }
 
+    function deselectC2PCard(){
+        const srcCardList = document.querySelector(c2pContainer).querySelector(srcCardListElement);
+        if(srcCardList){
+            srcCardList.removeAttribute("src-digital-card-id"); //need to remove for the attribute below to work
+            srcCardList.setAttribute("src-digital-card-id", "NONE");
+        }
+    }
+
     return {
         loadSRCCardsOnPage,
-        hideAccessCardsMessage
+        hideAccessCardsMessage,
+        deselectC2PCard
     }
 })();
 

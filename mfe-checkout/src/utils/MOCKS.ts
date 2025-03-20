@@ -257,7 +257,6 @@ export const ORDER_DATA = {
     },
   },
   userOptions: {
-    applyCashback: false,
     applyEWallet: false,
     isOfAge: false,
     trackingID: "",

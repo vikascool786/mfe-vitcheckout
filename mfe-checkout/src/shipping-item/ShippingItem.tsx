@@ -35,6 +35,7 @@ import { CustomDropdownField } from "../component/Form/Field/CustomDropdownField
 import { getOptionStringValue } from "../utils/helpers/GetOptionStringValue";
 import { PAYPAL } from "../payment-method/PaymentType";
 import { createPaymentMethod } from "../utils/helpers/GeneratePaymentMethod";
+import {isGiftCardStoreDetail} from "../utils/StoreUtils";
 
 interface IProduct {
   imageUrl: string;
@@ -117,7 +118,7 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
   const { catalogId, isMA } = storeDetail || {};
   const { bv, ibv } = item.totals;
 
-  const isGiftCard = caption.toLowerCase().includes("email delivery");
+  const isGiftCard = isGiftCardStoreDetail(storeDetail);
 
   const options = useMemo(() => {
     if (item.option && item.option.length > 0) {
@@ -207,13 +208,13 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
           // add paypal back if it exists in the payment methods
 
           const shouldShowPaypal =
-            orderData?.paymentMethods.some(
-              (method) =>
-                method.type.toLowerCase() === PAYPAL.name.toLowerCase()
-            ) &&
-            paymentMethods.some(
-              (method) => method.paymentMethod.typeID === PAYPAL.typeId
-            );
+          orderData?.paymentMethods.some(
+            (method) =>
+              method.type.toLowerCase() === PAYPAL.name.toLowerCase()
+          ) &&
+          paymentMethods.some(
+            (method) => method.paymentMethod.typeID === PAYPAL.typeId
+          );
 
           if (shouldShowPaypal) {
             // add paypal back if it exists in the payment methods on the 2nd last position if sezzle is present
@@ -245,7 +246,6 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
                   isVisible: true,
                 });
               }
-
 
               setPaymentMethods(updatedPaymentMethods);
             } else {
@@ -315,7 +315,9 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
                   {decodeHtmlEntities(caption)}
                 </div>
 
-                <div>{optionStringValue()}</div>
+                { !isGiftCard && (
+                    <div>{optionStringValue()}</div>
+                )}
               </div>
 
               <div className="shippingItem-priceStr">{totals?.priceStr}</div>
@@ -360,8 +362,8 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
             </section>
             {(item.autoshipFreq > 0 || item.autoShipId) &&
               (portalData?.autoShipDiscount > 0 &&
-              isMaProduct &&
-              item.hasAutoShipDiscount ? (
+                isMaProduct &&
+                item.hasAutoShipDiscount ? (
                 <div className="item-autoship">
                   <AutoshipIcon />
                   Saving {portalData.autoShipDiscount}% with Autoship
