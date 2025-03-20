@@ -98,8 +98,6 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     "GET"
   );
 
-
-
   useEffect(() => {
     const getQueryParams = () => {
       const params = new URLSearchParams(window.location.search);

@@ -117,35 +117,35 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
           payerId: params.get("PayerID"),
         };
       };
-  
+
       // checking paypal order success
       const { token, payerId } = getQueryParams();
-  
+
       const isPaypalOrderSuccess = token && payerId;
       const addressMap = new Map<string, Address>();
       const showPayPalSelected = !!token;
-  
+
       Object.keys(addresses).map((id) =>
         addressMap.set(id, addresses[parseInt(id)] as Address)
       );
-  
+
       try {
         const response = await fetchShoppersPaymentMethods(shopperId);
-  
+
         let staticMethods = paymentMethods;
-  
+
         if (!isSezzleAllowed()) {
           staticMethods = staticMethods.filter(
             (method) => method.paymentMethod.typeID !== SEZZLE.typeId
           );
         }
-  
+
         if (!shouldShowPaypal) {
           staticMethods = staticMethods.filter(
             (method) => method.paymentMethod.typeID !== PAYPAL.typeId
           );
         }
-  
+
         // case when user does not have any payment methods
         if (!response) {
           const newCard = createPaymentMethod({
@@ -156,7 +156,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
             addressId: 0,
             expMonth: new Date().getMonth() + 1,
           });
-  
+
           // [new card, paypal, sezzle]
           staticMethods = [
             {
@@ -169,15 +169,15 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
             },
             ...paymentMethods,
           ];
-  
+
           setPaymentMethods(staticMethods);
           setIsPaymentsFetched(true);
           return;
         }
-  
+
         let paymentOptions = response.map((paymentMethod) => {
           const isPreferred = paymentMethod.preferred;
-  
+
           if (isPreferred) {
             staticMethods = staticMethods.map((sm) => ({
               ...sm,
@@ -193,7 +193,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
             isSelected: isPreferred,
           } as IPaymentOption;
         });
-  
+
         const preferredPaymentMethod = paymentOptions.find(
           (option) => option.paymentMethod.preferred
         );
@@ -205,9 +205,10 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
           }));
         }
         let updatedPaymentOptions = [...paymentOptions, ...staticMethods];
-  
+
         if (showPayPalSelected) {
           // set paypal as selected and only show items visible which are true
+
           updatedPaymentOptions = updatedPaymentOptions.map((paymentOption) => {
             if (paymentOption.paymentMethod.typeID === PAYPAL.typeId) {
               // set paypal true
@@ -227,7 +228,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
             }
           });
         }
-  
+
         setTimeout(() => {
           setPaymentMethods(updatedPaymentOptions);
           setIsPaymentsFetched(true);
@@ -238,7 +239,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         // let user proceed with paypal
         if (isPaypalOrderSuccess) {
           await generatePayPalTransactionDetails(shopperId, token, true, false);
-  
+
           const updatedPaymentOptions = paymentMethods.map((paymentOption) => {
             if (paymentOption.paymentMethod.typeID === PAYPAL.typeId) {
               return {
@@ -253,18 +254,17 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
               };
             }
           });
-  
+
           setPaymentMethods(updatedPaymentOptions);
           setIsPaymentsFetched(true);
         }
       }
     };
-  
+
     if (addresses && paymentMethods.length < 3) {
       fetchShoppersSavedPayments(shopperId, addresses);
     }
   }, [shopperId, addresses]);
-  
 
   useEffect(() => {
     let updatedPMs = paymentMethods;
