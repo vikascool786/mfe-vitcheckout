@@ -68,6 +68,7 @@ const Checkout: React.FC<ICheckout> = ({
 
   const [shippingAddress, setShippingAddress] =
     useState<Address>(defaultAddress);
+  const [validAddressEntered, setValidAddressEntered] = useState<boolean>(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [showShipAddressForm, setShowShipAddressForm] = useState(false);
   const [shopperAddressBook, setShopperAddressBook] = useAtom(addressAtom);
@@ -214,7 +215,12 @@ const Checkout: React.FC<ICheckout> = ({
         ];
         setShopperAddressBook(updatedAddresses);
         setShippingAddress(validatedAddress);
-        setShowAVS(true);
+        if(isValidAddress){
+          setValidAddressEntered(isValidAddress);
+          setShowAVS(false);
+        }else {
+          setShowAVS(true);
+        } 
       } catch (error) {
         setLoading(false);
       } finally {
@@ -222,6 +228,12 @@ const Checkout: React.FC<ICheckout> = ({
       }
     }
   };
+
+  useEffect(() => {
+    if (validAddressEntered && shippingAddress) {
+        handleUseSelectedAddress();
+    }
+}, [shippingAddress, validAddressEntered]);
 
   const handleEditClick = () => {
     setShowAVS(false);
@@ -311,11 +323,16 @@ const Checkout: React.FC<ICheckout> = ({
           setErrorMessage("");
         }
       }
-      setShowAVS(!showAVS);
       setIsExpanded(false);
       setLoading(false);
+      if(validAddressEntered){
+        setValidAddressEntered(false);
+      }else {
+        setShowAVS(!showAVS);
+      }
     } catch (error: any) {
       setLoading(false);
+      setValidAddressEntered(false);
       setErrorMessage(error.response.data);
     }
   };

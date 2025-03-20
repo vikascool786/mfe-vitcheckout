@@ -18,6 +18,7 @@ export const AddressVerificationContainer = forwardRef<
   AddressHandler,
   MyComponentProps
 >((props, ref) => {
+  const { showAvs } = props;
   const [addressToVerify, setAddressToVerify] = useState<Address>({
     id: 0,
     isPrimary: 0,
@@ -77,6 +78,7 @@ export const AddressVerificationContainer = forwardRef<
     return isValidAddress;
   };
 
+  if (!showAvs) return null;
   return (
     <div
       className={`${
