@@ -92,11 +92,13 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   }, [order]);
 
   const { data: paypalToken } = useApi<{ tokenId: string }>(
-    !hasPaypalToken(location.search) && order
+    hasPaypalToken(location.search) && order
       ? PAYPAL_TOKEN_URL(shopperId, order.totals.price)
-      : "",
+      : PAYPAL_TOKEN_URL(shopperId, order?.totals.price),
     "GET"
   );
+
+
 
   useEffect(() => {
     const getQueryParams = () => {
@@ -242,6 +244,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
 
           if (!paypalToken) {
             alert("Failed to fetch PayPal token, check console for message");
+            setIsLoading(false);
             return;
           }
           const url = `https://www.sandbox.paypal.com/checkoutnow?token=${paypalToken.tokenId}`;
