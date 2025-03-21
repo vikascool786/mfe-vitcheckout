@@ -160,7 +160,6 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
 
   const scrollToCVV = (selectedPaymentMethod: IPaymentOption) => {
     if (!selectedPaymentMethod?.paymentMethod?.id) {
-      setOrderNotifications(["Please provide a payment method"]);
       window.scrollTo({
         top: 0,
         behavior: "smooth",
@@ -192,13 +191,17 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   const handlePlaceOrder = async (paymentMethods: IPaymentOption[]) => {
     try {
       setIsLoading(true);
-
       if (selectedPaymentMethod?.paymentMethod.id) {
-        setOrderNotifications([]);
+        setOrderNotifications(
+          orderNotifications?.filter(
+            (n) => n !== "Please provide a payment method"
+          )
+        );
       } else if (
         !selectedPaymentMethod?.paymentMethod.id ||
         (orderNotifications && orderNotifications?.length > 0)
       ) {
+        setOrderNotifications(["Please provide a payment method"]);
         window.scrollTo(0, 0);
         setIsLoading(false);
         return;
@@ -284,6 +287,8 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     } catch (error) {
       setIsLoading(false);
       console.error("Error placing order:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 

@@ -193,8 +193,8 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     () =>
       paymentMethods
         ? (paymentMethods?.find(
-          (payment) => payment?.preferred
-        ) as IPaymentMethod)
+            (payment) => payment?.preferred
+          ) as IPaymentMethod)
         : ({} as IPaymentMethod),
     [paymentMethods]
   );
@@ -230,8 +230,9 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
             redirectToOrderConfirmation(orderId);
           }
         } else {
-          if (response?.data?.response?.errors[0]?.message) {
-            setOrderErrorMessage(response?.data?.response?.errors[0]?.message);
+          if (response?.response.data?.errors[0]?.message) {
+            setLoadingOrderConfirmation(false);
+            setOrderErrorMessage(response?.response.data?.errors[0]?.message);
             return;
           }
 
@@ -242,6 +243,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
           setOrderErrorMessage(
             `Detail: ${errorMessage} ${developerMessage} (code: ${errorCode})`
           );
+          setLoadingOrderConfirmation(false);
         }
       })
       .catch((error) => {

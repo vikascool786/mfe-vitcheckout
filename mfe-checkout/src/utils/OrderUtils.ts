@@ -93,7 +93,7 @@ export const getOrderNotifications = (
 ): string[] => {
     let orderNotifications: string[] = [];
     orderSuccessResponse?.notifications?.forEach((n) => {
-        orderNotifications.push(n.reason);
+        if (n.reason)   orderNotifications.push(n.reason);
     });
     return orderNotifications;
 };
