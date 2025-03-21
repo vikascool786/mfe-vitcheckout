@@ -193,7 +193,9 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     try {
       setIsLoading(true);
 
-      if (
+      if (selectedPaymentMethod?.paymentMethod.id) {
+        setOrderNotifications([]);
+      } else if (
         !selectedPaymentMethod?.paymentMethod.id ||
         (orderNotifications && orderNotifications?.length > 0)
       ) {
