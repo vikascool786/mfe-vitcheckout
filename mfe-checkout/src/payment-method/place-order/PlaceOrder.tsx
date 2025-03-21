@@ -78,7 +78,9 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   const [isLoading, setIsLoading] = useState(false);
   const trackingData = new Map<string, string>();
   const [siteData] = useAtom(siteApiData(siteId));
-  const [orderNotifications] = useAtom(orderNotificationsAtom);
+  const [orderNotifications, setOrderNotifications] = useAtom(
+    orderNotificationsAtom
+  );
 
   const selectedPaymentMethod = paymentMethods.find((pm) => pm.isSelected);
 
@@ -158,7 +160,11 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
 
   const scrollToCVV = (selectedPaymentMethod: IPaymentOption) => {
     if (!selectedPaymentMethod?.paymentMethod?.id) {
-      console.error("Invalid payment method ID");
+      setOrderNotifications(["Please provide a payment method"]);
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
       return;
     }
 
@@ -187,7 +193,11 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     try {
       setIsLoading(true);
 
-      if (orderNotifications && orderNotifications?.length > 0) {
+      if (
+        orderNotifications &&
+        orderNotifications[0] !== "Please provide a payment method" &&
+        orderNotifications?.length > 0
+      ) {
         window.scrollTo(0, 0);
         setIsLoading(false);
         return;
@@ -481,10 +491,10 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
               <div>Processing Order...</div>
             ) : (
               <Button
-                qaTag={'qa-order'}
+                qaTag={"qa-order"}
                 label={
                   paymentTypeId === SEZZLE.typeId ||
-                    paymentTypeId === PAYPAL.typeId
+                  paymentTypeId === PAYPAL.typeId
                     ? "Pay with"
                     : "Place Order"
                 }
@@ -492,16 +502,16 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                   paymentTypeId === SEZZLE.typeId
                     ? "sezzle"
                     : paymentTypeId === PAYPAL.typeId
-                      ? "paypal"
-                      : "primary"
+                    ? "paypal"
+                    : "primary"
                 }
                 onClick={submitForm}
                 logo={
                   paymentTypeId === SEZZLE.typeId
                     ? "https://img.shop.com/Image/resources/checkout/Sezzle-Color-White-Logo.svg"
                     : paymentTypeId === PAYPAL.typeId
-                      ? "https://img.shop.com/Image/resources/checkout/PayPal-White-Logo.svg"
-                      : ""
+                    ? "https://img.shop.com/Image/resources/checkout/PayPal-White-Logo.svg"
+                    : ""
                 }
               />
             )}
