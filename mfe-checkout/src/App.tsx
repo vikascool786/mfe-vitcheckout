@@ -38,22 +38,22 @@ const App: React.FC<AppProps> = () => {
         /> */}
 
         {/* for old custoemr  */}
-        {/* <CheckoutContainer
+        <CheckoutContainer
           cartId="cart_1503581065_W_USA_USA_ENG"
           shopperId="pekekqYxzpXWqzhUqpzYhzmzhWpwWVVzwVXzzhwhm"
           pcid="1503581065"
           siteId="66"
           sessionId="3055304282"
-        /> */}
+        />
 
         {/* for GC Card Customer */}
-        <CheckoutContainer
+        {/* <CheckoutContainer
           cartId="cart_1778511302_W_USA_USA_ENG"
           shopperId="zWUVXxqjzwWqWzhZjqzZYUWzwWxWzhUmwVwUzehzpp"
           pcid="1778511302"
           siteId="66"
           sessionId="3055249126"
-        />
+        /> */}
         {/* <CheckoutContainer
           cartId="cart_1762863970_W_USA_USA_ENG"
           shopperId="qYmmqpWZzVjeZzhZqpzpVYwzkmqWjqkhZVqjzxqjqp"

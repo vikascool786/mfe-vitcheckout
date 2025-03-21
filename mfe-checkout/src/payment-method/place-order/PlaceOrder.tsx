@@ -52,6 +52,7 @@ interface IPlaceOrder {
   order?: Order;
   paymentMethods: IPaymentOption[];
   setOrderData: any;
+  setIsLoading: any;
   updateOrderErrorMessage: (newMessage: string) => void;
   setIsAutoShipChecked: React.Dispatch<SetStateAction<boolean>>;
   isAutoShipChecked: boolean;
@@ -71,11 +72,12 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   shopperId,
   siteId,
   order,
+  setIsLoading,
   updateOrderErrorMessage,
   setIsAutoShipChecked,
   isAutoShipChecked,
 }) => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
   const trackingData = new Map<string, string>();
   const [siteData] = useAtom(siteApiData(siteId));
   const [orderNotifications, setOrderNotifications] = useAtom(
@@ -269,7 +271,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
 
           if (
             selectedPaymentMethod &&
-            !selectedPaymentMethod.isPaymentValidated
+            !selectedPaymentMethod.paymentMethod.cvv
           ) {
             order &&
               setOrderData({
@@ -287,8 +289,6 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     } catch (error) {
       setIsLoading(false);
       console.error("Error placing order:", error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
