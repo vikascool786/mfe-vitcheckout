@@ -194,9 +194,8 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
       setIsLoading(true);
 
       if (
-        orderNotifications &&
-        orderNotifications[0] !== "Please provide a payment method" &&
-        orderNotifications?.length > 0
+        !selectedPaymentMethod?.paymentMethod.id ||
+        (orderNotifications && orderNotifications?.length > 0)
       ) {
         window.scrollTo(0, 0);
         setIsLoading(false);
