@@ -18,6 +18,7 @@
     "@babel/plugin-transform-runtime": "^7.15.8",
     "@babel/preset-env": "^7.15.8",
     "@babel/preset-react": "^7.14.5",
+    "@types/google.maps": "^3.58.1",
     "@types/jquery": "^3.5.32",
     "@types/js-cookie": "^3.0.6",
     "@types/lodash.isequal": "^4.5.8",
@@ -62,7 +63,7 @@
     "react-dom": "^18.2.0",
     "react-helmet": "^6.1.0",
     "sass": "^1.79.1",
-    "sweetalert2": "^11.6.13",
+    "sweetalert2": "^11.15.10",
     "ts-loader": "^9.5.1",
     "yup": "^1.6.1"
   }

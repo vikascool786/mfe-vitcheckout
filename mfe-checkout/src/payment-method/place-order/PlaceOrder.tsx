@@ -270,7 +270,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
 
           if (
             selectedPaymentMethod &&
-            !selectedPaymentMethod.paymentMethod.cvv
+            !selectedPaymentMethod.isPaymentValidated
           ) {
             order &&
               setOrderData({
