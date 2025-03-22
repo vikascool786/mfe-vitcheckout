@@ -349,13 +349,12 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({ pcid, order 
                                 accountName: "",
                                 number: "",
                                 cvv: "",
-                                expMonth: "",
-                                expYear: "",
+                                expMonth: new Date().getMonth() + 1,
+                                expYear: new Date().getFullYear(),
                             }
                         }}
                         validationSchema={validationSchema}
                         onSubmit={(values) => {
-                            console.log('Form Submitted', values);
                             saveNewCard(values);
                         }}
                     >

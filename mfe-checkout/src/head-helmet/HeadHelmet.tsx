@@ -20,6 +20,7 @@ const HeadHelmet = () => {
             />
             <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
             <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+            <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBdN1EI-Hi2HzTPb5qAjOiRKfTB36JIAis&libraries=places"></script>
         </Helmet>
     );
 };

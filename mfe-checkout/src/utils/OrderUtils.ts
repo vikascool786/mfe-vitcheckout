@@ -72,16 +72,9 @@ export const getOrderConsolidateData = (
     if (orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_SPLIT_CODE) {
         Object.entries(order.stores).forEach(([key, value]) => {
             const dateAvailable = value.items?.[0]?.available || "";
-            const shipStatusMessage =
-                value.items?.[0]?.permutation?.inventoryStatus === "PRE_ORDER"
-                    ? "Preorder"
-                    : value.items?.[0]?.permutation?.inventoryStatus ===
-                        "TEMPORARILY_OUT_OF_STOCK"
-                        ? "Backordered"
-                        : "";
             orderConsolidateData.shipDateMessageMap.set(
                 key,
-                `${shipStatusMessage} Shipping on ${dateAvailable}`
+                `Shipping on ${dateAvailable}`
             );
         });
     }

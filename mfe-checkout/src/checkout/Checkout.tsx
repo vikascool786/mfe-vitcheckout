@@ -34,6 +34,7 @@ import "./Checkout.scss";
 import { siteApiData } from "./siteAtom";
 import { customerApiData } from "./customerAtom";
 import { getOrderNotifications } from "../utils/OrderUtils";
+import {AddressAutocomplete} from "../component/AddressForm/AddressAutoComplete";
 
 const defaultAddress: Address = {
   id: 0,
@@ -84,6 +85,8 @@ const Checkout: React.FC<ICheckout> = ({
     orderNotificationsAtom
   );
   const [customerData] = useAtom(customerApiData(pcid));
+  const [siteData] = useAtom(siteApiData(siteId));
+  const [enableAddressSuggestions, setEnableAddressSuggestions] = useState(false);
 
   const filterValidShippingAddresses = (addresses: Address[]): Address[] => {
     let filteredAddresses: Address[] = [];
@@ -445,6 +448,14 @@ const Checkout: React.FC<ICheckout> = ({
       .required("Please enter your phone number"),
   });
 
+  const handleAddress1Change = (name: string, setFieldValue: any, e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if(value.length > 2){
+      setEnableAddressSuggestions(true);
+    }
+    setFieldValue(name, value);
+  };
+
   return (
     <div>
       <form className="qa-address-section shipping-address-form">
@@ -512,6 +523,7 @@ const Checkout: React.FC<ICheckout> = ({
                 submitForm,
               }) => (
                 <Form>
+                  <AddressAutocomplete enableAddressSuggestions={enableAddressSuggestions} country={siteData?.locale?.countryCode} />
                   {familyNameFirst ? (
                     <div className="form-field-container">
                       <FormField
@@ -562,12 +574,12 @@ const Checkout: React.FC<ICheckout> = ({
 
                   <div className="form-field-container-full">
                     <FormField
-                      className="qa-address input-container"
+                      className="qa-address input-container js-ship-address1"
                       name="address1"
                       label="Address Line 1"
                       required
                       value={values.address1}
-                      onChange={handleChange}
+                      onChange={(e) => handleAddress1Change("address1", setFieldValue, e)}
                       onBlur={handleBlur}
                       errorMessage={touched.address1 && errors.address1}
                     />
@@ -631,7 +643,7 @@ const Checkout: React.FC<ICheckout> = ({
                       errorMessage={touched.zip && errors.zip}
                     />
                     <FormField
-                      qaTag="qa-phone"
+                      className="qa-phone js-ship-phone input-container"
                       name="phone"
                       label="Phone"
                       required

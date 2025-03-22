@@ -83,7 +83,6 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   const [orderNotifications, setOrderNotifications] = useAtom(
     orderNotificationsAtom
   );
-
   const selectedPaymentMethod = paymentMethods.find((pm) => pm.isSelected);
 
   const [orderConsolidateData, setOrderConsolidateData] =
@@ -177,7 +176,6 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
       var headerOffset = 80;
       var elementPosition = section.getBoundingClientRect().top;
       var offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
       window.scrollTo({
         top: offsetPosition,
         behavior: "smooth",
@@ -193,6 +191,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   const handlePlaceOrder = async (paymentMethods: IPaymentOption[]) => {
     try {
       setIsLoading(true);
+
       if (selectedPaymentMethod?.paymentMethod.id) {
         setOrderNotifications(
           orderNotifications?.filter(
