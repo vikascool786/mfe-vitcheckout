@@ -52,6 +52,7 @@ interface IPlaceOrder {
   order?: Order;
   paymentMethods: IPaymentOption[];
   setOrderData: any;
+  setIsLoading: any;
   updateOrderErrorMessage: (newMessage: string) => void;
   setIsAutoShipChecked: React.Dispatch<SetStateAction<boolean>>;
   isAutoShipChecked: boolean;
@@ -71,17 +72,17 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   shopperId,
   siteId,
   order,
+  setIsLoading,
   updateOrderErrorMessage,
   setIsAutoShipChecked,
   isAutoShipChecked,
 }) => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
   const trackingData = new Map<string, string>();
   const [siteData] = useAtom(siteApiData(siteId));
   const [orderNotifications, setOrderNotifications] = useAtom(
     orderNotificationsAtom
   );
-
   const selectedPaymentMethod = paymentMethods.find((pm) => pm.isSelected);
 
   const [orderConsolidateData, setOrderConsolidateData] =
@@ -175,7 +176,6 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
       var headerOffset = 80;
       var elementPosition = section.getBoundingClientRect().top;
       var offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
       window.scrollTo({
         top: offsetPosition,
         behavior: "smooth",
@@ -191,6 +191,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   const handlePlaceOrder = async (paymentMethods: IPaymentOption[]) => {
     try {
       setIsLoading(true);
+
       if (selectedPaymentMethod?.paymentMethod.id) {
         setOrderNotifications(
           orderNotifications?.filter(
@@ -287,8 +288,6 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     } catch (error) {
       setIsLoading(false);
       console.error("Error placing order:", error);
-    } finally {
-      setIsLoading(false);
     }
   };
 

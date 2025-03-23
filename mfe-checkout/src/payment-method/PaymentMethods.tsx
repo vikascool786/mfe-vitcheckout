@@ -211,6 +211,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
 
           updatedPaymentOptions = updatedPaymentOptions.map((paymentOption) => {
             if (paymentOption.paymentMethod.typeID === PAYPAL.typeId) {
+              updatePaymentTypeId(paymentOption.paymentMethod.typeID);
               // set paypal true
               return {
                 ...paymentOption,

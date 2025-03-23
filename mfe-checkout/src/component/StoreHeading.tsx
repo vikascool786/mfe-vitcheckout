@@ -40,17 +40,17 @@ const StoreHeading: React.FC<IStoreHeadingProps> = ({ storeName, storeKey, isMAS
     const buildStoreHeading = (oosConsolidateData: OrderConsolidationData): string => {
         let storeHeading = storeName;
         if(oosConsolidateData?.oosConsolidate === OOS_CONSOLIDATE_SPLIT_CODE && isMAStore && !isGiftCardForStoreKey(order, storeKey)){
-            if(isOrderSummary){
-                let shipmentNumber = 1;
-                if(storeKey.includes("*OOS*")){
-                    shipmentNumber = Number(storeKey.split("*").pop()) + 1;
-                }
-                storeHeading = `${storeName} ${shipmentNumber}`;
-            } else{
-                if(storeKey.includes("*OOS*"))           {
-                    storeHeading = orderConsolidateData?.shipDateMessageMap.get(storeKey) || "";
+            let shipmentNumber = 1;
+            if(storeKey.includes("*OOS*")){
+                shipmentNumber = Number(storeKey.split("*").pop()) + 1;
+            }
+            storeHeading = `${storeName} ${shipmentNumber}`;
+
+            if(!isOrderSummary){
+                if(storeKey.includes("*OOS*")) {
+                    storeHeading = storeHeading + " - " + orderConsolidateData?.shipDateMessageMap.get(storeKey) || "";
                 } else{
-                    storeHeading = "Shipping Now";
+                    storeHeading = storeHeading + " - Shipping Now";
                 }
             }
         }

@@ -65,7 +65,7 @@ export const AddressVerificationContainer = forwardRef<
         phone: addressEntered.phone,
       }));
       setAddressList(mappedAddresses);
-      setAddressSuggestions(mappedAddresses.length > 1);
+      setAddressSuggestions(mappedAddresses.length > 0);
 
       isValidAddress = await response.data.response.indicators
         .validAddressIndicator;

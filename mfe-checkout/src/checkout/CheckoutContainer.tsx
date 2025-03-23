@@ -88,12 +88,10 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   const [orderData, setOrderData] = useAtom(orderAtom);
 
   const [showEmptyOrder, setShowEmptyOrder] = useState(false);
-  const [isLoading] = useAtom(loadingAtom);
+  const [isLoading, setIsLoading] = useAtom(loadingAtom);
   const [orderErrorMessage, setOrderErrorMessage] = useState("");
   const [paymentTypeId, setPaymentTypeId] = useState(0);
   const hasInitializedOrder = useRef(false); // Prevent multiple executions of updateOrder
-  const [loadingOrderConfirmation, setLoadingOrderConfirmation] =
-    useState(false);
   const [orderNotifications, setOrderNotifications] = useAtom(
     orderNotificationsAtom
   );
@@ -119,7 +117,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
       checkoutSezzle,
       buildOrder,
       generateChangeStoreResponse,
-      setLoadingOrderConfirmation,
+      setIsLoading,
       confirmOrder,
       cartId
     );
@@ -212,7 +210,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   const confirmOrder = () => {
     commitOrder(cartId)
       .then((response: any) => {
-        setLoadingOrderConfirmation(false);
+        setIsLoading(false);
         const isSuccessful = response?.data?.response?.success;
         if (isSuccessful) {
           const orderId = response.data.response.success.data.orderId;
@@ -230,25 +228,23 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
             redirectToOrderConfirmation(orderId);
           }
         } else {
-          if (response?.response.data?.errors[0]?.message) {
-            setLoadingOrderConfirmation(false);
+          if (response?.response?.data?.errors[0]?.message) {
             setOrderErrorMessage(response?.response.data?.errors[0]?.message);
             return;
+          } else {
+            const errorMessage = response.data.response.errors.message;
+            const errorCode = response.data.response.errors.code;
+            setOrderErrorMessage(
+              `Detail: ${errorMessage} (code: ${errorCode})`
+            );
           }
 
-          const errorMessage = response.data.response.errors.message;
-          const errorCode = response.data.response.errors.code;
-          const developerMessage =
-            response.data.response.errors.developer_message;
-          setOrderErrorMessage(
-            `Detail: ${errorMessage} ${developerMessage} (code: ${errorCode})`
-          );
-          setLoadingOrderConfirmation(false);
+          setIsLoading(false);
         }
       })
       .catch((error) => {
         setOrderErrorMessage(error);
-        setLoadingOrderConfirmation(false);
+        setIsLoading(false);
       });
   };
 
@@ -317,9 +313,6 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     }
   }, [defaultAddress, defaultPaymentMethod]);
 
-  const handlePlaceOrderUpdate = (value: boolean) => {
-    setLoadingOrderConfirmation(value);
-  };
 
   const handleUpdateOrderErrorMessage = (message: string) => {
     setOrderErrorMessage(message);
@@ -329,14 +322,6 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     return <Skeleton />;
 
   if (addressError || paymentError) return <div>Failed to load data</div>;
-
-  if (loadingOrderConfirmation)
-    return (
-      <div className="loading-order-conf">
-        <div>Please wait while your order is being placed</div>
-        <Spinner />
-      </div>
-    );
 
   return (
     <div>
@@ -383,11 +368,12 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                   siteId={siteId}
                   isAddressSaved={isAddressSaved}
                 />
-                {width >= 1024 && (
+                {width >= 1025 && (
                   <div className="place-order">
                     {isAddressSaved && paymentMethodOptions && (
                       <PlaceOrder
                         confirmOrder={confirmOrder}
+                        setIsLoading={setIsLoading}
                         errorMessage={orderErrorMessage}
                         paymentTypeId={paymentTypeId}
                         paymentMethods={paymentMethodOptions}
@@ -417,6 +403,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                   confirmOrder={confirmOrder}
                   errorMessage={orderErrorMessage}
                   paymentTypeId={paymentTypeId}
+                  setIsLoading={setIsLoading}
                   paymentMethods={paymentMethodOptions}
                   shopperId={shopperId}
                   siteId={siteId}
