@@ -48,11 +48,11 @@ const App: React.FC<AppProps> = () => {
 
         {/* for GC Card Customer */}
         <CheckoutContainer
-          cartId="cart_1778511302_W_USA_USA_ENG"
-          shopperId="zWUVXxqjzwWqWzhZjqzZYUWzwWxWzhUmwVwUzehzpp"
-          pcid="1778511302"
+          cartId="cart_1385667307_W_USA_USA_ENG"
+          shopperId="zUZeqxUhzqXUkzhUYXzZYhUzZZUVwVXYUpwwzmjkp"
+          pcid="1385667307"
           siteId="66"
-          sessionId="3055249126"
+          sessionId="3055307053"
         />
         {/* <CheckoutContainer
           cartId="cart_1762863970_W_USA_USA_ENG"
