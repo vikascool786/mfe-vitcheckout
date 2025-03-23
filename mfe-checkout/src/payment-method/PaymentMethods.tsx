@@ -239,27 +239,27 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         console.log("Error fetching payment methods", error);
         // in case fetching payment api fails and user has a successful paypal transaction
         // let user proceed with paypal
-        if (isPaypalOrderSuccess) {
-          await generatePayPalTransactionDetails(shopperId, token, true, false);
+        // if (isPaypalOrderSuccess) {
+        //   await generatePayPalTransactionDetails(shopperId, token, true, false);
 
-          const updatedPaymentOptions = paymentMethods.map((paymentOption) => {
-            if (paymentOption.paymentMethod.typeID === PAYPAL.typeId) {
-              return {
-                ...paymentOption,
-                isSelected: true,
-              };
-            } else {
-              return {
-                ...paymentOption,
-                isSelected: false,
-                isVisible: paymentOption.isVisible,
-              };
-            }
-          });
+        //   const updatedPaymentOptions = paymentMethods.map((paymentOption) => {
+        //     if (paymentOption.paymentMethod.typeID === PAYPAL.typeId) {
+        //       return {
+        //         ...paymentOption,
+        //         isSelected: true,
+        //       };
+        //     } else {
+        //       return {
+        //         ...paymentOption,
+        //         isSelected: false,
+        //         isVisible: paymentOption.isVisible,
+        //       };
+        //     }
+        //   });
 
-          setPaymentMethods(updatedPaymentOptions);
-          setIsPaymentsFetched(true);
-        }
+        //   setPaymentMethods(updatedPaymentOptions);
+        //   setIsPaymentsFetched(true);
+        // }
       }
     };
 
