@@ -115,7 +115,7 @@ export const GET_APM_URL = () => {
 export const GET_API_KEY = () => {
   switch (GET_API_MODE()) {
     case "localhost":
-      return "759ef1fc9e4c4e8bbf900db5f4b7caba";
+    return "759ef1fc9e4c4e8bbf900db5f4b7caba";
     case "dev":
       return "6f598d0a7639480eae2d266a1e87c15c";
     case "staging":
@@ -209,7 +209,24 @@ export const GET_AJAX_ENDPOINT_BASE_URL = () => {
   }
 };
 
+export const GET_DSB_MA = () => {
+  switch (GET_API_MODE()) {
+    case "localhost":
+      return "http://dev-dsb.marketamerica.com:80";
+    case "dev":
+      return "http://dev-dsb.marketamerica.com:80";
+    case "staging":
+      return "http://stg-dsb.marketamerica.com:80";
+    case "prod":
+      return "http://dsb.marketamerica.com:80";
+    default:
+      return "";
+  }
+};
+
+
 export const GET_BASE_URL =
   window.location.href.match(
     /^(https:\/\/)?(www\.)?([a-zA-Z0-9-]+(\.[a-zA-Z]+)+)/
   )?.[0] || "https://shop.com";
+

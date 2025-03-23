@@ -148,6 +148,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
 
         // case when user does not have any payment methods
         if (!response) {
+          if (paymentMethods.some(pm => pm.paymentMethod.id === 0)) return
           const newCard = createPaymentMethod({
             accountName: "",
             imageUrl: CardOptions,
@@ -554,7 +555,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   };
 
   const onAddNewCards = (payments: IPaymentOption[]) => {
-    console.log("payments", payments);
     setTimeout(() => {
       setPaymentMethods(payments);
       setShowNewCard(false);
