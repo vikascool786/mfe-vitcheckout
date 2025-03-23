@@ -555,6 +555,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   };
 
   const onAddNewCards = (payments: IPaymentOption[]) => {
+    console.log("payments", payments);
     setTimeout(() => {
       setPaymentMethods(payments);
       setShowNewCard(false);

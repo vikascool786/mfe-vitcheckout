@@ -192,27 +192,25 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     try {
       setIsLoading(true);
 
-      if (selectedPaymentMethod?.paymentMethod.id) {
-        setOrderNotifications(
-          orderNotifications?.filter(
-            (n) => n !== "Please provide a payment method"
-          )
-        );
-      } else if (
-        !selectedPaymentMethod?.paymentMethod.id ||
-        (orderNotifications && orderNotifications?.length > 0)
-      ) {
-        setOrderNotifications(["Please provide a payment method"]);
-        window.scrollTo(0, 0);
-        setIsLoading(false);
-        return;
-      }
-
       const isOrderCoveredUnderVIFT =
-        order?.userOptions.applyEWallet && order.totals.price === 0;
+          order?.userOptions.applyEWallet && order.totals.price === 0;
 
-      if (isOrderCoveredUnderVIFT) {
-        confirmOrder();
+      if(!isOrderCoveredUnderVIFT) {
+        if (selectedPaymentMethod?.paymentMethod.id) {
+          setOrderNotifications(
+              orderNotifications?.filter(
+                  (n) => n !== "Please provide a payment method"
+              )
+          );
+        } else if (
+            !selectedPaymentMethod?.paymentMethod.id ||
+            (orderNotifications && orderNotifications?.length > 0)
+        ) {
+          setOrderNotifications(["Please provide a payment method"]);
+          window.scrollTo(0, 0);
+          setIsLoading(false);
+          return;
+        }
       }
 
       if (!order?.shippingAddress.address1) {
@@ -269,6 +267,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
           );
 
           if (
+              !isOrderCoveredUnderVIFT &&
             selectedPaymentMethod &&
             !selectedPaymentMethod.isPaymentValidated
           ) {

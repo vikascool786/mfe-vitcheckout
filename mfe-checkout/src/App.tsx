@@ -5,7 +5,7 @@ import CheckoutContainer from "./checkout/CheckoutContainer";
 import { Provider, useAtom } from "jotai";
 import { loadingAtom, OrderStore } from "./store";
 
-interface AppProps {}
+interface AppProps { }
 
 const App: React.FC<AppProps> = () => {
   const [loading] = useAtom(loadingAtom);
@@ -38,29 +38,29 @@ const App: React.FC<AppProps> = () => {
         /> */}
 
         {/* for old custoemr  */}
-        {/* <CheckoutContainer
-          cartId="cart_1503581065_W_USA_USA_ENG"
-          shopperId="pekekqYxzpXWqzhUqpzYhzmzhWpwWVVzwVXzzhwhm"
-          pcid="1503581065"
+        <CheckoutContainer
+          cartId="cart_1060063066_W_USA_USA_ENG"
+          shopperId="VUVmjYWWzmVUVzhhkVzpxUUzmUmhZwpzjhzqzxjkpx"
+          pcid="1060063066"
           siteId="66"
-          sessionId="3055305661"
-        /> */}
+          sessionId="3055307133"
+        />
 
         {/* for GC Card Customer */}
-        <CheckoutContainer
-          cartId="cart_1299687008_W_USA_USA_ENG"
-          shopperId="mkhmXjehzWqZWzhpXVzppmXzxhVwYmkhmmkjzewjmz"
-          pcid="1299687008"
+        {/* <CheckoutContainer
+          cartId="cart_1778511302_W_USA_USA_ENG"
+          shopperId="zWUVXxqjzwWqWzhZjqzZYUWzwWxWzhUmwVwUzehzpp"
+          pcid="1778511302"
           siteId="66"
-          sessionId="3055305344"
-        />
+          sessionId="3055249126"
+        /> */}
         {/* <CheckoutContainer
           cartId="cart_1762863970_W_USA_USA_ENG"
           shopperId="qYmmqpWZzVjeZzhZqpzpVYwzkmqWjqkhZVqjzxqjqp"
           pcid="1762863970"
           siteId="66"
           sessionId="3055290977"
-        />
+        /> */}
         {/* for vikas card custoemr  */}
         {/* <CheckoutContainer
           cartId="cart_1817046463_W_USA_USA_ENG"

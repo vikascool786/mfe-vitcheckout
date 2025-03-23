@@ -66,7 +66,8 @@ const Checkout: React.FC<ICheckout> = ({
 
   const { createShopperAddressBookEntry } = useCreateShopperAddressBookEntry();
   const { updateShopperAddressBookEntry } = useUpdateShopperAddressBookEntry();
-
+  const [isEditAddressClicked, SetIsEditAddressClicked] =
+    useState<boolean>(false);
   const [shippingAddress, setShippingAddress] =
     useState<Address>(defaultAddress);
   const [validAddressEntered, setValidAddressEntered] = useState<boolean>(false);
@@ -250,6 +251,7 @@ const Checkout: React.FC<ICheckout> = ({
   };
 
   const handleEditAddressClick = (address: Address) => {
+    SetIsEditAddressClicked(true);
     setShippingAddress(address);
     setShowShipAddressForm(!showShipAddressForm);
   };
@@ -655,7 +657,7 @@ const Checkout: React.FC<ICheckout> = ({
                     />
                   </div>
 
-                  {shopperAddressBook.length > 0 ? (
+                  {isEditAddressClicked && shopperAddressBook.length > 0 ? (
                     <div className="form-footer form-footer__dual-button">
                       <Button
                         qaTag="qa-cancel"

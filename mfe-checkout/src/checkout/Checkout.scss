@@ -16,11 +16,25 @@ body {
   flex-direction: column;
   padding: 20px;
   border-radius: 5px;
+  position: relative;
+
+  &::after {
+    content: none;
+  }
 
   @media only screen and (max-width: 560px) {
     border-radius: 0px;
     border: none;
     box-shadow: none;
+
+    &::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 5%;
+      width: 90%;
+      border-bottom: 1px solid #959595;
+    }
   }
 
   &__hide {
@@ -28,25 +42,9 @@ body {
   }
 }
 
-.checkout-form-container::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 5%;
-  width: 90%;
-  border-bottom: 1px solid #959595;
-  display: none;
-}
-
 @media only screen and (max-width: 560px) {
-  .checkout-form-container::after {
+  .shipping-address-form::after {
     display: block;
-  }
-  .form-field-container{
-    width: 100%;
-    display: flex;
-    flex-direction: column !important;
-    margin-top: 10px;
   }
 }
 
@@ -62,17 +60,27 @@ body {
   justify-content: center;
   flex-direction: row;
   gap: 21px;
+  @media (max-width: 425px) {
+    flex-direction: column;
+    gap: 0px;
+  }
 }
 
 .form-field-container-full {
   display: flex;
   width: 100%;
   margin-top: 10px;
+  @media (max-width: 425px) {
+    margin-top: 0px;
+  }
 }
 
 .form-footer {
   display: flex;
   margin-top: 20px;
+  @media (max-width: 425px) {
+    margin-top: 0px;
+  }
 
   &__dual-button {
     gap: 20px;

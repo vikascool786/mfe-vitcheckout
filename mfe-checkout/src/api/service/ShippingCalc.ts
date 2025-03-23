@@ -1,6 +1,7 @@
 import { GET_API_KEY, GET_API_ENDPOINT_BASE_URL_ONLY } from "../../utils/urlResolver";
 import axiosInstance from "../axios";
 import {Item} from "../../interfaces/Order";
+import {isCustomCocktail, isInStockItem} from "../../utils/ItemUtils";
 
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
@@ -9,16 +10,15 @@ export const doShippingCalc = async (
     portalId: string,
     items: Item[],
 ): Promise<any> => {
-    //filter out BO/PreOrder items
-    const inStockItems = items.filter(item =>
-        item?.permutation?.inventoryStatus !== "TEMPORARILY_OUT_OF_STOCK" &&
-        item?.permutation?.inventoryStatus !== "PRE_ORDER"
+    //filter out BO/PreOrder items and custom cocktail
+    const qualifiedItems = items.filter(item =>
+        isInStockItem(item) && !isCustomCocktail(item)
     );
 
-    if(inStockItems.length > 0){
+    if(qualifiedItems.length > 0){
         try {
             const postData = new URLSearchParams();
-            inStockItems.forEach(item => {
+            qualifiedItems.forEach(item => {
                 postData.append("merchantSKUs", String(item.catalogSku));
                 postData.append("quantity", String(item.quantity));
                 postData.append("autoship", String(item.autoshipFreq));

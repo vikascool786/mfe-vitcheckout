@@ -15,6 +15,9 @@
     height: 20px;
     padding-left: 5px;
   }
+  @media (max-width: 425px) {
+    font-size: 14px;
+  }
 }
 
 // Primary Button Styles

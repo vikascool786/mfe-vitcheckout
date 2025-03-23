@@ -4,7 +4,7 @@ import { OrderStore } from "../interfaces/Order";
 import { doShippingCalc } from "../api/service/ShippingCalc";
 import { FreeShipData } from "../interfaces/FreeShipData";
 import { formattedNumber } from "../utils/OrderUtils";
-import { isGiftCardStore } from "../utils/StoreUtils";
+import {isGiftCardStore, storeHasCustomCocktail, storeHasOOSItems} from "../utils/StoreUtils";
 
 interface IShippingMessageProps {
     orderStore: OrderStore;
@@ -66,8 +66,15 @@ export const FreeShipMessage: React.FC<IShippingMessageProps> = ({
                                 freeShipDiff <= 0
                                 : freeShipDiff <= 0;
 
-                            setFreeShippingData(freeShipData);
-                            setFreeShipMessage(buildFreeShipMessage(freeShipData));
+                            //TODO: will need to revisit this - OOS and custom cocktail do not calculate correctly
+                            // with shipping calc
+                            // hiding the free ship message if threshold is not met and there are oos or cc items
+                            if (freeShipData.isFreeShipMet || (!storeHasOOSItems(orderStore) && !storeHasCustomCocktail(orderStore))){
+                                setFreeShippingData(freeShipData);
+                                setFreeShipMessage(buildFreeShipMessage(freeShipData));
+                            } else{
+                                setFreeShipMessage("");
+                            }
                         }
                     }
                 })
