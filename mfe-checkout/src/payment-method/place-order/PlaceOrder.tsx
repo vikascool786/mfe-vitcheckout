@@ -196,10 +196,14 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
       const isOrderCoveredUnderVIFT =
         order?.userOptions.applyEWallet && order.totals.price === 0;
 
+      const excludedPaymentTypes = [48, 56, 60];
+
       if (!isOrderCoveredUnderVIFT) {
         if (selectedPaymentMethod?.paymentMethod.id) {
-          updateOrderErrorMessage("please save your payment method");
-          setIsLoading(false);
+          if (!excludedPaymentTypes.includes(paymentTypeId)) {
+            updateOrderErrorMessage("please save your payment method");
+            setIsLoading(false);
+          }
           if (selectedPaymentMethod?.isEditing) {
             return;
           }
@@ -207,9 +211,11 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
           !selectedPaymentMethod?.paymentMethod.id ||
           (orderNotifications && orderNotifications?.length > 0)
         ) {
-          updateOrderErrorMessage("please save your payment method");
-          setIsLoading(false);
-          return;
+          if (!excludedPaymentTypes.includes(paymentTypeId)) {
+            updateOrderErrorMessage("please save your payment method");
+            setIsLoading(false);
+            return;
+          }
         }
       }
 
