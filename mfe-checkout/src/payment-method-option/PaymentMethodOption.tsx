@@ -91,6 +91,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   useEffect(() => {
     if (isCardExpired() && !isThirdPartyPayment(paymentMethod.typeID)) {
       setOrderNotifications(["The credit card has expired"]);
+      scrollTo(0, 0);
     }
   }, [paymentMethod]);
 
