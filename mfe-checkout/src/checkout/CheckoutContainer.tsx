@@ -207,19 +207,39 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     return false;
   };
 
+  const getProcessedOrders = (): string[] => {
+    return JSON.parse(localStorage.getItem("processedOrders") || "[]");
+  };
+
+  const setProcessedOrders = (orders: string[]) => {
+    localStorage.setItem("processedOrders", JSON.stringify(orders));
+  };
+
   const confirmOrder = () => {
+    let processedOrders = getProcessedOrders();
+
+    // Prevent duplicate processing for the same cartId
+    if (processedOrders.includes(cartId)) {
+      console.warn(`Order already processed for cartId: ${cartId}`);
+      return;
+    }
+    processedOrders.push(cartId);
+    setProcessedOrders(processedOrders);
+
     commitOrder(cartId)
       .then((response: any) => {
         setIsLoading(false);
         const isSuccessful = response?.data?.response?.success;
         if (isSuccessful) {
           const orderId = response.data.response.success.data.orderId;
-          //if order needs a new autoship created
+
+          // Remove cartId from tracking since order is successful
+          processedOrders = getProcessedOrders().filter((id) => id !== cartId);
+          setProcessedOrders(processedOrders);
+
           if (orderHasNewAutoship()) {
             createAutoshipUrl(shopperId, orderId)
-              .then((response: any) => {
-                redirectToOrderConfirmation(orderId);
-              })
+              .then(() => redirectToOrderConfirmation(orderId))
               .catch((error) => {
                 console.error(`Error creating autoship from order: ${error}`);
                 redirectToOrderConfirmation(orderId);
@@ -228,24 +248,27 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
             redirectToOrderConfirmation(orderId);
           }
         } else {
-          if (response?.response?.data?.errors[0]?.message) {
-            setOrderErrorMessage(response?.response.data?.errors[0]?.message);
-            return;
-          } else {
-            const errorMessage = response.data.response.errors.message;
-            const errorCode = response.data.response.errors.code;
-            setOrderErrorMessage(
-              `Detail: ${errorMessage} (code: ${errorCode})`
-            );
-          }
-
-          setIsLoading(false);
+          handleOrderError(response);
         }
       })
       .catch((error) => {
-        setOrderErrorMessage(error);
-        setIsLoading(false);
+        handleOrderError(error);
       });
+  };
+
+  const handleOrderError = (error: any) => {
+    let processedOrders = getProcessedOrders().filter((id) => id !== cartId);
+    setProcessedOrders(processedOrders);
+
+    if (error?.response?.data?.errors[0]?.message) {
+      setOrderErrorMessage(error.response.data.errors[0].message);
+    } else {
+      const errorMessage =
+        error?.data?.response?.errors?.message || "Unknown error";
+      const errorCode = error?.data?.response?.errors?.code || "N/A";
+      setOrderErrorMessage(`Detail: ${errorMessage} (code: ${errorCode})`);
+    }
+    setIsLoading(false);
   };
 
   const redirectToOrderConfirmation = (orderId: string | number): void => {
@@ -312,7 +335,6 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
       );
     }
   }, [defaultAddress, defaultPaymentMethod]);
-
 
   const handleUpdateOrderErrorMessage = (message: string) => {
     setOrderErrorMessage(message);
