@@ -1,11 +1,9 @@
-import { Formik, FormikErrors } from "formik";
+import { Formik } from "formik";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import React, { useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
-import { AddressVerificationContainer } from "../../address-verification/AddressVerificationContainer";
 import { fetchStatesAndCountries } from "../../api/service/CountriesAndStates";
 import { buildOrder } from "../../api/service/Order";
-import { useCreateShopperAddressBookEntry } from "../../api/service/ShopperAddressBook";
 import {
   addShoppersPaymentMethod,
   addTempPaymentMethod,
@@ -16,6 +14,7 @@ import {
 import { Button } from "../../component/Button/Button";
 import { DropdownField } from "../../component/Form/Field/DropdownField";
 import { FormField } from "../../component/Form/Field/FormField";
+import ScrollToError from "../../component/Form/ScrollToError/ScrollToError";
 import { Address } from "../../interfaces/Address";
 import { AddressHandler } from "../../interfaces/AddressHandler";
 import { DropdownOption } from "../../interfaces/DropdownOption";
@@ -30,10 +29,9 @@ import {
 import { generateChangeStoreResponse } from "../../utils/helpers/GenerateChangeStoreResponse";
 import { getCardType } from "../../utils/helpers/GetCardType";
 import { getCreditCardSchema } from "../../validation/creditcardSchemas";
+import { getTypeIdByAltName, isThirdPartyPayment } from "../PaymentType";
 import "./CardInformation.scss";
 import { CardInputs } from "./CardInputs";
-import { getTypeIdByAltName, isThirdPartyPayment } from "../PaymentType";
-import ScrollToError from "../../component/Form/ScrollToError/ScrollToError";
 
 interface ICardInformationProps {
   paymentMethod: IPaymentMethod;
@@ -45,6 +43,7 @@ interface ICardInformationProps {
   updatePaymentValidationStatus: (id: number) => void;
   setCVVFieldValue: any;
   isEditing: boolean;
+  isTempPaymentMethod?: boolean;
 }
 
 const CARD_MAP = new Map([
@@ -64,6 +63,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   shopperId,
   address,
   onCancel,
+  isTempPaymentMethod,
   isEditing = false,
 }) => {
   const setLoading = useSetAtom(loadingAtom);
@@ -262,7 +262,6 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
       return;
     }
 
-    console.log("Acceptable Payment Methods", acceptablePaymentMethods);
 
     if (typeId && !acceptablePaymentMethods?.includes(typeId)) {
       setCardError("This card type is not accepted");
@@ -368,9 +367,9 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
         }
       } else if (type === "TEMP") {
         const cardTokenResponse = await generateCardToken(requestData.number);
-        const imageUrl = CARD_MAP.get(
+        const imageUrl = values.id === 0 ? CARD_MAP.get(
           getCardType(requestData.number).toLowerCase()
-        );
+        ) : values.imageUrl;
 
         const token = cardTokenResponse?.token.id;
         const number = cardTokenResponse?.token.mask;
@@ -388,6 +387,8 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           const updatedPaymentMethod = {
             ...(response as IPaymentMethod),
           };
+
+          console.log(imageUrl)
 
           const updatedPaymentMethods = [
             {
@@ -469,6 +470,11 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   const [loadingStates, setLoadingStates] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (paymentMethods.find((pm) => pm.paymentMethod.id === paymentMethod.id)?.isTempPaymentMethod) {
+      setSaveCardToWallet(false);
+    }
+  }, [paymentMethods])
   // Fetch states and countries on mount
   useEffect(() => {
     const fetchCountryAndStateData = async () => {

@@ -385,6 +385,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
           paymentMethod={paymentMethod}
           address={paymentAddress}
           isPaymentValidated={isPaymentValidated}
+          isTempPaymentMethod={isTempPaymentMethod}
           updatePaymentValidationStatus={updatePaymentValidationStatus}
           shopperId={shopperId}
           onCancel={handleCancelNewCard}
