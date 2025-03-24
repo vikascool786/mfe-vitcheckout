@@ -113,7 +113,6 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     const { token, payerId } = getQueryParams();
 
     const fetchPayPalTransactionDetails = async () => {
-      if (isLoading) return;
       setIsLoading(true);
 
       if (token && payerId) {
@@ -194,18 +193,18 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
       setIsLoading(true);
 
       const isOrderCoveredUnderVIFT =
-        order?.userOptions.applyEWallet && order.totals.price === 0;
+          order?.userOptions.applyEWallet && order.totals.price === 0;
 
-      if (!isOrderCoveredUnderVIFT) {
+      if(!isOrderCoveredUnderVIFT) {
         if (selectedPaymentMethod?.paymentMethod.id) {
           setOrderNotifications(
-            orderNotifications?.filter(
-              (n) => n !== "Please provide a payment method"
-            )
+              orderNotifications?.filter(
+                  (n) => n !== "Please provide a payment method"
+              )
           );
         } else if (
-          !selectedPaymentMethod?.paymentMethod.id ||
-          (orderNotifications && orderNotifications?.length > 0)
+            !selectedPaymentMethod?.paymentMethod.id ||
+            (orderNotifications && orderNotifications?.length > 0)
         ) {
           setOrderNotifications(["Please provide a payment method"]);
           window.scrollTo(0, 0);
@@ -268,7 +267,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
           );
 
           if (
-            !isOrderCoveredUnderVIFT &&
+              !isOrderCoveredUnderVIFT &&
             selectedPaymentMethod &&
             !selectedPaymentMethod.isPaymentValidated
           ) {
