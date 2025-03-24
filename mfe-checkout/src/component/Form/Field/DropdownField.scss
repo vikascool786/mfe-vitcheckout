@@ -6,7 +6,7 @@
 
   label {
     margin-bottom: 0.5rem;
-    font-size: 16px;
+    font-size: 0.9rem;
 
     &.required-field::after {
       content: "*";
@@ -18,9 +18,9 @@
   .input-container {
     width: 100%;
     padding: 0.75rem;
-    border: 1px solid #000000;
+    border: 1px solid #ccc;
     border-radius: 4px;
-    font-size: 16px;
+    font-size: 1rem;
 
     &:focus {
       outline: none;
@@ -39,11 +39,11 @@
   .field-item-container {
     .input-container {
       padding: 0.5rem;
-      font-size: 16px;
+      font-size: 0.9rem;
     }
 
     label {
-      font-size: 16px;
+      font-size: 0.8rem;
     }
   }
 }

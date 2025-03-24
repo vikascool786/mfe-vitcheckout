@@ -45,6 +45,7 @@ interface IPaymentMethod {
   siteId: string;
   pcid: string;
   updatePaymentTypeId: (newValue: number) => void;
+  updateOrderErrorMessage: (newMessage: string) => void;
 }
 
 const PaymentMethod: React.FC<IPaymentMethod> = ({
@@ -53,6 +54,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   siteId,
   pcid,
   updatePaymentTypeId,
+  updateOrderErrorMessage,
 }) => {
   // initial payment methods
   const [paymentMethods, setPaymentMethods] = useAtom(paymentMethodsAtom);
@@ -80,7 +82,8 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   const [thirdPartySiteFlagData, setThirdPartySiteFlagData] = useState<
     SiteFlags[]
   >([]);
-  const [isClick2PayCardSelected, setIsClick2PayCardSelected] =  useState<boolean>(false);
+  const [isClick2PayCardSelected, setIsClick2PayCardSelected] =
+    useState<boolean>(false);
 
   useEffect(() => {
     const paymentSiteFlagList = thirdPartyPaymentFlagList().join(",");
@@ -668,6 +671,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
                   formik={formik}
                   updateCvvError={updateCvvError}
                   setCVVFieldValue={setCVVFieldValue}
+                  updateOrderErrorMessage={updateOrderErrorMessage}
                 />
               ))}
             {showClick2Pay && (

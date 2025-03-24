@@ -89,6 +89,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     useState<OrderConsolidationData>(getOrderConsolidateData(order || null));
 
   useEffect(() => {
+    updateOrderErrorMessage("");
     if (order) {
       setOrderConsolidateData(getOrderConsolidateData(order));
     }
@@ -193,21 +194,20 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
       setIsLoading(true);
 
       const isOrderCoveredUnderVIFT =
-          order?.userOptions.applyEWallet && order.totals.price === 0;
+        order?.userOptions.applyEWallet && order.totals.price === 0;
 
-      if(!isOrderCoveredUnderVIFT) {
+      if (!isOrderCoveredUnderVIFT) {
         if (selectedPaymentMethod?.paymentMethod.id) {
-          setOrderNotifications(
-              orderNotifications?.filter(
-                  (n) => n !== "Please provide a payment method"
-              )
-          );
+          updateOrderErrorMessage("please save your payment method");
+          setIsLoading(false);
+          if (selectedPaymentMethod?.isEditing) {
+            return;
+          }
         } else if (
-            !selectedPaymentMethod?.paymentMethod.id ||
-            (orderNotifications && orderNotifications?.length > 0)
+          !selectedPaymentMethod?.paymentMethod.id ||
+          (orderNotifications && orderNotifications?.length > 0)
         ) {
-          setOrderNotifications(["Please provide a payment method"]);
-          window.scrollTo(0, 0);
+          updateOrderErrorMessage("please save your payment method");
           setIsLoading(false);
           return;
         }

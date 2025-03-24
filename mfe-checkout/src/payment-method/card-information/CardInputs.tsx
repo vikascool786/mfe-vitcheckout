@@ -47,8 +47,6 @@ export const CardInputs: React.FC<ICardInputProps> = ({
     handleChange("cardInfo.number")(formattedValue);
   };
 
-  console.log(values);
-
   return (
     <>
       {!isEditing && (

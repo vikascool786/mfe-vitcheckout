@@ -39,6 +39,7 @@ export interface IPaymentOptionProps {
   setCVVFieldValue: any;
   updatePaymentTypeId: (newValue: number) => void;
   updateCvvError: (error: string) => void;
+  updateOrderErrorMessage: (newMessage: string) => void;
 }
 
 export const PaymentOption: React.FC<IPaymentOptionProps> = ({
@@ -52,6 +53,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   handleCancelNewCard,
   setCVVFieldValue,
   updateCvvError,
+  updateOrderErrorMessage,
 }) => {
   const [isCardEdit, setIsCardEdit] = useState<boolean>(false);
   const [order, setOrder] = useAtom(orderAtom);
@@ -105,7 +107,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     const previouslySelectedPayment = paymentMethods.find(
       (pm) => pm.isSelected
     );
-
+    updateOrderErrorMessage("");
     if (previouslySelectedPayment?.paymentMethod.id !== paymentMethod.id) {
       onCollapse(paymentMethod.id);
       // If you need to reset any other values manually, you can do so here.
