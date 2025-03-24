@@ -22,7 +22,7 @@
 
   .form-field-half {
     label {
-      font-size: 13px;
+      font-size: 16px;
       font-weight: 400;
     }
   }
@@ -79,6 +79,13 @@
   gap: 0.6rem;
 }
 
+.billing-text {
+  font-family: Roboto;
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 100%;
+  letter-spacing: 0%;
+}
 .checkbox {
   /* Reset default appearance */
   -webkit-appearance: none;
@@ -154,7 +161,7 @@
 
 .form-field {
   label {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 400;
   }
 }

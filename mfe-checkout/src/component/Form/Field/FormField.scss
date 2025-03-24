@@ -3,7 +3,7 @@
   flex-direction: column;
   width: 100%;
   margin-bottom: 1rem;
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 400;
 }
 
@@ -19,12 +19,12 @@
   vertical-align: middle;
   border-radius: 4px; /* Slightly increased border-radius for modern UI */
   background-color: #ffffff;
-  border: 1px solid #000000;
+  border: 1px solid;
+  border-color: #000000;
   font-size: 16px;
   min-height: 46px;
   line-height: 18px;
   font-weight: normal;
-  transition: border-color 0.3s ease, background-color 0.3s ease; /* Smooth transitions */
 
   &:focus {
     border-color: #4a90e2; /* Highlight border on focus */
@@ -69,7 +69,7 @@
 
 .field-extra-label {
   font-family: "Inter", sans-serif;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 300;
   margin-top: 4px;
   margin-bottom: 4px;

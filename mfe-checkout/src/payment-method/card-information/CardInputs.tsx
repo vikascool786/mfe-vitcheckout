@@ -10,6 +10,8 @@ interface ICardInputProps {
   values: any;
   handleBlur: any;
   isEditingExistingCard: boolean;
+  saveCardToWallet: boolean;
+  setSaveCardToWallet: any;
   isEditing: boolean;
   errorRefs?: React.MutableRefObject<{
     [key: string]: HTMLInputElement | null;
@@ -23,6 +25,8 @@ export const CardInputs: React.FC<ICardInputProps> = ({
   values,
   handleBlur,
   isEditingExistingCard,
+  saveCardToWallet,
+  setSaveCardToWallet,
   isEditing = false,
   errorRefs = null,
 }) => {
@@ -42,6 +46,8 @@ export const CardInputs: React.FC<ICardInputProps> = ({
 
     handleChange("cardInfo.number")(formattedValue);
   };
+
+  console.log(values);
 
   return (
     <>
@@ -77,6 +83,7 @@ export const CardInputs: React.FC<ICardInputProps> = ({
         <DropdownField
           qaTag="qa-expiration-month"
           className="form-field-half"
+          required
           label="Expiration Month"
           formName="cardInfo.expMonth"
           selectedValue={
@@ -94,6 +101,7 @@ export const CardInputs: React.FC<ICardInputProps> = ({
         <DropdownField
           qaTag="qa-expiration-year"
           className="form-field-half"
+          required
           label="Expiration Year"
           formName="cardInfo.expYear"
           selectedValue={values.cardInfo?.expYear?.toString() || ""}
@@ -103,20 +111,33 @@ export const CardInputs: React.FC<ICardInputProps> = ({
         />
       </div>
       {!isEditing && (
-        <FormField
-          qaTag="qa-cvv"
-          label="CVV"
-          required
-          name="cardInfo.cvv"
-          type="password"
-          inputMode="numeric"
-          value={values.cardInfo?.cvv || ""}
-          maxLength={4}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          errorMessage={touched.cardInfo?.cvv && errors.cardInfo?.cvv}
-          errorRefs={errorRefs}
-        />
+        <div className="form-field-container">
+          <FormField
+            qaTag="qa-cvv"
+            label="CVV"
+            required
+            name="cardInfo.cvv"
+            type="password"
+            inputMode="numeric"
+            value={values.cardInfo?.cvv || ""}
+            maxLength={4}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            errorMessage={touched.cardInfo?.cvv && errors.cardInfo?.cvv}
+            errorRefs={errorRefs}
+          />{" "}
+          {!isEditingExistingCard && (
+            <div className="save-for-later">
+              <input
+                type="checkbox"
+                className="qa-save checkbox"
+                checked={saveCardToWallet}
+                onChange={(e) => setSaveCardToWallet(!saveCardToWallet)}
+              />
+              <span>Save card for later</span>
+            </div>
+          )}
+        </div>
       )}
     </>
   );
