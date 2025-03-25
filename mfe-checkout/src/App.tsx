@@ -52,7 +52,7 @@ const App: React.FC<AppProps> = () => {
           shopperId="mkYxXjppzhzmjzhxWzzpkYjzmYXZVzYWkeZjzwjhx"
           pcid="1316760835"
           siteId="66"
-          sessionId="3055307133"
+          sessionId="3055311904"
         />
 
         {/* for GC Card Customer */}
