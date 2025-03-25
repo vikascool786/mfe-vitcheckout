@@ -687,7 +687,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                   <Button
                     qaTag="qa-submit"
                     btnType="primary"
-                    label={"Save Card Changes"}
+                    label={saveCardToWallet ? "Save to wallet": "Save and continue"}
                     onClick={(e) => {
                       e.stopPropagation();
                       submitForm();
