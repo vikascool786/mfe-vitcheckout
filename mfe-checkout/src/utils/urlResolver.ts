@@ -84,6 +84,19 @@ export const GET_PAYPAL_RETURN_URL = () => {
   }
 };
 
+export const GET_PAYPAL_CHECKOUT_URL = () => {
+  const mode = GET_API_MODE();
+  switch (mode) {
+    case "localhost":
+    case "dev":
+    case "staging":
+      return "https://sandbox.paypal.com/checkoutnow";
+    case "prod":
+    default:
+      return "https://www.paypal.com/checkoutnow";
+  }
+};
+
 export const GET_PAYPAL_CLIENT_ID = () => {
   switch (GET_API_MODE()) {
     case "localhost":

@@ -16,6 +16,7 @@ interface ICardInputProps {
   errorRefs?: React.MutableRefObject<{
     [key: string]: HTMLInputElement | null;
   }> | null;
+  isFromClick2Pay?: boolean;
 }
 
 export const CardInputs: React.FC<ICardInputProps> = ({
@@ -29,6 +30,7 @@ export const CardInputs: React.FC<ICardInputProps> = ({
   setSaveCardToWallet,
   isEditing = false,
   errorRefs = null,
+  isFromClick2Pay = false,
 }) => {
   const getYears = (startYear: number, endYear: number) =>
     Array.from({ length: endYear - startYear + 1 }, (_, i) => ({
@@ -124,7 +126,7 @@ export const CardInputs: React.FC<ICardInputProps> = ({
             errorMessage={touched.cardInfo?.cvv && errors.cardInfo?.cvv}
             errorRefs={errorRefs}
           />{" "}
-          {!isEditingExistingCard && (
+          {!isEditingExistingCard && !isFromClick2Pay && (
             <div className="save-for-later">
               <input
                 type="checkbox"

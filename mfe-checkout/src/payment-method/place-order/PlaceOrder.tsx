@@ -33,7 +33,7 @@ import {
 } from "../../utils/OrderUtils";
 import {
   GET_API_ENDPOINT_BASE_URL_ONLY,
-  GET_API_KEY,
+  GET_API_KEY, GET_PAYPAL_CHECKOUT_URL,
   GET_PAYPAL_CLIENT_ID,
   GET_PAYPAL_RETURN_URL,
 } from "../../utils/urlResolver";
@@ -61,7 +61,7 @@ interface IPlaceOrder {
 const PAYPAL_TOKEN_URL = (shopperId: string, totalAmountDue: number) =>
   // make the return url and cancel url dynamic
   // TODO: PICK THIS UP FROM ENVIORNMENT VARIABLES
-  `${GET_API_ENDPOINT_BASE_URL_ONLY()}/shoppingcart-checkouts/v1/Checkout/Paypal/${shopperId}/Token?creditFlow=false&hideShipping=false&markFlow=false&returnURL=${GET_PAYPAL_RETURN_URL()}&cancelURL=${GET_PAYPAL_RETURN_URL()}&api_key=${GET_API_KEY()}&total=${totalAmountDue}`;
+  `${GET_API_ENDPOINT_BASE_URL_ONLY()}/shoppingcart-checkouts/v1/Checkout/Paypal/${shopperId}/Token?creditFlow=false&hideShipping=true&markFlow=true&returnURL=${GET_PAYPAL_RETURN_URL()}&cancelURL=${GET_PAYPAL_RETURN_URL()}&api_key=${GET_API_KEY()}&total=${totalAmountDue}`;
 
 const PlaceOrder: React.FC<IPlaceOrder> = ({
   confirmOrder,
@@ -200,7 +200,10 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
 
       if (!isOrderCoveredUnderVIFT) {
         if (selectedPaymentMethod?.paymentMethod.id) {
-          if (!excludedPaymentTypes.includes(paymentTypeId)) {
+          if (
+            !excludedPaymentTypes.includes(paymentTypeId) &&
+            !selectedPaymentMethod?.isPaymentValidated
+          ) {
             updateOrderErrorMessage("please save your payment method");
             setIsLoading(false);
           }
@@ -211,7 +214,37 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
           !selectedPaymentMethod?.paymentMethod.id ||
           (orderNotifications && orderNotifications?.length > 0)
         ) {
-          if (!excludedPaymentTypes.includes(paymentTypeId)) {
+          if (
+            !excludedPaymentTypes.includes(paymentTypeId) &&
+            !selectedPaymentMethod?.isPaymentValidated
+          ) {
+            updateOrderErrorMessage("please save your payment method");
+            setIsLoading(false);
+            return;
+          }
+        }
+      }
+
+      if (isOrderCoveredUnderVIFT && orderHasAutoshipItems(order)) {
+        if (selectedPaymentMethod?.paymentMethod.id) {
+          if (
+            !excludedPaymentTypes.includes(paymentTypeId) &&
+            !selectedPaymentMethod?.isPaymentValidated
+          ) {
+            updateOrderErrorMessage("please save your payment method");
+            setIsLoading(false);
+          }
+          if (selectedPaymentMethod?.isEditing) {
+            return;
+          }
+        } else if (
+          !selectedPaymentMethod?.paymentMethod.id ||
+          (orderNotifications && orderNotifications?.length > 0)
+        ) {
+          if (
+            !excludedPaymentTypes.includes(paymentTypeId) &&
+            !selectedPaymentMethod?.isPaymentValidated
+          ) {
             updateOrderErrorMessage("please save your payment method");
             setIsLoading(false);
             return;
@@ -264,7 +297,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             setIsLoading(false);
             return;
           }
-          const url = `https://www.sandbox.paypal.com/checkoutnow?token=${paypalToken.tokenId}`;
+          const url = `${GET_PAYPAL_CHECKOUT_URL()}?token=${paypalToken.tokenId}`;
           window.open(url, "_self");
           break;
         default:
@@ -286,8 +319,21 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             setIsLoading(false);
             return;
           }
-          
-          setIsLoading(true);
+          if (
+            isOrderCoveredUnderVIFT &&
+            orderHasAutoshipItems(order) &&
+            selectedPaymentMethod &&
+            !selectedPaymentMethod.isPaymentValidated
+          ) {
+            order &&
+              setOrderData({
+                ...order,
+                shouldShowInvalidCVVMessage: true,
+              });
+            scrollToCVV(selectedPaymentMethod);
+            setIsLoading(false);
+            return;
+          }
           await handleFinalPlaceOrderUpdate();
           confirmOrder();
           break;

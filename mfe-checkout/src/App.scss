@@ -20,6 +20,7 @@ body,
 }
 
 .checkout-container {
+  position: relative;
   display: flex;
   gap: 2rem;
   align-items: flex-start;
@@ -37,6 +38,8 @@ body,
 }
 
 .checkout-container .right-column {
+  position: sticky;
+  top: 1rem;
   width: 40%;
   box-sizing: border-box;
 }
@@ -52,6 +55,21 @@ body,
     flex-wrap: wrap;
     gap: 1rem;
     flex-direction: column;
+    .right-column {
+      position: relative;
+      .place-order {
+        position: sticky;
+        top: 1rem;
+      }
+    }
+    .sticky-place-order {
+      position: sticky;
+      top: 0;
+      width: 100%;
+      padding-bottom: 1.25rem;
+      background-color: white;
+      z-index: 10;
+    }
   }
 
   .checkout-container .left-column,

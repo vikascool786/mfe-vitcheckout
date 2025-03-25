@@ -24,7 +24,10 @@ import {
   orderNotificationsAtom,
   paymentMethodsAtom,
 } from "../store";
-import { getOrderNotifications } from "../utils/OrderUtils";
+import {
+  getOrderNotifications,
+  orderHasAutoshipItems,
+} from "../utils/OrderUtils";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import { handleSezzleCheckout } from "../utils/helpers/SezzleHelper";
 import {
@@ -40,6 +43,7 @@ import { portalApiData } from "./portalAtom";
 import Skeleton from "../component/Skeleton/Skeleton";
 import { setDataObjectProperty } from "../utils/helpers/SetDataObjectProperty";
 import PaymentMethodHeading from "../payment-method/PaymentMethodHeading";
+import { TextUpdates } from "../text-updates/TextUpdates";
 
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
@@ -369,7 +373,8 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                 />
 
                 {isAddressSaved ? (
-                  orderData.totals.price > 0 && (
+                  (orderHasAutoshipItems(orderData) ||
+                    orderData.totals.price > 0) && (
                     <PaymentMethod
                       cartId={cartId}
                       shopperId={shopperId}
@@ -382,6 +387,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                 ) : (
                   <PaymentMethodHeading />
                 )}
+                {isAddressSaved && <TextUpdates pcid={pcid} siteId={siteId} />}
               </div>
               <div className="right-column">
                 <OrderSummary
@@ -391,56 +397,35 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                   siteId={siteId}
                   isAddressSaved={isAddressSaved}
                 />
-                {width >= 1025 && (
-                  <div className="place-order">
-                    {isAddressSaved && paymentMethodOptions && !isLoading && (
-                      <PlaceOrder
-                        confirmOrder={confirmOrder}
-                        setIsLoading={setIsLoading}
-                        errorMessage={orderErrorMessage}
-                        paymentTypeId={paymentTypeId}
-                        paymentMethods={paymentMethodOptions}
-                        shopperId={shopperId}
-                        siteId={siteId}
-                        order={orderData}
-                        updateOrderErrorMessage={handleUpdateOrderErrorMessage}
-                        billingId={defaultAddress?.id || 0}
-                        setOrderData={setOrderData}
-                        setIsAutoShipChecked={setIsAutoShipChecked}
-                        isAutoShipChecked={isAutoShipChecked}
-                        shippingId={
-                          defaultPaymentMethod?.addressId ??
-                          defaultAddress?.id ??
-                          0
-                        }
-                      />
-                    )}
-                  </div>
-                )}
+
+                <div className="place-order">
+                  {isAddressSaved && paymentMethodOptions && (
+                    <PlaceOrder
+                      confirmOrder={confirmOrder}
+                      setIsLoading={setIsLoading}
+                      errorMessage={orderErrorMessage}
+                      paymentTypeId={paymentTypeId}
+                      paymentMethods={paymentMethodOptions}
+                      shopperId={shopperId}
+                      siteId={siteId}
+                      order={orderData}
+                      updateOrderErrorMessage={handleUpdateOrderErrorMessage}
+                      billingId={defaultAddress?.id || 0}
+                      setOrderData={setOrderData}
+                      setIsAutoShipChecked={setIsAutoShipChecked}
+                      isAutoShipChecked={isAutoShipChecked}
+                      shippingId={
+                        defaultPaymentMethod?.addressId ??
+                        defaultAddress?.id ??
+                        0
+                      }
+                    />
+                  )}
+                </div>
               </div>
             </div>
 
             <div className="place-order">
-              {isAddressSaved && paymentMethodOptions && !isLoading && (
-                <PlaceOrder
-                  confirmOrder={confirmOrder}
-                  errorMessage={orderErrorMessage}
-                  paymentTypeId={paymentTypeId}
-                  setIsLoading={setIsLoading}
-                  paymentMethods={paymentMethodOptions}
-                  shopperId={shopperId}
-                  siteId={siteId}
-                  order={orderData}
-                  updateOrderErrorMessage={handleUpdateOrderErrorMessage}
-                  billingId={defaultAddress?.id || 0}
-                  setOrderData={setOrderData}
-                  setIsAutoShipChecked={setIsAutoShipChecked}
-                  isAutoShipChecked={isAutoShipChecked}
-                  shippingId={
-                    defaultPaymentMethod?.addressId ?? defaultAddress?.id ?? 0
-                  }
-                />
-              )}
               <Feedback siteId={siteId} pcId={pcid} sessionId={sessionId} />
             </div>
             <HeadHelmet />

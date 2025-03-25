@@ -19,7 +19,6 @@ import {
   orderAtom,
   paymentMethodsAtom,
 } from "../store";
-import { TextUpdates } from "../text-updates/TextUpdates";
 import { createPaymentMethod } from "../utils/helpers/GeneratePaymentMethod";
 import "./PaymentMethods.scss";
 import * as Yup from "yup";
@@ -703,7 +702,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
             )}
           </div>
         </div>
-        <TextUpdates pcid={pcid} siteId={siteId} />
       </div>
     </FormikProvider>
   );

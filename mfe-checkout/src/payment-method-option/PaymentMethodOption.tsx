@@ -74,7 +74,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     } else {
       updateCvvError("");
     }
-  }, [order?.shouldShowInvalidCVVMessage]);
+  }, [order]);
 
   const maxLength = paymentMethod.typeID === 1 ? 4 : 3;
 
@@ -316,6 +316,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                       className="qa-cvv payment-option-container__card-cvv-form"
                       value={formik.values.cvv}
                       type="password"
+                      maxLength={maxLength}
                       onChange={(e: ChangeEvent<HTMLInputElement>) => {
                         const sanitizedValue = e.target.value.replace(
                           /\D/g,

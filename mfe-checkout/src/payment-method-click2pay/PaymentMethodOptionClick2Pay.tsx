@@ -390,7 +390,7 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({ pcid, order 
                                                 secure checkout.
                                             </div>
                                         </div>
-                                        <CardInputs handleChange={handleChange} touched={touched} errors={errors} handleBlur={handleBlur} values={values} isEditingExistingCard={false} isEditing={false} />
+                                        <CardInputs handleChange={handleChange} touched={touched} errors={errors} handleBlur={handleBlur} values={values} isEditingExistingCard={false} isEditing={false} isFromClick2Pay={true}/>
                                     </div>
                                     <div className="form-footer form-footer__dual-button">
                                         <Button

@@ -373,7 +373,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
       {gcLoading && <Spinner />}
       <>
         <FormHeading title="Order Summary" />
-        {isAddressSaved && !hideCashback && (
+        { !hideCashback && (
           <>
             {!loading &&
               !error &&
@@ -381,102 +381,103 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               parseInt(eWalletData.totalCoaCBAvail) > 0 && (
                 <ApplyCashback cashbackData={eWalletData} siteId={siteId} />
               )}
-            <div className="order-redeem-coupon-text">Redeem Coupon</div>
-            <div className="qa-order-coupon order-summary-coupon-container">
-              <div className="order-input-container">
-                <FormField
-                  qaTag={'qa-input'}
-                  value={coupon.coupon}
-                  onChange={handleCouponTextChange}
-                  errorMessage={coupon.couponError}
-                />
-              </div>
-              <div className="order-apply-container">
-                <Button
-                  qaTag={'qa-button'}
-                  label="Apply"
-                  btnType="secondary"
-                  onClick={handleAddCoupon}
-                />
-              </div>
-            </div>
-            {order?.userOptions.coupons &&
-              order?.userOptions.coupons?.length > 0 && (
+          </>
+        )}
+
+        <div className="order-redeem-coupon-text">Redeem Coupon</div>
+        <div className="qa-order-coupon order-summary-coupon-container">
+          <div className="order-input-container">
+            <FormField
+                qaTag={'qa-input'}
+                value={coupon.coupon}
+                onChange={handleCouponTextChange}
+                errorMessage={coupon.couponError}
+            />
+          </div>
+          <div className="order-apply-container">
+            <Button
+                qaTag={'qa-button'}
+                label="Apply"
+                btnType="secondary"
+                onClick={handleAddCoupon}
+            />
+          </div>
+        </div>
+        {order?.userOptions.coupons &&
+            order?.userOptions.coupons?.length > 0 && (
                 <div className="order-applied-coupons">
                   {order?.userOptions.coupons
-                    ?.filter((appliedCoupon) => !hideCouponCode(appliedCoupon)) // Exclude hidden coupons
-                    .map((appliedCoupon, index) => (
-                      <li key={index} className="qa-cancel order-applied-coupon">
-                        {appliedCoupon}
-                        <Close
-                          onClick={() => handleRemoveCoupon(appliedCoupon)}
-                        />
-                      </li>
-                    ))}
+                      ?.filter((appliedCoupon) => !hideCouponCode(appliedCoupon)) // Exclude hidden coupons
+                      .map((appliedCoupon, index) => (
+                          <li key={index} className="qa-cancel order-applied-coupon">
+                            {appliedCoupon}
+                            <Close
+                                onClick={() => handleRemoveCoupon(appliedCoupon)}
+                            />
+                          </li>
+                      ))}
                 </div>
-              )}
+            )}
 
-            {gcState.gcVisible && !gcState.gcApplied && (
-              <div className="qa-order-gift gift-card-wrapper">
-                <div className="gift-card-wrapper-fields">
-                  <div className="gift-card-wrapper-field-1">
-                    <div className="order-redeem-coupon-text">
-                      Gift Card Number
-                    </div>
-                    <FormField
+        {gcState.gcVisible && !gcState.gcApplied && (
+            <div className="qa-order-gift gift-card-wrapper">
+              <div className="gift-card-wrapper-fields">
+                <div className="gift-card-wrapper-field-1">
+                  <div className="order-redeem-coupon-text">
+                    Gift Card Number
+                  </div>
+                  <FormField
                       qaTag={'qa-card-number'}
                       value={gcState.gcNum}
                       onChange={handleGcNumChange}
-                    />
-                  </div>
-                  <div className="gift-card-wrapper-field-2">
-                    <div className="order-redeem-coupon-text">PIN</div>
-                    <FormField
+                  />
+                </div>
+                <div className="gift-card-wrapper-field-2">
+                  <div className="order-redeem-coupon-text">PIN</div>
+                  <FormField
                       qaTag={'qa-input'}
                       value={gcState.gcPin}
                       onChange={handleGcPinChange}
-                    />
-                  </div>
+                  />
                 </div>
+              </div>
 
-                <div className="gift-card-apply">
-                  <Button
+              <div className="gift-card-apply">
+                <Button
                     qaTag={'qa-button'}
                     label={!!gcState.gcApplied ? "Remove" : "Apply"}
                     btnType="secondary"
                     onClick={() => handleAddGiftCard(!!gcState.gcApplied)}
-                  />
-                </div>
+                />
               </div>
-            )}
+            </div>
+        )}
 
-            {gcState.gcApplied && (
-              <div className="gcApplied">
-                <div className="gcLeft-cont">
-                  <p className="cardName">{`Card: ${gcState.gcNum}`}</p>
-                  <p className="balanceCard">{`$${order?.totals.gcBalance} Balance`}</p>
-                </div>
-                <div className="gcRight-cont">
-                  <p className="appliedCash">
-                    {`${order?.totals.gcAppliedStr} Applied`}
-                  </p>
-
-                  <Close onClick={() => handleAddGiftCard(true)} />
-                </div>
+        {gcState.gcApplied && (
+            <div className="gcApplied">
+              <div className="gcLeft-cont">
+                <p className="cardName">{`Card: ${gcState.gcNum}`}</p>
+                <p className="balanceCard">{`$${order?.totals.gcBalance} Balance`}</p>
               </div>
-            )}
-            {gcState.gcError && (
-              <div className="error-message">{gcState.gcError}</div>
-            )}
-            {!gcState.gcApplied && (
-              <div
+              <div className="gcRight-cont">
+                <p className="appliedCash">
+                  {`${order?.totals.gcAppliedStr} Applied`}
+                </p>
+
+                <Close onClick={() => handleAddGiftCard(true)} />
+              </div>
+            </div>
+        )}
+        {gcState.gcError && (
+            <div className="error-message">{gcState.gcError}</div>
+        )}
+        {!gcState.gcApplied && (
+            <div
                 className="qa-link order-sub-text underlined"
                 onClick={handleApplyGiftCard}
-              >
-                {gcState.gcVisible ? "Hide Gift Card" : "Apply Gift Card"}
-              </div>
-            )}
-          </>
+            >
+              {gcState.gcVisible ? "Hide Gift Card" : "Apply Gift Card"}
+            </div>
         )}
 
         {storesTotals &&
