@@ -34,7 +34,7 @@ import "./Checkout.scss";
 import { siteApiData } from "./siteAtom";
 import { customerApiData } from "./customerAtom";
 import { getOrderNotifications } from "../utils/OrderUtils";
-import {AddressAutocomplete} from "../component/AddressForm/AddressAutoComplete";
+import { AddressAutocomplete } from "../component/AddressForm/AddressAutoComplete";
 
 const defaultAddress: Address = {
   id: 0,
@@ -70,7 +70,8 @@ const Checkout: React.FC<ICheckout> = ({
     useState<boolean>(false);
   const [shippingAddress, setShippingAddress] =
     useState<Address>(defaultAddress);
-  const [validAddressEntered, setValidAddressEntered] = useState<boolean>(false);
+  const [validAddressEntered, setValidAddressEntered] =
+    useState<boolean>(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [showShipAddressForm, setShowShipAddressForm] = useState(false);
   const [shopperAddressBook, setShopperAddressBook] = useAtom(addressAtom);
@@ -87,7 +88,8 @@ const Checkout: React.FC<ICheckout> = ({
   );
   const [customerData] = useAtom(customerApiData(pcid));
   const [siteData] = useAtom(siteApiData(siteId));
-  const [enableAddressSuggestions, setEnableAddressSuggestions] = useState(false);
+  const [enableAddressSuggestions, setEnableAddressSuggestions] =
+    useState(false);
 
   const filterValidShippingAddresses = (addresses: Address[]): Address[] => {
     let filteredAddresses: Address[] = [];
@@ -219,12 +221,12 @@ const Checkout: React.FC<ICheckout> = ({
         ];
         setShopperAddressBook(updatedAddresses);
         setShippingAddress(validatedAddress);
-        if(isValidAddress){
+        if (isValidAddress) {
           setValidAddressEntered(isValidAddress);
           setShowAVS(false);
-        }else {
+        } else {
           setShowAVS(true);
-        } 
+        }
       } catch (error) {
         setLoading(false);
       } finally {
@@ -235,9 +237,9 @@ const Checkout: React.FC<ICheckout> = ({
 
   useEffect(() => {
     if (validAddressEntered && shippingAddress) {
-        handleUseSelectedAddress();
+      handleUseSelectedAddress();
     }
-}, [shippingAddress, validAddressEntered]);
+  }, [shippingAddress, validAddressEntered]);
 
   const handleEditClick = () => {
     setShowAVS(false);
@@ -330,9 +332,9 @@ const Checkout: React.FC<ICheckout> = ({
       }
       setIsExpanded(false);
       setLoading(false);
-      if(validAddressEntered){
+      if (validAddressEntered) {
         setValidAddressEntered(false);
-      }else {
+      } else {
         setShowAVS(!showAVS);
       }
     } catch (error: any) {
@@ -347,7 +349,7 @@ const Checkout: React.FC<ICheckout> = ({
     setShowShipAddressForm(!showShipAddressForm);
     setShippingAddress(
       shopperAddressBook.find((address) => address.isShip === 1) ||
-      shippingAddress
+        shippingAddress
     );
     setIsExpanded(!isExpanded);
   };
@@ -450,9 +452,13 @@ const Checkout: React.FC<ICheckout> = ({
       .required("Please enter your phone number"),
   });
 
-  const handleAddress1Change = (name: string, setFieldValue: any, e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAddress1Change = (
+    name: string,
+    setFieldValue: any,
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const value = e.target.value;
-    if(value.length > 2){
+    if (value.length > 2) {
       setEnableAddressSuggestions(true);
     }
     setFieldValue(name, value);
@@ -525,7 +531,10 @@ const Checkout: React.FC<ICheckout> = ({
                 submitForm,
               }) => (
                 <Form>
-                  <AddressAutocomplete enableAddressSuggestions={enableAddressSuggestions} country={siteData?.locale?.countryCode} />
+                  <AddressAutocomplete
+                    enableAddressSuggestions={enableAddressSuggestions}
+                    country={siteData?.locale?.countryCode}
+                  />
                   {familyNameFirst ? (
                     <div className="form-field-container">
                       <FormField
@@ -581,7 +590,9 @@ const Checkout: React.FC<ICheckout> = ({
                       label="Address Line 1"
                       required
                       value={values.address1}
-                      onChange={(e) => handleAddress1Change("address1", setFieldValue, e)}
+                      onChange={(e) =>
+                        handleAddress1Change("address1", setFieldValue, e)
+                      }
                       onBlur={handleBlur}
                       errorMessage={touched.address1 && errors.address1}
                     />
@@ -657,7 +668,8 @@ const Checkout: React.FC<ICheckout> = ({
                     />
                   </div>
 
-                  {isEditAddressClicked && shopperAddressBook.length > 0 ? (
+                  {isEditAddressClicked ||
+                  shopperAddressBook.filter((s) => s.hasAddress)?.length > 0 ? (
                     <div className="form-footer form-footer__dual-button">
                       <Button
                         qaTag="qa-cancel"

@@ -508,6 +508,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                     ? "Pay with"
                     : "Place Order"
                 }
+                disabled={isLoading}
                 btnType={
                   paymentTypeId === SEZZLE.typeId
                     ? "sezzle"
