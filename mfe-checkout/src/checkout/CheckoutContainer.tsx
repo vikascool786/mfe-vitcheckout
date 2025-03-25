@@ -336,7 +336,6 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     }
   }, [defaultAddress, defaultPaymentMethod]);
 
-
   const handleUpdateOrderErrorMessage = (message: string) => {
     setOrderErrorMessage(message);
   };
@@ -394,7 +393,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                 />
                 {width >= 1025 && (
                   <div className="place-order">
-                    {isAddressSaved && paymentMethodOptions && (
+                    {isAddressSaved && paymentMethodOptions && !isLoading && (
                       <PlaceOrder
                         confirmOrder={confirmOrder}
                         setIsLoading={setIsLoading}
@@ -422,7 +421,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
             </div>
 
             <div className="place-order">
-              {isAddressSaved && paymentMethodOptions && (
+              {isAddressSaved && paymentMethodOptions && !isLoading && (
                 <PlaceOrder
                   confirmOrder={confirmOrder}
                   errorMessage={orderErrorMessage}

@@ -286,6 +286,8 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             setIsLoading(false);
             return;
           }
+          
+          setIsLoading(true);
           await handleFinalPlaceOrderUpdate();
           confirmOrder();
           break;
