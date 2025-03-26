@@ -150,7 +150,16 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
 
         // case when user does not have any payment methods
         if (!response) {
-          if (paymentMethods.some(pm => pm.paymentMethod.id === 0)) return
+          if (isPaymentsFetched) return;
+
+          const isSelected = paymentMethods.some(
+            (method) => method.isSelected && method.isVisible
+          );
+
+          if (isSelected) {
+            setIsPaymentsFetched(true);
+            return;
+          }
           const newCard = createPaymentMethod({
             accountName: "",
             imageUrl: CardOptions,
@@ -341,10 +350,10 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       let filteredPaymentMethods = paymentMethods;
       //remove cc entry option
       filteredPaymentMethods = paymentMethods.filter(
-          (payment) => payment.paymentMethod.id !== 0
+        (payment) => payment.paymentMethod.id !== 0
       );
       setPaymentMethods(
-          filteredPaymentMethods.map((item) => ({
+        filteredPaymentMethods.map((item) => ({
           ...item,
           isSelected: false,
         }))
@@ -357,7 +366,10 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       handleDeselectPaymentMethodsEvent
     );
     return () => {
-      document.removeEventListener("c2pSelectedCard", handleDeselectPaymentMethodsEvent);
+      document.removeEventListener(
+        "c2pSelectedCard",
+        handleDeselectPaymentMethodsEvent
+      );
     };
   }, [paymentMethods.length]);
 
@@ -450,7 +462,12 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
 
     setShowNewCard(selectedPayment?.paymentMethod.id === 0);
 
-    if(isClick2PayCardSelected && selectedPayment && showClick2Pay && selectedPayment?.paymentMethod.typeID !== CLICK2PAY.typeId){
+    if (
+      isClick2PayCardSelected &&
+      selectedPayment &&
+      showClick2Pay &&
+      selectedPayment?.paymentMethod.typeID !== CLICK2PAY.typeId
+    ) {
       Click2PayCardLoader.deselectC2PCard();
       setIsClick2PayCardSelected(false);
     }
@@ -498,14 +515,14 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     const updatedPaymentMethods = paymentMethods.map((method) =>
       method.paymentMethod.id === paymentId
         ? {
-          ...method,
-          isEditing: !method.isEditing, // Toggle editing state for the selected payment method
-        }
+            ...method,
+            isEditing: !method.isEditing, // Toggle editing state for the selected payment method
+          }
         : {
-          ...method,
-          isEditing: false,
-          isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
-        }
+            ...method,
+            isEditing: false,
+            isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
+          }
     );
     setPaymentMethods(updatedPaymentMethods);
   };
@@ -628,10 +645,10 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   };
 
   const getSavedCreditCardsFromWallet = paymentMethods.filter(
-      (pm) =>
-          pm.paymentMethod.id > 0 &&
-          creditCardTypeIds.includes(pm.paymentMethod.typeID)
-  )
+    (pm) =>
+      pm.paymentMethod.id > 0 &&
+      creditCardTypeIds.includes(pm.paymentMethod.typeID)
+  );
 
   const showShouldToggleAccordian = getSavedCreditCardsFromWallet.length > 1;
 
