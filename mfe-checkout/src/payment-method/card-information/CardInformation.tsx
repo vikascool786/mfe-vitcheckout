@@ -176,7 +176,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
         });
         const orderResponse = await buildOrder(updatedOrder);
 
-        if (orderResponse.response.errors.message) {
+        if (orderResponse?.response?.errors?.message) {
           setCardError("Something went wrong. Please try again.");
           return;
         }
