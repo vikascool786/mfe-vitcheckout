@@ -168,9 +168,17 @@
   cursor: pointer;
   flex: 1;
 }
+
 .checkout-add-new-card {
   max-height: 35px;
+  display: flex; // Ensure proper alignment
+  align-items: center;
+  justify-content: center;
+  
   @media only screen and (max-width: 560px) {
     max-width: 95px;
+    max-height: 30px; // Adjust height for better fit
+    font-size: 14px; // Reduce font size if necessary
+    padding: 5px 10px; // Add padding for better tap target size
   }
 }

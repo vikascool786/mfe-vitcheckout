@@ -5,7 +5,7 @@ import CheckoutContainer from "./checkout/CheckoutContainer";
 import { Provider, useAtom } from "jotai";
 import { loadingAtom, OrderStore } from "./store";
 
-interface AppProps { }
+interface AppProps {}
 
 const App: React.FC<AppProps> = () => {
   const [loading] = useAtom(loadingAtom);
@@ -39,21 +39,12 @@ const App: React.FC<AppProps> = () => {
 
         {/* for old custoemr  */}
         <CheckoutContainer
-          cartId="cart_1365520742_W_USA_USA_ENG"
-          shopperId="XWWmqZYpzjqXzzhZwmzZXYmzWYpqqqZzmqZWzkeph"
-          pcid="1365520742"
-          siteId="66"
-          sessionId="3055311904"
-        />
-
-        {/* vift cashback account  */}
-        {/* <CheckoutContainer
-          cartId="cart_1316760835_W_USA_USA_ENG"
-          shopperId="mkYxXjppzhzmjzhxWzzpkYjzmYXZVzYWkeZjzwjhx"
-          pcid="1316760835"
+          cartId="cart_1876564227_W_USA_USA_ENG"
+          shopperId="UVXkYmzkzkehpzhWzmzYeWxzzhpkpYWqZWqhzeemhj"
+          pcid="1876564227"
           siteId="66"
           sessionId="3055307133"
-        /> */}
+        />
 
         {/* expired credit card account  */}
         {/* <CheckoutContainer
