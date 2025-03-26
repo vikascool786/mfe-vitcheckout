@@ -14,16 +14,17 @@ interface AppProps {
   hasAddressSuggestions: boolean;
   handleEditClick: () => void;
   handleUseSelectedAddress: () => void;
+  setAddressToVerify: (address: Address) => void;
 }
 
 export const AddressVerification: React.FC<AppProps> = ({
   addressList,
+  handleEditClick,
   addressToVerify,
   hasAddressSuggestions,
-  handleEditClick,
+  setAddressToVerify,
   handleUseSelectedAddress,
 }) => {
-
   return (
     <div>
       <div className="form-header">
@@ -65,6 +66,7 @@ export const AddressVerification: React.FC<AppProps> = ({
           <AddressVerificationAddressList
             addressList={addressList}
             addressToVerify={addressToVerify}
+            setAddressToVerify={setAddressToVerify}
           />
           <div className="form-footer form-footer__dual-button">
             <Button

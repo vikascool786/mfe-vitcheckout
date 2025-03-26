@@ -364,7 +364,7 @@ const Checkout: React.FC<ICheckout> = ({
     const updatedAddress = updatedSelectedAddress.find((add) => add.id === id);
 
     if (childRef.current && updatedAddress) {
-      const isValidAddress = await childRef.current.verifyAddress({
+      await childRef.current.verifyAddress({
         ...updatedAddress,
         isShip: 0,
       });
@@ -693,6 +693,7 @@ const Checkout: React.FC<ICheckout> = ({
         ref={childRef}
         showAvs={showAVS}
         onClick={handleEditClick}
+        onChangeShippingAddress={setShippingAddress}
         onSelectAddress={handleUseSelectedAddress}
         errorMessage={errorMessage}
       />

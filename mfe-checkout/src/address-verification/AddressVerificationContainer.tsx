@@ -11,6 +11,7 @@ interface MyComponentProps {
   showAvs: boolean;
   onClick: () => void;
   onSelectAddress: () => void;
+  onChangeShippingAddress: (address: Address) => void;
   errorMessage: string;
 }
 
@@ -95,6 +96,7 @@ export const AddressVerificationContainer = forwardRef<
       <AddressVerification
         addressList={addressList}
         addressToVerify={addressToVerify}
+        setAddressToVerify={props.onChangeShippingAddress}
         hasAddressSuggestions={hasAddressSuggestions}
         handleEditClick={props.onClick}
         handleUseSelectedAddress={props.onSelectAddress}
