@@ -59,7 +59,6 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   const [order, setOrder] = useAtom(orderAtom);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [paymentMethods] = useAtom(paymentMethodsAtom);
-
   const setOrderNotifications = useSetAtom(orderNotificationsAtom);
   const {
     paymentMethod,
@@ -207,7 +206,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
       // formik.setFieldValue("cvv", "");
     } catch (error) {
       setOrder({ ...order, isOrderValid: false });
-      setErrorMessage("Something went wrong, please try again.");
+      setErrorMessage("Something went wrong, please try again."); 
     }
 
     setLoading(false);
@@ -252,9 +251,8 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
       id={`[id=${paymentMethod.id}]`}
     >
       <div
-        className={`payment-option-select-container ${
-          isEditing ? "form-mode" : ""
-        }`}
+        className={`payment-option-select-container ${isEditing ? "form-mode" : ""
+          }`}
       >
         <div className="payment-option-sub-container">
           <RadioButton
@@ -289,7 +287,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
               <div className="payment-option-add-container__card-title">
                 Credit or Debit Card
               </div>
-              <div>
+              <div className="payment-creditcard-wrapper">
                 {order?.paymentMethods
                   ?.filter((pm) => pm.visible)
                   ?.map(
@@ -340,9 +338,9 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                             (pm) =>
                               pm.paymentMethod.id === paymentMethod.id
                                 ? {
-                                    ...pm,
-                                    isPaymentValidated: false,
-                                  }
+                                  ...pm,
+                                  isPaymentValidated: false,
+                                }
                                 : pm
                           );
 

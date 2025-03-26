@@ -15,7 +15,7 @@ export const GET_API_ENDPOINT_BASE_URL = (
   if (isTranslationService) {
     switch (mode) {
       case "localhost":
-        // return `https://stagingapi2.shop.com{{path}}?api_key=759ef1fc9e4c4e8bbf900db5f4b7caba`;
+        return `https://stagingapi2.shop.com{{path}}?api_key=759ef1fc9e4c4e8bbf900db5f4b7caba`;
       case "dev":
         return `https://devapi2.shop.com{{path}}?api_key=6f598d0a7639480eae2d266a1e87c15c`;
       case "staging":
@@ -27,11 +27,11 @@ export const GET_API_ENDPOINT_BASE_URL = (
   }
   switch (mode) {
     case "localhost":
-      // return `https://stagingapi2.shop.com{{path}}?api_key=${
-      //   isModuleRanker
-      //     ? "78cfbfddd65949e886faef65db6bba26"
-      //     : "759ef1fc9e4c4e8bbf900db5f4b7caba"
-      // }`;
+      return `https://stagingapi2.shop.com{{path}}?api_key=${
+        isModuleRanker
+          ? "78cfbfddd65949e886faef65db6bba26"
+          : "759ef1fc9e4c4e8bbf900db5f4b7caba"
+      }`;
     case "dev":
       return `https://devapi2.shop.com{{path}}?api_key=${
         isModuleRanker
@@ -58,7 +58,7 @@ export const GET_API_ENDPOINT_BASE_URL_ONLY = () => {
   const mode = GET_API_MODE();
   switch (mode) {
     case "localhost":
-      // return "https://stagingapi2.shop.com";
+      return "https://stagingapi2.shop.com";
     case "dev":
       return "https://devapi2.shop.com";
     case "staging":
@@ -90,7 +90,7 @@ export const GET_PAYPAL_CHECKOUT_URL = () => {
     case "localhost":
     case "dev":
     case "staging":
-      return "https://sandbox.paypal.com/checkoutnow";
+      return "https://www.sandbox.paypal.com/checkoutnow";
     case "prod":
     default:
       return "https://www.paypal.com/checkoutnow";
@@ -100,7 +100,7 @@ export const GET_PAYPAL_CHECKOUT_URL = () => {
 export const GET_PAYPAL_CLIENT_ID = () => {
   switch (GET_API_MODE()) {
     case "localhost":
-      // return "ARxYpxURBvfOG4_8UoCf8686KdIHB_1Vg6L_9E_oK8PycqgRHQnwpx46MS3Ej7dzZiv9r0Kui72LeEVw";
+      return "ARxYpxURBvfOG4_8UoCf8686KdIHB_1Vg6L_9E_oK8PycqgRHQnwpx46MS3Ej7dzZiv9r0Kui72LeEVw";
     case "dev":
       return "AdKcUB21vu4saO5O4Hcyzw0gytZyJ-R0Nq16Uci9W4NAYKRCPD_ITB7ppw5xZkOOCg4JKjIB-Uwn0Eqc";
     case "staging":
@@ -128,7 +128,7 @@ export const GET_APM_URL = () => {
 export const GET_API_KEY = () => {
   switch (GET_API_MODE()) {
     case "localhost":
-      // return "759ef1fc9e4c4e8bbf900db5f4b7caba";
+      return "759ef1fc9e4c4e8bbf900db5f4b7caba";
     case "dev":
       return "6f598d0a7639480eae2d266a1e87c15c";
     case "staging":
@@ -143,7 +143,7 @@ export const GET_API_KEY = () => {
 export const GET_TOKEN_SERVICE = () => {
   switch (GET_API_MODE()) {
     case "localhost":
-      // return "https://devccsoa.marketamerica.com/TokenService/GetToken";
+      return "https://devccsoa.marketamerica.com/TokenService/GetToken";
     case "dev":
       return "https://devccsoa.marketamerica.com/TokenService/GetToken";
     case "staging":
@@ -226,4 +226,3 @@ export const GET_BASE_URL =
   window.location.href.match(
     /^(https:\/\/)?(www\.)?([a-zA-Z0-9-]+(\.[a-zA-Z]+)+)/
   )?.[0] || "https://shop.com";
-

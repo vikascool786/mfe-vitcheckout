@@ -21,6 +21,7 @@ import { getOrderValidatePromoCode } from "../api/service/PromoCodeAPI";
 import { portalApiData } from "../checkout/portalAtom";
 import { hideCouponCode } from "../utils/CouponUtils";
 import StoreHeading from "../component/StoreHeading";
+import { GET_API_MODE } from "../utils/helpers/urlResolvers";
 
 interface IOrderSummary {
   pcid: string;
@@ -71,6 +72,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
 
   const [gcLoading, setGCLoading] = useState(false);
   const [portalData] = useAtom(portalApiData(shopperId));
+  const apiMode = GET_API_MODE();
 
   // Handle input text change for coupon
   const handleCouponTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -369,11 +371,15 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
   }, [order?.userOptions.gcNum]);
 
   return (
-    <div className="qa-order-summary order-summary-container">
+    <div
+      className={`qa-order-summary order-summary-container ${
+        apiMode === "localhost" ? "height-160" : "height-190"
+      }`}
+    >
       {gcLoading && <Spinner />}
       <>
         <FormHeading title="Order Summary" />
-        { !hideCashback && (
+        {!hideCashback && (
           <>
             {!loading &&
               !error &&
@@ -388,96 +394,92 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         <div className="qa-order-coupon order-summary-coupon-container">
           <div className="order-input-container">
             <FormField
-                qaTag={'qa-input'}
-                value={coupon.coupon}
-                onChange={handleCouponTextChange}
-                errorMessage={coupon.couponError}
+              qaTag={"qa-input"}
+              value={coupon.coupon}
+              onChange={handleCouponTextChange}
+              errorMessage={coupon.couponError}
             />
           </div>
           <div className="order-apply-container">
             <Button
-                qaTag={'qa-button'}
-                label="Apply"
-                btnType="secondary"
-                onClick={handleAddCoupon}
+              qaTag={"qa-button"}
+              label="Apply"
+              btnType="secondary"
+              onClick={handleAddCoupon}
             />
           </div>
         </div>
         {order?.userOptions.coupons &&
-            order?.userOptions.coupons?.length > 0 && (
-                <div className="order-applied-coupons">
-                  {order?.userOptions.coupons
-                      ?.filter((appliedCoupon) => !hideCouponCode(appliedCoupon)) // Exclude hidden coupons
-                      .map((appliedCoupon, index) => (
-                          <li key={index} className="qa-cancel order-applied-coupon">
-                            {appliedCoupon}
-                            <Close
-                                onClick={() => handleRemoveCoupon(appliedCoupon)}
-                            />
-                          </li>
-                      ))}
-                </div>
-            )}
+          order?.userOptions.coupons?.length > 0 && (
+            <div className="order-applied-coupons">
+              {order?.userOptions.coupons
+                ?.filter((appliedCoupon) => !hideCouponCode(appliedCoupon)) // Exclude hidden coupons
+                .map((appliedCoupon, index) => (
+                  <li key={index} className="qa-cancel order-applied-coupon">
+                    {appliedCoupon}
+                    <Close onClick={() => handleRemoveCoupon(appliedCoupon)} />
+                  </li>
+                ))}
+            </div>
+          )}
 
         {gcState.gcVisible && !gcState.gcApplied && (
-            <div className="qa-order-gift gift-card-wrapper">
-              <div className="gift-card-wrapper-fields">
-                <div className="gift-card-wrapper-field-1">
-                  <div className="order-redeem-coupon-text">
-                    Gift Card Number
-                  </div>
-                  <FormField
-                      qaTag={'qa-card-number'}
-                      value={gcState.gcNum}
-                      onChange={handleGcNumChange}
-                  />
-                </div>
-                <div className="gift-card-wrapper-field-2">
-                  <div className="order-redeem-coupon-text">PIN</div>
-                  <FormField
-                      qaTag={'qa-input'}
-                      value={gcState.gcPin}
-                      onChange={handleGcPinChange}
-                  />
-                </div>
+          <div className="qa-order-gift gift-card-wrapper">
+            <div className="gift-card-wrapper-fields">
+              <div className="gift-card-wrapper-field-1">
+                <div className="order-redeem-coupon-text">Gift Card Number</div>
+                <FormField
+                  qaTag={"qa-card-number"}
+                  value={gcState.gcNum}
+                  onChange={handleGcNumChange}
+                />
               </div>
-
-              <div className="gift-card-apply">
-                <Button
-                    qaTag={'qa-button'}
-                    label={!!gcState.gcApplied ? "Remove" : "Apply"}
-                    btnType="secondary"
-                    onClick={() => handleAddGiftCard(!!gcState.gcApplied)}
+              <div className="gift-card-wrapper-field-2">
+                <div className="order-redeem-coupon-text">PIN</div>
+                <FormField
+                  qaTag={"qa-input"}
+                  value={gcState.gcPin}
+                  onChange={handleGcPinChange}
                 />
               </div>
             </div>
+
+            <div className="gift-card-apply">
+              <Button
+                qaTag={"qa-button"}
+                label={!!gcState.gcApplied ? "Remove" : "Apply"}
+                btnType="secondary"
+                onClick={() => handleAddGiftCard(!!gcState.gcApplied)}
+              />
+            </div>
+          </div>
         )}
 
         {gcState.gcApplied && (
-            <div className="gcApplied">
-              <div className="gcLeft-cont">
-                <p className="cardName">{`Card: ${gcState.gcNum}`}</p>
-                <p className="balanceCard">{`$${order?.totals.gcBalance} Balance`}</p>
-              </div>
-              <div className="gcRight-cont">
-                <p className="appliedCash">
-                  {`${order?.totals.gcAppliedStr} Applied`}
-                </p>
-
-                <Close onClick={() => handleAddGiftCard(true)} />
-              </div>
+          <div className="gcApplied">
+            <div className="gcLeft-cont">
+              <p className="cardName">{`Card: ${gcState.gcNum}`}</p>
+              <p className="balanceCard">{`$${order?.totals.gcBalance} Balance`}</p>
             </div>
+            <div className="gcRight-cont">
+              <p className="appliedCash">
+                {`${order?.totals.gcAppliedStr} Applied`}
+              </p>
+
+              <Close onClick={() => handleAddGiftCard(true)} />
+            </div>
+          </div>
         )}
         {gcState.gcError && (
-            <div className="error-message">{gcState.gcError}</div>
+          <div className="error-message">{gcState.gcError}</div>
         )}
         {!gcState.gcApplied && (
-            <div
-                className="qa-link order-sub-text underlined"
-                onClick={handleApplyGiftCard}
-            >
-              {gcState.gcVisible ? "Hide Gift Card" : "Apply Gift Card"}
-            </div>
+          <div
+            className="qa-link order-sub-text underlined"
+            onClick={handleApplyGiftCard}
+          >
+            {gcState.gcVisible ? "Hide Gift Card" : "Apply Gift Card"}
+          </div>
         )}
 
         {storesTotals &&
@@ -508,7 +510,9 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
 
                   <div className="order-summary-row">
                     <div>Items Subtotal</div>
-                    <div className={'qa-subtotal'}>{store?.store?.totals?.priceStr}</div>
+                    <div className={"qa-subtotal"}>
+                      {store?.store?.totals?.priceStr}
+                    </div>
                   </div>
                   {store?.store?.totals?.couponCode && (
                     <div className="order-summary-row order-summary-row__coupon">
@@ -530,12 +534,16 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                   )}
                   <div className="order-summary-row">
                     <div>Tax Total</div>
-                    <div className={'qa-tax'}>{store?.store?.totals?.taxStr}</div>
+                    <div className={"qa-tax"}>
+                      {store?.store?.totals?.taxStr}
+                    </div>
                   </div>
 
                   <div className="order-summary-row">
                     <div>Shipping</div>
-                    <div className={'qa-shipping'}>{store?.store?.totals?.shippingStr}</div>
+                    <div className={"qa-shipping"}>
+                      {store?.store?.totals?.shippingStr}
+                    </div>
                   </div>
                 </div>
               );
@@ -562,7 +570,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
 
         <div className="order-summary-total">
           <div>Total Due</div>
-          <div className={'qa-total'}>{order?.totals?.priceStr}</div>
+          <div className={"qa-total"}>{order?.totals?.priceStr}</div>
         </div>
         {Number(order?.totals?.cashBack) > 0 && (
           <>
@@ -585,7 +593,9 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                 <VIFT />
                 You earned 1% extra Cash using VIFT
               </div>
-              <div className={'qa-cashback'}>{`$${formattedNumber(order.totals.extraCashBack)}`}</div>
+              <div className={"qa-cashback"}>{`$${formattedNumber(
+                order.totals.extraCashBack
+              )}`}</div>
             </div>
           </>
         ) : null}
@@ -606,30 +616,26 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           </>
         ) : null}
 
-        {order?.totals?.bv !== undefined && order?.totals?.bv !== null && order?.totals?.bv > 0 && (
+        {order?.totals?.bv !== undefined &&
+          order?.totals?.bv !== null &&
+          order?.totals?.bv > 0 && (
             <div className="shipping-item-container">
               <div className="order-summary-cashback-container">
-                <div className="order-cashback">
-                   BV earned in this order
-                </div>
-                <div>
-                  {formattedNumber(order.totals.bv)}
-                </div>
+                <div className="order-cashback">BV earned in this order</div>
+                <div>{formattedNumber(order.totals.bv)}</div>
               </div>
             </div>
-        )}
-        {order?.totals?.ibv !== undefined && order?.totals?.ibv !== null && order?.totals?.ibv > 0 && (
+          )}
+        {order?.totals?.ibv !== undefined &&
+          order?.totals?.ibv !== null &&
+          order?.totals?.ibv > 0 && (
             <div className="shipping-item-container">
               <div className="order-summary-cashback-container">
-                <div className="order-cashback">
-                  IBV earned in this order
-                </div>
-                <div>
-                  {formattedNumber(order.totals.ibv)}
-                </div>
+                <div className="order-cashback">IBV earned in this order</div>
+                <div>{formattedNumber(order.totals.ibv)}</div>
               </div>
             </div>
-        )}
+          )}
       </>
     </div>
   );

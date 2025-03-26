@@ -25,6 +25,7 @@ export const AddressVerification: React.FC<AppProps> = ({
   setAddressToVerify,
   handleUseSelectedAddress,
 }) => {
+
   return (
     <div>
       <div className="form-header">

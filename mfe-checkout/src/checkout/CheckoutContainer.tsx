@@ -44,6 +44,7 @@ import Skeleton from "../component/Skeleton/Skeleton";
 import { setDataObjectProperty } from "../utils/helpers/SetDataObjectProperty";
 import PaymentMethodHeading from "../payment-method/PaymentMethodHeading";
 import { TextUpdates } from "../text-updates/TextUpdates";
+import { GET_API_MODE } from "../utils/helpers/urlResolvers";
 
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
@@ -99,6 +100,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   const [orderNotifications, setOrderNotifications] = useAtom(
     orderNotificationsAtom
   );
+  const apiMode = GET_API_MODE();
 
   const [isAutoShipChecked, setIsAutoShipChecked] = useState<boolean>(false);
   const addressList = useAtomValue(addressAtom);
@@ -389,7 +391,11 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                 )}
                 {isAddressSaved && <TextUpdates pcid={pcid} siteId={siteId} />}
               </div>
-              <div className="right-column">
+              <div
+                className={`right-column ${
+                  apiMode === "localhost" ? "top-1" : "top-475"
+                }`}
+              >
                 <OrderSummary
                   pcid={pcid}
                   shopperId={shopperId}
@@ -399,7 +405,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                 />
 
                 <div className="place-order">
-                {isAddressSaved && paymentMethodOptions  && (
+                  {isAddressSaved && paymentMethodOptions && (
                     <PlaceOrder
                       confirmOrder={confirmOrder}
                       isLoading={isLoading}

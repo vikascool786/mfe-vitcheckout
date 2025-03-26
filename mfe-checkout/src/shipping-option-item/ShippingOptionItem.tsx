@@ -19,6 +19,7 @@ interface IShippingOptionItem {
   onChange?: () => void;
   hasAutoship: boolean;
   qaTag?: string;
+  isExpanded?: boolean;
 }
 
 export const ShippingOptionItem: React.FC<IShippingOptionItem> = ({
@@ -29,6 +30,7 @@ export const ShippingOptionItem: React.FC<IShippingOptionItem> = ({
   size,
   hasAutoship,
   qaTag = "",
+  isExpanded = false,
 }) => {
   const select = isSelected ? "selected" : "";
   const isFirst = index === 0 ? "start" : "";
@@ -38,7 +40,9 @@ export const ShippingOptionItem: React.FC<IShippingOptionItem> = ({
     <div
       className={`qa-selection shipping-option-container ${select} ${isFirst} ${isLast}`}
       id={shippingOption.id.toString()}
-      onClick={!shippingOption.isSelected && onChange ? () => onChange() : undefined}
+      onClick={
+        !shippingOption.isSelected && onChange ? () => onChange() : undefined
+      }
     >
       <div className="shipping-option-wrapper">
         <div className="shipping-option-select-container">
@@ -61,7 +65,11 @@ export const ShippingOptionItem: React.FC<IShippingOptionItem> = ({
         </div>
       </div>
       {hasAutoship && shippingOption.isSelected && (
-        <div className="shipping-option-autoship">
+        <div
+          className={`shipping-option-autoship ${
+            isExpanded ? "" : "shipping-option-autoship-no-padding"
+          }`}
+        >
           <AutoshipIcon />
           Recurring Autoship orders with ship via Standard Shipping
         </div>

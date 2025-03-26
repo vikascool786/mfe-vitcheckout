@@ -22,10 +22,16 @@ export const ShippingOptions: React.FC<IShippingOptions> = ({
   const [shipping, setShipping] = useState(shippingSelections);
   const setLoading = useSetAtom(loadingAtom);
   const [isShipExpanded, setIsShipExpanded] = useState(false);
-  const [selectedShippingMethod, setSelectedShippingMethod] = useState<ShippingSelection | null | undefined>(null);
+  const [selectedShippingMethod, setSelectedShippingMethod] = useState<
+    ShippingSelection | null | undefined
+  >(null);
 
-  const getSelectedShippingOption = (selections: ShippingSelection[]): ShippingSelection | null | undefined => {
-    return selections.find(selection => selection.isSelected) || selections[0];
+  const getSelectedShippingOption = (
+    selections: ShippingSelection[]
+  ): ShippingSelection | null | undefined => {
+    return (
+      selections.find((selection) => selection.isSelected) || selections[0]
+    );
   };
 
   useEffect(() => {
@@ -94,8 +100,9 @@ export const ShippingOptions: React.FC<IShippingOptions> = ({
   };
 
   const storeHasAutoshipItems = (order: OrderStore): boolean => {
-    const autoshipItems = order.items
-      .filter(item => item.autoshipFreq > 0 || item.autoShipId !== undefined);
+    const autoshipItems = order.items.filter(
+      (item) => item.autoshipFreq > 0 || item.autoShipId !== undefined
+    );
     return autoshipItems.length > 0;
   };
 
@@ -106,42 +113,48 @@ export const ShippingOptions: React.FC<IShippingOptions> = ({
   return (
     <div className="shipping-options-container">
       {shipping.length > 1 && (
-          <div className="shipping-options-container__ship_selection"
-               onClick={toggleShipSelectionAccordion}>
-            Change Shipping Method
-            <Back
-                className={`qa-expand accordion ${
-                    isShipExpanded ? "open" : "close"
-                }`}
-            />
-          </div>
+        <div
+          className="shipping-options-container__ship_selection"
+          onClick={toggleShipSelectionAccordion}
+        >
+          Change Shipping Method
+          <Back
+            className={`qa-expand accordion ${
+              isShipExpanded ? "open" : "close"
+            }`}
+          />
+        </div>
       )}
       {!isShipExpanded && selectedShippingMethod && (
-          <div onClick={toggleShipSelectionAccordion}>
-            <ShippingOptionItem
-                key={selectedShippingMethod.id}
-                shippingOption={selectedShippingMethod}
-                index={0}
-                size={0}
-                isSelected={true}
-                hasAutoship={storeHasAutoshipItems(store)}
-            />
-          </div>
-      )}
-      { isShipExpanded && (shipping
-        .sort((a, b) => a.total - b.total)
-        .map((shippingOption, index) => (
+        <div onClick={toggleShipSelectionAccordion}>
           <ShippingOptionItem
-
-            key={shippingOption.id}
-            shippingOption={shippingOption}
-            index={index}
-            size={shipping.length - 1}
-            isSelected={shippingOption?.isSelected || (index === 0 && !shipping.some(opt => opt.isSelected))}
-            onChange={() => handleChange(shippingOption.method)}
+            key={selectedShippingMethod.id}
+            shippingOption={selectedShippingMethod}
+            index={0}
+            size={0}
+            isSelected={true}
             hasAutoship={storeHasAutoshipItems(store)}
           />
-        )))}
+        </div>
+      )}
+      {isShipExpanded &&
+        shipping
+          .sort((a, b) => a.total - b.total)
+          .map((shippingOption, index) => (
+            <ShippingOptionItem
+              key={shippingOption.id}
+              shippingOption={shippingOption}
+              index={index}
+              size={shipping.length - 1}
+              isSelected={
+                shippingOption?.isSelected ||
+                (index === 0 && !shipping.some((opt) => opt.isSelected))
+              }
+              onChange={() => handleChange(shippingOption.method)}
+              hasAutoship={storeHasAutoshipItems(store)}
+              isExpanded={true}
+            />
+          ))}
     </div>
   );
 };
