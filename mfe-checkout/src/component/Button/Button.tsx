@@ -10,6 +10,7 @@ interface IButtonProps
   label: string;
   logo?: string;
   qaTag?: string;
+  disabled?: boolean;
 }
 
 export const Button: React.FC<IButtonProps> = ({
@@ -17,10 +18,11 @@ export const Button: React.FC<IButtonProps> = ({
   btnType,
   logo,
   qaTag = "",
+  disabled,
   ...props
 }) => {
   return (
-    <button className={`${qaTag} custom-button ${btnType}`} type="button" {...props}>
+    <button className={`${qaTag} custom-button ${btnType}`} type="button" {...props} disabled={disabled}>
       {label}
       {logo && <img src={logo} alt={label} />}
     </button>

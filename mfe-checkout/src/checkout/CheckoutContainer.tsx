@@ -399,9 +399,10 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                 />
 
                 <div className="place-order">
-                  {isAddressSaved && paymentMethodOptions && (
+                {isAddressSaved && paymentMethodOptions  && (
                     <PlaceOrder
                       confirmOrder={confirmOrder}
+                      isLoading={isLoading}
                       setIsLoading={setIsLoading}
                       errorMessage={orderErrorMessage}
                       paymentTypeId={paymentTypeId}

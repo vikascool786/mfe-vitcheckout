@@ -52,6 +52,7 @@ interface IPlaceOrder {
   order?: Order;
   paymentMethods: IPaymentOption[];
   setOrderData: any;
+  isLoading: boolean;
   setIsLoading: any;
   updateOrderErrorMessage: (newMessage: string) => void;
   setIsAutoShipChecked: React.Dispatch<SetStateAction<boolean>>;
@@ -72,12 +73,12 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   shopperId,
   siteId,
   order,
+  isLoading,
   setIsLoading,
   updateOrderErrorMessage,
   setIsAutoShipChecked,
   isAutoShipChecked,
 }) => {
-  const [isLoading] = useState(false);
   const trackingData = new Map<string, string>();
   const [siteData] = useAtom(siteApiData(siteId));
   const [orderNotifications, setOrderNotifications] = useAtom(
@@ -334,6 +335,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             setIsLoading(false);
             return;
           }
+          setIsLoading(true);
           await handleFinalPlaceOrderUpdate();
           confirmOrder();
           break;
@@ -467,9 +469,9 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     }
   };
 
-  if (isLoading) {
-    return <Spinner />;
-  }
+  // if (isLoading) {
+  //   return <Spinner />;
+  // }
 
   return (
     <div className="checkout-place-order">
@@ -545,10 +547,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                 You will be charged when product(s) are available for shipment
               </div>
             )}
-            {isLoading ? (
-              <div>Processing Order...</div>
-            ) : (
-              <Button
+           <Button
                 qaTag={"qa-order"}
                 label={
                   paymentTypeId === SEZZLE.typeId ||
@@ -573,7 +572,6 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                     : ""
                 }
               />
-            )}
           </form>
         )}
       </Formik>

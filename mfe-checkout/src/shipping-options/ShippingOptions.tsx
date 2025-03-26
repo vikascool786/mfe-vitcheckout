@@ -1,11 +1,12 @@
 import { useAtom, useSetAtom } from "jotai";
 import React, { useEffect, useState } from "react";
 import { changeOrder } from "../api/service/Order";
-import { OrderStore } from "../interfaces/Order";
+import { OrderStore, ShippingSelection } from "../interfaces/Order";
 import { ShippingOptionItem } from "../shipping-option-item/ShippingOptionItem";
 import { loadingAtom, orderAtom } from "../store";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import "./ShippingOptions.scss";
+import { Back } from "../assets/svgs/Back";
 
 interface IShippingOptions {
   store: OrderStore;
@@ -20,6 +21,12 @@ export const ShippingOptions: React.FC<IShippingOptions> = ({
   const [order, setOrder] = useAtom(orderAtom); // Access both getter and setter for the atom
   const [shipping, setShipping] = useState(shippingSelections);
   const setLoading = useSetAtom(loadingAtom);
+  const [isShipExpanded, setIsShipExpanded] = useState(false);
+  const [selectedShippingMethod, setSelectedShippingMethod] = useState<ShippingSelection | null | undefined>(null);
+
+  const getSelectedShippingOption = (selections: ShippingSelection[]): ShippingSelection | null | undefined => {
+    return selections.find(selection => selection.isSelected) || selections[0];
+  };
 
   useEffect(() => {
     const defaultShippingOptions = shippingSelections.map((selection) => {
@@ -31,6 +38,10 @@ export const ShippingOptions: React.FC<IShippingOptions> = ({
     setShipping(defaultShippingOptions);
   }, [shippingSelections, shippingMethod]);
 
+  useEffect(() => {
+    setSelectedShippingMethod(getSelectedShippingOption(shipping));
+  }, [shipping]);
+
   const handleChange = (method: string) => {
     // Map through the selections to update the isSelected flag
     setLoading(true);
@@ -40,6 +51,7 @@ export const ShippingOptions: React.FC<IShippingOptions> = ({
     }));
 
     setShipping(updatedOptions);
+    setIsShipExpanded(false);
 
     if (order) {
       changeOrder(
@@ -87,9 +99,36 @@ export const ShippingOptions: React.FC<IShippingOptions> = ({
     return autoshipItems.length > 0;
   };
 
+  const toggleShipSelectionAccordion = () => {
+    setIsShipExpanded(!isShipExpanded);
+  };
+
   return (
     <div className="shipping-options-container">
-      {shipping
+      {shipping.length > 1 && (
+          <div className="shipping-options-container__ship_selection"
+               onClick={toggleShipSelectionAccordion}>
+            Change Shipping Method
+            <Back
+                className={`qa-expand accordion ${
+                    isShipExpanded ? "open" : "close"
+                }`}
+            />
+          </div>
+      )}
+      {!isShipExpanded && selectedShippingMethod && (
+          <div onClick={toggleShipSelectionAccordion}>
+            <ShippingOptionItem
+                key={selectedShippingMethod.id}
+                shippingOption={selectedShippingMethod}
+                index={0}
+                size={0}
+                isSelected={true}
+                hasAutoship={storeHasAutoshipItems(store)}
+            />
+          </div>
+      )}
+      { isShipExpanded && (shipping
         .sort((a, b) => a.total - b.total)
         .map((shippingOption, index) => (
           <ShippingOptionItem
@@ -102,7 +141,7 @@ export const ShippingOptions: React.FC<IShippingOptions> = ({
             onChange={() => handleChange(shippingOption.method)}
             hasAutoship={storeHasAutoshipItems(store)}
           />
-        ))}
+        )))}
     </div>
   );
 };

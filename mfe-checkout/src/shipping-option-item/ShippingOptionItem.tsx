@@ -16,7 +16,7 @@ interface IShippingOptionItem {
   index: number;
   size: number;
   isSelected: boolean;
-  onChange: () => void;
+  onChange?: () => void;
   hasAutoship: boolean;
   qaTag?: string;
 }
@@ -38,7 +38,7 @@ export const ShippingOptionItem: React.FC<IShippingOptionItem> = ({
     <div
       className={`qa-selection shipping-option-container ${select} ${isFirst} ${isLast}`}
       id={shippingOption.id.toString()}
-      onClick={!shippingOption.isSelected ? () => onChange() : undefined}
+      onClick={!shippingOption.isSelected && onChange ? () => onChange() : undefined}
     >
       <div className="shipping-option-wrapper">
         <div className="shipping-option-select-container">

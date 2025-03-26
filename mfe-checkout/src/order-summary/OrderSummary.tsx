@@ -606,29 +606,29 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           </>
         ) : null}
 
-        {order?.stores && (
-          <div className="shipping-item-container">
-            {Object.entries(order?.stores).map(([key, store]) => {
-              if (store.totals.ibv > 0 || store.totals.bv > 0) {
-                return (
-                  store && (
-                    <div className="order-summary-cashback-container">
-                      <div className="order-cashback">
-                        {store?.store?.isMA === 1
-                          ? `BV earned in this order`
-                          : `IBV earned in this order`}
-                      </div>
-                      <div>
-                        {store?.store?.isMA === 1
-                          ? formattedNumber(store.totals.bv)
-                          : formattedNumber(store.totals.ibv)}
-                      </div>
-                    </div>
-                  )
-                );
-              }
-            })}
-          </div>
+        {order?.totals?.bv !== undefined && order?.totals?.bv !== null && order?.totals?.bv > 0 && (
+            <div className="shipping-item-container">
+              <div className="order-summary-cashback-container">
+                <div className="order-cashback">
+                   BV earned in this order
+                </div>
+                <div>
+                  {formattedNumber(order.totals.bv)}
+                </div>
+              </div>
+            </div>
+        )}
+        {order?.totals?.ibv !== undefined && order?.totals?.ibv !== null && order?.totals?.ibv > 0 && (
+            <div className="shipping-item-container">
+              <div className="order-summary-cashback-container">
+                <div className="order-cashback">
+                  IBV earned in this order
+                </div>
+                <div>
+                  {formattedNumber(order.totals.ibv)}
+                </div>
+              </div>
+            </div>
         )}
       </>
     </div>

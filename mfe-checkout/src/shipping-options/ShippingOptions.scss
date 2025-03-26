@@ -1,3 +1,9 @@
 .shipping-options-container {
   margin-top: 10px;
+  &__ship_selection {
+    font-size: 13px;
+    display: flex;
+    justify-content: right;
+    padding-bottom: 10px;
+  }
 }
