@@ -227,7 +227,6 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
 
   const handleChangeOOSConsolidate = (
     oosConsolidate: number,
-    event: React.ChangeEvent<HTMLInputElement>
   ) => {
     setLoading(true);
     setOrderConsolidateData((prev) => ({
@@ -265,6 +264,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
                 ? "selected"
                 : ""
               }`}
+              onClick={() => handleChangeOOSConsolidate(OOS_CONSOLIDATE_SPLIT_CODE)}
           >
             <div className="shipping-option-wrapper">
               <div className="shipping-option-select-container">
@@ -277,6 +277,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
                     orderConsolidateData.oosConsolidate ===
                     OOS_CONSOLIDATE_SPLIT_CODE
                   }
+                  onClick={(e) => e.stopPropagation()} // Prevent triggering div click
                 />
                 <div className={`shipping-option-sub-container`}>
                   <div>
@@ -292,6 +293,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
                 ? "selected"
                 : ""
               }`}
+              onClick={() => handleChangeOOSConsolidate(OOS_CONSOLIDATE_CODE)}
           >
             <div className="shipping-option-wrapper">
               <div className="shipping-option-select-container">
@@ -303,6 +305,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
                   checked={
                     orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_CODE
                   }
+                  onClick={(e) => e.stopPropagation()} // Prevent triggering div click
                 />
                 <div className={`shipping-option-sub-container`}>
                   <div>Wait and ship together. Save on shipping.</div>
