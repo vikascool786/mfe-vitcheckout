@@ -33,12 +33,13 @@ import {
 } from "../../utils/OrderUtils";
 import {
   GET_API_ENDPOINT_BASE_URL_ONLY,
-  GET_API_KEY, GET_PAYPAL_CHECKOUT_URL,
+  GET_API_KEY,
+  GET_PAYPAL_CHECKOUT_URL,
   GET_PAYPAL_CLIENT_ID,
   GET_PAYPAL_RETURN_URL,
 } from "../../utils/urlResolver";
 import { placeOrderSchema } from "../../validation/placeOrderSchema";
-import { CLICK2PAY, PAYPAL, SEZZLE } from "../PaymentType";
+import { CLICK2PAY, isThirdPartyPayment, PAYPAL, SEZZLE } from "../PaymentType";
 import "./PlaceOrder.scss";
 
 interface IPlaceOrder {
@@ -190,6 +191,21 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     }
   };
 
+  const isCardExpired = (expMonth: number, expYear: number) => {
+    if (!expMonth || !expYear) {
+      return false;
+    }
+
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth() + 1; // Months are 0-based
+    const currentYear = currentDate.getFullYear(); // Get last two digits of year
+
+    return (
+      expYear < currentYear ||
+      (expYear === currentYear && expMonth < currentMonth)
+    );
+  };
+
   const handlePlaceOrder = async (paymentMethods: IPaymentOption[]) => {
     try {
       setIsLoading(true);
@@ -298,7 +314,9 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             setIsLoading(false);
             return;
           }
-          const url = `${GET_PAYPAL_CHECKOUT_URL()}?token=${paypalToken.tokenId}`;
+          const url = `${GET_PAYPAL_CHECKOUT_URL()}?token=${
+            paypalToken.tokenId
+          }`;
           window.open(url, "_self");
           break;
         default:
@@ -306,15 +324,33 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             (pm) => pm.isSelected
           );
 
+          const isCardExpiredFlag = isCardExpired(
+            selectedPaymentMethod?.paymentMethod.expMonth || 0,
+            selectedPaymentMethod?.paymentMethod.expYear || 0
+          );
+
+          if (isCardExpiredFlag && !isThirdPartyPayment(paymentTypeId)) {
+            order &&
+              setOrderData({
+                ...order,
+                shouldShowInvalidCVVMessage: "Card expired!",
+              });
+            setIsLoading(false);
+            return;
+          }
+
           if (
-              !isOrderCoveredUnderVIFT &&
+            !isOrderCoveredUnderVIFT &&
             selectedPaymentMethod &&
             !selectedPaymentMethod.isPaymentValidated
           ) {
             order &&
               setOrderData({
                 ...order,
-                shouldShowInvalidCVVMessage: true,
+                shouldShowInvalidCVVMessage:
+                  order?.shouldShowInvalidCVVMessage === "Card expired!"
+                    ? order.shouldShowInvalidCVVMessage
+                    : "Please check CVV",
               });
             scrollToCVV(selectedPaymentMethod);
             setIsLoading(false);
@@ -329,7 +365,10 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             order &&
               setOrderData({
                 ...order,
-                shouldShowInvalidCVVMessage: true,
+                shouldShowInvalidCVVMessage:
+                  order?.shouldShowInvalidCVVMessage === "Card expired!"
+                    ? order.shouldShowInvalidCVVMessage
+                    : "Please check CVV",
               });
             scrollToCVV(selectedPaymentMethod);
             setIsLoading(false);
@@ -547,31 +586,31 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                 You will be charged when product(s) are available for shipment
               </div>
             )}
-           <Button
-                qaTag={"qa-order"}
-                label={
-                  paymentTypeId === SEZZLE.typeId ||
-                  paymentTypeId === PAYPAL.typeId
-                    ? "Pay with"
-                    : "Place Order"
-                }
-                disabled={isLoading}
-                btnType={
-                  paymentTypeId === SEZZLE.typeId
-                    ? "sezzle"
-                    : paymentTypeId === PAYPAL.typeId
-                    ? "paypal"
-                    : "primary"
-                }
-                onClick={submitForm}
-                logo={
-                  paymentTypeId === SEZZLE.typeId
-                    ? "https://img.shop.com/Image/resources/checkout/Sezzle-Color-White-Logo.svg"
-                    : paymentTypeId === PAYPAL.typeId
-                    ? "https://img.shop.com/Image/resources/checkout/PayPal-White-Logo.svg"
-                    : ""
-                }
-              />
+            <Button
+              qaTag={"qa-order"}
+              label={
+                paymentTypeId === SEZZLE.typeId ||
+                paymentTypeId === PAYPAL.typeId
+                  ? "Pay with"
+                  : "Place Order"
+              }
+              disabled={isLoading}
+              btnType={
+                paymentTypeId === SEZZLE.typeId
+                  ? "sezzle"
+                  : paymentTypeId === PAYPAL.typeId
+                  ? "paypal"
+                  : "primary"
+              }
+              onClick={submitForm}
+              logo={
+                paymentTypeId === SEZZLE.typeId
+                  ? "https://img.shop.com/Image/resources/checkout/Sezzle-Color-White-Logo.svg"
+                  : paymentTypeId === PAYPAL.typeId
+                  ? "https://img.shop.com/Image/resources/checkout/PayPal-White-Logo.svg"
+                  : ""
+              }
+            />
           </form>
         )}
       </Formik>

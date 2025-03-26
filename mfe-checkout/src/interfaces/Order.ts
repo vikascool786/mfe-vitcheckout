@@ -15,7 +15,7 @@ export interface Order {
   userOptions: IUserOptions;
   isOrderValid?: boolean;
   hidePaymentMethods?: boolean;
-  shouldShowInvalidCVVMessage?: boolean;
+  shouldShowInvalidCVVMessage?: string | null;
 }
 
 interface OrderStores {

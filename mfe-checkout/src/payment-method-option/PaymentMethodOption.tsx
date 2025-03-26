@@ -59,6 +59,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   const [order, setOrder] = useAtom(orderAtom);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [paymentMethods] = useAtom(paymentMethodsAtom);
+
   const setOrderNotifications = useSetAtom(orderNotificationsAtom);
   const {
     paymentMethod,
@@ -69,7 +70,9 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   } = paymentOption;
 
   useEffect(() => {
-    if (order?.shouldShowInvalidCVVMessage) {
+    if (order?.shouldShowInvalidCVVMessage === "Card expired!") {
+      updateCvvError(order.shouldShowInvalidCVVMessage);
+    } else if (order?.shouldShowInvalidCVVMessage) {
       updateCvvError("CVV is required");
     } else {
       updateCvvError("");
@@ -91,9 +94,20 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   };
 
   useEffect(() => {
-    if (isCardExpired() && !isThirdPartyPayment(paymentMethod.typeID)) {
-      setOrderNotifications(["The credit card has expired"]);
-      scrollTo(0, 0);
+    if (
+      isCardExpired() &&
+      isSelected &&
+      !isThirdPartyPayment(paymentMethod.typeID)
+    ) {
+      setTimeout(() => {
+        order &&
+          setOrder({
+            ...order,
+            isOrderValid: false,
+            shouldShowInvalidCVVMessage: "Card expired!",
+          });
+        return;
+      }, 300);
     }
   }, [paymentMethod]);
 
@@ -120,15 +134,6 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     }
 
     setLoading(true);
-
-    if (isCardExpired()) {
-      setTimeout(() => {
-        formik.setFieldValue("cvv", "", false);
-        formik.setFieldError("cvv", "The credit card has expired");
-      }, 300);
-      setLoading(false);
-      return;
-    }
 
     const isThirdPartyPayment = thirdPartyPaymentTypeIdList().includes(
       paymentOption.paymentMethod.typeID
@@ -185,7 +190,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
       setOrder({
         ...orderResponse.response.success.data,
         isOrderValid: true,
-        shouldShowInvalidCVVMessage: false,
+        shouldShowInvalidCVVMessage: null,
       });
 
       // Reset all payment methods, only keep the validated one
@@ -202,7 +207,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
       // formik.setFieldValue("cvv", "");
     } catch (error) {
       setOrder({ ...order, isOrderValid: false });
-      setErrorMessage("Something went wrong, please try again."); 
+      setErrorMessage("Something went wrong, please try again.");
     }
 
     setLoading(false);
@@ -247,8 +252,9 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
       id={`[id=${paymentMethod.id}]`}
     >
       <div
-        className={`payment-option-select-container ${isEditing ? "form-mode" : ""
-          }`}
+        className={`payment-option-select-container ${
+          isEditing ? "form-mode" : ""
+        }`}
       >
         <div className="payment-option-sub-container">
           <RadioButton
@@ -334,9 +340,9 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                             (pm) =>
                               pm.paymentMethod.id === paymentMethod.id
                                 ? {
-                                  ...pm,
-                                  isPaymentValidated: false,
-                                }
+                                    ...pm,
+                                    isPaymentValidated: false,
+                                  }
                                 : pm
                           );
 
@@ -347,11 +353,9 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                       required
                     />
                     <div className="cvv-text">3 or 4 digits</div>
-                    <ErrorMessage
-                      name="cvv"
-                      component="div"
-                      className="error-message"
-                    />
+                    {errorMessage && (
+                      <span className="error-message">{errorMessage}</span>
+                    )}
                     {formik.values.cvvError && !formik.errors.cvv && (
                       <div className="error-message">
                         {formik.values.cvvError}
@@ -371,9 +375,6 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                 >
                   edit
                 </div>
-              )}
-              {errorMessage && (
-                <div className="error-message">{errorMessage}</div>
               )}
             </div>
           </form>
