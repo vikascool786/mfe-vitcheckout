@@ -693,7 +693,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
                   </div>
                   <div>Add New Card</div>
                 </div>
-                <div>
+                <div className="checkout-add-new-card-image">
                   {order?.paymentMethods
                     ?.filter((pm) => pm.visible)
                     ?.map(

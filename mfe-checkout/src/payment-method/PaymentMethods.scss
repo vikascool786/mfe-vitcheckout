@@ -176,7 +176,7 @@
 
 .payment-creditcard-wrapper {
   display: flex;
-  gap: 2px;
+  gap: 5px;
 }
 .checkout-add-card-text {
   cursor: pointer;
@@ -184,10 +184,13 @@
 }
 
 .checkout-add-new-card {
-  max-height: 35px;
+  height: 24px;
 }
-
-
+.checkout-add-new-card-image {
+  height: 25px;
+  display: flex;
+  gap: 5px;
+}
 
 @media only screen and (max-width: 560px) {
   .checkout-add-new-card {

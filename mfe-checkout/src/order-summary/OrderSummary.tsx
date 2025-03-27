@@ -439,6 +439,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                 <FormField
                   qaTag={"qa-input"}
                   value={gcState.gcPin}
+                  type="password"
                   onChange={handleGcPinChange}
                 />
               </div>
