@@ -68,16 +68,14 @@
 .checkout-method-click-to-pay-container {
   display: flex;
 
-  @media only screen and (max-width: 560px) {
-    flex-direction: column;
+  @media only screen and (max-width: 768px) {
+    flex-wrap: wrap;
   }
 }
 
 .checkout-method-click-to-pay {
   display: flex;
   align-items: center;
-  padding-top: 1.375rem;
-  padding-bottom: 1.375rem;
   color: #000;
 }
 
@@ -90,22 +88,34 @@
     font-size: 12px;
   }
 
-  .learn-more {
+  &__learn-more {
     color: #000;
+    padding-left: 5px;
   }
-}
-
-.checkout-method-click-to-pay-text-black {
-  font-weight: 600;
-  font-size: 16px;
-  color: black;
+  &--sm {
+    font-size: 13px;
+    font-weight: 300;
+  }
+  &--black {
+    font-weight: 600;
+    font-size: 16px;
+    color: black;
+  }
 }
 
 .checkout-method-save-information {
   min-width: 16rem;
-  @media only screen and (max-width: 560px) {
+  padding-left: 10px;
+  @media only screen and (max-width: 768px) {
     min-width: unset;
-    width: 100%;
+    width: 80%;
+  }
+  &__text {
+    font-size: 13px;
+    font-weight: 300;
+  }
+  &__add-btn {
+    cursor: pointer;
   }
 }
 
@@ -153,7 +163,7 @@
     align-items: center;
     gap: 0.4rem;
     font-size: 18px;
-    font-weight: 500;
+    font-weight: 600;
     line-height: 21.09px;
     text-align: left;
     text-decoration-skip-ink: none;
@@ -175,8 +185,6 @@
 
 .checkout-add-new-card {
   max-height: 35px;
-  
- 
 }
 
 

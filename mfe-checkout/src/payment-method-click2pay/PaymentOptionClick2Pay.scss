@@ -19,6 +19,9 @@
     @media only screen and (max-width: 560px) {
       font-size: 12px;
     }
+    &--inline {
+      display: inline-flex;
+    }
   }
   &__iframe-container {
     position: fixed;

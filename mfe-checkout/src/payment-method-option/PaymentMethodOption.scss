@@ -181,7 +181,7 @@
 
 .payment-option-name {
   font-size: 18px;
-  font-weight: 500;
+  font-weight: 600;
   display: flex;
   flex: 1;
   align-items: center;
@@ -221,12 +221,4 @@
   font-size: 14px;
   line-height: 16.41px;
   letter-spacing: 0%;
-}
-
-@media screen and (max-width: 375px) {
-  .payment-option-select-container {
-    img {
-      width: 80px;
-    }
-  }
 }

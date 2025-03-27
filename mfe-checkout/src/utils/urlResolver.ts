@@ -195,18 +195,7 @@ export const GET_SHOP_CART_URL = () => {
 };
 
 export const GET_TOKEN_SERVICE_SHOP = () => {
-  switch (GET_API_MODE()) {
-    case "localhost":
-      return "https://dev.shop.com/TokenService/GetToken";
-    case "dev":
-      return "https://dev.shop.com/TokenService/GetToken";
-    case "staging":
-      return "https://staging.shop.com/TokenService/GetToken";
-    case "prod":
-      return "https://www.shop.com/TokenService/GetToken";
-    default:
-      return "";
-  }
+  return `${GET_BASE_URL}/TokenService/GetToken`;
 };
 
 export const GET_AJAX_ENDPOINT_BASE_URL = () => {
