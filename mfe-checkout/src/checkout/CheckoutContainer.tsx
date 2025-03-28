@@ -235,7 +235,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
       .then((response: any) => {
         const isSuccessful = response?.data?.response?.success;
         if (isSuccessful) {
-          const orderId = response.data.response.success.data.orderId;
+          const orderId = response?.data?.response?.success?.data.orderId;
 
           // Remove cartId from tracking since order is successful
           processedOrders = getProcessedOrders().filter((id) => id !== cartId);
@@ -277,7 +277,9 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
 
   const redirectToOrderConfirmation = (orderId: string | number): void => {
     window.location.href = `/nbts/orderconfirmation-${orderId}`;
-    setIsLoading(false);
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
   };
 
   useEffect(() => {

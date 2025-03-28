@@ -172,11 +172,11 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
         return;
       }
 
-      const hasPaymentChanged = order?.paymentMethod.id !== paymentMethod.id;
+      const hasPaymentChanged = order?.paymentMethod?.id !== paymentMethod.id;
 
       // Update order with validated payment method -
       // AI-110718 only call this if the payment method has been updated, build order takes too long when only cvv is entered
-      if(!order?.paymentMethod.id || hasPaymentChanged){
+      if(!order?.paymentMethod?.id || hasPaymentChanged){
         const updatedOrder = generateChangeStoreResponse({
           ...order,
           paymentMethod: {
@@ -200,9 +200,9 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
       // Reset all payment methods, only keep the validated one
       const updatedPaymentMethods = paymentMethods.map((method) => ({
         ...method,
-        isSelected: method.paymentMethod.id === paymentOption.paymentMethod.id,
+        isSelected: method?.paymentMethod.id === paymentOption?.paymentMethod.id,
         isPaymentValidated:
-          method.paymentMethod.id === paymentOption.paymentMethod.id,
+          method.paymentMethod.id === paymentOption?.paymentMethod.id,
       }));
 
       onAddNewCards(updatedPaymentMethods);
@@ -210,6 +210,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
       // Reset CVV input in formik
       // formik.setFieldValue("cvv", "");
     } catch (error) {
+      console.log(error);
       setOrder({ ...order, isOrderValid: false });
       setErrorMessage("Something went wrong, please try again."); 
     }
@@ -356,9 +357,12 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                       required
                     />
                     <div className="cvv-text">3 or 4 digits</div>
-                    {errorMessage && (
-                      <span className="error-message">{errorMessage}</span>
-                    )}
+                    {errorMessage ||
+                      (formik.errors.cvv && (
+                        <span className="error-message">
+                          {errorMessage ?? formik.errors.cvv}
+                        </span>
+                      ))}
                     {formik.values.cvvError && !formik.errors.cvv && (
                       <div className="error-message">
                         {formik.values.cvvError}
