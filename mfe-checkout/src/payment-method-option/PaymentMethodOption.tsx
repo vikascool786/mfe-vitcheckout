@@ -208,7 +208,8 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
       onAddNewCards(updatedPaymentMethods);
 
       // Reset CVV input in formik
-      // formik.setFieldValue("cvv", "");
+      formik.setFieldValue("cvvError", "");
+      formik.setFieldValue("cvv", cvv);
     } catch (error) {
       console.log(error);
       setOrder({ ...order, isOrderValid: false });
