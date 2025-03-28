@@ -6,6 +6,7 @@ import { orderAtom, orderNotificationsAtom } from "../../store";
 import { changeOrder } from "../../api/service/Order";
 import { generateChangeStoreResponse } from "../../utils/helpers/GenerateChangeStoreResponse";
 import { VIFT } from "../../assets/svgs/VIFT";
+import { VIFTinit } from "../../assets/svgs/VIFTinit";
 import { getOrderNotifications } from "../../utils/OrderUtils";
 import { siteApiData } from "../../checkout/siteAtom";
 import { getFormattedPrice } from "../../utils/helpers/CurrencyFormatterUtil";
@@ -63,8 +64,9 @@ export const ApplyCashback: React.FC<IApplyCashbackContainer> = ({
         }
       >
         <div className="left-part-middle-container">
-          <div className="image-border-container">
-            <VIFT />
+          <div className={order?.userOptions.applyEWallet ? "image-border-container" : "image-border-container notselected" }>
+          {order?.userOptions.applyEWallet ?
+            <VIFT /> : <VIFTinit/>}
           </div>
           <p
             className={
