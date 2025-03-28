@@ -188,7 +188,11 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
           return;
         }
 
-        let paymentOptions = response.map((paymentMethod) => {
+        const staticMethodIds = new Set(staticMethods.map((sm) => sm.paymentMethod?.id));
+        console.log("staticMethodIds", staticMethodIds);  
+
+        let paymentOptions = response.filter((paymentMethod) => !staticMethodIds.has(paymentMethod.id)) // Exclude duplicates
+          .map((paymentMethod) => {
           const isPreferred = paymentMethod.preferred;
 
           if (isPreferred) {

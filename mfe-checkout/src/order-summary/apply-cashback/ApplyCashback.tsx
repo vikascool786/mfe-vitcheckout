@@ -69,7 +69,7 @@ export const ApplyCashback: React.FC<IApplyCashbackContainer> = ({
         <div className="left-part-middle-container">
           <div className={order?.userOptions.applyEWallet ? "image-border-container" : "image-border-container notselected" }>
           {order?.userOptions.applyEWallet ?
-            <VIFT /> : <VIFTinit/>}
+            <VIFT /> : <VIFT />}
           </div>
           <p
             className={

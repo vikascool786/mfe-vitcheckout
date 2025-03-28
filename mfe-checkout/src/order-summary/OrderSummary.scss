@@ -82,13 +82,14 @@
 }
 
 .image-border-container {
-  width: 20%;
-  height: 30px;
+  width: 43px;
+  height: 23px;
   border-radius: 2px;
   border: 1px solid black;
   display: flex;
   justify-content: center;
   align-items: center;
+  background: linear-gradient(90deg, #bed45b 0%, #43909f 100%);
 }
 
 .notselected {
