@@ -6,7 +6,7 @@ import {
     OrderConsolidationData
 } from "../interfaces/OrderConsolidationData";
 import { Success } from "../api/service/Order";
-import {GIFT_CARD_STORE_CATALOGS, GIFT_CARD_STORE_VOLUMES} from "./StoreUtils";
+import {GIFT_CARD_STORE_CATALOGS, GIFT_CARD_STORE_VOLUMES, isGiftCardStore} from "./StoreUtils";
 
 export function updatePaymentMethod(
     order: ChangeOrder,
@@ -46,7 +46,7 @@ export const getOrderConsolidateData = (
         (store) => store.canConsolidate
     );
     const maProductCount = Object.values(order.stores)
-        .filter((entry) => entry.store?.isMA === 1)
+        .filter((entry) => entry.store?.isMA === 1 && !isGiftCardStore(entry))
         .reduce((count, entry) => count + entry.items.length, 0);
     orderConsolidateData.showOrderConsolidate =
         canConsolidate.length > 0 && maProductCount > 1;

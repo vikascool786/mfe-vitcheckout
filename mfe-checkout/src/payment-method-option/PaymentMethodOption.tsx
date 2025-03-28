@@ -172,25 +172,30 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
         return;
       }
 
-      // Update order with validated payment method
-      const updatedOrder = generateChangeStoreResponse({
-        ...order,
-        paymentMethod: {
-          ...order.paymentMethod,
-          id: paymentMethod.id,
-        },
-        billingAddress: {
-          ...paymentAddress,
-          id: paymentAddress?.id as number,
-        },
-      });
+      const hasPaymentChanged = order?.paymentMethod.id !== paymentMethod.id;
 
-      const orderResponse = await buildOrder(updatedOrder);
-      setOrder({
-        ...orderResponse.response.success.data,
-        isOrderValid: true,
-        shouldShowInvalidCVVMessage: null,
-      });
+      // Update order with validated payment method -
+      // AI-110718 only call this if the payment method has been updated, build order takes too long when only cvv is entered
+      if(!order?.paymentMethod.id || hasPaymentChanged){
+        const updatedOrder = generateChangeStoreResponse({
+          ...order,
+          paymentMethod: {
+            ...order.paymentMethod,
+            id: paymentMethod.id,
+          },
+          billingAddress: {
+            ...paymentAddress,
+            id: paymentAddress?.id as number,
+          },
+        });
+
+        const orderResponse = await buildOrder(updatedOrder);
+        setOrder({
+          ...orderResponse.response.success.data,
+          isOrderValid: true,
+          shouldShowInvalidCVVMessage: null,
+        });
+      }
 
       // Reset all payment methods, only keep the validated one
       const updatedPaymentMethods = paymentMethods.map((method) => ({

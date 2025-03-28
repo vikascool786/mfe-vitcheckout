@@ -665,31 +665,26 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
           <div className="pm-sub-container">
             {paymentMethods
               .filter((method) => method.isVisible)
-              .map((paymentOption, index) => {
-                // Only render credit cards first
-                if (creditCardTypeIds.includes(paymentOption.paymentMethod.typeID)) {
-                  return (
-                    <PaymentOption
-                      key={paymentOption.paymentMethod.id}
-                      paymentOption={paymentOption}
-                      index={index}
-                      shopperId={shopperId}
-                      onCardEdit={onCardEdit}
-                      handleCancelNewCard={handleCancelNewCard}
-                      onAddNewCards={onAddNewCards}
-                      updatePaymentTypeId={updatePaymentTypeId}
-                      onCollapse={onCollapse}
-                      formik={formik}
-                      updateCvvError={updateCvvError}
-                      setCVVFieldValue={setCVVFieldValue}
-                      updateOrderErrorMessage={updateOrderErrorMessage}
-                    />
-                  );
-                }
-                return null;
-              })}
-
-            {/* Add New Card section */}
+              .map((paymentOption, index) => (
+                <PaymentOption
+                  key={paymentOption.paymentMethod.id}
+                  paymentOption={paymentOption}
+                  index={index}
+                  shopperId={shopperId}
+                  onCardEdit={onCardEdit}
+                  handleCancelNewCard={handleCancelNewCard}
+                  onAddNewCards={onAddNewCards}
+                  updatePaymentTypeId={updatePaymentTypeId}
+                  onCollapse={onCollapse}
+                  formik={formik}
+                  updateCvvError={updateCvvError}
+                  setCVVFieldValue={setCVVFieldValue}
+                  updateOrderErrorMessage={updateOrderErrorMessage}
+                />
+              ))}
+            {showClick2Pay && (
+              <PaymentOptionClick2Pay pcid={pcid} order={order} />
+            )}
             {!showNewCard && (
               <div className="checkout-add-card" onClick={onAddNewCard}>
                 <div className="checkout-add-card-text">
@@ -714,34 +709,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
                 </div>
               </div>
             )}
-
-            {/* Render non-credit card payment methods (PayPal, Sezzle, etc.) */}
-            {paymentMethods
-              .filter((method) => method.isVisible)
-              .map((paymentOption, index) => {
-                if (!creditCardTypeIds.includes(paymentOption.paymentMethod.typeID)) {
-                  return (
-                    <PaymentOption
-                      key={paymentOption.paymentMethod.id}
-                      paymentOption={paymentOption}
-                      index={index}
-                      shopperId={shopperId}
-                      onCardEdit={onCardEdit}
-                      handleCancelNewCard={handleCancelNewCard}
-                      onAddNewCards={onAddNewCards}
-                      updatePaymentTypeId={updatePaymentTypeId}
-                      onCollapse={onCollapse}
-                      formik={formik}
-                      updateCvvError={updateCvvError}
-                      setCVVFieldValue={setCVVFieldValue}
-                      updateOrderErrorMessage={updateOrderErrorMessage}
-                    />
-                  );
-                }
-                return null;
-              })}
-
-            {showClick2Pay && <PaymentOptionClick2Pay pcid={pcid} order={order} />}
           </div>
         </div>
       </div>

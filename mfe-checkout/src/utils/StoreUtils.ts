@@ -18,7 +18,7 @@ export const isGiftCardStoreDetail = (storeDetail: StoreDetail | null): boolean 
 };
 
 export const isGiftCardForStoreKey = (order: Order, storeKey: string): boolean => {
-    return isGiftCardStore(order?.stores?.[storeKey] || null);
+    return isGiftCardStore(getStoreDataFromKey(order, storeKey));
 };
 
 export const storeHasOOSItems = (store: OrderStore | null): boolean => {
@@ -31,4 +31,8 @@ export const storeHasCustomCocktail = (store: OrderStore | null): boolean => {
     if (!store) return false;
     const customCocktailItems = store.items.filter(item => isCustomCocktail(item));
     return customCocktailItems.length > 0;
+};
+
+export const getStoreDataFromKey = (order: Order, storeKey: string): OrderStore | null => {
+    return order?.stores?.[storeKey] || null;
 };

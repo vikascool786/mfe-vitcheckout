@@ -62,7 +62,6 @@ const getInitialBuildOrderData = (
   site_type: "W",
   application: "cart",
   userOptions: {
-    applyCashback: false,
     applyEWallet: false,
     isOfAge: false,
     trackingID: "",
@@ -295,6 +294,9 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
         if (defaultPaymentMethod?.addressId) {
           buildOrderPayload.billing = buildOrderPayload.billing ?? { id: 0 };
           buildOrderPayload.billing.id = defaultPaymentMethod.addressId;
+        }
+        if (defaultPaymentMethod) {
+          buildOrderPayload.paymentMethod = { id: defaultPaymentMethod.id };
         }
 
         const orderResponse = buildOrder(buildOrderPayload);
