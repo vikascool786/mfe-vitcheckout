@@ -176,7 +176,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
 
       // Update order with validated payment method -
       // AI-110718 only call this if the payment method has been updated, build order takes too long when only cvv is entered
-      if(!order?.paymentMethod.id || hasPaymentChanged){
+      if (!order?.paymentMethod.id || hasPaymentChanged) {
         const updatedOrder = generateChangeStoreResponse({
           ...order,
           paymentMethod: {
@@ -211,7 +211,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
       // formik.setFieldValue("cvv", "");
     } catch (error) {
       setOrder({ ...order, isOrderValid: false });
-      setErrorMessage("Something went wrong, please try again."); 
+      setErrorMessage("Something went wrong, please try again.");
     }
 
     setLoading(false);
@@ -249,6 +249,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     );
   };
 
+  console.log(formik);
   return (
     <div
       className={`payment-option-container ${isSelected} ${isFirst}`}
@@ -256,8 +257,9 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
       id={`[id=${paymentMethod.id}]`}
     >
       <div
-        className={`payment-option-select-container ${isEditing ? "form-mode" : ""
-          }`}
+        className={`payment-option-select-container ${
+          isEditing ? "form-mode" : ""
+        }`}
       >
         <div className="payment-option-sub-container">
           <RadioButton
@@ -343,9 +345,9 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                             (pm) =>
                               pm.paymentMethod.id === paymentMethod.id
                                 ? {
-                                  ...pm,
-                                  isPaymentValidated: false,
-                                }
+                                    ...pm,
+                                    isPaymentValidated: false,
+                                  }
                                 : pm
                           );
 
@@ -356,9 +358,12 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                       required
                     />
                     <div className="cvv-text">3 or 4 digits</div>
-                    {errorMessage && (
-                      <span className="error-message">{errorMessage}</span>
-                    )}
+                    {errorMessage ||
+                      (formik.errors.cvv && (
+                        <span className="error-message">
+                          {errorMessage ?? formik.errors.cvv}
+                        </span>
+                      ))}
                     {formik.values.cvvError && !formik.errors.cvv && (
                       <div className="error-message">
                         {formik.values.cvvError}
