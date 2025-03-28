@@ -13,3 +13,13 @@ export const isInStockItem = (item: Item | null): boolean => {
     const inventoryStatus = item?.permutation?.inventoryStatus || "";
     return !inventoryStatus ? true : !OOS_STATUSES.includes(inventoryStatus);
 };
+
+export const getItemEstimatedShipDate = (item: Item | null): string => {
+    if (!item) return "";
+    return item?.available || "";
+};
+
+export const hasEstimatedShipDate = (item: Item | null): boolean => {
+    const estimatedShipDate = getItemEstimatedShipDate(item);
+    return estimatedShipDate.length > 1; //checking length because availability field can return as "0"
+};

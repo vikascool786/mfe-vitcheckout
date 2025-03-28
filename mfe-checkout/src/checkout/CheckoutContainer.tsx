@@ -62,7 +62,6 @@ const getInitialBuildOrderData = (
   site_type: "W",
   application: "cart",
   userOptions: {
-    applyCashback: false,
     applyEWallet: false,
     isOfAge: false,
     trackingID: "",
@@ -234,7 +233,6 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
 
     commitOrder(cartId)
       .then((response: any) => {
-        setIsLoading(false);
         const isSuccessful = response?.data?.response?.success;
         if (isSuccessful) {
           const orderId = response.data.response.success.data.orderId;
@@ -279,6 +277,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
 
   const redirectToOrderConfirmation = (orderId: string | number): void => {
     window.location.href = `/nbts/orderconfirmation-${orderId}`;
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -295,6 +294,9 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
         if (defaultPaymentMethod?.addressId) {
           buildOrderPayload.billing = buildOrderPayload.billing ?? { id: 0 };
           buildOrderPayload.billing.id = defaultPaymentMethod.addressId;
+        }
+        if (defaultPaymentMethod) {
+          buildOrderPayload.paymentMethod = { id: defaultPaymentMethod.id };
         }
 
         const orderResponse = buildOrder(buildOrderPayload);
