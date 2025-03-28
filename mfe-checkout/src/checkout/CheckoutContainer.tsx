@@ -233,7 +233,6 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
 
     commitOrder(cartId)
       .then((response: any) => {
-        setIsLoading(false);
         const isSuccessful = response?.data?.response?.success;
         if (isSuccessful) {
           const orderId = response.data.response.success.data.orderId;
@@ -278,6 +277,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
 
   const redirectToOrderConfirmation = (orderId: string | number): void => {
     window.location.href = `/nbts/orderconfirmation-${orderId}`;
+    setIsLoading(false);
   };
 
   useEffect(() => {
