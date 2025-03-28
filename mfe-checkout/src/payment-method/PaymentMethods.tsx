@@ -641,7 +641,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
           pm.paymentMethod.id > 0 &&
           creditCardTypeIds.includes(pm.paymentMethod.typeID)
   )
-
   const showShouldToggleAccordian = getSavedCreditCardsFromWallet.length > 1;
 
   const updateCvvError = (error: string) => {
