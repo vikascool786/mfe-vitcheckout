@@ -73,19 +73,23 @@
 
 .left-part-middle-container {
   display: flex;
-  width: 40%;
+  width: 70%;
   align-items: center;
   gap: 10px;
 }
 
 .image-border-container {
-  width: 37%;
+  width: 20%;
   height: 30px;
   border-radius: 2px;
   border: 1px solid black;
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.notselected {
+  background: linear-gradient(to right, #bed45b, #43909f);
 }
 
 .Discount-price-text {

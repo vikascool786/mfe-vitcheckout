@@ -2,10 +2,11 @@ import { useAtom } from "jotai";
 import React from "react";
 import { EWallet } from "../../interfaces/EWallet";
 import "../OrderSummary.scss";
-import { orderAtom, orderNotificationsAtom } from "../../store";
+import { loadingAtom, orderAtom, orderNotificationsAtom } from "../../store";
 import { changeOrder } from "../../api/service/Order";
 import { generateChangeStoreResponse } from "../../utils/helpers/GenerateChangeStoreResponse";
 import { VIFT } from "../../assets/svgs/VIFT";
+import { VIFTinit } from "../../assets/svgs/VIFTinit";
 import { getOrderNotifications } from "../../utils/OrderUtils";
 import { siteApiData } from "../../checkout/siteAtom";
 import { getFormattedPrice } from "../../utils/helpers/CurrencyFormatterUtil";
@@ -20,6 +21,7 @@ export const ApplyCashback: React.FC<IApplyCashbackContainer> = ({
   siteId,
 }) => {
   const [order, setOrder] = useAtom(orderAtom);
+  const [loading, setLoading] = useAtom(loadingAtom);
   const [notificationMessages, setOrderNotifications] = useAtom(
     orderNotificationsAtom
   );
@@ -30,6 +32,7 @@ export const ApplyCashback: React.FC<IApplyCashbackContainer> = ({
     // Determine if cashback is being applied or removed
 
     if (order) {
+      setLoading(true);
       const isCashbackApplied = !order?.userOptions.applyEWallet;
 
       changeOrder(
@@ -47,6 +50,7 @@ export const ApplyCashback: React.FC<IApplyCashbackContainer> = ({
           setOrderNotifications(
             getOrderNotifications(response.response.success)
           );
+          setLoading(false);
         }
       });
     }
@@ -63,8 +67,9 @@ export const ApplyCashback: React.FC<IApplyCashbackContainer> = ({
         }
       >
         <div className="left-part-middle-container">
-          <div className="image-border-container">
-            <VIFT />
+          <div className={order?.userOptions.applyEWallet ? "image-border-container" : "image-border-container notselected" }>
+          {order?.userOptions.applyEWallet ?
+            <VIFT /> : <VIFTinit/>}
           </div>
           <p
             className={
