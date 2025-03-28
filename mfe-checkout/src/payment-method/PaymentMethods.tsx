@@ -37,6 +37,7 @@ import { FormikProvider, useFormik } from "formik";
 import { getVisibleCardOptionsImages } from "../utils/helpers/GetVisibleCardImages";
 import { IPaymentMethod2 } from "../interfaces/Order";
 import Click2PayCardLoader from "../payment-method-click2pay/Click2PayCardLoader";
+import { RadioButton } from "../component/RadioButton/RadioButton";
 
 interface IPaymentMethod {
   shopperId: string;
@@ -350,10 +351,10 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       let filteredPaymentMethods = paymentMethods;
       //remove cc entry option
       filteredPaymentMethods = paymentMethods.filter(
-          (payment) => payment.paymentMethod.id !== 0
+        (payment) => payment.paymentMethod.id !== 0
       );
       setPaymentMethods(
-          filteredPaymentMethods.map((item) => ({
+        filteredPaymentMethods.map((item) => ({
           ...item,
           isSelected: false,
         }))
@@ -366,7 +367,10 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       handleDeselectPaymentMethodsEvent
     );
     return () => {
-      document.removeEventListener("c2pSelectedCard", handleDeselectPaymentMethodsEvent);
+      document.removeEventListener(
+        "c2pSelectedCard",
+        handleDeselectPaymentMethodsEvent
+      );
     };
   }, [paymentMethods.length]);
 
@@ -459,7 +463,12 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
 
     setShowNewCard(selectedPayment?.paymentMethod.id === 0);
 
-    if(isClick2PayCardSelected && selectedPayment && showClick2Pay && selectedPayment?.paymentMethod.typeID !== CLICK2PAY.typeId){
+    if (
+      isClick2PayCardSelected &&
+      selectedPayment &&
+      showClick2Pay &&
+      selectedPayment?.paymentMethod.typeID !== CLICK2PAY.typeId
+    ) {
       Click2PayCardLoader.deselectC2PCard();
       setIsClick2PayCardSelected(false);
     }
@@ -507,14 +516,14 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     const updatedPaymentMethods = paymentMethods.map((method) =>
       method.paymentMethod.id === paymentId
         ? {
-          ...method,
-          isEditing: !method.isEditing, // Toggle editing state for the selected payment method
-        }
+            ...method,
+            isEditing: !method.isEditing, // Toggle editing state for the selected payment method
+          }
         : {
-          ...method,
-          isEditing: false,
-          isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
-        }
+            ...method,
+            isEditing: false,
+            isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
+          }
     );
     setPaymentMethods(updatedPaymentMethods);
   };
@@ -637,10 +646,10 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   };
 
   const getSavedCreditCardsFromWallet = paymentMethods.filter(
-      (pm) =>
-          pm.paymentMethod.id > 0 &&
-          creditCardTypeIds.includes(pm.paymentMethod.typeID)
-  )
+    (pm) =>
+      pm.paymentMethod.id > 0 &&
+      creditCardTypeIds.includes(pm.paymentMethod.typeID)
+  );
 
   const showShouldToggleAccordian = getSavedCreditCardsFromWallet.length > 1;
 
@@ -665,32 +674,37 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
           <div className="pm-sub-container">
             {paymentMethods
               .filter((method) => method.isVisible)
-              .map((paymentOption, index) => (
-                <PaymentOption
-                  key={paymentOption.paymentMethod.id}
-                  paymentOption={paymentOption}
-                  index={index}
-                  shopperId={shopperId}
-                  onCardEdit={onCardEdit}
-                  handleCancelNewCard={handleCancelNewCard}
-                  onAddNewCards={onAddNewCards}
-                  updatePaymentTypeId={updatePaymentTypeId}
-                  onCollapse={onCollapse}
-                  formik={formik}
-                  updateCvvError={updateCvvError}
-                  setCVVFieldValue={setCVVFieldValue}
-                  updateOrderErrorMessage={updateOrderErrorMessage}
-                />
-              ))}
-            {showClick2Pay && (
-              <PaymentOptionClick2Pay pcid={pcid} order={order} />
-            )}
+              .map((paymentOption, index) => {
+                // Only render credit cards first
+                if (
+                  creditCardTypeIds.includes(paymentOption.paymentMethod.typeID)
+                ) {
+                  return (
+                    <PaymentOption
+                      key={paymentOption.paymentMethod.id}
+                      paymentOption={paymentOption}
+                      index={index}
+                      shopperId={shopperId}
+                      onCardEdit={onCardEdit}
+                      handleCancelNewCard={handleCancelNewCard}
+                      onAddNewCards={onAddNewCards}
+                      updatePaymentTypeId={updatePaymentTypeId}
+                      onCollapse={onCollapse}
+                      formik={formik}
+                      updateCvvError={updateCvvError}
+                      setCVVFieldValue={setCVVFieldValue}
+                      updateOrderErrorMessage={updateOrderErrorMessage}
+                    />
+                  );
+                }
+                return null;
+              })}
+
+            {/* Add New Card section */}
             {!showNewCard && (
               <div className="checkout-add-card" onClick={onAddNewCard}>
                 <div className="checkout-add-card-text">
-                  <div>
-                    <Add />
-                  </div>
+                  <RadioButton id={"39812031823"} />
                   <div>Add New Card</div>
                 </div>
                 <div className="checkout-add-new-card-image">
@@ -708,6 +722,40 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
                     )}
                 </div>
               </div>
+            )}
+
+            {/* Render non-credit card payment methods (PayPal, Sezzle, etc.) */}
+            {paymentMethods
+              .filter((method) => method.isVisible)
+              .map((paymentOption, index) => {
+                if (
+                  !creditCardTypeIds.includes(
+                    paymentOption.paymentMethod.typeID
+                  )
+                ) {
+                  return (
+                    <PaymentOption
+                      key={paymentOption.paymentMethod.id}
+                      paymentOption={paymentOption}
+                      index={index}
+                      shopperId={shopperId}
+                      onCardEdit={onCardEdit}
+                      handleCancelNewCard={handleCancelNewCard}
+                      onAddNewCards={onAddNewCards}
+                      updatePaymentTypeId={updatePaymentTypeId}
+                      onCollapse={onCollapse}
+                      formik={formik}
+                      updateCvvError={updateCvvError}
+                      setCVVFieldValue={setCVVFieldValue}
+                      updateOrderErrorMessage={updateOrderErrorMessage}
+                    />
+                  );
+                }
+                return null;
+              })}
+
+            {showClick2Pay && (
+              <PaymentOptionClick2Pay pcid={pcid} order={order} />
             )}
           </div>
         </div>
