@@ -50,7 +50,7 @@ export const ApplyCashback: React.FC<IApplyCashbackContainer> = ({
           setOrderNotifications(
             getOrderNotifications(response.response.success)
           );
-          setLoading(false);
+          setLoading(false)
         }
       });
     }

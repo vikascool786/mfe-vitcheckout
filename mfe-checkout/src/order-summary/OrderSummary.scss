@@ -9,7 +9,6 @@
   overflow-y: scroll;
 
   @media only screen and (max-width: 1024px) {
-    max-height: unset;
     overflow-y: unset;
   }
 
@@ -17,8 +16,6 @@
     border-radius: 0px;
     border: none;
     box-shadow: none;
-    max-height: auto;
-    overflow-y: unset;
   }
 
   .order-sub-text {
@@ -38,6 +35,12 @@
 }
 .height-190 {
   max-height: calc(100vh - 190px);
+}
+@media only screen and (max-width: 1024px) {
+  .height-160,
+  .height-190 {
+    max-height: unset;
+  }
 }
 
 .GiftCard-container-apply-giftcard {
