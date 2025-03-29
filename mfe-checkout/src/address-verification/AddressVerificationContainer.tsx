@@ -48,7 +48,7 @@ export const AddressVerificationContainer = forwardRef<
     try {
       const response = await postAVS(
         addressEntered.address1,
-        addressEntered.address2,
+        addressEntered.address2 as string,
         addressEntered.city,
         addressEntered.state,
         addressEntered.zip,
@@ -60,6 +60,7 @@ export const AddressVerificationContainer = forwardRef<
         last: addressEntered.last,
         address1: address.shpAddr1,
         address2: address.shpAddr2,
+        addressHash: address.addressHash,
         zip: address.shpPCode,
         city: address.shpCity,
         state: address.shpState,

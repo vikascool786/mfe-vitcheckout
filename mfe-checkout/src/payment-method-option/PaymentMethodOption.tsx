@@ -69,7 +69,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   } = paymentOption;
 
   useEffect(() => {
-    if (order?.shouldShowInvalidCVVMessage === "Card expired!") {
+    if (order?.shouldShowInvalidCVVMessage === "The credit card has expired.") {
       updateCvvError(order.shouldShowInvalidCVVMessage);
     } else if (order?.shouldShowInvalidCVVMessage) {
       updateCvvError("CVV is required");
@@ -103,7 +103,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
           setOrder({
             ...order,
             isOrderValid: false,
-            shouldShowInvalidCVVMessage: "Card expired!",
+            shouldShowInvalidCVVMessage: "The credit card has expired.",
           });
         return;
       }, 300);

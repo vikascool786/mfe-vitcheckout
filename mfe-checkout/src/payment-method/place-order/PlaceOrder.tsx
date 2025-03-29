@@ -33,7 +33,8 @@ import {
 } from "../../utils/OrderUtils";
 import {
   GET_API_ENDPOINT_BASE_URL_ONLY,
-  GET_API_KEY, GET_PAYPAL_CHECKOUT_URL,
+  GET_API_KEY,
+  GET_PAYPAL_CHECKOUT_URL,
   GET_PAYPAL_CLIENT_ID,
   GET_PAYPAL_RETURN_URL,
 } from "../../utils/urlResolver";
@@ -313,7 +314,9 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             setIsLoading(false);
             return;
           }
-          const url = `${GET_PAYPAL_CHECKOUT_URL()}?token=${paypalToken.tokenId}`;
+          const url = `${GET_PAYPAL_CHECKOUT_URL()}?token=${
+            paypalToken.tokenId
+          }`;
           window.open(url, "_self");
           break;
         default:
@@ -330,7 +333,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             order &&
               setOrderData({
                 ...order,
-                shouldShowInvalidCVVMessage: "Card expired!",
+                shouldShowInvalidCVVMessage: "The credit card has expired.",
               });
             setIsLoading(false);
             return;
@@ -345,7 +348,8 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
               setOrderData({
                 ...order,
                 shouldShowInvalidCVVMessage:
-                  order?.shouldShowInvalidCVVMessage === "Card expired!"
+                  order?.shouldShowInvalidCVVMessage ===
+                  "The credit card has expired."
                     ? order.shouldShowInvalidCVVMessage
                     : "Please check CVV",
               });
@@ -363,7 +367,8 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
               setOrderData({
                 ...order,
                 shouldShowInvalidCVVMessage:
-                  order?.shouldShowInvalidCVVMessage === "Card expired!"
+                  order?.shouldShowInvalidCVVMessage ===
+                  "The credit card has expired."
                     ? order.shouldShowInvalidCVVMessage
                     : "Please check CVV",
               });
@@ -586,8 +591,10 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             <Button
               qaTag={"qa-order"}
               label={
-                paymentTypeId === SEZZLE.typeId ||
-                  paymentTypeId === PAYPAL.typeId
+                isLoading
+                  ? "Loading..."
+                  : paymentTypeId === SEZZLE.typeId ||
+                    paymentTypeId === PAYPAL.typeId
                   ? "Pay with"
                   : "Place Order"
               }
@@ -596,16 +603,16 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                 paymentTypeId === SEZZLE.typeId
                   ? "sezzle"
                   : paymentTypeId === PAYPAL.typeId
-                    ? "paypal"
-                    : "primary"
+                  ? "paypal"
+                  : "primary"
               }
               onClick={submitForm}
               logo={
                 paymentTypeId === SEZZLE.typeId
                   ? "https://img.shop.com/Image/resources/checkout/Sezzle-Color-White-Logo.svg"
                   : paymentTypeId === PAYPAL.typeId
-                    ? "https://img.shop.com/Image/resources/checkout/PayPal-White-Logo.svg"
-                    : ""
+                  ? "https://img.shop.com/Image/resources/checkout/PayPal-White-Logo.svg"
+                  : ""
               }
             />
           </form>
