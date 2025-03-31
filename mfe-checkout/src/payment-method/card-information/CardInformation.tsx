@@ -685,21 +685,21 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                 {cardError && <div className="error-message">{cardError}</div>}
                 <div className="button-container">
                   <Button
-                    qaTag="qa-submit"
-                    btnType="primary"
-                    label={saveCardToWallet ? "Save & continue": "Continue"}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      submitForm();
-                    }}
-                  />
-                  <Button
                     qaTag="qa-cancel"
                     btnType="secondary"
                     label="Cancel"
                     onClick={(e) => {
                       e.stopPropagation();
                       onCancel();
+                    }}
+                  />
+                  <Button
+                    qaTag="qa-submit"
+                    btnType="primary"
+                    label={saveCardToWallet ? "Save & continue": "Continue"}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      submitForm();
                     }}
                   />
                 </div>

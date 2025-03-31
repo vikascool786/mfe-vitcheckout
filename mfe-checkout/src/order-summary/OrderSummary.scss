@@ -178,7 +178,7 @@
 
 .order-summary-coupon-container {
   display: flex;
-  flex-direction: row;
+  align-items: center;
   justify-content: space-between;
   gap: 10px;
   padding-top: 10px;
@@ -194,14 +194,22 @@
 }
 
 .order-input-container {
+  height: 100%;
   flex: 1;
   min-width: 0;
+  padding: 0px;
+  margin: 0px;
 }
 
 .order-apply-container {
+  height: 100%;
   display: flex;
-  flex-direction: row;
   flex-shrink: 0;
+  justify-content: center;
+  padding: 0px;
+  margin: 0px;
+  justify-content: center;
+  margin-bottom: 1rem;
 
   .custom-button.secondary {
     width: 90px;
@@ -450,7 +458,9 @@ div.order-charges-table {
 
 .gift-card-apply {
   display: flex;
-  flex: 1; // Aligns the button to the right
+  flex: 1; 
+  margin-top: 14px;
+  justify-content: flex-end;
 
   .custom-button.secondary {
     width: 90px;
