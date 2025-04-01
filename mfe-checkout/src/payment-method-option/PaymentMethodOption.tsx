@@ -68,17 +68,21 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     isEditing,
   } = paymentOption;
 
+  const scrollToPMMain = () => {
+    const element = document.getElementById("pm-main");
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   useEffect(() => {
     if (
       isCardExpired() &&
       order?.shouldShowInvalidCVVMessage === "The credit card has expired."
     ) {
       updateCvvError("The credit card has expired.");
-    } else if (
-      !order?.isOrderValid &&
-      order?.shouldShowInvalidCVVMessage &&
-      formik.dirty
-    ) {
+      scrollToPMMain();
+    } else if (!order?.isOrderValid && order?.shouldShowInvalidCVVMessage) {
       updateCvvError("CVV is required");
     } else {
       updateCvvError("");
