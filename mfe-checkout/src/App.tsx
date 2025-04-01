@@ -66,11 +66,11 @@ const App: React.FC<AppProps> = () => {
 
         {/* new user - do not add payments  */}
         <CheckoutContainer
-          cartId="cart_1464553485_W_USA_USA_ENG"
-          shopperId="hxXjpUzWzWjXmzhexmzYWZxzUYVwYpZxkeWhzxwjhk"
-          pcid="1464553485"
-          siteId="222"
-          sessionId="3055321553"
+          cartId="cart_1311880675_W_USA_USA_ENG"
+          shopperId="hWpWXexYzjzzpzhWUezpUwjzxYVpVYwpYVUZzeekhz"
+          pcid="1311880675"
+          siteId="66"
+          sessionId="3055322485"
         />
 
         {/* test staging account - user name   */}

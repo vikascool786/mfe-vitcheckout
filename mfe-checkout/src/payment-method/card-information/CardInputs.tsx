@@ -110,6 +110,7 @@ export const CardInputs: React.FC<ICardInputProps> = ({
           errorMessage={touched.cardInfo?.expYear && errors.cardInfo?.expYear}
         />
       </div>
+      {isEditing ? <p className="billingAddressstyles">Billing Addess</p> : null }
       {!isEditing && (
         <div className="form-field-container">
           <FormField
