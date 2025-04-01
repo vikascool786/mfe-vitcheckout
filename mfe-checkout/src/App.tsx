@@ -56,22 +56,22 @@ const App: React.FC<AppProps> = () => {
         /> */}
 
         {/* expired credit card account  */}
-        {/* <CheckoutContainer
+        <CheckoutContainer
           cartId="cart_1947765337_W_USA_USA_ENG"
           shopperId="hmUhkqpzzezhXzhhVqzZmxWzqeYXkUjzqXjpzpqqm"
           pcid="1947765337"
           siteId="66"
           sessionId="3055321553"
-        /> */}
+        />
 
         {/* test staging account - user name   */}
-        <CheckoutContainer
+        {/* <CheckoutContainer
           cartId="cart_1198092033_W_USA_USA_ENG"
           shopperId="epzYwVWwzXpXzzhphkzYzYezxVxwYkpqwZwwzqepw"
           pcid="1198092033"
           siteId="66"
           sessionId="3055321553"
-        />
+        /> */}
 
         {/* for GC Card Customer */}
         {/* <CheckoutContainer
