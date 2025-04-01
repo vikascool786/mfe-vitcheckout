@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { FormHeading } from "../component/Form/Heading/FormHeading";
 import { Alert } from "../assets/icons/Alert";
 import "./AddressVerification.scss";
@@ -25,6 +25,19 @@ export const AddressVerification: React.FC<AppProps> = ({
   setAddressToVerify,
   handleUseSelectedAddress,
 }) => {
+  const [isNewSelectedAddress, setIsNewSelectedAddress] =
+    React.useState<boolean>(false);
+
+  const onChangeVericationAddress = (address: Address) => {
+    // set is new selected address to false if address does not exist on the addressList
+    if (address?.addressHash == 0) {
+      setIsNewSelectedAddress(false);
+    } else {
+      setIsNewSelectedAddress(true);
+    }
+
+    setAddressToVerify(address);
+  };
 
   return (
     <div>
@@ -67,12 +80,13 @@ export const AddressVerification: React.FC<AppProps> = ({
           <AddressVerificationAddressList
             addressList={addressList}
             addressToVerify={addressToVerify}
-            setAddressToVerify={setAddressToVerify}
+            setAddressToVerify={onChangeVericationAddress}
           />
           <div className="form-footer form-footer__dual-button">
             <Button
               label="Edit Address"
               btnType="secondary"
+              disabled={isNewSelectedAddress}
               onClick={handleEditClick}
             />
             <Button

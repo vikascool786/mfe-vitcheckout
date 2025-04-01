@@ -21,6 +21,8 @@ export const AddressVerificationAddressList: React.FC<AppProps> = ({
         setSelectedAddress(address);
         setAddressToVerify({
             ...addressToVerify,
+            // if addressHash property is not present in address, then create it and set to 0
+            addressHash: address.addressHash || 0,
             address1: address.address1,
             address2: address.address2,
             city: address.city,

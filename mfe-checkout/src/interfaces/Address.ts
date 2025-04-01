@@ -30,7 +30,7 @@ export interface Address {
   links?: Links
   isoalpha3Code?: string
   hashCode?: string
-  addressHash?: string
+  addressHash?: number
 }
 
 export interface Links {
