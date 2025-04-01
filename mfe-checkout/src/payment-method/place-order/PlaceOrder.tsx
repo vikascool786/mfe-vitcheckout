@@ -254,13 +254,19 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
 
       const excludedPaymentTypes = [48, 56, 60];
 
+      if (selectedPaymentMethod?.isEditing) {
+        updateOrderErrorMessage("Please save your payment method");
+        setIsLoading(false);
+        return;
+      }
+
       if (isCreditCardRequired) {
         if (selectedPaymentMethod?.paymentMethod.id) {
           if (
             !excludedPaymentTypes.includes(paymentTypeId) &&
             !selectedPaymentMethod?.isPaymentValidated
           ) {
-            updateOrderErrorMessage("please save your payment method");
+            updateOrderErrorMessage("Please save your payment method");
             setIsLoading(false);
           }
           if (selectedPaymentMethod?.isEditing) {
@@ -274,7 +280,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             !excludedPaymentTypes.includes(paymentTypeId) &&
             !selectedPaymentMethod?.isPaymentValidated
           ) {
-            updateOrderErrorMessage("please save your payment method");
+            updateOrderErrorMessage("Please save your payment method");
             setIsLoading(false);
             return;
           }
@@ -285,16 +291,16 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
         (isOrderCoveredUnderVIFT || isOrderCoveredByGiftCard) &&
         orderHasAutoshipItems(order)
       ) {
-        if (selectedPaymentMethod?.paymentMethod.id) {
+        if (
+          selectedPaymentMethod?.paymentMethod.id &&
+          selectedPaymentMethod.isEditing
+        ) {
           if (
             !excludedPaymentTypes.includes(paymentTypeId) &&
             !selectedPaymentMethod?.isPaymentValidated
           ) {
-            updateOrderErrorMessage("please save your payment method");
+            updateOrderErrorMessage("Please save your payment method");
             setIsLoading(false);
-          }
-          if (selectedPaymentMethod?.isEditing) {
-            return;
           }
         } else if (
           !selectedPaymentMethod?.paymentMethod.id ||
@@ -304,7 +310,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             !excludedPaymentTypes.includes(paymentTypeId) &&
             !selectedPaymentMethod?.isPaymentValidated
           ) {
-            updateOrderErrorMessage("please save your payment method");
+            updateOrderErrorMessage("Please save your payment method");
             setIsLoading(false);
             return;
           }
@@ -399,8 +405,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             )
               break;
 
-
-            console.log(message)
+            console.log(message);
             setOrderData({
               ...order,
               shouldShowInvalidCVVMessage: message,

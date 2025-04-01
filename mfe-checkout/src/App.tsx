@@ -5,7 +5,7 @@ import CheckoutContainer from "./checkout/CheckoutContainer";
 import { Provider, useAtom } from "jotai";
 import { loadingAtom, OrderStore } from "./store";
 
-interface AppProps { }
+interface AppProps {}
 
 const App: React.FC<AppProps> = () => {
   const [loading] = useAtom(loadingAtom);
@@ -56,11 +56,20 @@ const App: React.FC<AppProps> = () => {
         /> */}
 
         {/* expired credit card account  */}
-        <CheckoutContainer
+        {/* <CheckoutContainer
           cartId="cart_1947765337_W_USA_USA_ENG"
           shopperId="hmUhkqpzzezhXzhhVqzZmxWzqeYXkUjzqXjpzpqqm"
           pcid="1947765337"
           siteId="66"
+          sessionId="3055321553"
+        /> */}
+
+        {/* new user - do not add payments  */}
+        <CheckoutContainer
+          cartId="cart_1464553485_W_USA_USA_ENG"
+          shopperId="hxXjpUzWzWjXmzhexmzYWZxzUYVwYpZxkeWhzxwjhk"
+          pcid="1464553485"
+          siteId="222"
           sessionId="3055321553"
         />
 
