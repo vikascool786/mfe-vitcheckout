@@ -62,9 +62,9 @@ export const AddressDisplay: React.FC<AppProps> = ({
 
   return (
     <div className="add-display">
-      <span className="nowrap">{renderName()}</span>
-      <span className="nowrap">{renderAddressLine1()}</span>
-      <span className="nowrap">{renderAddressLine2()}</span>
+      {renderName()}
+      {renderAddressLine1()}
+      {renderAddressLine2()}
       <div>{renderCityStateZip()}</div>
     </div>
   );

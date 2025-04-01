@@ -430,7 +430,8 @@ div.order-charges-table {
   display: flex;
   flex-direction: row;
   gap: 0.8rem;
-  margin-top: 8px;
+  margin-top: 0.563rem;
+  flex-wrap: wrap;
 }
 
 .order-applied-coupon {
@@ -438,10 +439,17 @@ div.order-charges-table {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  border: 1px solid #aca8a8;
-  border-radius: 24px;
-  padding: 8px;
-  gap: 0.6rem;
+  padding: 0.375rem 0.438rem;
+  gap: 0.2rem;
+  background-color: #F0F1F7;
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 100%;
+  letter-spacing: 0;
+
+  svg {
+    cursor: pointer;
+  }
 }
 
 .gift-card-container {

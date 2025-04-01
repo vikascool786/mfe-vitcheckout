@@ -24,7 +24,7 @@ export const Close = (props: JSX.IntrinsicAttributes & React.SVGProps<SVGSVGElem
     </mask>
     <g mask="url(#a)">
       <path
-        fill="#F0A500"
+        fill="#000000"
         d="M7.625 22.37 6.01 20.755l6.46-6.46-6.46-6.461 1.615-1.615 6.46 6.46 6.46-6.46 1.616 1.615-6.46 6.46 6.46 6.46-1.615 1.616-6.46-6.46-6.461 6.46Z"
       />
     </g>
