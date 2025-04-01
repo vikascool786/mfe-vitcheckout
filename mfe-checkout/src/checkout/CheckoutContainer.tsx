@@ -45,6 +45,7 @@ import { setDataObjectProperty } from "../utils/helpers/SetDataObjectProperty";
 import PaymentMethodHeading from "../payment-method/PaymentMethodHeading";
 import { TextUpdates } from "../text-updates/TextUpdates";
 import { GET_API_MODE } from "../utils/helpers/urlResolvers";
+import { getShippingAddressFromAddressList } from "../utils/AddressUtils";
 
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
@@ -184,12 +185,9 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   };
 
   const defaultAddress = useMemo(() => {
-    const filteredAddresses = addresses?.filter((ad) => ad.hasAddress !== 0);
-    return (
-      filteredAddresses?.find((address) => address?.isShip === 1) ??
-      filteredAddresses?.find((address) => address?.isPrimary === 1) ??
-      filteredAddresses?.[0]
-    );
+    if (addresses) {
+      return getShippingAddressFromAddressList(addresses);
+    }
   }, [addresses]);
 
   const defaultPaymentMethod: IPaymentMethod = useMemo<IPaymentMethod>(
@@ -361,7 +359,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
       {orderData && (
         <>
           <div className="qa-checkout container">
-            <div className="checkout-container">
+            <div className="checkout-container" id="mfe-checkout-container">
               <div className="left-column">
                 <Notifications
                   notificationMessages={orderNotifications || []}

@@ -60,16 +60,14 @@ body {
   justify-content: center;
   flex-direction: row;
   gap: 21px;
-  @media (max-width: 425px) {
-    flex-direction: column;
-    gap: 0px;
-  }
+  margin-bottom: 0.3rem;
 }
 
 .form-field-container-full {
   display: flex;
   width: 100%;
   margin-top: 10px;
+  margin-bottom: 0.3rem;
   @media (max-width: 425px) {
     margin-top: 0px;
   }
@@ -238,8 +236,6 @@ body {
   font-weight: 400;
   /* Regular weight for readability */
   margin-top: 8px;
-  /* Add spacing above the message */
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   /* Subtle shadow for elevation */
   position: relative;
   min-height: 1.8rem;

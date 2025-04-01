@@ -373,7 +373,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
   return (
     <div
       className={`qa-order-summary order-summary-container ${
-        apiMode === "localhost" ? "height-160" : "height-190"
+        apiMode === "localhost" ? "height-180" : "height-245"
       }`}
     >
       {gcLoading && <Spinner />}
@@ -471,7 +471,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
             </div>
           </div>
         )}
-        {gcState.gcError && (
+        {gcState.gcError && gcState.gcVisible && (
           <div className="error-message">{gcState.gcError}</div>
         )}
         {!gcState.gcApplied && (
@@ -592,7 +592,9 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
             <div className="order-summary-cashback-container">
               <div className="order-cashback">
                 <VIFT />
-                You earned 1% extra Cash using VIFT
+                <span className="vift-earned-cash">
+                  You earned 1% extra Cash using VIFT
+                </span>
               </div>
               <div className={"qa-cashback"}>{`$${formattedNumber(
                 order.totals.extraCashBack
@@ -608,7 +610,9 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
             <div className="order-summary-cashback-container">
               <div className="order-cashback">
                 <VIFT />
-                Total Cash added to your VIFT
+                <span className="total-cash-added">
+                  Total Cash added to your VIFT
+                </span>
               </div>
               <div>{`$${formattedNumber(
                 order?.totals?.extraCashBack + order?.totals?.cashBack

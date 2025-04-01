@@ -32,6 +32,7 @@ import "./CardInformation.scss";
 import { CardInputs } from "./CardInputs";
 import { getTypeIdByAltName, isThirdPartyPayment } from "../PaymentType";
 import ScrollToError from "../../component/Form/ScrollToError/ScrollToError";
+import {getShippingAddressFromAddressList} from "../../utils/AddressUtils";
 
 interface ICardInformationProps {
   paymentMethod: IPaymentMethod;
@@ -83,9 +84,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   const [paymentMethods] = useAtom(paymentMethodsAtom);
   const [order, setOrder] = useAtom(orderAtom);
 
-  const shippingAddress =
-    addressList.find((address) => address.isShip || address.isPrimary) ??
-    addressList.find((address) => address.hasAddress);
+  const shippingAddress = getShippingAddressFromAddressList(addressList);
   const [sameShippingAddress, setSameShippingAddress] = useState<boolean>(
     paymentMethod.id === 0
   );

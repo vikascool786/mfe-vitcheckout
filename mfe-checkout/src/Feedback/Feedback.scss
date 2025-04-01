@@ -30,21 +30,17 @@
   }
 
   .feedback-button {
-    padding: 0.75rem 6rem;
+    padding: 0.75rem 3rem;
     font-size: 1rem;
-    color: #ffffff;
-    background-color: #2a2f4f;
-    border: none;
+    color: #2a2f4f;
+    background-color: #ffffff;
+    border: 1px solid #000000;
     font-weight: 500;
     border-radius: 1rem;
     cursor: pointer;
     transition: background-color 0.3s ease;
     @media only screen and (max-width: 545px) {
       font-size: 14px;
-    }
-
-    &:hover {
-      background-color: #1a1a3c;
     }
   }
 }

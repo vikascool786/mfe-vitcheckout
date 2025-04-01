@@ -320,7 +320,9 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
             <div className="payment-option-container__card-cvv-container">
               {isSelected && (
                 <div className="payment-option-container__card-cvv">
-                  <div>CVV</div>
+                  <div className="payment-option-container__card-cvv-text">
+                    CVV
+                  </div>
                   <div>
                     <input
                       name="cvv"
@@ -394,18 +396,21 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
       )}
 
       {isEditing && (
-        <CardInformation
-          paymentMethod={paymentMethod}
-          address={paymentAddress}
-          isPaymentValidated={isPaymentValidated}
-          isTempPaymentMethod={isTempPaymentMethod}
-          updatePaymentValidationStatus={updatePaymentValidationStatus}
-          shopperId={shopperId}
-          onCancel={handleCancelNewCard}
-          onAddNewCard={onAddNewCards}
-          setCVVFieldValue={setCVVFieldValue}
-          isEditing={isCardEdit}
-        />
+        <>
+          <hr className="payment-divider" />
+          <CardInformation
+            paymentMethod={paymentMethod}
+            address={paymentAddress}
+            isPaymentValidated={isPaymentValidated}
+            isTempPaymentMethod={isTempPaymentMethod}
+            updatePaymentValidationStatus={updatePaymentValidationStatus}
+            shopperId={shopperId}
+            onCancel={handleCancelNewCard}
+            onAddNewCard={onAddNewCards}
+            setCVVFieldValue={setCVVFieldValue}
+            isEditing={isCardEdit}
+          />
+        </>
       )}
     </div>
   );

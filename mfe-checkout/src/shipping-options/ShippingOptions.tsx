@@ -117,7 +117,7 @@ export const ShippingOptions: React.FC<IShippingOptions> = ({
           className="shipping-options-container__ship_selection"
           onClick={toggleShipSelectionAccordion}
         >
-          Change Shipping Method
+          <span className="change-shipping-method">Change Shipping Method</span>
           <Back
             className={`qa-expand accordion ${
               isShipExpanded ? "open" : "close"

@@ -77,6 +77,12 @@
   display: flex;
   align-items: center;
   gap: 0.6rem;
+  & > span {
+    font-size: 16px;
+    @media (max-width: 425px) {
+      font-size: 13px;
+    }
+  }
 }
 
 .billing-text {
@@ -124,7 +130,32 @@
       left: 4px;
     }
   }
+  &.disabled {
+    background-color: #f5f5f5;
+    border-color: #ccc;
+    opacity: 0.6;
+
+    &:checked {
+      background-color: #ccc;
+      border-color: #ccc;
+
+      &::before {
+        opacity: 0.6;
+      }
+    }
+
+    & + label {
+      color: #999;
+      opacity: 0.6;
+    }
+
+    &:hover {
+      border-color: #ccc;
+      background-color: #f5f5f5;
+    }
+  }
 }
+
 
 .billing-address {
   display: flex;
@@ -157,6 +188,9 @@
   font-size: 18px;
   line-height: 21.09px;
   letter-spacing: 0%;
+  @media (max-width: 425px) {
+    font-size: 14px;
+  }
 }
 
 .form-field {

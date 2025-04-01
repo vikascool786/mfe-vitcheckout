@@ -1,12 +1,13 @@
 .field-item-container {
   display: flex;
   flex-direction: column;
-  margin-bottom: 1rem;
+  margin-bottom: 0.3rem;
   width: 100%;
 
   label {
     margin-bottom: 0.5rem;
-    font-size: 0.9rem;
+    font-size: 16px;
+    font-weight: 400;
 
     &.required-field::after {
       content: "*";
@@ -18,7 +19,7 @@
   .input-container {
     width: 100%;
     padding: 0.75rem;
-    border: 1px solid #ccc;
+    border: 1px solid #000000;
     border-radius: 4px;
     font-size: 1rem;
 

@@ -19,6 +19,7 @@ import { Address } from "../../interfaces/Address";
 import { Order } from "../../interfaces/Order";
 import { OrderConsolidationData } from "../../interfaces/OrderConsolidationData";
 import Click2PayPlaceOrder from "../../payment-method-click2pay/Click2PayPlaceOrder";
+import { Back } from "../../assets/svgs/Back";
 import {
   // cvvValidAtom,
   IPaymentOption,
@@ -89,6 +90,8 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
 
   const [orderConsolidateData, setOrderConsolidateData] =
     useState<OrderConsolidationData>(getOrderConsolidateData(order || null));
+
+  const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
   useEffect(() => {
     updateOrderErrorMessage("");
@@ -162,6 +165,36 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     }
   }, []); // Ensure dependencies are correctly handled
 
+  const onToggleAccordion = () => {
+    setIsExpanded((prev) => !prev);
+    if (!isExpanded) {
+      setTimeout(() => {
+        const placeOrderBtn = document.getElementById("mfe-place-order-btn")!;
+        const container = document.getElementById("mfe-checkout-container")!;
+        const containerRect = container.getBoundingClientRect();
+        const elementRect = placeOrderBtn.getBoundingClientRect();
+        if (elementRect && containerRect) {
+          const isVisible =
+            elementRect.top >= 0 &&
+            elementRect.bottom <= window.innerHeight &&
+            elementRect.left >= 0 &&
+            elementRect.right <= window.innerWidth;
+          if (elementRect.top > containerRect.top && !isVisible) {
+            window.scrollTo({
+              top: elementRect.top + containerRect.bottom * 0.7,
+              behavior: "smooth",
+            });
+          }
+        }
+
+        // placeOrderBtn?.scrollIntoView({
+        //   behavior: "smooth",
+        //   block: "start",
+        // });
+      }, 0);
+    }
+  };
+
   const scrollToCVV = (selectedPaymentMethod: IPaymentOption) => {
     if (!selectedPaymentMethod?.paymentMethod?.id) {
       window.scrollTo({
@@ -213,9 +246,14 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
       const isOrderCoveredUnderVIFT =
         order?.userOptions.applyEWallet && order.totals.price === 0;
 
+      const isOrderCoveredByGiftCard =
+          order?.userOptions?.gcNum && order.totals.price === 0;
+
+      const isCreditCardRequired = !isOrderCoveredUnderVIFT && !isOrderCoveredByGiftCard;
+
       const excludedPaymentTypes = [48, 56, 60];
 
-      if (!isOrderCoveredUnderVIFT) {
+      if (isCreditCardRequired) {
         if (selectedPaymentMethod?.paymentMethod.id) {
           if (
             !excludedPaymentTypes.includes(paymentTypeId) &&
@@ -242,7 +280,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
         }
       }
 
-      if (isOrderCoveredUnderVIFT && orderHasAutoshipItems(order)) {
+      if ((isOrderCoveredUnderVIFT || isOrderCoveredByGiftCard) && orderHasAutoshipItems(order)) {
         if (selectedPaymentMethod?.paymentMethod.id) {
           if (
             !excludedPaymentTypes.includes(paymentTypeId) &&
@@ -340,7 +378,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
           }
 
           if (
-            !isOrderCoveredUnderVIFT &&
+            isCreditCardRequired &&
             selectedPaymentMethod &&
             !selectedPaymentMethod.isPaymentValidated
           ) {
@@ -348,8 +386,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
               setOrderData({
                 ...order,
                 shouldShowInvalidCVVMessage:
-                  order?.shouldShowInvalidCVVMessage ===
-                  "The credit card has expired."
+                  order?.shouldShowInvalidCVVMessage === "The credit card has expired."
                     ? order.shouldShowInvalidCVVMessage
                     : "Please check CVV",
               });
@@ -358,7 +395,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             return;
           }
           if (
-            isOrderCoveredUnderVIFT &&
+            (isOrderCoveredUnderVIFT || isOrderCoveredByGiftCard) &&
             orderHasAutoshipItems(order) &&
             selectedPaymentMethod &&
             !selectedPaymentMethod.isPaymentValidated
@@ -367,8 +404,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
               setOrderData({
                 ...order,
                 shouldShowInvalidCVVMessage:
-                  order?.shouldShowInvalidCVVMessage ===
-                  "The credit card has expired."
+                  order?.shouldShowInvalidCVVMessage === "The credit card has expired."
                     ? order.shouldShowInvalidCVVMessage
                     : "Please check CVV",
               });
@@ -515,7 +551,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   // }
 
   return (
-    <div className="checkout-place-order">
+    <div className="checkout-place-order margin-5">
       <Formik
         initialValues={{ autoshipTerms: !orderHasAutoshipItems(order || null) }}
         validationSchema={placeOrderSchema}
@@ -525,25 +561,42 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
           <form>
             {orderHasAutoshipItems(order || null) && (
               <div className="checkout-place-order-autoship checkout-place-order-text">
-                <div className="checkout-place-order-text__heading">
-                  Autoship Terms and Conditions
+                <div className="checkout-place-order-text__flex">
+                  <div className="checkout-place-order-text__heading">
+                    Autoship Terms and Conditions
+                  </div>
+                  <Back
+                    className={`qa-expand accordion ${
+                      isExpanded ? "open" : "close"
+                    }`}
+                    onClick={onToggleAccordion}
+                  />
                 </div>
-                <div className="checkout-place-order-text">
-                  When submitting your AutoShip along with providing payment and
-                  a shipping address, you authorize us to charge the same
-                  selected payment method each time your AutoShip order is
-                  processed. This is for your initial AutoShip order and
-                  subsequent AutoShip orders until you cancel your AutoShip.
-                  There is no obligation and you may cancel at any time. After
-                  you cancel, you will not be billed for, or receive, any future
-                  automatic shipments.
+                <div
+                  className={`checkout-place-order-text__box ${
+                    isExpanded
+                      ? "checkout-place-order-text__open"
+                      : "checkout-place-order-text__close"
+                  }`}
+                >
+                  <div className="checkout-place-order-text">
+                    When submitting your AutoShip along with providing payment
+                    and a shipping address, you authorize us to charge the same
+                    selected payment method each time your AutoShip order is
+                    processed. This is for your initial AutoShip order and
+                    subsequent AutoShip orders until you cancel your AutoShip.
+                    There is no obligation and you may cancel at any time. After
+                    you cancel, you will not be billed for, or receive, any
+                    future automatic shipments.
+                  </div>
+                  <div className="checkout-place-order-text__note">
+                    Please note that at the time of your order pulling, the
+                    shipping, tax and/or fee cost could change or be adjusted
+                    based on current rates and the availability of the products
+                    being shipped.
+                  </div>
                 </div>
-                <div className="checkout-place-order-text__note">
-                  Please note that at the time of your order pulling, the
-                  shipping, tax and/or fee cost could change or be adjusted
-                  based on current rates and the availability of the products
-                  being shipped.
-                </div>
+
                 <Checkbox
                   name="autoshipTerms"
                   title="I agree to the Autoship Terms & Conditions"
@@ -589,6 +642,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
               </div>
             )}
             <Button
+              id="mfe-place-order-btn"
               qaTag={"qa-order"}
               label={
                 isLoading

@@ -8,35 +8,6 @@ import axiosInstance from "../axios";
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
 
-// Hook for fetching the shopper's address book
-export const useFetchShopperAddressBook = () => {
-  const [data, setData] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-
-  const fetchShopperAddressBook = useCallback(async (shopperId: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const endpoint = `${apiDomain}/shopper-addressbooks/v1/${shopperId}/AddressBook?api_key=${apiKey}`;
-      const response = await axiosInstance(endpoint).get("");
-      setData(response.data);
-      return response.data;
-    } catch (err) {
-      console.error(
-        `Error fetching address book for shopper: ${shopperId}`,
-        err
-      );
-      setError(err as Error);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  return { data, loading, error, fetchShopperAddressBook };
-};
-
 // Hook for creating a new address book entry
 export const useCreateShopperAddressBookEntry = () => {
   const [loading, setLoading] = useState(false);

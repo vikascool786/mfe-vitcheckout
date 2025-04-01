@@ -17,4 +17,7 @@
     padding: 10px;
     text-align: center;
   }
+  @media (max-width: 560px) {
+    margin: 5px -6px;
+  }
 }

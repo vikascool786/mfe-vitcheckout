@@ -30,15 +30,23 @@
     }
   }
 }
-.height-160 {
-  max-height: calc(100vh - 160px);
+.vift-earned-cash {
+  font-size: 16px;
+  font-weight: 400;
 }
-.height-190 {
-  max-height: calc(100vh - 190px);
+.total-cash-added {
+  font-size: 16px;
+  font-weight: 500;
+}
+.height-180 {
+  max-height: calc(100vh - 180px);
+}
+.height-245 {
+  max-height: calc(100vh - 245px);
 }
 @media only screen and (max-width: 1024px) {
-  .height-160,
-  .height-190 {
+  .height-180,
+  .height-245 {
     max-height: unset;
   }
 }
@@ -66,7 +74,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px;
+  padding: 10px;
   border-radius: 7px;
 }
 
@@ -183,6 +191,11 @@
   gap: 10px;
   padding-top: 10px;
   width: 100%;
+  align-items: center;
+}
+
+.order-input-container > .field-item-container {
+  margin-bottom: 0px;
 }
 
 .order-vift-cashback-earned {
@@ -204,12 +217,12 @@
 .order-apply-container {
   height: 100%;
   display: flex;
-  flex-shrink: 0;
   justify-content: center;
   padding: 0px;
   margin: 0px;
   justify-content: center;
-  margin-bottom: 1rem;
+  margin-bottom: 7px;
+  flex-shrink: 0;
 
   .custom-button.secondary {
     width: 90px;
@@ -315,6 +328,7 @@ div.order-charges-table {
   line-height: 19.75px;
   color: black;
   gap: 2rem;
+  margin-bottom: 10px;
 }
 
 .order-cashback {
@@ -459,7 +473,7 @@ div.order-charges-table {
 .gift-card-apply {
   display: flex;
   flex: 1; 
-  margin-top: 14px;
+  margin-top: 25px;
   justify-content: flex-end;
 
   .custom-button.secondary {
@@ -484,30 +498,52 @@ div.order-charges-table {
   justify-content: space-between;
   gap: 1rem;
   width: 100%;
-  margin-top: 20px;
+  margin-top: 10px;
   margin-bottom: 10px;
-}
 
-.gift-card-wrapper-fields {
-  display: flex;
-  flex: 7;
-  align-items: center;
-  position: relative;
-}
+  .gift-card-wrapper-fields {
+    display: flex;
+    flex: 7;
+    align-items: center;
+    position: relative;
+  }
 
-.gift-card-wrapper-field-1 {
-  display: flex;
-  flex-direction: column;
-  position: absolute;
-  width: 78%;
-}
+  .gift-card-wrapper-field-1 {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    width: 78%;
+  }
 
-.gift-card-wrapper-field-2 {
-  display: flex;
-  flex-direction: column;
-  position: absolute;
-  left: 80%;
-  width: 22%;
+  .gift-card-wrapper-field-2 {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    left: 80%;
+    width: 22%;
+  }
+
+  @media only screen and (max-width: 768px) {
+    .gift-card-wrapper-field-1 {
+      width: 77%;
+    }
+
+    .gift-card-wrapper-field-2 {
+      width: 22%;
+    }
+  }
+
+  .gift-card-apply {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    width: 100%;
+
+    button {
+      min-width: 80px;
+    }
+  }
 }
 
 .gcApplied {
@@ -553,14 +589,4 @@ div.order-charges-table {
   font-size: 16px;
   line-height: 18.75px;
   letter-spacing: 0%;
-}
-
-@media only screen and (max-width: 768px) {
-  .gift-card-wrapper-field-1 {
-    width: 77%;
-  }
-
-  .gift-card-wrapper-field-2 {
-    width: 22%;
-  }
 }

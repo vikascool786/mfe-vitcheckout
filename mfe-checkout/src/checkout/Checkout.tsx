@@ -35,6 +35,7 @@ import { siteApiData } from "./siteAtom";
 import { customerApiData } from "./customerAtom";
 import { getOrderNotifications } from "../utils/OrderUtils";
 import { AddressAutocomplete } from "../component/AddressForm/AddressAutoComplete";
+import { getFilteredShippingAddresses, getShippingAddressFromFilteredList } from "../utils/AddressUtils";
 
 const defaultAddress: Address = {
   id: 0,
@@ -70,8 +71,7 @@ const Checkout: React.FC<ICheckout> = ({
     useState<boolean>(false);
   const [shippingAddress, setShippingAddress] =
     useState<Address>(defaultAddress);
-  const [validAddressEntered, setValidAddressEntered] =
-    useState<boolean>(false);
+  const [validAddressEntered, setValidAddressEntered] = useState<boolean>(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [showShipAddressForm, setShowShipAddressForm] = useState(false);
   const [shopperAddressBook, setShopperAddressBook] = useAtom(addressAtom);
@@ -88,54 +88,13 @@ const Checkout: React.FC<ICheckout> = ({
   );
   const [customerData] = useAtom(customerApiData(pcid));
   const [siteData] = useAtom(siteApiData(siteId));
-  const [enableAddressSuggestions, setEnableAddressSuggestions] =
-    useState(false);
-
-  const filterValidShippingAddresses = (addresses: Address[]): Address[] => {
-    let filteredAddresses: Address[] = [];
-    addresses.forEach((address: Address) => {
-      if (
-        address.hasAddress !== 0 &&
-        address.isBill !== 1 &&
-        address.isPrimary !== 1
-      ) {
-        filteredAddresses.push(address);
-      }
-    });
-    return filteredAddresses;
-  };
+  const [enableAddressSuggestions, setEnableAddressSuggestions] = useState(false);
 
   const buildShoppersAddressBookFromResponse = (
     addressBookResponse: Address[]
   ) => {
-    let filteredAddresses: Address[] = [];
-    let hasPrimaryAddress: boolean = false;
-    addressBookResponse.forEach((address: Address) => {
-      if (address.id) {
-        const newAddress: Address = {
-          id: address.id,
-          isShip: address.isShip,
-          first: address.first,
-          last: address.last,
-          address1: address.address1,
-          address2: address.address2,
-          city: address.city,
-          state: address.state,
-          zip: address.zip,
-          phone: address.phone,
-          isPoBox: address.isPoBox,
-        } as Address;
-        if (newAddress.isShip) {
-          hasPrimaryAddress = true;
-          setShippingAddress(newAddress);
-        }
-      }
-    });
-    filteredAddresses = filterValidShippingAddresses(addresses);
-
-    if (!hasPrimaryAddress) {
-      setShippingAddress(filteredAddresses[0] ?? defaultAddress);
-    }
+    let filteredAddresses: Address[] = getFilteredShippingAddresses(addressBookResponse);
+    setShippingAddress(getShippingAddressFromFilteredList(filteredAddresses) || defaultAddress);
     setShowShipAddressForm(filteredAddresses.length < 1);
     return filteredAddresses;
   };
@@ -221,12 +180,12 @@ const Checkout: React.FC<ICheckout> = ({
         ];
         setShopperAddressBook(updatedAddresses);
         setShippingAddress(validatedAddress);
-        if (isValidAddress) {
+        if(isValidAddress){
           setValidAddressEntered(isValidAddress);
           setShowAVS(false);
-        } else {
+        }else {
           setShowAVS(true);
-        }
+        } 
       } catch (error) {
         setLoading(false);
       } finally {
@@ -237,9 +196,9 @@ const Checkout: React.FC<ICheckout> = ({
 
   useEffect(() => {
     if (validAddressEntered && shippingAddress) {
-      handleUseSelectedAddress();
+        handleUseSelectedAddress();
     }
-  }, [shippingAddress, validAddressEntered]);
+}, [shippingAddress, validAddressEntered]);
 
   const handleEditClick = () => {
     setShowAVS(false);
@@ -289,7 +248,7 @@ const Checkout: React.FC<ICheckout> = ({
             getOrderNotifications(newOrder.response.success)
           );
 
-          setShopperAddressBook(filterValidShippingAddresses(updatedAddresses));
+          setShopperAddressBook(getFilteredShippingAddresses(updatedAddresses));
           setShowShipAddressForm(false);
           setErrorMessage("");
         }
@@ -298,7 +257,7 @@ const Checkout: React.FC<ICheckout> = ({
         const updatedAddressList: Address[] =
           await createShopperAddressBookEntry(shopperId, addressParams);
         //update address atom with new addresslist
-        setShopperAddressBook(filterValidShippingAddresses(updatedAddressList));
+        setShopperAddressBook(getFilteredShippingAddresses(updatedAddressList));
         const newAddedAddress = updatedAddressList.find(
           (address) => address.isShip
         );
@@ -313,9 +272,7 @@ const Checkout: React.FC<ICheckout> = ({
               },
               billingAddress: {
                 ...order?.billingAddress,
-                id:
-                  updatedAddressList.find((add) => add.isBill)?.id ||
-                  newAddedAddress.id,
+                id: newAddedAddress.id,
               },
             })
           );
@@ -332,9 +289,9 @@ const Checkout: React.FC<ICheckout> = ({
       }
       setIsExpanded(false);
       setLoading(false);
-      if (validAddressEntered) {
+      if(validAddressEntered){
         setValidAddressEntered(false);
-      } else {
+      }else {
         setShowAVS(!showAVS);
       }
     } catch (error: any) {
@@ -349,7 +306,7 @@ const Checkout: React.FC<ICheckout> = ({
     setShowShipAddressForm(!showShipAddressForm);
     setShippingAddress(
       shopperAddressBook.find((address) => address.isShip === 1) ||
-        shippingAddress
+      shippingAddress
     );
     setIsExpanded(!isExpanded);
   };
@@ -399,7 +356,7 @@ const Checkout: React.FC<ICheckout> = ({
         },
         billingAddress: {
           ...order?.billingAddress,
-          id: updatedSelectedAddress.find((add) => add.isBill)?.id || id,
+          id: id,
         },
       })
     );
@@ -452,13 +409,9 @@ const Checkout: React.FC<ICheckout> = ({
       .required("Please enter your phone number"),
   });
 
-  const handleAddress1Change = (
-    name: string,
-    setFieldValue: any,
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleAddress1Change = (name: string, setFieldValue: any, e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    if (value.length > 2) {
+    if(value.length > 2){
       setEnableAddressSuggestions(true);
     }
     setFieldValue(name, value);
@@ -495,10 +448,12 @@ const Checkout: React.FC<ICheckout> = ({
           {/* show details fields based on accordion state close  */}
           {!showShipAddressForm && (
             <div className="shipping-address">
-              <AddressDisplay
-                address={shippingAddress}
-                familyNameFirst={familyNameFirst}
-              />
+              {!isExpanded && (
+                <AddressDisplay
+                  address={shippingAddress}
+                  familyNameFirst={familyNameFirst}
+                />
+              )}
               {shopperAddressBook.length > 0 && isExpanded && (
                 <AddressList
                   addressBook={shopperAddressBook}

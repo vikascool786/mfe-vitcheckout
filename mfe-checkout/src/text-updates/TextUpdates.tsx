@@ -191,12 +191,14 @@ export const TextUpdates: React.FC<ITextUpdatesProps> = ({ pcid, siteId}) => {
                                 errorMessage={touched.phone && errors.phone}
                             />
                         </div>
-                        <div className="save-for-later">
+                        <div className={`save-for-later ${touched.phone && errors.phone ? "checkbox-custom":""}`}>
                             <FormField
                                 type="checkbox"
                                 name="boxChecked"
                                 qaTag={"qa-checkbox"}
-                                className="checkbox"
+                                className={`checkbox  ${
+                                    (values.phone || "").length !== 10 ? "disabled " : ""
+                                 }`}
                                 checked={values.boxChecked}
                                 disabled={(values.phone || "").length !== 10} // Disable if phone number is not 10 digits
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {

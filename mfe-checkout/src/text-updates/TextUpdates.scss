@@ -16,16 +16,6 @@
   }
 }
 
-.tm-container::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 5%;
-  width: 90%;
-  border-bottom: 1px solid #959595;
-  display: none;
-}
-
 .tm-form-container {
   display: flex;
   justify-content: center;
@@ -79,7 +69,13 @@
   flex-direction: row;
   min-width: 2rem;
   margin-top: 0px;
-
+  font-size: 16px;
+  &.checkbox-custom {
+    margin-top: -42px;
+  }
+  @media (max-width: 425px) {
+    font-size: 13px;
+  }
   .field-item-container {
     flex-direction: row;
     gap: 8px;
