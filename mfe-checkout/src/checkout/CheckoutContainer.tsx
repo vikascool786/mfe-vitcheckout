@@ -274,10 +274,23 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   };
 
   const redirectToOrderConfirmation = (orderId: string | number): void => {
-    window.location.href = `/nbts/orderconfirmation-${orderId}`;
+    const url = `/nbts/orderconfirmation-${orderId}`;
+
+    const handleNavigation = () => {
+      document.removeEventListener("visibilitychange", handleNavigation);
+      if (document.visibilityState === "hidden") {
+        return;
+      }
+      setIsLoading(false);
+    };
+
+    document.addEventListener("visibilitychange", handleNavigation);
+
+    window.location.href = url;
+
     setTimeout(() => {
       setIsLoading(false);
-    }, 1000);
+    }, 3000);
   };
 
   useEffect(() => {
