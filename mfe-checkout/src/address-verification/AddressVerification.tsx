@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { FormHeading } from "../component/Form/Heading/FormHeading";
 import { Alert } from "../assets/icons/Alert";
 import "./AddressVerification.scss";
@@ -26,7 +26,7 @@ export const AddressVerification: React.FC<AppProps> = ({
   handleUseSelectedAddress,
 }) => {
   const [isNewSelectedAddress, setIsNewSelectedAddress] =
-    React.useState<boolean>(false);
+  React.useState<boolean>(false);
 
   const onChangeVericationAddress = (address: Address) => {
     // set is new selected address to false if address does not exist on the addressList
@@ -38,7 +38,6 @@ export const AddressVerification: React.FC<AppProps> = ({
 
     setAddressToVerify(address);
   };
-
   return (
     <div>
       <div className="form-header">

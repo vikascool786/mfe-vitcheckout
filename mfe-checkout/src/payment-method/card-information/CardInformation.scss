@@ -77,10 +77,8 @@
   display: flex;
   align-items: center;
   gap: 0.6rem;
-
-  &>span {
+  & > span {
     font-size: 16px;
-
     @media (max-width: 425px) {
       font-size: 13px;
     }
@@ -94,7 +92,6 @@
   line-height: 100%;
   letter-spacing: 0%;
 }
-
 .checkbox {
   /* Reset default appearance */
   -webkit-appearance: none;
@@ -133,7 +130,6 @@
       left: 4px;
     }
   }
-
   &.disabled {
     background-color: #f5f5f5;
     border-color: #ccc;
@@ -148,7 +144,7 @@
       }
     }
 
-    &+label {
+    & + label {
       color: #999;
       opacity: 0.6;
     }
@@ -192,12 +188,10 @@
   font-size: 18px;
   line-height: 21.09px;
   letter-spacing: 0%;
-
   @media (max-width: 425px) {
     font-size: 14px;
   }
 }
-
 
 .form-field {
   label {
@@ -206,8 +200,7 @@
   }
 }
 
-
-.billingAddressstyles {
+.billing-address-styles {
   font-family: Roboto;
   font-weight: 500;
   font-size: 18px;

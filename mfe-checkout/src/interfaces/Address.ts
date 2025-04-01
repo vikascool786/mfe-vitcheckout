@@ -15,6 +15,7 @@ export interface Address {
   address2?: string
   city: string
   state: string
+  defaultaddr?: boolean
   region?: string
   zip: string
   country?: string

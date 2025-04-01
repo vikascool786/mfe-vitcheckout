@@ -247,10 +247,9 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
         order?.userOptions.applyEWallet && order.totals.price === 0;
 
       const isOrderCoveredByGiftCard =
-        order?.userOptions?.gcNum && order.totals.price === 0;
+          order?.userOptions?.gcNum && order.totals.price === 0;
 
-      const isCreditCardRequired =
-        !isOrderCoveredUnderVIFT && !isOrderCoveredByGiftCard;
+      const isCreditCardRequired = !isOrderCoveredUnderVIFT && !isOrderCoveredByGiftCard;
 
       const excludedPaymentTypes = [48, 56, 60];
 
@@ -287,10 +286,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
         }
       }
 
-      if (
-        (isOrderCoveredUnderVIFT || isOrderCoveredByGiftCard) &&
-        orderHasAutoshipItems(order)
-      ) {
+      if ((isOrderCoveredUnderVIFT || isOrderCoveredByGiftCard) && orderHasAutoshipItems(order)) {
         if (
           selectedPaymentMethod?.paymentMethod.id &&
           selectedPaymentMethod.isEditing
@@ -424,8 +420,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
               setOrderData({
                 ...order,
                 shouldShowInvalidCVVMessage:
-                  order?.shouldShowInvalidCVVMessage ===
-                  "The credit card has expired."
+                  order?.shouldShowInvalidCVVMessage === "The credit card has expired."
                     ? order.shouldShowInvalidCVVMessage
                     : "Please check CVV",
               });
