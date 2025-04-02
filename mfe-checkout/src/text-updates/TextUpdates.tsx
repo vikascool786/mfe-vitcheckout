@@ -191,7 +191,7 @@ export const TextUpdates: React.FC<ITextUpdatesProps> = ({ pcid, siteId}) => {
                                 errorMessage={touched.phone && errors.phone}
                             />
                         </div>
-                        <div className={`save-for-later ${touched.phone && errors.phone ? "checkbox-custom":""}`}>
+                        <div className={`save-for-later-txtupdate ${touched.phone && errors.phone ? "checkbox-custom":""}`}>
                             <FormField
                                 type="checkbox"
                                 name="boxChecked"
