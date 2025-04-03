@@ -34,6 +34,7 @@ export interface ShippingSelection {
   method: string;
   total: number;
   estShipDate: string;
+  estShipDisplayDate: string;
   isSelected?: boolean;
   totalStr: string;
 }

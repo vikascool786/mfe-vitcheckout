@@ -55,7 +55,7 @@ export const ShippingOptionItem: React.FC<IShippingOptionItem> = ({
           <div className={`shipping-option-sub-container`}>
             <div>{shippingOption.method}</div>
             <div className="shipping-option-estShipDate">
-              {shippingOption.estShipDate}
+              {shippingOption.estShipDisplayDate}
             </div>
           </div>
         </div>
