@@ -119,6 +119,9 @@ export const CardInputs: React.FC<ICardInputProps> = ({
             required
             name="cardInfo.cvv"
             type="password"
+            autoComplete="off" 
+            data-1p-ignore data-lpignore="true" 
+            data-protonpass-ignore="true"
             inputMode="numeric"
             value={values.cardInfo?.cvv || ""}
             maxLength={4}

@@ -342,6 +342,9 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                       className="qa-cvv payment-option-container__card-cvv-form"
                       value={formik.values.cvv}
                       type="password"
+                      autoComplete="off" 
+                      data-1p-ignore data-lpignore="true" 
+                      data-protonpass-ignore="true"
                       maxLength={maxLength}
                       onChange={(e: ChangeEvent<HTMLInputElement>) => {
                         const sanitizedValue = e.target.value.replace(
