@@ -44,6 +44,7 @@ export interface Item {
   autoshipFreq: number;
   autoShipId?: number;
   available?: string;
+  availableDisplayDate?: string;
   totals: ITotal;
   permutation?: Permutation;
   shipWarningMessages?: string[];
