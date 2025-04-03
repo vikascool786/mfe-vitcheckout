@@ -244,6 +244,11 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
 
               setPaymentMethods(updatedPaymentMethods);
             } else {
+              
+              const isPaypalAlreadyAdded = paymentMethods.some(method => method.paymentMethod.accountName === PAYPAL.name);
+
+              if (isPaypalAlreadyAdded) return
+
               if(paypalPayment){
                 setPaymentMethods([
                   ...paymentMethods,
