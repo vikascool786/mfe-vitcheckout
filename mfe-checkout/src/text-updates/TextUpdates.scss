@@ -64,11 +64,11 @@
   }
 }
 
-.save-for-later {
+.save-for-later-txtupdate {
   display: flex;
   flex-direction: row;
   min-width: 2rem;
-  margin-top: 0px;
+  margin-top: 10px;
   font-size: 16px;
   &.checkbox-custom {
     margin-top: -42px;
