@@ -5,7 +5,7 @@ import CheckoutContainer from "./checkout/CheckoutContainer";
 import { Provider, useAtom } from "jotai";
 import { loadingAtom, OrderStore } from "./store";
 
-interface AppProps { }
+interface AppProps {}
 
 const App: React.FC<AppProps> = () => {
   const [loading] = useAtom(loadingAtom);
@@ -61,16 +61,34 @@ const App: React.FC<AppProps> = () => {
           shopperId="hmUhkqpzzezhXzhhVqzZmxWzqeYXkUjzqXjpzpqqm"
           pcid="1947765337"
           siteId="66"
-          sessionId="3055311904"
+          sessionId="3055321553"
+        /> */}
+
+        {/* new user - do not add payments  */}
+        <CheckoutContainer
+          cartId="cart_1464553485_W_USA_USA_ENG"
+          shopperId="hxXjpUzWzWjXmzhexmzYWZxzUYVwYpZxkeWhzxwjhk"
+          pcid="1464553485"
+          siteId="66"
+          sessionId="3055321553"
+        />
+
+        {/* test staging account - user name   */}
+        {/* <CheckoutContainer
+          cartId="cart_1198092033_W_USA_USA_ENG"
+          shopperId="epzYwVWwzXpXzzhphkzYzYezxVxwYkpqwZwwzqepw"
+          pcid="1198092033"
+          siteId="66"
+          sessionId="3055321553"
         /> */}
 
         {/* for GC Card Customer */}
         {/* <CheckoutContainer
-          cartId="cart_1778511302_W_USA_USA_ENG"
-          shopperId="zWUVXxqjzwWqWzhZjqzZYUWzwWxWzhUmwVwUzehzpp"
-          pcid="1778511302"
+          cartId="cart_1918885741_W_USA_USA_ENG"
+          shopperId="YUXUeYeqzeYzUzhkYVzZhUezzwUwUmqUpVmYzjqzz"
+          pcid="1918885741"
           siteId="66"
-          sessionId="3055249126"
+          sessionId="3055321553"
         /> */}
         {/* <CheckoutContainer
           cartId="cart_1762863970_W_USA_USA_ENG"
