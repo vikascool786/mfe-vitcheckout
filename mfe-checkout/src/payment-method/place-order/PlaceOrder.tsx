@@ -42,6 +42,8 @@ import {
 import { placeOrderSchema } from "../../validation/placeOrderSchema";
 import { CLICK2PAY, isThirdPartyPayment, PAYPAL, SEZZLE } from "../PaymentType";
 import "./PlaceOrder.scss";
+import { useCreditCardFormContext } from "../../component/Form/CreditCardFormContext";
+import { handleSaveCard } from "../../utils/helpers/CreditCardHelper";
 
 interface IPlaceOrder {
   confirmOrder: () => void;
@@ -92,6 +94,8 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     useState<OrderConsolidationData>(getOrderConsolidateData(order || null));
 
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
+
+  const { creditCardFormData } = useCreditCardFormContext();
 
   useEffect(() => {
     updateOrderErrorMessage("");
@@ -240,20 +244,43 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   };
 
   const handlePlaceOrder = async (paymentMethods: IPaymentOption[]) => {
-    try {
-      setIsLoading(true);
+    setIsLoading(true);
+    const hasNewCreditCardDataToSave = (creditCardFormData?.cardInfo?.number ?? "").length > 0;
 
-      const isOrderCoveredUnderVIFT =
+    const isOrderCoveredUnderVIFT =
         order?.userOptions.applyEWallet && order.totals.price === 0;
 
-      const isOrderCoveredByGiftCard =
-          order?.userOptions?.gcNum && order.totals.price === 0;
+    const isOrderCoveredByGiftCard =
+        order?.userOptions?.gcNum && order.totals.price === 0;
 
-      const isCreditCardRequired = !isOrderCoveredUnderVIFT && !isOrderCoveredByGiftCard;
+    const isCreditCardRequired = !isOrderCoveredUnderVIFT && !isOrderCoveredByGiftCard;
+
+    if(isCreditCardRequired && selectedPaymentMethod?.paymentMethod.id === 0){
+      if(!hasNewCreditCardDataToSave){
+        updateOrderErrorMessage("Please complete your payment information");
+        setIsLoading(false);
+        return;
+      }else{
+        const saveCardResponse = await handleSaveCard(creditCardFormData, shopperId, {order});
+        if(saveCardResponse?.error){
+          updateOrderErrorMessage(saveCardResponse.error);
+          setIsLoading(false);
+          return;
+        } else{
+          if(saveCardResponse?.updatedOrder){
+            order = saveCardResponse.updatedOrder;
+            selectedPaymentMethod.isPaymentValidated = true;
+          }
+        }
+      }
+
+    }
+
+    try {
 
       const excludedPaymentTypes = [48, 56, 60];
 
-      if (selectedPaymentMethod?.isEditing) {
+      if (selectedPaymentMethod?.isEditing && selectedPaymentMethod?.paymentMethod.id !== 0) {
         updateOrderErrorMessage("Please save your payment method");
         setIsLoading(false);
         return;
@@ -286,7 +313,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
         }
       }
 
-      if ((isOrderCoveredUnderVIFT || isOrderCoveredByGiftCard) && orderHasAutoshipItems(order)) {
+      if ((isOrderCoveredUnderVIFT || isOrderCoveredByGiftCard) && orderHasAutoshipItems(order || null)) {
         if (
           selectedPaymentMethod?.paymentMethod.id &&
           selectedPaymentMethod.isEditing
@@ -360,7 +387,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
           }
           const url = `${GET_PAYPAL_CHECKOUT_URL()}?token=${
             paypalToken.tokenId
-          }`;
+          }&useraction=commit`;
           window.open(url, "_self");
           break;
         default:

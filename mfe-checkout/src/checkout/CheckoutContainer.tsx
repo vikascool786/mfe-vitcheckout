@@ -46,6 +46,8 @@ import PaymentMethodHeading from "../payment-method/PaymentMethodHeading";
 import { TextUpdates } from "../text-updates/TextUpdates";
 import { GET_API_MODE } from "../utils/helpers/urlResolvers";
 import { getShippingAddressFromAddressList } from "../utils/AddressUtils";
+import {CreditCardFormProvider} from "../component/Form/CreditCardFormContext";
+import {siteApiData} from "./siteAtom";
 
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
@@ -106,6 +108,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   const addressList = useAtomValue(addressAtom);
   const paymentMethodOptions = useAtomValue(paymentMethodsAtom);
   const [portalData] = useAtom(portalApiData(shopperId));
+  const [siteData] = useAtom(siteApiData(siteId));
 
   const isAddressSaved = useMemo(
     () => addressList?.some((address) => address.hasAddress === 1),
@@ -186,7 +189,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
 
   const defaultAddress = useMemo(() => {
     if (addresses) {
-      return getShippingAddressFromAddressList(addresses);
+      return getShippingAddressFromAddressList(addresses, siteData.siteCountryCode);
     }
   }, [addresses]);
 
@@ -372,6 +375,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
       {orderData && (
         <>
           <div className="qa-checkout container">
+            <CreditCardFormProvider>
             <div className="checkout-container" id="mfe-checkout-container">
               <div className="left-column">
                 <Notifications
@@ -446,6 +450,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                 </div>
               </div>
             </div>
+            </CreditCardFormProvider>
 
             <div className="place-order">
               <Feedback siteId={siteId} pcId={pcid} sessionId={sessionId} />

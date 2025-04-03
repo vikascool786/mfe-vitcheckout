@@ -93,7 +93,7 @@ const Checkout: React.FC<ICheckout> = ({
   const buildShoppersAddressBookFromResponse = (
     addressBookResponse: Address[]
   ) => {
-    let filteredAddresses: Address[] = getFilteredShippingAddresses(addressBookResponse);
+    let filteredAddresses: Address[] = getFilteredShippingAddresses(addressBookResponse, siteData.siteCountryCode);
     setShippingAddress(getShippingAddressFromFilteredList(filteredAddresses) || defaultAddress);
     setShowShipAddressForm(filteredAddresses.length < 1);
     return filteredAddresses;
@@ -248,7 +248,7 @@ const Checkout: React.FC<ICheckout> = ({
             getOrderNotifications(newOrder.response.success)
           );
 
-          setShopperAddressBook(getFilteredShippingAddresses(updatedAddresses));
+          setShopperAddressBook(getFilteredShippingAddresses(updatedAddresses, siteData.siteCountryCode));
           setShowShipAddressForm(false);
           setErrorMessage("");
         }
@@ -257,7 +257,7 @@ const Checkout: React.FC<ICheckout> = ({
         const updatedAddressList: Address[] =
           await createShopperAddressBookEntry(shopperId, addressParams);
         //update address atom with new addresslist
-        setShopperAddressBook(getFilteredShippingAddresses(updatedAddressList));
+        setShopperAddressBook(getFilteredShippingAddresses(updatedAddressList, siteData.siteCountryCode));
         const newAddedAddress = updatedAddressList.find(
           (address) => address.isShip
         );

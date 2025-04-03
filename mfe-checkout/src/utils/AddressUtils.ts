@@ -1,11 +1,11 @@
 import {Address} from "../interfaces/Address";
 
-export const getFilteredShippingAddresses = (addressList: Address[]): Address[] => {
-    return addressList?.filter((ad) => ad.hasAddress !== 0 && ad.isBill !== 1 && ad.isPrimary !== 1);
+export const getFilteredShippingAddresses = (addressList: Address[], countryCode: string): Address[] => {
+    return addressList?.filter((ad) => ad.hasAddress !== 0 && ad.isBill !== 1 && ad.isPrimary !== 1 && ad.isoalpha3Code === countryCode);
 };
 
-export const getShippingAddressFromAddressList = (addressList: Address[]): Address | undefined => {
-    const filteredAddressList = getFilteredShippingAddresses(addressList);
+export const getShippingAddressFromAddressList = (addressList: Address[], countryCode: string): Address | undefined => {
+    const filteredAddressList = getFilteredShippingAddresses(addressList, countryCode);
     return filterForShippingAddress(filteredAddressList);
 };
 

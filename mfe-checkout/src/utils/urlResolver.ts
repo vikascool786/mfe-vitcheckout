@@ -198,6 +198,11 @@ export const GET_TOKEN_SERVICE_SHOP = () => {
   return `${GET_BASE_URL}/TokenService/GetToken`;
 };
 
+//**Only use for local testing with FAMOS**
+export const GET_TOKEN_SERVICE_SHOP_AJAX = () => {
+  return `${GET_BASE_URL}/ajaxaction/MyTokenService/MyGetToken`;
+};
+
 export const GET_AJAX_ENDPOINT_BASE_URL = () => {
   const mode = GET_API_MODE();
   switch (mode) {

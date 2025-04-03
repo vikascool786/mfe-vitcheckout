@@ -33,6 +33,8 @@ import { CardInputs } from "./CardInputs";
 import { getTypeIdByAltName, isThirdPartyPayment } from "../PaymentType";
 import ScrollToError from "../../component/Form/ScrollToError/ScrollToError";
 import {getShippingAddressFromAddressList} from "../../utils/AddressUtils";
+import { CreditCardValidationWatcher } from "./CreditCardValidationWatcher";
+import {siteApiData} from "../../checkout/siteAtom";
 
 interface ICardInformationProps {
   paymentMethod: IPaymentMethod;
@@ -45,6 +47,7 @@ interface ICardInformationProps {
   setCVVFieldValue: any;
   isEditing: boolean;
   isTempPaymentMethod?: boolean;
+  siteId: string;
 }
 
 const CARD_MAP = new Map([
@@ -66,6 +69,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   onCancel,
   isTempPaymentMethod,
   isEditing = false,
+  siteId
 }) => {
   const setLoading = useSetAtom(loadingAtom);
 
@@ -83,8 +87,9 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
 
   const [paymentMethods] = useAtom(paymentMethodsAtom);
   const [order, setOrder] = useAtom(orderAtom);
+  const [siteData] = useAtom(siteApiData(siteId));
 
-  const shippingAddress = getShippingAddressFromAddressList(addressList);
+  const shippingAddress = getShippingAddressFromAddressList(addressList, siteData.siteCountryCode);
   const [sameShippingAddress, setSameShippingAddress] = useState<boolean>(
     paymentMethod.id === 0
   );
@@ -236,10 +241,9 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
     }
   };
 
-  const handleSaveCardInformation = async (
+  const updateCardInformation = async (
     values: IPaymentMethod,
     address: Address,
-    type: "TEMP" | "WALLET",
     sameShippingAddress: boolean
   ) => {
     setLoading(true);
@@ -294,150 +298,9 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
     }
 
     try {
-      if (type === "WALLET") {
-        // if we are editing the card
         if (values.id !== 0) {
           processCardUpdate(values, requestData, typeId as number);
           return;
-        }
-
-        // we are adding a new card
-        const cardTokenResponse = await generateCardToken(requestData.number);
-        const token = cardTokenResponse?.token.id;
-        const number = cardTokenResponse?.token.mask;
-        setCVVFieldValue(values.cvv);
-        // api call to add card into the user's wallet
-        const response = await addShoppersPaymentMethod(shopperId, {
-          ...requestData,
-          token,
-          number,
-        });
-
-        // since we do not have id for the card we are adding newly,
-        // we add the last card in the response to the payment methods
-        const updatedPaymentMethods = [
-          {
-            paymentMethod: {
-              ...response.at(-1),
-              cvv: requestData.cvv,
-            },
-            paymentAddress: sameShippingAddress ? shippingAddress : address,
-            isSelected: true,
-            isVisible: true,
-            isEditing: false,
-            isPaymentValidated: true,
-          },
-          ...paymentMethods.map((pm) => ({
-            ...pm,
-            paymentMethod: {
-              ...pm.paymentMethod,
-              preferred: false,
-            },
-            isSelected: false,
-            isPaymentValidated: false,
-            isVisible: isThirdPartyPayment(pm.paymentMethod.typeID),
-          })),
-        ].filter((pm) => pm.paymentMethod?.id !== 0);
-
-        //update the order with the newly added payment method
-        if (order && paymentMethod) {
-          const updatedOrder = generateChangeStoreResponse({
-            ...order,
-            billingAddress: {
-              ...order.billingAddress,
-              id: response.at(-1)?.addressId as number,
-            },
-            paymentMethod: {
-              ...order.paymentMethod,
-              id: response.at(-1)?.id as number,
-            },
-          });
-
-          // build the order to sync with the cart api
-          const orderResponse = await buildOrder(updatedOrder);
-
-          onAddNewCard(updatedPaymentMethods as IPaymentOption[]);
-          setOrder({
-            ...orderResponse.response.success.data,
-            isOrderValid: true,
-          });
-          setLoading(false);
-        }
-      } else if (type === "TEMP") {
-        const cardTokenResponse = await generateCardToken(requestData.number);
-        const imageUrl =
-        values.id === 0
-          ? CARD_MAP.get(getCardType(requestData.number).toLowerCase())
-          : values.imageUrl;
-
-        const token = cardTokenResponse?.token.id;
-        const number = cardTokenResponse?.token.mask;
-
-        const response =
-          token && number
-            ? await addTempPaymentMethod(shopperId, {
-              ...requestData,
-              token,
-              number,
-            })
-            : await updateTempPaymentMethod(shopperId, requestData);
-
-        if (response) {
-          const updatedPaymentMethod = {
-            ...(response as IPaymentMethod),
-          };
-
-          const updatedPaymentMethods = [
-            {
-              paymentMethod: {
-                ...updatedPaymentMethod,
-                imageUrl,
-                cvv: requestData.cvv,
-              },
-              paymentAddress: sameShippingAddress ? shippingAddress : address,
-              isTempPaymentMethod: true,
-              isPaymentValidated: true,
-              isSelected: true,
-              isVisible: true,
-            },
-            ...paymentMethods.map((pm) => ({
-              ...pm,
-              paymentMethod: {
-                ...pm.paymentMethod,
-                preferred: false,
-              },
-              isPaymentValidated: false,
-              isSelected: false,
-              isVisible: isThirdPartyPayment(pm.paymentMethod.typeID),
-            })),
-          ].filter((pm) => pm.paymentMethod.id !== 0);
-
-          setCVVFieldValue(values.cvv);
-
-          if (order && response.id) {
-            const updatedOrder = generateChangeStoreResponse({
-              ...order,
-              billingAddress: {
-                ...order.billingAddress,
-                id: response?.addressId as number,
-              },
-              paymentMethod: {
-                ...order.paymentMethod,
-                id: response.id,
-              },
-            });
-            const orderResponse = await buildOrder(updatedOrder);
-            setOrder({
-              ...orderResponse.response.success.data,
-              isOrderValid: true,
-            });
-          }
-
-          onAddNewCard(updatedPaymentMethods as IPaymentOption[]);
-          setLoading(false);
-        }
-
-        setCardError("Error while adding card");
       }
     } catch (error: any) {
       if (order) {
@@ -509,33 +372,34 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
       <Formik
         initialValues={initialValues}
         validationSchema={validationSchema}
-        onSubmit={(values) => {
+        //onSubmit only for saving card edits
+        //new card info submit will be handled by place order button - AI-110697
+        onSubmit= {(values) => {
           setCardError(null);
           const address = !sameShippingAddress
-            ? {
-              first: values.first,
-              last: values.last,
-              address1: values.address1,
-              address2: values.address2,
-              city: values.city,
-              state: values.state,
-              zip: values.zip,
-            }
-            : (shippingAddress as Address);
-          handleSaveCardInformation(
-            {
-              ...paymentMethod,
-              accountName: values.cardInfo.accountName,
-              number: values.cardInfo.number,
-              expMonth: values.cardInfo.expMonth,
-              expYear: values.cardInfo.expYear,
-              cvv: parseInt(values.cardInfo.cvv),
-              preferred: paymentMethod.preferred,
-              id: paymentMethod.id,
-            },
-            address,
-            saveCardToWallet ? "WALLET" : "TEMP",
-            sameShippingAddress
+              ? {
+                first: values.first,
+                last: values.last,
+                address1: values.address1,
+                address2: values.address2,
+                city: values.city,
+                state: values.state,
+                zip: values.zip,
+              }
+              : (shippingAddress as Address);
+          updateCardInformation(
+              {
+                ...paymentMethod,
+                accountName: values.cardInfo.accountName,
+                number: values.cardInfo.number,
+                expMonth: values.cardInfo.expMonth,
+                expYear: values.cardInfo.expYear,
+                cvv: parseInt(values.cardInfo.cvv),
+                preferred: paymentMethod.preferred,
+                id: paymentMethod.id,
+              },
+              address,
+              sameShippingAddress
           );
         }}
       >
@@ -546,162 +410,165 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           isValid,
           handleChange,
           handleBlur,
-          handleSubmit,
           setFieldValue,
           submitForm,
         }) => {
           return (
             <form>
+              <CreditCardValidationWatcher isValid={isValid} values={values} isShipSameAsBill={sameShippingAddress}
+                                           shipAddress={shippingAddress} saveForLater={saveCardToWallet}/>
               <ScrollToError errorRefs={errorRefs} />
               <div className="card-information-container">
                 <CardInputs
-                  handleChange={handleChange}
-                  touched={touched}
-                  errors={errors}
-                  handleBlur={handleBlur}
-                  values={values}
-                  isEditing={isEditing}
-                  isEditingExistingCard={paymentMethod.id !== 0}
-                  saveCardToWallet={saveCardToWallet}
-                  setSaveCardToWallet={setSaveCardToWallet}
-                  errorRefs={errorRefs}
+                    handleChange={handleChange}
+                    touched={touched}
+                    errors={errors}
+                    handleBlur={handleBlur}
+                    values={values}
+                    isEditing={isEditing}
+                    isEditingExistingCard={paymentMethod.id !== 0}
+                    saveCardToWallet={saveCardToWallet}
+                    setSaveCardToWallet={setSaveCardToWallet}
+                    errorRefs={errorRefs}
                 />
-                
+
                 {addressList.length > 0 && paymentMethod.id < 1 && (
-                  <div className="billing">
-                    <span className="billing-text">Billing Address</span>
-                    <input
-                      type="checkbox"
-                      className="qa-same-shipping checkbox"
-                      checked={sameShippingAddress}
-                      onChange={() => {
-                        setSameShippingAddress(!sameShippingAddress);
-                      }}
-                    />
-                    <span>Same as shipping</span>
-                  </div>
+                    <div className="billing">
+                      <span className="billing-text">Billing Address</span>
+                      <input
+                          type="checkbox"
+                          className="qa-same-shipping checkbox"
+                          checked={sameShippingAddress}
+                          onChange={() => {
+                            setSameShippingAddress(!sameShippingAddress);
+                          }}
+                      />
+                      <span>Same as shipping</span>
+                    </div>
                 )}
 
                 {addressList.length === 0 || !sameShippingAddress ? (
-                  <form>
-                    <div className="form-field-container">
-                      <FormField
-                        label="First Name"
-                        required
-                        name="first"
-                        value={values.first}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        errorMessage={touched.first && errors.first}
-                        errorRefs={errorRefs}
-                      />
-                      <FormField
-                        label="Last Name"
-                        required
-                        name="last"
-                        value={values.last}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        errorMessage={touched.last && errors.last}
-                        errorRefs={errorRefs}
-                      />
-                    </div>
-                    <div className="form-field-container-full">
-                      <FormField
-                        label="Address Line 1"
-                        required
-                        name="address1"
-                        value={values.address1}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        errorMessage={touched.address1 && errors.address1}
-                        errorRefs={errorRefs}
-                      />
-                    </div>
-                    <div className="form-field-container-full">
-                      <FormField
-                        label="Address Line 2"
-                        name="address2"
-                        value={values.address2}
-                        onChange={handleChange}
-                        errorRefs={errorRefs}
-                      />
-                    </div>
-                    <div className="form-field-container">
-                      <FormField
-                        label="City"
-                        required
-                        name="city"
-                        value={values.city}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        errorMessage={touched.city && errors.city}
-                        errorRefs={errorRefs}
-                      />
-                      <DropdownField
-                        options={stateDropdownList}
-                        label="State/Province"
-                        required
-                        selectedValue={values.state}
-                        formName="state"
-                        onChange={(e) => setFieldValue("state", e)}
-                        errorMessage={touched.state && errors.state}
-                        errorRefs={errorRefs}
-                      />
-                    </div>
-                    <div className="form-field-container">
-                      <FormField
-                        label="Zip Code"
-                        required
-                        name="zip"
-                        value={values.zip}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        errorMessage={touched.zip && errors.zip}
-                        errorRefs={errorRefs}
-                      />
-                      <div className="save-for-later">
-                        <input
-                          className="checkbox"
-                          type="checkbox"
-                          name="isPoBox"
-                          onChange={handleChange}
+                    <form>
+                      <div className="form-field-container">
+                        <FormField
+                            label="First Name"
+                            required
+                            name="first"
+                            value={values.first}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            errorMessage={touched.first && errors.first}
+                            errorRefs={errorRefs}
                         />
-                        <span className="shipping-text">
+                        <FormField
+                            label="Last Name"
+                            required
+                            name="last"
+                            value={values.last}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            errorMessage={touched.last && errors.last}
+                            errorRefs={errorRefs}
+                        />
+                      </div>
+                      <div className="form-field-container-full">
+                        <FormField
+                            label="Address Line 1"
+                            required
+                            name="address1"
+                            value={values.address1}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            errorMessage={touched.address1 && errors.address1}
+                            errorRefs={errorRefs}
+                        />
+                      </div>
+                      <div className="form-field-container-full">
+                        <FormField
+                            label="Address Line 2"
+                            name="address2"
+                            value={values.address2}
+                            onChange={handleChange}
+                            errorRefs={errorRefs}
+                        />
+                      </div>
+                      <div className="form-field-container">
+                        <FormField
+                            label="City"
+                            required
+                            name="city"
+                            value={values.city}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            errorMessage={touched.city && errors.city}
+                            errorRefs={errorRefs}
+                        />
+                        <DropdownField
+                            options={stateDropdownList}
+                            label="State/Province"
+                            required
+                            selectedValue={values.state}
+                            formName="state"
+                            onChange={(e) => setFieldValue("state", e)}
+                            errorMessage={touched.state && errors.state}
+                            errorRefs={errorRefs}
+                        />
+                      </div>
+                      <div className="form-field-container">
+                        <FormField
+                            label="Zip Code"
+                            required
+                            name="zip"
+                            value={values.zip}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            errorMessage={touched.zip && errors.zip}
+                            errorRefs={errorRefs}
+                        />
+                        <div className="save-for-later">
+                          <input
+                              className="checkbox"
+                              type="checkbox"
+                              name="isPoBox"
+                              onChange={handleChange}
+                          />
+                          <span className="shipping-text">
                           This address is a PO box
                         </span>
+                        </div>
                       </div>
-                    </div>
-                  </form>
+                    </form>
                 ) : (
-                  <div className="address-saved-text">
-                    {shippingAddress?.first} {shippingAddress?.last}{" "}
-                    {shippingAddress?.address1}
-                    {shippingAddress?.address2} {shippingAddress?.city}{" "}
-                    {shippingAddress?.zip}
-                  </div>
+                    <div className="address-saved-text">
+                      {shippingAddress?.first} {shippingAddress?.last}{" "}
+                      {shippingAddress?.address1}
+                      {shippingAddress?.address2} {shippingAddress?.city}{" "}
+                      {shippingAddress?.zip}
+                    </div>
                 )}
                 {cardError && <div className="error-message">{cardError}</div>}
-                <div className="button-container">
-                  <Button
-                    qaTag="qa-cancel"
-                    btnType="secondary"
-                    label="Cancel"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onCancel();
-                    }}
-                  />
-                  <Button
-                    qaTag="qa-submit"
-                    btnType="primary"
-                    label={saveCardToWallet ? "Save & continue": "Continue"}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      submitForm();
-                    }}
-                  />
-                </div>
+                {isEditing && (
+                    <div className="button-container">
+                      <Button
+                          qaTag="qa-cancel"
+                          btnType="secondary"
+                          label="Cancel"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onCancel();
+                          }}
+                      />
+                      <Button
+                          qaTag="qa-submit"
+                          btnType="primary"
+                          label={"Save"}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            submitForm();
+                          }}
+                      />
+                    </div>
+                )}
               </div>
             </form>
           );
