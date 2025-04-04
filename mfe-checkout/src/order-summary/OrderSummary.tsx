@@ -22,6 +22,7 @@ import { portalApiData } from "../checkout/portalAtom";
 import { hideCouponCode } from "../utils/CouponUtils";
 import StoreHeading from "../component/StoreHeading";
 import { GET_API_MODE } from "../utils/helpers/urlResolvers";
+import { GiftCard } from "./GiftCard";
 
 interface IOrderSummary {
   pcid: string;
@@ -143,7 +144,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
   };
 
   // Add gift card to the order
-  const handleAddGiftCard = async (isGCApplied: boolean, index: number) => {
+  const handleAddGiftCard = async (isGCApplied: boolean, index?: number) => {
     if (isGCApplied && order) {
       // Remove gift card from the order
       try {
@@ -449,7 +450,6 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                 <FormField
                   qaTag={"qa-input"}
                   value={gcState.gcPin}
-                  type="password"
                   onChange={handleGcPinChange}
                 />
               </div>
@@ -469,17 +469,13 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         {order?.totals.gcDispAppliedStr &&
           order?.totals?.gcBalanceStr &&
           order.totals.gcDispAppliedStr.map((gcDispApplied, index) => (
-            <div className="gcApplied">
-              <div className="gcLeft-cont">
-                <p className="cardName">{`Card: ${order.userOptions.gcNum[index]}`}</p>
-                <p className="balanceCard">{`${order.totals.gcBalanceStr[index]} Balance`}</p>
-              </div>
-              <div className="gcRight-cont">
-                <p className="appliedCash">{`${gcDispApplied} Applied`}</p>
-
-                <Close onClick={() => handleAddGiftCard(true, index)} />
-              </div>
-            </div>
+            <GiftCard
+              key={gcDispApplied}
+              gcDispApplied={gcDispApplied}
+              handleAddGiftCard={handleAddGiftCard}
+              index={index}
+              order={order}
+            />
           ))}
         {gcState.gcError && gcState.gcVisible && (
           <div className="error-message">{gcState.gcError}</div>
