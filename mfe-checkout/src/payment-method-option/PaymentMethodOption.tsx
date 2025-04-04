@@ -76,7 +76,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
       element.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
-  
+
   useEffect(() => {
     if (
       isCardExpired() &&
@@ -189,7 +189,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
 
       // Update order with validated payment method -
       // AI-110718 only call this if the payment method has been updated, build order takes too long when only cvv is entered
-      if(!order?.paymentMethod?.id || hasPaymentChanged){
+      if (!order?.paymentMethod?.id || hasPaymentChanged) {
         const updatedOrder = generateChangeStoreResponse({
           ...order,
           paymentMethod: {
@@ -213,7 +213,8 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
       // Reset all payment methods, only keep the validated one
       const updatedPaymentMethods = paymentMethods.map((method) => ({
         ...method,
-        isSelected: method?.paymentMethod.id === paymentOption?.paymentMethod.id,
+        isSelected:
+          method?.paymentMethod.id === paymentOption?.paymentMethod.id,
         isPaymentValidated:
           method.paymentMethod.id === paymentOption?.paymentMethod.id,
       }));
@@ -226,7 +227,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     } catch (error) {
       console.log(error);
       setOrder({ ...order, isOrderValid: false });
-      setErrorMessage("Something went wrong, please try again."); 
+      setErrorMessage("Something went wrong, please try again.");
     }
 
     setLoading(false);
@@ -271,8 +272,9 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
       id={`[id=${paymentMethod.id}]`}
     >
       <div
-        className={`payment-option-select-container ${isEditing ? "form-mode" : ""
-          }`}
+        className={`payment-option-select-container ${
+          isEditing ? "form-mode" : ""
+        }`}
       >
         <div className="payment-option-sub-container">
           <RadioButton
@@ -341,10 +343,13 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                       name="cvv"
                       className="qa-cvv payment-option-container__card-cvv-form"
                       value={formik.values.cvv}
-                      type="password"
-                      autoComplete="new-password" 
-                      data-1p-ignore data-lpignore="true" 
+                      type="text"
+                      pattern="\d*"
+                      aria-hidden="true"
+                      data-1p-ignore
+                      data-lpignore="true"
                       data-protonpass-ignore="true"
+                      data-autocompletetype="off"
                       maxLength={maxLength}
                       onChange={(e: ChangeEvent<HTMLInputElement>) => {
                         const sanitizedValue = e.target.value.replace(
@@ -362,10 +367,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                           const updatedPaymentMethods = paymentMethods.map(
                             (pm) =>
                               pm.paymentMethod.id === paymentMethod.id
-                                ? {
-                                  ...pm,
-                                  isPaymentValidated: false,
-                                }
+                                ? { ...pm, isPaymentValidated: false }
                                 : pm
                           );
 

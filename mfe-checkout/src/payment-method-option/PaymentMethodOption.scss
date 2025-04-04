@@ -92,10 +92,13 @@
       min-height: 42px;
       line-height: 18px;
       font-weight: normal;
+      font-family: "password";
+
       max-width: 40%;
 
       @media only screen and (max-width: 560px) {
         &::placeholder {
+          font-family: "password";
           font-size: 12px;
         }
 
@@ -241,4 +244,11 @@
   @media only screen and (max-width: 560px) {
     font-size: 11px;
   }
+}
+
+@font-face {
+  font-family: "password";
+  font-style: normal;
+  font-weight: 400;
+  src: url(https://jsbin-user-assets.s3.amazonaws.com/rafaelcastrocouto/password.ttf);
 }
