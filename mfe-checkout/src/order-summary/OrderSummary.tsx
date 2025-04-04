@@ -449,6 +449,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                 <div className="order-redeem-coupon-text">PIN</div>
                 <FormField
                   qaTag={"qa-input"}
+                  disablePasswordManager
                   value={gcState.gcPin}
                   onChange={handleGcPinChange}
                 />

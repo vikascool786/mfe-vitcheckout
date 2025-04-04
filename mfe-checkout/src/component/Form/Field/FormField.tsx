@@ -12,6 +12,7 @@ interface IFormFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   }> | null;
   maxLength?: number;
   qaTag?: string;
+  disablePasswordManager?: boolean;
   formName?: string;
 }
 
@@ -38,7 +39,7 @@ export const FormField: React.FC<IFormFieldProps> = ({
       <input
         className={`${qaTag} input-container ${
           errorMessage ? "error-border" : ""
-        }`}
+        } ${props.disablePasswordManager ? "disable-password-manager" : ""}`}
         name={name}
         ref={(el: HTMLInputElement | null) =>
           el && errorRefs && errorRefs.current

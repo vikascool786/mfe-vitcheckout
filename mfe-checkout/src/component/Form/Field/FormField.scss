@@ -55,6 +55,12 @@
   line-height: 18px;
 }
 
+.disable-password-manager {
+  font-family: "password";
+  font-size: 16px;
+  font-weight: 400;
+  color: #000000; /* Neutral color for password manager text */
+}
 .error-message::before {
   content: "";
   display: block;
@@ -74,4 +80,11 @@
   margin-top: 4px;
   margin-bottom: 4px;
   color: #666666; /* Neutral color for extra labels */
+}
+
+@font-face {
+  font-family: "password";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../../../assets/fonts/password.woff");
 }
