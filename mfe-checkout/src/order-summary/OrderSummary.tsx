@@ -61,8 +61,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
   });
 
   const [gcState, setgcState] = useState<IGCState>({
-    gcNum: order?.userOptions.gcNum ? order.userOptions.gcNum[0] : "",
-    gcPin: order?.userOptions.gcPin ? order.userOptions.gcPin[0] : "",
+    gcNum: "",
+    gcPin: "",
     gcError: "",
     gcVisible:
       order?.userOptions.gcNum && order?.userOptions?.gcNum[0] ? true : false,
@@ -143,25 +143,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
   };
 
   // Add gift card to the order
-  const handleAddGiftCard = async (isGCApplied: boolean) => {
-    if (!gcState.gcNum?.trim()) {
-      setgcState((prevState) => ({
-        ...prevState,
-        gcError: "Please enter number",
-      }));
-      return;
-    }
-
-    if (!gcState.gcPin?.trim()) {
-      setgcState((prevState) => ({
-        ...prevState,
-        gcError: "Please enter pin",
-      }));
-      return;
-    }
-
-    setGCLoading(true);
-
+  const handleAddGiftCard = async (isGCApplied: boolean, index: number) => {
     if (isGCApplied && order) {
       // Remove gift card from the order
       try {
@@ -170,8 +152,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
             ...order,
             userOptions: {
               ...order.userOptions,
-              gcNum: [],
-              gcPin: [],
+              gcNum: [...order.userOptions.gcNum.filter((_, i) => i !== index)],
+              gcPin: [...order.userOptions.gcPin.filter((_, i) => i !== index)],
             },
           })
         );
@@ -192,6 +174,23 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         console.error("Error while removing gift card:", error);
       }
     }
+    if (!gcState.gcNum?.trim()) {
+      setgcState((prevState) => ({
+        ...prevState,
+        gcError: "Please enter number",
+      }));
+      return;
+    }
+
+    if (!gcState.gcPin?.trim()) {
+      setgcState((prevState) => ({
+        ...prevState,
+        gcError: "Please enter pin",
+      }));
+      return;
+    }
+
+    setGCLoading(true);
 
     if (order) {
       try {
@@ -200,8 +199,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
             ...order,
             userOptions: {
               ...order.userOptions,
-              gcNum: [gcState.gcNum],
-              gcPin: [gcState.gcPin],
+              gcNum: [...order.userOptions.gcNum, gcState.gcNum],
+              gcPin: [...order.userOptions.gcPin, gcState.gcPin],
             },
           })
         );
@@ -212,7 +211,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         ) {
           setgcState((prevState) => ({
             ...prevState,
-            gcError: updatedOrder.response.success.notifications[0].reason,
+            gcError: updatedOrder?.response?.success?.notifications.at(0)
+              ?.reason as string,
             gcVisible: true,
             gcApplied: false,
           }));
@@ -230,6 +230,14 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           return;
         }
         setOrder(updatedOrder.response?.success?.data);
+        setgcState((prevState) => ({
+          ...prevState,
+          gcNum: "",
+          gcError: "",
+          gcPin: "",
+          gcVisible: false,
+          gcApplied: false,
+        }));
         setGCLoading(false);
       } catch (error) {
         console.error("Error while adding gift card:", error);
@@ -366,7 +374,9 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
   useEffect(() => {
     setgcState((prevState) => ({
       ...prevState,
-      gcApplied: order?.userOptions.gcNum?.length > 0,
+      gcApplied: order?.userOptions?.gcNum
+        ? order?.userOptions?.gcNum?.length > 0
+        : false,
     }));
   }, [order?.userOptions.gcNum]);
 
@@ -423,7 +433,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
             </div>
           )}
 
-        {gcState.gcVisible && !gcState.gcApplied && (
+        {gcState.gcVisible && (
           <div className="qa-order-gift gift-card-wrapper">
             <div className="gift-card-wrapper-fields">
               <div className="gift-card-wrapper-field-1">
@@ -448,40 +458,39 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
             <div className="gift-card-apply">
               <Button
                 qaTag={"qa-button"}
-                label={!!gcState.gcApplied ? "Remove" : "Apply"}
+                label="Apply"
                 btnType="secondary"
-                onClick={() => handleAddGiftCard(!!gcState.gcApplied)}
+                onClick={() => handleAddGiftCard(false)}
               />
             </div>
           </div>
         )}
 
-        {gcState.gcApplied && (
-          <div className="gcApplied">
-            <div className="gcLeft-cont">
-              <p className="cardName">{`Card: ${gcState.gcNum}`}</p>
-              <p className="balanceCard">{`$${order?.totals.gcBalance} Balance`}</p>
-            </div>
-            <div className="gcRight-cont">
-              <p className="appliedCash">
-                {`${order?.totals.gcAppliedStr} Applied`}
-              </p>
+        {order?.totals.gcDispAppliedStr &&
+          order?.totals?.gcBalanceStr &&
+          order.totals.gcDispAppliedStr.map((gcDispApplied, index) => (
+            <div className="gcApplied">
+              <div className="gcLeft-cont">
+                <p className="cardName">{`Card: ${order.userOptions.gcNum[index]}`}</p>
+                <p className="balanceCard">{`${order.totals.gcBalanceStr[index]} Balance`}</p>
+              </div>
+              <div className="gcRight-cont">
+                <p className="appliedCash">{`${gcDispApplied} Applied`}</p>
 
-              <Close onClick={() => handleAddGiftCard(true)} />
+                <Close onClick={() => handleAddGiftCard(true, index)} />
+              </div>
             </div>
-          </div>
-        )}
+          ))}
         {gcState.gcError && gcState.gcVisible && (
           <div className="error-message">{gcState.gcError}</div>
         )}
-        {!gcState.gcApplied && (
-          <div
-            className="qa-link order-sub-text underlined"
-            onClick={handleApplyGiftCard}
-          >
-            {gcState.gcVisible ? "Hide Gift Card" : "Apply Gift Card"}
-          </div>
-        )}
+
+        <div
+          className="qa-link order-sub-text underlined"
+          onClick={handleApplyGiftCard}
+        >
+          {gcState.gcVisible ? "Hide Gift Card" : "Apply Gift Card"}
+        </div>
 
         {storesTotals &&
           storesTotals
@@ -499,7 +508,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                   className={`order-charges-table ${
                     isLast ? "order-charges-table-last" : ""
                   }`}
-                  key={store?.id || index}
+                  key={store.key || index}
                 >
                   <StoreHeading
                     storeName={getCatalogName(store?.store) || ""}
