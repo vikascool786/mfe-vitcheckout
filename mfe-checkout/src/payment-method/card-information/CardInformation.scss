@@ -26,6 +26,16 @@
       font-weight: 400;
     }
   }
+
+  // state provience
+  &.state-provinces {
+    label {
+      margin-bottom: 12px;
+    }
+    select {
+      max-height: 46px;
+    }
+  }
 }
 
 .form-field-container-full {

@@ -83,6 +83,7 @@
     }
 
     &-cvv-form {
+      font-family: "password";
       padding: 0 4px;
       vertical-align: middle;
       border-radius: 3px;
@@ -92,8 +93,6 @@
       min-height: 42px;
       line-height: 18px;
       font-weight: normal;
-      font-family: "password";
-
       max-width: 40%;
 
       @media only screen and (max-width: 560px) {

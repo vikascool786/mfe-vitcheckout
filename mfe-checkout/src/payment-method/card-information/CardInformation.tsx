@@ -492,7 +492,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                             errorRefs={errorRefs}
                         />
                       </div>
-                      <div className="form-field-container">
+                      <div className="form-field-container state-provinces">
                         <FormField
                             label="City"
                             required

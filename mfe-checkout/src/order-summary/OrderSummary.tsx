@@ -199,9 +199,11 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           generateChangeStoreResponse({
             ...order,
             userOptions: {
-              ...order.userOptions,
-              gcNum: [...order.userOptions.gcNum, gcState.gcNum],
-              gcPin: [...order.userOptions.gcPin, gcState.gcPin],
+              ...order?.userOptions,
+              // gcNum: [...order?.userOptions?.gcNum, gcState?.gcNum],
+              // gcPin: [...order?.userOptions?.gcPin, gcState?.gcPin],
+              gcNum: [...(order?.userOptions?.gcNum || []), gcState?.gcNum],
+              gcPin: [...(order?.userOptions?.gcPin || []), gcState?.gcPin],
             },
           })
         );
@@ -376,8 +378,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
     setgcState((prevState) => ({
       ...prevState,
       gcApplied: order?.userOptions?.gcNum
-        ? order?.userOptions?.gcNum?.length > 0
-        : false,
+      ? order?.userOptions?.gcNum?.length > 0
+      : false,
     }));
   }, [order?.userOptions.gcNum]);
 
@@ -477,15 +479,16 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               index={index}
               order={order}
             />
-          ))}
+        ))}
+
         {gcState.gcError && gcState.gcVisible && (
           <div className="error-message">{gcState.gcError}</div>
         )}
-
+        
         <div
           className="qa-link order-sub-text underlined"
-          onClick={handleApplyGiftCard}
-        >
+            onClick={handleApplyGiftCard}
+          >
           {gcState.gcVisible ? "Hide Gift Card" : "Apply Gift Card"}
         </div>
 
