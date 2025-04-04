@@ -25,9 +25,9 @@ export const VIFT = (props: SVGProps<SVGSVGElement>) => (
         y2="15.3367"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#C9D855" />
-        <stop offset="0.49" stop-color="#69BA86" />
-        <stop offset="1" stop-color="#408DA1" />
+        <stop stopColor="#C9D855" />
+        <stop offset="0.49" stopColor="#69BA86" />
+        <stop offset="1" stopColor="#408DA1" />
       </linearGradient>
     </defs>
   </svg>

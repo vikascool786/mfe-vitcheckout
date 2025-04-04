@@ -44,7 +44,10 @@ export const generateChangeStoreResponse = (order: Order): ChangeOrder => {
     updatedPayload.billing = { id: order.billingAddress.id };
   } else if (order.billingAddress && order.billingAddress.address1) {
     updatedPayload.billing = updatedPayload.billing ?? {};
+    updatedPayload.billing.first = order.billingAddress.first;
+    updatedPayload.billing.last = order.billingAddress.last;
     updatedPayload.billing.address1 = order.billingAddress.address1;
+    updatedPayload.billing.address2 = order.billingAddress.address2;
     updatedPayload.billing.city = order.billingAddress.city;
     updatedPayload.billing.state = order.billingAddress.state;
     updatedPayload.billing.zip = order.billingAddress.zip;

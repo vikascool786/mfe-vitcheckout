@@ -173,6 +173,10 @@
   font-size: 16px;
   font-weight: 400;
   margin-top: 20px;
+
+  input[type=checkbox] {
+    margin-top: 0;
+  }
 }
 
 .button-container {

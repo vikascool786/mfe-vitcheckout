@@ -627,16 +627,16 @@ const Checkout: React.FC<ICheckout> = ({
                   shopperAddressBook.filter((s) => s.hasAddress)?.length > 0 ? (
                     <div className="form-footer form-footer__dual-button">
                       <Button
-                        qaTag="qa-submit"
-                        label="Save & Continue"
-                        btnType="primary"
-                        onClick={submitForm}
-                      />
-                      <Button
                         qaTag="qa-cancel"
                         label="Cancel"
                         btnType="secondary"
                         onClick={onCancelClick}
+                      />
+                      <Button
+                      qaTag="qa-submit"
+                      label="Save & Continue"
+                      btnType="primary"
+                      onClick={submitForm}
                       />
                     </div>
                   ) : (

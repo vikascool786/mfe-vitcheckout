@@ -17,7 +17,10 @@ export interface ChangeOrder {
 
 export interface Billing {
   id?: number;
+  first?: string;
+  last?: string;
   address1?: string;
+  address2?: string;
   city?: string;
   state?: string;
   zip?: string;

@@ -329,7 +329,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
           <img src={paymentMethod.imageUrl} alt={paymentMethod.accountName} />
         )}
         {!isEditing && isCard ? (
-          <form id="card-form" className={`qa-payment-form`}>
+          <form id="card-form" className={`qa-payment-form`} autoComplete="off">
             <div className="payment-option-container__card-cvv-container">
               {isSelected && (
                 <div className="payment-option-container__card-cvv">
@@ -342,7 +342,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                       className="qa-cvv payment-option-container__card-cvv-form"
                       value={formik.values.cvv}
                       type="password"
-                      autoComplete="off" 
+                      autoComplete="new-password" 
                       data-1p-ignore data-lpignore="true" 
                       data-protonpass-ignore="true"
                       maxLength={maxLength}

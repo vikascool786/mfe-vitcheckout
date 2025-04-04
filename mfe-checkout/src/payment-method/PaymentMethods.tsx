@@ -484,27 +484,24 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   };
 
   const formik = useFormik({
-        initialValues: {
-          cvv: "",
-        },
-        validationSchema: Yup.object().shape({
-          cvv: Yup.string()
-            .matches(/^\d+$/, "CVV must be numeric")
-            .test("cvv-length", "CVV must be 3 or 4 digits", (value) => {
-              return value?.length === 3 || value?.length === 4;
-            })
-            .required("CVV is required"),
-        }),
-        onSubmit: (values) => {
-          // No need to check maxLength separately, as validation already ensures correct length
-          // onValidCVV(values.cvv);
-        },
-      });
-    
+    initialValues: {
+      cvv: "",
+    },
+    validationSchema: Yup.object().shape({
+      cvv: Yup.string()
+        .matches(/^\d+$/, "CVV must be numeric")
+        .test("cvv-length", "CVV must be 3 or 4 digits", (value) => {
+          return value?.length === 3 || value?.length === 4;
+        })
+        .required("CVV is required"),
+    }),
+    onSubmit: (values) => {
+      // No need to check maxLength separately, as validation already ensures correct length
+    },
+  });
 
   const onCardEdit = (paymentId: number) => {
     // Update payment methods with the editing state
-
     const updatedPaymentMethods = paymentMethods.map((method) =>
       method.paymentMethod.id === paymentId
         ? {
