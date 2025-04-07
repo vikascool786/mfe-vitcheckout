@@ -119,6 +119,7 @@ export const CardInputs: React.FC<ICardInputProps> = ({
             required
             name="cardInfo.cvv"
             type="password"
+            disablePasswordManager
             autoComplete="off" 
             data-1p-ignore data-lpignore="true" 
             data-protonpass-ignore="true"
