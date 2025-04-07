@@ -50,15 +50,6 @@ interface ICardInformationProps {
   siteId: string;
 }
 
-const CARD_MAP = new Map([
-  ["mastercard", "https://img.shop.com/Image/local/images/cc/mastercard.png"],
-  ["visa", "https://img.shop.com/Image/local/images/cc/visa.jpg"],
-  ["discover", "https://img.shop.com/Image/local/images/cc/discover.png"],
-  ["american express", "https://img.shop.com/Image/local/images/cc/amex.png"],
-  ["diners club", "https://img.shop.com/Image/local/images/cc/diners.png"],
-  ["jcb", "https://img.shop.com/Image/local/images/cc/jcb.png"],
-]);
-
 export const CardInformation: React.FC<ICardInformationProps> = ({
   updatePaymentValidationStatus,
   setCVVFieldValue,
@@ -195,7 +186,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
       if (order) {
         setOrder({
           ...order,
-          isOrderValid: true,
+          isOrderValid: false, //invalidate the order during cc edit, it will need to get revalidated when new cvv is entered
         });
       }
 
@@ -210,7 +201,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           isEditing: false,
           isSelected: true,
           isVisible: true,
-          isPaymentValidated: true,
+          isPaymentValidated: false, //card was edited so cvv needs to be re-validated
         },
         ...otherMethods.map((pm) => ({
           ...pm,

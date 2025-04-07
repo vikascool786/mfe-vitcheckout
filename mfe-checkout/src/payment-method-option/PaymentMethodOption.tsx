@@ -126,6 +126,9 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   const handlePaymentMethodEdit = () => {
     if (isSelected && paymentMethod) {
       onCardEdit(paymentMethod.id);
+      if(formik.values.cvv){ //clear out cvv if something was entered
+        setCVVFieldValue("");
+      }
     }
   };
 
@@ -164,20 +167,6 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     };
 
     try {
-      let isPaymentMethodValid;
-
-      if (isTempPaymentMethod) {
-        isPaymentMethodValid = await updateTempPaymentMethod(
-          shopperId,
-          requestData
-        );
-      } else {
-        isPaymentMethodValid = await updateShopperDetails(
-          shopperId,
-          paymentMethod.id,
-          requestData
-        );
-      }
 
       // Prevent re-validating if already validated
       if (isPaymentValidated) {

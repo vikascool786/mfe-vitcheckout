@@ -61,7 +61,7 @@ export const handleSaveCard = async (
             const response = await addShoppersPaymentMethod(shopperId, {
                 ...payload
             })
-            newPaymentInfo = response[0]; // wallet response returns all shopper payments, first one in list will be the newest
+            newPaymentInfo = response.at(-1); // wallet response returns all shopper payments, last one in list will be the newest
 
         } else{ //save as temp payment
             const response = await addTempPaymentMethod(shopperId, {
