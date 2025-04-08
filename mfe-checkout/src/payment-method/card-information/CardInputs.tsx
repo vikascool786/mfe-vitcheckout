@@ -38,7 +38,6 @@ export const CardInputs: React.FC<ICardInputProps> = ({
       label: `${startYear + i}`,
     }));
 
-
   const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let formattedValue = e.target.value.replace(/\D/g, ""); // Remove non-numeric characters
     if (formattedValue.length > 16)
@@ -47,10 +46,11 @@ export const CardInputs: React.FC<ICardInputProps> = ({
     handleChange("cardInfo.number")(formattedValue);
   };
 
-  const currentYear = new Date().getFullYear();
-const years = Array.from({ length: 15 }, (_, i) => {
-  const year = currentYear + i;
-  return { value: year.toString(), label: year.toString() };
+
+const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 15 }, (_, i) => {
+    const year = currentYear + i;
+    return { value: year.toString(), label: year.toString() };
 });
 
 const currentMonth = new Date().getMonth() + 1;
@@ -132,8 +132,9 @@ const getValidMonths = (selectedYear?: number | string) => {
             label="CVV"
             required
             name="cardInfo.cvv"
+            type="text"
             disablePasswordManager
-            autoComplete="off"
+            autoComplete="off" 
             data-1p-ignore data-lpignore="true" 
             data-protonpass-ignore="true"
             inputMode="numeric"
