@@ -60,6 +60,8 @@ interface IPlaceOrder {
   setIsLoading: any;
   updateOrderErrorMessage: (newMessage: string) => void;
   setIsAutoShipChecked: React.Dispatch<SetStateAction<boolean>>;
+  setMobileRequiredMessage: React.Dispatch<SetStateAction<boolean>>;
+  hasPhoneError: boolean;
   isAutoShipChecked: boolean;
 }
 
@@ -81,7 +83,9 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   setIsLoading,
   updateOrderErrorMessage,
   setIsAutoShipChecked,
+  setMobileRequiredMessage,
   isAutoShipChecked,
+  hasPhoneError,
 }) => {
   const trackingData = new Map<string, string>();
   const [siteData] = useAtom(siteApiData(siteId));
@@ -245,6 +249,17 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
 
   const handlePlaceOrder = async (paymentMethods: IPaymentOption[]) => {
     setIsLoading(true);
+
+    if (hasPhoneError) {
+      window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: "smooth",
+      });
+      setIsLoading(false);
+      setMobileRequiredMessage(true);
+      return;
+    }
+
     const hasNewCreditCardDataToSave = (creditCardFormData?.cardInfo?.number ?? "").length > 0;
 
     const isOrderCoveredUnderVIFT =

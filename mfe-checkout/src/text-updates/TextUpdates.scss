@@ -18,18 +18,49 @@
 
 .tm-form-container {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   flex-direction: row;
   gap: 36px;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.field-item-container {
+  min-width: 15rem;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 8px;
+}
+
+.qa-mobile-texts {
+  flex: 1;
+}
+
+.save-for-later-txtupdate {
+  display: flex;
+  flex-direction: row;
   align-items: center;
+  margin-top: 6.5%;
+
+@media (min-width: 651px) and (max-width: 1024px) {
+  margin-top: 4.5%;
+}
+  @media (max-width: 425px) {
+    font-size: 13px;
+  }
 
   .field-item-container {
-    min-width: 15rem;
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
+    justify-content: flex-start;
+    margin: 0;
   }
 }
 
 .form-field-label {
   font-size: 15px;
+  margin-bottom: 4px;
 }
 
 .tm-form-row {
@@ -64,24 +95,40 @@
   }
 }
 
-.save-for-later-txtupdate {
+
+.save-for-later-txtupdate .checkbox {
+  margin-top: 0;
+}
+
+.tm-form-container .field-item-container {
   display: flex;
-  flex-direction: row;
-  min-width: 2rem;
-  margin-top: 10px;
-  font-size: 16px;
-  &.checkbox-custom {
-    margin-top: -42px;
+  flex-direction: column;
+}
+
+.form-field-error {
+  color: red;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.save-for-later-txtupdate .field-item-container {
+  flex-direction: row !important;
+}
+
+
+@media (max-width: 560px) {
+  .tm-form-container {
+    flex-direction: column;
+    gap: 20px;
   }
-  @media (max-width: 425px) {
-    font-size: 13px;
+
+  .save-for-later-txtupdate {
+    margin-top: 0px;
   }
+  
+
   .field-item-container {
-    flex-direction: row;
-    gap: 8px;
-    align-items: center;
-    justify-content: flex-start;
-    margin: 0;
-    bottom: 7px;
+    min-width: auto;
+    width: 100%;
   }
 }

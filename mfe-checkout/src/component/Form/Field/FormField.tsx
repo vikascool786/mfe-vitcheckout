@@ -2,7 +2,7 @@ import React, { ReactNode } from "react";
 import "./FormField.scss";
 
 interface IFormFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label?: string;
+  label?: string | React.ReactNode;
   renderCheckBox?: ReactNode;
   required?: boolean;
   extraLabel?: string;

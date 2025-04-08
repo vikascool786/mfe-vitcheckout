@@ -109,7 +109,9 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   const paymentMethodOptions = useAtomValue(paymentMethodsAtom);
   const [portalData] = useAtom(portalApiData(shopperId));
   const [siteData] = useAtom(siteApiData(siteId));
-
+  const [hasPhoneError, setHasPhoneError] = useState<boolean>(false);
+  const [mobileRequiredMessage, setMobileRequiredMessage] =
+    useState<boolean>(false);
   const isAddressSaved = useMemo(
     () => addressList?.some((address) => address.hasAddress === 1),
     [addressList]
@@ -408,7 +410,15 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                 ) : (
                   <PaymentMethodHeading />
                 )}
-                {isAddressSaved && <TextUpdates pcid={pcid} siteId={siteId} />}
+                {isAddressSaved && 
+                 <TextUpdates 
+                  pcid={pcid} 
+                  siteId={siteId} 
+                  setHasPhoneError={setHasPhoneError}
+                  mobileRequiredMessage={mobileRequiredMessage}
+                  setMobileRequiredMessage={setMobileRequiredMessage}
+                 />
+                 }
               </div>
               <div
                 className={`right-column ${
@@ -440,6 +450,8 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                       setOrderData={setOrderData}
                       setIsAutoShipChecked={setIsAutoShipChecked}
                       isAutoShipChecked={isAutoShipChecked}
+                      hasPhoneError={hasPhoneError}
+                      setMobileRequiredMessage={setMobileRequiredMessage}
                       shippingId={
                         defaultPaymentMethod?.addressId ??
                         defaultAddress?.id ??

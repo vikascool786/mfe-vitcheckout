@@ -22,7 +22,7 @@
     border: 1px solid #000000;
     border-radius: 4px;
     font-size: 1rem;
-
+    margin: 0px;
     &:focus {
       outline: none;
       border-color: #0066cc;
@@ -41,6 +41,7 @@
     .input-container {
       padding: 0.5rem;
       font-size: 0.9rem;
+      margin: 0px;
     }
 
     label {
