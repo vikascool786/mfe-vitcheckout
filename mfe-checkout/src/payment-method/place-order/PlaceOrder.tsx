@@ -428,7 +428,6 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             )
               break;
 
-            console.log(message);
             setOrderData({
               ...order,
               shouldShowInvalidCVVMessage: message,

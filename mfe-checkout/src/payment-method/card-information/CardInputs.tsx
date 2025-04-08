@@ -38,8 +38,6 @@ export const CardInputs: React.FC<ICardInputProps> = ({
       label: `${startYear + i}`,
     }));
 
-  const currentYear = new Date().getFullYear();
-  const years = getYears(currentYear, currentYear + 10);
 
   const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let formattedValue = e.target.value.replace(/\D/g, ""); // Remove non-numeric characters
@@ -48,6 +46,25 @@ export const CardInputs: React.FC<ICardInputProps> = ({
 
     handleChange("cardInfo.number")(formattedValue);
   };
+
+  const currentYear = new Date().getFullYear();
+const years = Array.from({ length: 15 }, (_, i) => {
+  const year = currentYear + i;
+  return { value: year.toString(), label: year.toString() };
+});
+
+const currentMonth = new Date().getMonth() + 1;
+
+const getValidMonths = (selectedYear?: number | string) => {
+  const selected = parseInt(selectedYear as string, 10);
+  const startMonth = selected === currentYear ? currentMonth : 1;
+
+  return Array.from({ length: 12 - startMonth + 1 }, (_, i) => {
+    const month = i + startMonth;
+    const value = month.toString().padStart(2, "0");
+    return { value, label: value };
+  });
+};
 
   return (
     <>
@@ -91,10 +108,7 @@ export const CardInputs: React.FC<ICardInputProps> = ({
               ? values.cardInfo.expMonth.toString().padStart(2, "0")
               : new Date().getMonth() + (1).toString().padStart(2, "0") // Default to the current month
           }
-          options={[...Array(12)].map((_, i) => ({
-            value: (i + 1).toString().padStart(2, "0"),
-            label: (i + 1).toString().padStart(2, "0"),
-          }))}
+          options={getValidMonths(values.cardInfo?.expYear)}
           onChange={(value) => handleChange("cardInfo.expMonth")(value)}
           errorMessage={touched.cardInfo?.expMonth && errors.cardInfo?.expMonth}
         />
@@ -118,9 +132,8 @@ export const CardInputs: React.FC<ICardInputProps> = ({
             label="CVV"
             required
             name="cardInfo.cvv"
-            type="password"
             disablePasswordManager
-            autoComplete="off" 
+            autoComplete="off"
             data-1p-ignore data-lpignore="true" 
             data-protonpass-ignore="true"
             inputMode="numeric"
