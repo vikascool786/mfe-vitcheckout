@@ -39,6 +39,8 @@ export interface ITotal {
   couponCode?: string;
   gcDispAppliedStr?: string[]
   gcBalanceStr?: string[];
+  priceActualStr: string;
+  priceActual?:string;
 }
 
 export interface IItem {

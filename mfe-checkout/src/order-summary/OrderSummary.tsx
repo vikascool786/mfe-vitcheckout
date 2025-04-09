@@ -578,8 +578,13 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           </div>
         ) : null}
 
+        {order?.totals?.priceActualStr !== order?.totals.priceStr && <div className="order-summary-total">
+          <div>Total Amount</div>
+          <div className={"qa-total"}>{order?.totals?.priceActualStr}</div>
+        </div>}
+
         <div className="order-summary-total">
-          <div>Total Due</div>
+          <div>Total Amount Due</div>
           <div className={"qa-total"}>{order?.totals?.priceStr}</div>
         </div>
         {Number(order?.totals?.cashBack) > 0 && (
