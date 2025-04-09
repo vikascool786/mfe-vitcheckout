@@ -89,7 +89,7 @@ export const FreeShipMessage: React.FC<IShippingMessageProps> = ({
         let freeShipMessage = "";
         if (freeShipData.hasFreeShipping) {
             if (freeShipData.isFreeShipMet) {
-                freeShipMessage = "Congratulations! Your order qualifies for free shipping.";
+                freeShipMessage = "Your order qualifies for free shipping.";
             } else {
                 freeShipMessage = `Add ${freeShipData.freeShipDifference} in ${freeShipData.storeName} products for free shipping.`
             }
@@ -144,7 +144,7 @@ export const FreeShipMessage: React.FC<IShippingMessageProps> = ({
                     {freeShipPolicy.length > 0 && !freeShippingData.isFreeShipMet && (
                         <button className="free-ship-policy-btn" type="button"
                             onClick={showShippingPolicy}>
-                            view free shipping policy
+                            Continue Shopping
                         </button>
                     )}
                 </div>
@@ -166,7 +166,7 @@ export const FreeShipMessage: React.FC<IShippingMessageProps> = ({
                                 {isLoadingPolicy && (
                                     <p>Loading Market America free shipping policy...</p>
                                 )}
-                                <iframe className="free-ship-policy-iframe" src="/about-shipfree.html" width="100%"
+                                <iframe className="free-ship-policy-iframe" src="/s/*?exclusiveBrands=true" width="100%"
                                     height="500px" style={{ display: 'none' }}></iframe>
                             </div>
                         ) :
