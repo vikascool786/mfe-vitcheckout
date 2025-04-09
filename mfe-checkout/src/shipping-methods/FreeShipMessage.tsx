@@ -89,7 +89,7 @@ export const FreeShipMessage: React.FC<IShippingMessageProps> = ({
         let freeShipMessage = "";
         if (freeShipData.hasFreeShipping) {
             if (freeShipData.isFreeShipMet) {
-                freeShipMessage = "Your order qualifies for free shipping.";
+                freeShipMessage = "";
             } else {
                 freeShipMessage = `Add ${freeShipData.freeShipDifference} in ${freeShipData.storeName} products for free shipping.`
             }
@@ -142,42 +142,16 @@ export const FreeShipMessage: React.FC<IShippingMessageProps> = ({
             {freeShipMessage.length > 0 && (
                 <div className="alert-message">{freeShipMessage}
                     {freeShipPolicy.length > 0 && !freeShippingData.isFreeShipMet && (
-                        <button className="free-ship-policy-btn" type="button"
-                            onClick={showShippingPolicy}>
+                        <button
+                            className="free-ship-policy-btn"
+                            type="button"
+                            onClick={() => window.open('/s/*?exclusiveBrands=true', '_blank', 'noopener,noreferrer')}
+                            >
                             Continue Shopping
-                        </button>
+                            </button>
                     )}
                 </div>
             )}
-            {showFreeShipPolicy && (
-                <div className="overlay-wrapper">
-                    <div className="overlay-simple max-500">
-                        <button
-                            className="overlay-simple__close overlay-simple__close--dark margin-top"
-                            onClick={closeShippingPolicy}
-                        >
-                            <span className="collapse-text">Close</span>
-                            <span className="material-icons" aria-hidden="true">
-                                close
-                            </span>
-                        </button>
-                        {freeShippingData?.isMA ? (
-                            <div>
-                                {isLoadingPolicy && (
-                                    <p>Loading Market America free shipping policy...</p>
-                                )}
-                                <iframe className="free-ship-policy-iframe" src="/s/*?exclusiveBrands=true" width="100%"
-                                    height="500px" style={{ display: 'none' }}></iframe>
-                            </div>
-                        ) :
-                            (
-                                <div dangerouslySetInnerHTML={{ __html: freeShipPolicy }} />
-                            )}
-
-                    </div>
-                </div>
-            )}
-
         </div>
     );
 };
