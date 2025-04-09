@@ -687,11 +687,11 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             </div>
             {errorMessage.length > 0 && (
               <div className="error-message-order">
-                <div className="error-message-order--bold">
-                  There was an issue placing your order
-                </div>
-                <div className="error-message-order__detail">{errorMessage}</div>
+              <div className="error-message-order--bold">
+                There was an issue placing your order
               </div>
+              <div className="error-message-order__detail">{errorMessage}</div>
+            </div>
             )}
             {orderConsolidateData.oosConsolidate === 2 && (
               <div className="alert-message">

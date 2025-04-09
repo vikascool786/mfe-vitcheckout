@@ -578,7 +578,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           </div>
         ) : null}
 
-        {order?.totals?.priceActualStr !== order?.totals.priceStr && <div className="order-summary-total">
+        {order?.totals?.priceActualStr !== order?.totals.priceStr && <div className="order-summary-total pb-0">
           <div>Total Amount</div>
           <div className={"qa-total"}>{order?.totals?.priceActualStr}</div>
         </div>}

@@ -148,7 +148,7 @@ export const FreeShipMessage: React.FC<IShippingMessageProps> = ({
                             onClick={() => window.open('/s/*?exclusiveBrands=true', '_blank', 'noopener,noreferrer')}
                             >
                             Continue Shopping
-                            </button>
+                        </button>
                     )}
                 </div>
             )}

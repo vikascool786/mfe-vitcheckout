@@ -29,6 +29,9 @@
       font-size: 13px;
     }
   }
+  .pb-0 {
+    padding-bottom: 0px;
+  }
 }
 .vift-earned-cash {
   font-size: 16px;
@@ -479,10 +482,6 @@ div.order-charges-table {
 }
 
 .gift-card-apply {
-  display: flex;
-  flex: 1; 
-  margin-top: 50px;
-  justify-content: flex-end;
 
   .custom-button.secondary {
     width: 90px;
@@ -543,14 +542,36 @@ div.order-charges-table {
 
   .gift-card-apply {
     display: flex;
+    flex: 1; 
     justify-content: center;
     align-items: center;
-    margin-top: 25px;
+    margin-top: 13px;
     width: 100%;
 
     button {
       min-width: 80px;
     }
+  }
+  .field-item-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 100%;
+  }
+
+  .field-item-container {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0.3rem;
+    width: 100%;
+  }
+  .field-item-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-bottom: 1rem;
+    font-size: 16px;
+    font-weight: 400;
   }
 }
 

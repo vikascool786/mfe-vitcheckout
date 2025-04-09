@@ -43,7 +43,7 @@ const App: React.FC<AppProps> = () => {
           shopperId="YUXUeYeqzeYzUzhkYVzZhUezzwUwUmqUpVmYzjqzz"
           pcid="1918885741"
           siteId="66"
-          sessionId="3055335012"
+          sessionId="3055338706"
         />
 
         {/* vift cashback account  */}
