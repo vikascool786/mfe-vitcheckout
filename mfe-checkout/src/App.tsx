@@ -37,14 +37,34 @@ const App: React.FC<AppProps> = () => {
           sessionId="3055290977"
         /> */}
 
-        {/* for old custoemr  */}
+
+
+        {/* user with only one address - stage  */}
         <CheckoutContainer
+          cartId="cart_1302053663_W_USA_USA_ENG"
+          shopperId="UeXqXWZYzeUkjzhqYZzqqXUzXYhXqjzzxqkqzxewex"
+          pcid="1302053663"
+          siteId="66"
+          sessionId="3055335012"
+        />
+
+        {/* user with no address - dev  */}
+        {/* <CheckoutContainer
+          cartId="cart_1147815679_W_USA_USA_ENG"
+          shopperId="VZWhUYzVzWwWzzhmeYzZUpwzzVVUVqxmkeqxzxkzjh"
+          pcid="1147815679"
+          siteId="222"
+          sessionId="3055335012"
+        /> */}
+
+                {/* rob test custoemr  */}
+        {/* <CheckoutContainer
           cartId="cart_1918885741_W_USA_USA_ENG"
           shopperId="YUXUeYeqzeYzUzhkYVzZhUezzwUwUmqUpVmYzjqzz"
           pcid="1918885741"
           siteId="66"
-          sessionId="3055338706"
-        />
+          sessionId="3055335012"
+        /> */}
 
         {/* vift cashback account  */}
         {/* <CheckoutContainer
