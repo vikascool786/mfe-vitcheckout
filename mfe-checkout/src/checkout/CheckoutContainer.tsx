@@ -395,7 +395,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                   isAddressSaved={isAddressSaved}
                 />
 
-                {isAddressSaved ? (
+                {(
                   (orderHasAutoshipItems(orderData) ||
                     orderData.totals.price > 0) && (
                     <PaymentMethod
@@ -407,8 +407,6 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                       updateOrderErrorMessage={handleUpdateOrderErrorMessage}
                     />
                   )
-                ) : (
-                  <PaymentMethodHeading />
                 )}
                 {isAddressSaved && 
                  <TextUpdates 
