@@ -378,8 +378,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
     setgcState((prevState) => ({
       ...prevState,
       gcApplied: order?.userOptions?.gcNum
-      ? order?.userOptions?.gcNum?.length > 0
-      : false,
+        ? order?.userOptions?.gcNum?.length > 0
+        : false,
     }));
   }, [order?.userOptions.gcNum]);
 
@@ -429,7 +429,18 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                 ?.filter((appliedCoupon) => !hideCouponCode(appliedCoupon)) // Exclude hidden coupons
                 .map((appliedCoupon, index) => (
                   <li key={index} className="qa-cancel order-applied-coupon">
-                    {appliedCoupon}
+                    <div>
+                      {appliedCoupon}
+                      <a
+                        href={`/coupon-terms?code=${appliedCoupon}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="coupon-terms-link"
+                        style={{ marginLeft: "8px", fontSize: "12px" }}
+                      >
+                        Terms & Conditions
+                      </a>
+                    </div>
                     <Close onClick={() => handleRemoveCoupon(appliedCoupon)} />
                   </li>
                 ))}
@@ -479,16 +490,16 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               index={index}
               order={order}
             />
-        ))}
+          ))}
 
         {gcState.gcError && gcState.gcVisible && (
           <div className="error-message">{gcState.gcError}</div>
         )}
-        
+
         <div
           className="qa-link order-sub-text underlined"
-            onClick={handleApplyGiftCard}
-          >
+          onClick={handleApplyGiftCard}
+        >
           {gcState.gcVisible ? "Hide Gift Card" : "Apply Gift Card"}
         </div>
 
@@ -550,21 +561,28 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                   </div>
 
                   <div className="order-summary-row">
-                    <div> {order.totals.shipping == 0 ? "Free Shipping" : "Shipping" } </div>
+                    <div>
+                      {" "}
+                      {order.totals.shipping == 0
+                        ? "Free Shipping"
+                        : "Shipping"}{" "}
+                    </div>
                     <div className={"qa-shipping"}>
                       {store?.store?.totals?.shippingStr}
                     </div>
                   </div>
-
-
                 </div>
               );
             })}
 
-{order?.totals?.priceActualStr !== order?.totals.priceStr && <div className="order-summary-row">
-                    <div className="order-summary-row-bold">Subtotal</div>
-                    <div className={"qa-sub-totaltotal"}>{order?.totals?.priceActualStr}</div>
-                  </div>}
+        {order?.totals?.priceActualStr !== order?.totals.priceStr && (
+          <div className="order-summary-row">
+            <div className="order-summary-row">Subtotal</div>
+            <div className={"qa-sub-totaltotal"}>
+              {order?.totals?.priceActualStr}
+            </div>
+          </div>
+        )}
 
         {order?.userOptions?.applyEWallet && eWalletData?.totalCoaCBAvail && (
           <div className="order-summary-row">
@@ -584,8 +602,6 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
             <div>{order?.totals.gcAppliedStr}</div>
           </div>
         ) : null}
-
-
 
         <div className="order-summary-total">
           <div>Total Due</div>
