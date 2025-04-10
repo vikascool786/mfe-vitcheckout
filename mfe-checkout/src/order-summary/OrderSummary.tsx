@@ -519,7 +519,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                   />
 
                   <div className="order-summary-row">
-                    <div>Items Subtotal</div>
+                    <div>Items</div>
                     <div className={"qa-subtotal"}>
                       {store?.store?.totals?.priceStr}
                     </div>
@@ -543,21 +543,28 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                     </div>
                   )}
                   <div className="order-summary-row">
-                    <div>Tax Total</div>
+                    <div>Tax</div>
                     <div className={"qa-tax"}>
                       {store?.store?.totals?.taxStr}
                     </div>
                   </div>
 
                   <div className="order-summary-row">
-                    <div>Shipping</div>
+                    <div> {order.totals.shipping == 0 ? "Free Shipping" : "Shipping" } </div>
                     <div className={"qa-shipping"}>
                       {store?.store?.totals?.shippingStr}
                     </div>
                   </div>
+
+
                 </div>
               );
             })}
+
+{order?.totals?.priceActualStr !== order?.totals.priceStr && <div className="order-summary-row">
+                    <div className="order-summary-row-bold">Subtotal</div>
+                    <div className={"qa-sub-totaltotal"}>{order?.totals?.priceActualStr}</div>
+                  </div>}
 
         {order?.userOptions?.applyEWallet && eWalletData?.totalCoaCBAvail && (
           <div className="order-summary-row">
@@ -578,13 +585,10 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           </div>
         ) : null}
 
-        {order?.totals?.priceActualStr !== order?.totals.priceStr && <div className="order-summary-total pb-0">
-          <div>Total Amount</div>
-          <div className={"qa-total"}>{order?.totals?.priceActualStr}</div>
-        </div>}
+
 
         <div className="order-summary-total">
-          <div>Total Amount Due</div>
+          <div>Total Due</div>
           <div className={"qa-total"}>{order?.totals?.priceStr}</div>
         </div>
         {Number(order?.totals?.cashBack) > 0 && (
