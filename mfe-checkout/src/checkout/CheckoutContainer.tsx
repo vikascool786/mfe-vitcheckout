@@ -34,7 +34,7 @@ import {
   GET_API_ENDPOINT_BASE_URL_ONLY,
   GET_API_KEY,
   GET_SHOP_CART_URL,
-} from "../utils/urlResolverStage";
+} from "../utils/urlResolver";
 import Feedback from "./../Feedback/Feedback";
 import Checkout from "./Checkout";
 import { Notifications } from "./Notifications";
@@ -395,7 +395,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                   isAddressSaved={isAddressSaved}
                 />
 
-                {addressList.length > 0 ? (
+                {isAddressSaved ? (
                   (orderHasAutoshipItems(orderData) ||
                     orderData.totals.price > 0) && (
                     <PaymentMethod

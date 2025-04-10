@@ -431,10 +431,25 @@ div.order-charges-table {
 
 .order-applied-coupons {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   gap: 0.8rem;
   margin-top: 0.563rem;
   flex-wrap: wrap;
+}
+
+.coupon-terms-link{
+  font-weight: 400;
+  font-size: 11px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-decoration: underline;
+  text-decoration-style: solid;
+  margin-top: 3px;
+
+  a {
+    color: #000000;
+    margin-left: 0;
+  }
 }
 
 .order-applied-coupon {

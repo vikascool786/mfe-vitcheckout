@@ -378,8 +378,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
     setgcState((prevState) => ({
       ...prevState,
       gcApplied: order?.userOptions?.gcNum
-        ? order?.userOptions?.gcNum?.length > 0
-        : false,
+      ? order?.userOptions?.gcNum?.length > 0
+      : false,
     }));
   }, [order?.userOptions.gcNum]);
 
@@ -431,15 +431,15 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                   <li key={index} className="qa-cancel order-applied-coupon">
                     <div>
                       {appliedCoupon}
-                      <a
-                        href={`/coupon-terms?code=${appliedCoupon}`}
+                     <p className="coupon-terms-link">
+                     <a
+                        href={`/first_20_Off_Terms-v.xhtml`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="coupon-terms-link"
-                        style={{ marginLeft: "8px", fontSize: "12px" }}
                       >
                         Terms & Conditions
                       </a>
+                     </p>
                     </div>
                     <Close onClick={() => handleRemoveCoupon(appliedCoupon)} />
                   </li>
@@ -490,16 +490,16 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               index={index}
               order={order}
             />
-          ))}
+        ))}
 
         {gcState.gcError && gcState.gcVisible && (
           <div className="error-message">{gcState.gcError}</div>
         )}
-
+        
         <div
           className="qa-link order-sub-text underlined"
-          onClick={handleApplyGiftCard}
-        >
+            onClick={handleApplyGiftCard}
+          >
           {gcState.gcVisible ? "Hide Gift Card" : "Apply Gift Card"}
         </div>
 
@@ -574,7 +574,6 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                 </div>
               );
             })}
-
         {order?.totals?.priceActualStr !== order?.totals.priceStr && (
           <div className="order-summary-row">
             <div className="order-summary-row">Subtotal</div>

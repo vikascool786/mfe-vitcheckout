@@ -42,13 +42,13 @@ export const CreditCardValidationWatcher: React.FC<ICreditCardValidationWatcher>
                 if(isShipSameAsBill && shipAddress?.id){
                     ccFormData.addressId = shipAddress.id;
                 } else {
-                    ccFormData.first = address?.first;
-                    ccFormData.last = address?.last;
-                    ccFormData.address1 = address?.address1;
-                    ccFormData.address2 = address?.address2;
-                    ccFormData.city = address?.city;
-                    ccFormData.state = address?.state;
-                    ccFormData.zip = address?.zip;
+                    ccFormData.first = address.first;
+                    ccFormData.last = address.last;
+                    ccFormData.address1 = address.address1;
+                    ccFormData.address2 = address.address2;
+                    ccFormData.city = address.city;
+                    ccFormData.state = address.state;
+                    ccFormData.zip = address.zip;
                 }
 
                 setCreditCardFormData(ccFormData);
