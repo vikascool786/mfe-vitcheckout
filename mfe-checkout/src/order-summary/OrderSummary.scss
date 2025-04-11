@@ -277,7 +277,6 @@ div.order-charges-table {
 
   &-last {
     border-bottom: 0.5px solid #939393; // Adds bottom border
-    margin-bottom: 6px;
   }
 }
 
@@ -318,6 +317,11 @@ div.order-charges-table {
   font-weight: 500;
   line-height: 23.44px;
   padding: 10px 0px 20px 0px;
+}
+
+.order-summary-total-line {
+  border-top: 0.5px solid #939393;
+  margin-top: 6px;
 }
 
 .order-summary-cashback-container {
