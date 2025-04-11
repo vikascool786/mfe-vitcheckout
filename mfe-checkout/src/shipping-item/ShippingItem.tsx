@@ -37,6 +37,7 @@ import { getOptionStringValue } from "../utils/helpers/GetOptionStringValue";
 import { PAYPAL } from "../payment-method/PaymentType";
 import { createPaymentMethod } from "../utils/helpers/GeneratePaymentMethod";
 import { isGiftCardStoreDetail } from "../utils/StoreUtils";
+import { Spinner } from "../component/Spinner/Spinner";
 
 interface IProduct {
   imageUrl: string;
@@ -305,6 +306,7 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
   };
   return (
     <>
+    <>{isUpdating && <Spinner />}</>
       {itemError && <div className="error-message">{itemError}</div>}
       <div className="item-container">
         <div className="item-detail-container">
@@ -356,9 +358,9 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
                       disabled={isUpdating}
                     />
                   </div>
-                  {isUpdating && (
+                  {/* {isUpdating && (
                     <span className="updating-message">Updating...</span>
-                  )}
+                  )} */}
                 </div>
               )}
             </section>
