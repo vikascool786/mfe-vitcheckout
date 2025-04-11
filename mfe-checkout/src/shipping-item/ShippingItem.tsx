@@ -36,7 +36,7 @@ import { CustomDropdownField } from "../component/Form/Field/CustomDropdownField
 import { getOptionStringValue } from "../utils/helpers/GetOptionStringValue";
 import { PAYPAL } from "../payment-method/PaymentType";
 import { createPaymentMethod } from "../utils/helpers/GeneratePaymentMethod";
-import {isGiftCardStoreDetail} from "../utils/StoreUtils";
+import { isGiftCardStoreDetail } from "../utils/StoreUtils";
 
 interface IProduct {
   imageUrl: string;
@@ -162,6 +162,20 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
         setUpdateError(null);
         setItemError(null);
 
+        const autoShipData =
+          item.autoshipFreq > 0 || item.autoShipId
+            ? {
+                userOptions: {
+                  autoShipFrequency: item.autoshipFreq,
+                  ...(item.autoShipId
+                    ? {
+                        autoShipId: item.autoShipId,
+                      }
+                    : {}),
+                },
+              }
+            : {};
+
         const requestData = {
           id: cartId,
           products: [
@@ -170,6 +184,7 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
               type: "PROD",
               quantity: newQuantity,
               option: item.option,
+              ...autoShipData,
               product_hash: item.product_hash,
             },
           ],
@@ -209,13 +224,13 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
           // add paypal back if it exists in the payment methods
 
           const shouldShowPaypal =
-          orderData?.paymentMethods.some(
-            (method) =>
-              method.type.toLowerCase() === PAYPAL.name.toLowerCase()
-          ) &&
-          paymentMethods.some(
-            (method) => method.paymentMethod.typeID === PAYPAL.typeId
-          );
+            orderData?.paymentMethods.some(
+              (method) =>
+                method.type.toLowerCase() === PAYPAL.name.toLowerCase()
+            ) &&
+            paymentMethods.some(
+              (method) => method.paymentMethod.typeID === PAYPAL.typeId
+            );
 
           if (shouldShowPaypal) {
             // add paypal back if it exists in the payment methods on the 2nd last position if sezzle is present
@@ -224,9 +239,9 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
             );
 
             const paypalPayment =
-                initialPaymentMethods.find(
-                    (method) => method.paymentMethod.typeID === PAYPAL.typeId
-                ) || null;
+              initialPaymentMethods.find(
+                (method) => method.paymentMethod.typeID === PAYPAL.typeId
+              ) || null;
 
             if (sezzleIndex > -1) {
               // Clone the array to avoid mutating state directly
@@ -236,7 +251,9 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
               const insertIndex = Math.max(sezzleIndex - 1, 0);
 
               // Check if the PayPal account is already in the updatedPaymentMethods array
-              const isPaypalAlreadyAdded = updatedPaymentMethods.some(method => method.paymentMethod.accountName === PAYPAL.name);
+              const isPaypalAlreadyAdded = updatedPaymentMethods.some(
+                (method) => method.paymentMethod.accountName === PAYPAL.name
+              );
 
               if (!isPaypalAlreadyAdded && paypalPayment) {
                 updatedPaymentMethods.splice(insertIndex, 0, paypalPayment);
@@ -244,13 +261,12 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
 
               setPaymentMethods(updatedPaymentMethods);
             } else {
-              const isPaypalAlreadyAdded = paymentMethods.some(method => method.paymentMethod.accountName === PAYPAL.name);
+              const isPaypalAlreadyAdded = paymentMethods.some(
+                (method) => method.paymentMethod.accountName === PAYPAL.name
+              );
               if (isPaypalAlreadyAdded) return;
-              if(paypalPayment){
-                setPaymentMethods([
-                  ...paymentMethods,
-                  paypalPayment,
-                ])
+              if (paypalPayment) {
+                setPaymentMethods([...paymentMethods, paypalPayment]);
               }
             }
           }
@@ -303,9 +319,7 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
                   {decodeHtmlEntities(caption)}
                 </div>
 
-                { !isGiftCard && (
-                    <div>{optionStringValue()}</div>
-                )}
+                {!isGiftCard && <div>{optionStringValue()}</div>}
               </div>
 
               <div className="shippingItem-priceStr">{totals?.priceStr}</div>
@@ -350,8 +364,8 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
             </section>
             {(item.autoshipFreq > 0 || item.autoShipId) &&
               (portalData?.autoShipDiscount > 0 &&
-                isMaProduct &&
-                item.hasAutoShipDiscount ? (
+              isMaProduct &&
+              item.hasAutoShipDiscount ? (
                 <div className="item-autoship">
                   <AutoshipIcon />
                   Saving {portalData.autoShipDiscount}% with Autoship

@@ -145,7 +145,7 @@ export const FreeShipMessage: React.FC<IShippingMessageProps> = ({
                         <button
                             className="free-ship-policy-btn"
                             type="button"
-                            onClick={() => window.open('/s/*?exclusiveBrands=true', '_blank', 'noopener,noreferrer')}
+                            onClick={() => window.location.href = '/s/*?exclusiveBrands=true'}
                             >
                             Continue Shopping
                         </button>
