@@ -367,7 +367,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                       onBlur={formik.handleBlur}
                       required
                     />
-                    <div className="cvv-text">3 or 4 digits</div>
+                    <div className="cvv-text">{maxLength} digits</div>
                     {errorMessage ||
                       (formik.errors.cvv && (
                         <span className="error-message">
