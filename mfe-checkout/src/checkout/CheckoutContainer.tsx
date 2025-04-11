@@ -395,7 +395,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                   isAddressSaved={isAddressSaved}
                 />
 
-                {isAddressSaved ? (
+                {addressList.length > 0 ? (
                   (orderHasAutoshipItems(orderData) ||
                     orderData.totals.price > 0) && (
                     <PaymentMethod
