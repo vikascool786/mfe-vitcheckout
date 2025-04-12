@@ -2,14 +2,13 @@
   display: flex;
   flex-direction: row;
   padding-top: 10px;
-  gap: 8px; 
-  align-items: flex-start;
+  gap: 8px;
+  align-items: center;
 }
 
 .checkbox-container input {
   width: 21px;
   height: 21px;
-  margin-top: 2px;
 }
 
 .checkbox-sub-container {

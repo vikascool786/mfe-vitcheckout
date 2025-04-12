@@ -185,6 +185,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
             ...order.paymentMethod,
             id: paymentMethod.id,
           },
+
           billingAddress: {
             ...paymentAddress,
             id: paymentAddress?.id as number,
@@ -367,7 +368,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                       onBlur={formik.handleBlur}
                       required
                     />
-                    <div className="cvv-text">{maxLength} digits</div>
+                     <div className="cvv-text">{maxLength} digits</div>
                     {errorMessage ||
                       (formik.errors.cvv && (
                         <span className="error-message">

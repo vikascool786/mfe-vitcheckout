@@ -38,7 +38,6 @@ import { PAYPAL } from "../payment-method/PaymentType";
 import { createPaymentMethod } from "../utils/helpers/GeneratePaymentMethod";
 import { isGiftCardStoreDetail } from "../utils/StoreUtils";
 import { Spinner } from "../component/Spinner/Spinner";
-
 interface IProduct {
   imageUrl: string;
   name: string;
@@ -358,9 +357,6 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
                       disabled={isUpdating}
                     />
                   </div>
-                  {/* {isUpdating && (
-                    <span className="updating-message">Updating...</span>
-                  )} */}
                 </div>
               )}
             </section>

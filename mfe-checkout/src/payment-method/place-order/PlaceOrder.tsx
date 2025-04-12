@@ -260,42 +260,49 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
       return;
     }
 
-    const hasNewCreditCardDataToSave = (creditCardFormData?.cardInfo?.number ?? "").length > 0;
+    const hasNewCreditCardDataToSave =
+      (creditCardFormData?.cardInfo?.number ?? "").length > 0;
 
     const isOrderCoveredUnderVIFT =
-        order?.userOptions.applyEWallet && order.totals.price === 0;
+      order?.userOptions.applyEWallet && order.totals.price === 0;
 
     const isOrderCoveredByGiftCard =
-        order?.userOptions?.gcNum && order.totals.price === 0;
+      order?.userOptions?.gcNum && order.totals.price === 0;
 
-    const isCreditCardRequired = !isOrderCoveredUnderVIFT && !isOrderCoveredByGiftCard;
+    const isCreditCardRequired =
+      !isOrderCoveredUnderVIFT && !isOrderCoveredByGiftCard;
 
-    if(isCreditCardRequired && selectedPaymentMethod?.paymentMethod.id === 0){
-      if(!hasNewCreditCardDataToSave){
+    if (isCreditCardRequired && selectedPaymentMethod?.paymentMethod.id === 0) {
+      if (!hasNewCreditCardDataToSave) {
         updateOrderErrorMessage("Please complete your payment information");
         setIsLoading(false);
         return;
-      }else{
-        const saveCardResponse = await handleSaveCard(creditCardFormData, shopperId, {order});
-        if(saveCardResponse?.error){
+      } else {
+        const saveCardResponse = await handleSaveCard(
+          creditCardFormData,
+          shopperId,
+          { order }
+        );
+        if (saveCardResponse?.error) {
           updateOrderErrorMessage(saveCardResponse.error);
           setIsLoading(false);
           return;
-        } else{
-          if(saveCardResponse?.updatedOrder){
+        } else {
+          if (saveCardResponse?.updatedOrder) {
             order = saveCardResponse.updatedOrder;
             selectedPaymentMethod.isPaymentValidated = true;
           }
         }
       }
-
     }
 
     try {
-
       const excludedPaymentTypes = [48, 56, 60];
 
-      if (selectedPaymentMethod?.isEditing && selectedPaymentMethod?.paymentMethod.id !== 0) {
+      if (
+        selectedPaymentMethod?.isEditing &&
+        selectedPaymentMethod?.paymentMethod.id !== 0
+      ) {
         updateOrderErrorMessage("Please save your payment method");
         setIsLoading(false);
         return;
@@ -328,7 +335,10 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
         }
       }
 
-      if ((isOrderCoveredUnderVIFT || isOrderCoveredByGiftCard) && orderHasAutoshipItems(order || null)) {
+      if (
+        (isOrderCoveredUnderVIFT || isOrderCoveredByGiftCard) &&
+        orderHasAutoshipItems(order || null)
+      ) {
         if (
           selectedPaymentMethod?.paymentMethod.id &&
           selectedPaymentMethod.isEditing
@@ -461,7 +471,8 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
               setOrderData({
                 ...order,
                 shouldShowInvalidCVVMessage:
-                  order?.shouldShowInvalidCVVMessage === "The credit card has expired."
+                  order?.shouldShowInvalidCVVMessage ===
+                  "The credit card has expired."
                     ? order.shouldShowInvalidCVVMessage
                     : "Please check CVV",
               });
@@ -666,7 +677,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                 />
               </div>
             )}
-            <div className="checkout-place-order-text">
+            <div className="checkout-place-order-text-terms-policy">
               By clicking place order, you agree to the SHOP.COM{" "}
               <a
                 href="/info/terms-of-use"
@@ -687,11 +698,13 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             </div>
             {errorMessage.length > 0 && (
               <div className="error-message-order">
-              <div className="error-message-order--bold">
-                There was an issue placing your order
+                <div className="error-message-order--bold">
+                  There was an issue placing your order
+                </div>
+                <div className="error-message-order__detail">
+                  {errorMessage}
+                </div>
               </div>
-              <div className="error-message-order__detail">{errorMessage}</div>
-            </div>
             )}
             {orderConsolidateData.oosConsolidate === 2 && (
               <div className="alert-message">

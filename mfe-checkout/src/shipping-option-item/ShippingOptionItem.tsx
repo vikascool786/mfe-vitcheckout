@@ -61,7 +61,7 @@ export const ShippingOptionItem: React.FC<IShippingOptionItem> = ({
         </div>
 
         <div>
-          {shippingOption.total === 0 ? "Free Shipping" : `${shippingOption.totalStr}`}
+          {shippingOption.totalStr}
         </div>
       </div>
       {hasAutoship && shippingOption.isSelected && (
