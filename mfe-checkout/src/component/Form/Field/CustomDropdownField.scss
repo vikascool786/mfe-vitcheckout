@@ -10,7 +10,7 @@
   border-radius: 8px;
   transition: 0.3s ease;
 
-  .accordion {
+  .mfe-accordion {
     width: 13px !important;
     height: 14px !important;
     display: block;
@@ -29,7 +29,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 35px;
+  gap: 4px;
 }
 
 .dropdown-options {

@@ -188,27 +188,32 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
           return;
         }
 
-        const staticMethodIds = new Set(staticMethods.map((sm) => sm.paymentMethod?.id));
+        const staticMethodIds = new Set(
+          staticMethods.map((sm) => sm.paymentMethod?.id)
+        );
 
-        let paymentOptions = response.filter((paymentMethod) => !staticMethodIds.has(paymentMethod.id)) // Exclude duplicates
+        let paymentOptions = response
+          .filter((paymentMethod) => !staticMethodIds.has(paymentMethod.id)) // Exclude duplicates
           .map((paymentMethod) => {
-          const isPreferred = paymentMethod.preferred;
+            const isPreferred = paymentMethod.preferred;
 
-          if (isPreferred) {
-            staticMethods = staticMethods.map((sm) => ({
-              ...sm,
-              isSelected: false,
-            }));
-          }
-          // fetch saved cards from wallet
-          return {
-            paymentMethod,
-            // set address based on the address id
-            paymentAddress: addressMap.get(paymentMethod.addressId.toString()),
-            isVisible: isPreferred,
-            isSelected: isPreferred,
-          } as IPaymentOption;
-        });
+            if (isPreferred) {
+              staticMethods = staticMethods.map((sm) => ({
+                ...sm,
+                isSelected: false,
+              }));
+            }
+            // fetch saved cards from wallet
+            return {
+              paymentMethod,
+              // set address based on the address id
+              paymentAddress: addressMap.get(
+                paymentMethod.addressId.toString()
+              ),
+              isVisible: isPreferred,
+              isSelected: isPreferred,
+            } as IPaymentOption;
+          });
 
         const preferredPaymentMethod = paymentOptions.find(
           (option) => option.paymentMethod.preferred
@@ -354,10 +359,10 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       let filteredPaymentMethods = paymentMethods;
       //remove cc entry option
       filteredPaymentMethods = paymentMethods.filter(
-          (payment) => payment.paymentMethod.id !== 0
+        (payment) => payment.paymentMethod.id !== 0
       );
       setPaymentMethods(
-          filteredPaymentMethods.map((item) => ({
+        filteredPaymentMethods.map((item) => ({
           ...item,
           isSelected: false,
         }))
@@ -370,7 +375,10 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       handleDeselectPaymentMethodsEvent
     );
     return () => {
-      document.removeEventListener("c2pSelectedCard", handleDeselectPaymentMethodsEvent);
+      document.removeEventListener(
+        "c2pSelectedCard",
+        handleDeselectPaymentMethodsEvent
+      );
     };
   }, [paymentMethods.length]);
 
@@ -463,7 +471,12 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
 
     setShowNewCard(selectedPayment?.paymentMethod.id === 0);
 
-    if(isClick2PayCardSelected && selectedPayment && showClick2Pay && selectedPayment?.paymentMethod.typeID !== CLICK2PAY.typeId){
+    if (
+      isClick2PayCardSelected &&
+      selectedPayment &&
+      showClick2Pay &&
+      selectedPayment?.paymentMethod.typeID !== CLICK2PAY.typeId
+    ) {
       Click2PayCardLoader.deselectC2PCard();
       setIsClick2PayCardSelected(false);
     }
@@ -484,24 +497,24 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
 
   const getValidationSchema = (paymentTypeId: number) =>
     Yup.object().shape({
-    cvv: Yup.string()
-      .matches(/^\d+$/, "CVV must be numeric")
-      .test("cvv-length", function (value) {
-        const expectedLength = paymentTypeId === 1 ? 4 : 3;
+      cvv: Yup.string()
+        .matches(/^\d+$/, "CVV must be numeric")
+        .test("cvv-length", function (value) {
+          const expectedLength = paymentTypeId === 1 ? 4 : 3;
 
-        if (!value || value.length !== expectedLength) {
-          return this.createError({
-            message:
-              paymentTypeId === 1
-                ? "CVV must be 4 digits"
-                : "CVV must be 3 digits",
-          });
-        }
+          if (!value || value.length !== expectedLength) {
+            return this.createError({
+              message:
+                paymentTypeId === 1
+                  ? "CVV must be 4 digits"
+                  : "CVV must be 3 digits",
+            });
+          }
 
-        return true;
-      })
-      .required("CVV is required"),
-  });
+          return true;
+        })
+        .required("CVV is required"),
+    });
 
   const formik = useFormik({
     initialValues: {
@@ -520,14 +533,14 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     const updatedPaymentMethods = paymentMethods.map((method) =>
       method.paymentMethod.id === paymentId
         ? {
-          ...method,
-          isEditing: !method.isEditing, // Toggle editing state for the selected payment method
-        }
+            ...method,
+            isEditing: !method.isEditing, // Toggle editing state for the selected payment method
+          }
         : {
-          ...method,
-          isEditing: false,
-          isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
-        }
+            ...method,
+            isEditing: false,
+            isVisible: isMethodDefault(method), // Ensure other methods are not in editing mode
+          }
     );
     setPaymentMethods(updatedPaymentMethods);
   };
@@ -650,10 +663,10 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   };
 
   const getSavedCreditCardsFromWallet = paymentMethods.filter(
-      (pm) =>
-          pm.paymentMethod.id > 0 &&
-          creditCardTypeIds.includes(pm.paymentMethod.typeID)
-  )
+    (pm) =>
+      pm.paymentMethod.id > 0 &&
+      creditCardTypeIds.includes(pm.paymentMethod.typeID)
+  );
 
   const showShouldToggleAccordian = getSavedCreditCardsFromWallet.length > 1;
 
@@ -670,7 +683,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
               <div className="pm-show-card" onClick={toggleAccordion}>
                 <div>{isExpanded ? "Hide other cards" : "See other cards"}</div>
                 <Back
-                  className={`accordion ${isExpanded ? "open" : "close"}`}
+                  className={`mfe-accordion ${isExpanded ? "open" : "close"}`}
                 />
               </div>
             )}

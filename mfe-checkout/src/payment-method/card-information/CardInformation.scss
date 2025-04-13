@@ -54,7 +54,7 @@
   transition: max-height 0.3s ease-in-out;
 }
 
-.accordion {
+.mfe-accordion {
   cursor: pointer;
   transform-origin: center;
   align-self: center;
@@ -166,7 +166,6 @@
   }
 }
 
-
 .billing-address {
   display: flex;
   align-items: center;
@@ -184,7 +183,7 @@
   font-weight: 400;
   margin-top: 20px;
 
-  input[type=checkbox] {
+  input[type="checkbox"] {
     margin-top: 0;
   }
 }

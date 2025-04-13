@@ -312,7 +312,8 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
         if (selectedPaymentMethod?.paymentMethod.id) {
           if (
             !excludedPaymentTypes.includes(paymentTypeId) &&
-            !selectedPaymentMethod?.isPaymentValidated
+            !selectedPaymentMethod?.isPaymentValidated &&
+            selectedPaymentMethod?.isEditing
           ) {
             updateOrderErrorMessage("Please save your payment method");
             setIsLoading(false);
@@ -634,7 +635,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                     Autoship Terms and Conditions
                   </div>
                   <Back
-                    className={`qa-expand accordion ${
+                    className={`qa-expand mfe-accordion ${
                       isExpanded ? "open" : "close"
                     }`}
                     onClick={onToggleAccordion}

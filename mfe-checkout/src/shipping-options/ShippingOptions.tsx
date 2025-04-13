@@ -119,7 +119,7 @@ export const ShippingOptions: React.FC<IShippingOptions> = ({
         >
           <span className="change-shipping-method">Change Shipping Method</span>
           <Back
-            className={`qa-expand accordion ${
+            className={`qa-expand mfe-accordion ${
               isShipExpanded ? "open" : "close"
             }`}
           />

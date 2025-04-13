@@ -83,7 +83,7 @@ export const CustomDropdownField: React.FC<DropdownProps> = ({
             ? options.find((opt) => opt.value === selected)?.label
             : `Select ${label || "an option"}`}
           <Back
-            className={`accordion ${isOpen ? "open" : "close"}`}
+            className={`mfe-accordion ${isOpen ? "open" : "close"}`}
             width="13"
             height="14"
             viewBox="0 0 24 14"

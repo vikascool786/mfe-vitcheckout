@@ -87,18 +87,20 @@ const FormContent = React.memo(
     const handleCheckboxChange = useCallback(
       (e: React.ChangeEvent<HTMLInputElement>) => {
         const { checked } = e.target;
+        const phoneValue = values.phone;
         if (!checked) {
           setFieldValue("phone", "");
           setFieldError("phone", "");
           setMobileRequiredMessage(false);
           setHasPhoneError(false);
         } else {
-          setHasPhoneError(true);
+          values.phone.length !== 10 && setHasPhoneError(true);
         }
         handleChange(e);
         handleSubmit();
       },
       [
+        values.phone,
         setFieldValue,
         setFieldError,
         setMobileRequiredMessage,

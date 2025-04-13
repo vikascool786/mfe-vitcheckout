@@ -9,6 +9,7 @@
 .checkbox-container input {
   width: 21px;
   height: 21px;
+  margin: 0;
 }
 
 .checkbox-sub-container {
@@ -68,11 +69,6 @@
 }
 
 @media (max-width: 425px) {
-  .checkbox-container {
-    flex-direction: column;
-    gap: 5px;
-  }
-
   .checkbox-text {
     font-size: 12px;
   }

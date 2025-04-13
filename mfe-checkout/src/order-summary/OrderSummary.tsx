@@ -23,6 +23,7 @@ import { hideCouponCode } from "../utils/CouponUtils";
 import StoreHeading from "../component/StoreHeading";
 import { GET_API_MODE } from "../utils/helpers/urlResolvers";
 import { GiftCard } from "./GiftCard";
+import { IPaymentMethod } from "../interfaces/ShopperCart";
 
 interface IOrderSummary {
   pcid: string;
@@ -382,6 +383,34 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
       : false,
     }));
   }, [order?.userOptions.gcNum]);
+
+  // not to send payment method id if Gift card covers whole order 
+  useEffect(() => {
+    if (order?.totals?.price == 0) {
+      console.log(order?.totals?.price == 0, "order?.totals?.price");
+
+      const handlePaymentOnGCCover = async () => {
+        try {
+
+          const { id: _, ...pmId } = order?.paymentMethod || {};
+        
+          const updatedOrder = await buildOrder(
+            generateChangeStoreResponse({
+              ...order,
+              paymentMethod: pmId  as IPaymentMethod,
+            })
+          );
+          setOrder(updatedOrder.response?.success?.data);
+        } catch (error) {
+          console.error("Error while adding gift card:", error);
+        } finally {
+          setGCLoading(false);
+        }
+      };
+
+      handlePaymentOnGCCover();
+    }
+  }, [order?.totals?.price]);
 
   return (
     <div
