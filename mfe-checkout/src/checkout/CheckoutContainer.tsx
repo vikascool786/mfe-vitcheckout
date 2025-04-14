@@ -286,7 +286,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
       if (document.visibilityState === "hidden") {
         return;
       }
-      setIsLoading(false);
+      // setIsLoading(false);
     };
 
     document.addEventListener("visibilitychange", handleNavigation);
@@ -294,7 +294,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     window.location.href = url;
 
     setTimeout(() => {
-      setIsLoading(false);
+      // setIsLoading(false);
     }, 3000);
   };
 
