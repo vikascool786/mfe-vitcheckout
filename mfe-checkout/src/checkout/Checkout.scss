@@ -203,6 +203,10 @@ body {
   /* Subtle shadow for elevation */
   position: relative;
   min-height: 1.8rem;
+  @media only screen and (max-width: 560px) {
+    font-size: 12px;
+    padding: 7px 5px;
+  }
 }
 
 .error-message::before {

@@ -65,12 +65,14 @@
     &-cvv {
       display: flex;
       flex-direction: row;
-      align-items: center;
+      align-items: flex-start;
       gap: 8px;
       font-weight: 400;
       font-size: 16px;
       line-height: 18px;
-
+      &-text {
+        margin-top: 0.5rem;
+      }
       @media only screen and (max-width: 560px) {
         font-size: 12px;
         align-items: baseline;
@@ -117,7 +119,7 @@
     &-cvv-container {
       display: flex;
       flex-direction: row;
-      align-items: center;
+      align-items: flex-start;
     }
 
     &-cvv-edit {
@@ -125,6 +127,7 @@
       line-height: 21px;
       text-decoration: underline;
       font-weight: 400;
+      margin-top: 0.5rem;
       cursor: pointer;
       @media only screen and (max-width: 560px) {
         font-size: 14px;
@@ -180,6 +183,7 @@
 
   @media only screen and (max-width: 560px) {
     gap: 0px;
+    align-items: flex-start;
   }
 }
 
@@ -189,7 +193,7 @@
 
 .payment-option-select-container {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
 }
 
