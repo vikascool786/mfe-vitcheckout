@@ -462,7 +462,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                       {appliedCoupon}
                      <p className="coupon-terms-link">
                      <a
-                        href={`/first_20_Off_Terms-v.xhtml`}
+                        href={`/${appliedCoupon}.xhtml`}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
