@@ -113,7 +113,7 @@ const Checkout: React.FC<ICheckout> = ({
   const shipFormRef = useRef<HTMLFormElement>(null);
   const childRef = useRef<AddressHandler>(null);
 
-  const setLoading = useSetAtom(loadingAtom);
+  const [loading, setLoading] = useAtom(loadingAtom);
 
   useEffect(() => {
     setShopperAddressBook(buildShoppersAddressBookFromResponse(addresses));
@@ -659,6 +659,7 @@ const Checkout: React.FC<ICheckout> = ({
                       />
                       <Button
                         qaTag="qa-submit"
+                        disabled={loading}
                         label="Save & Continue"
                         btnType="primary"
                         onClick={submitForm}
@@ -668,6 +669,7 @@ const Checkout: React.FC<ICheckout> = ({
                     <div className="form-footer">
                       <Button
                         qaTag="qa-submit"
+                        disabled={loading}
                         label="Save Shipping Address & Continue"
                         btnType="primary"
                         onClick={submitForm}
