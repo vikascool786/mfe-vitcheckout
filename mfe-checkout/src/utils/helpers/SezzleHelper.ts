@@ -1,6 +1,10 @@
 import { generateOrderTrackingId } from "./GenerateOrderTrackingId";
 import { fetchOrderDetail } from "../../api/service/Order";
 
+const URL_SEARCH_KEY_CHECKOUT_TYPE = "checkoutType";
+const URL_SEARCH_KEY_STATUS = "status";
+const URL_SEARCH_VALUE_STATUS_COMPLETE = "complete";
+
 export const handleSezzleCheckout = async (
     locationSearch: string,
     checkoutSezzle: () => Promise<any>,
@@ -45,14 +49,10 @@ export const handleSezzleCheckout = async (
         }
     };
 
-    const queryParams = new URLSearchParams(locationSearch);
-    const keyCheckoutType = "checkoutType";
-    const keyStatus = "status";
-
-    const checkoutTypeValue = queryParams.get(keyCheckoutType);
-    if (checkoutTypeValue?.toLowerCase() === "sezzle") {
-        const statusValue = queryParams.get(keyStatus);
-        if (statusValue?.toLowerCase() === "complete") {
+    if (isSezzleSelectedPayment(locationSearch)) {
+        const queryParams = new URLSearchParams(locationSearch);
+        const statusValue = queryParams.get(URL_SEARCH_KEY_STATUS);
+        if (isSezzleSuccessful(locationSearch)) {
             setLoadingOrderConfirmation(true);
             try {
                 const response = await createSezzleOrder();
@@ -64,4 +64,16 @@ export const handleSezzleCheckout = async (
             console.log("no status returned");
         }
     }
+};
+
+export const isSezzleSelectedPayment = (locationSearch: string): boolean => {
+    const queryParams = new URLSearchParams(locationSearch);
+    const checkoutTypeValue = queryParams.get(URL_SEARCH_KEY_CHECKOUT_TYPE);
+    return checkoutTypeValue?.toLowerCase() === "sezzle";
+};
+
+export const isSezzleSuccessful = (locationSearch: string): boolean => {
+    const queryParams = new URLSearchParams(locationSearch);
+    const statusValue = queryParams.get(URL_SEARCH_KEY_STATUS);
+    return statusValue?.toLowerCase() === URL_SEARCH_VALUE_STATUS_COMPLETE;
 };

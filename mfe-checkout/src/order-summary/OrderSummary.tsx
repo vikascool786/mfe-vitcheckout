@@ -678,7 +678,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               <div className="order-cashback">
                 <VIFT />
                 <span className="total-cash-added">
-                  Total Cash added to your VIFT balance
+                Total Cash added to your VIFT balance
                 </span>
               </div>
               <div>{`$${formattedNumber(

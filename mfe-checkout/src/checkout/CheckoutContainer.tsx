@@ -29,7 +29,7 @@ import {
   orderHasAutoshipItems,
 } from "../utils/OrderUtils";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
-import { handleSezzleCheckout } from "../utils/helpers/SezzleHelper";
+import {handleSezzleCheckout, isSezzleSelectedPayment, isSezzleSuccessful} from "../utils/helpers/SezzleHelper";
 import {
   GET_API_ENDPOINT_BASE_URL_ONLY,
   GET_API_KEY,
@@ -117,21 +117,28 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     [addressList]
   );
 
+  const [isPlacingOrderWithThirdParty, setIsPlacingOrderWithThirdParty] = useState<boolean>(false);
+
   const addressUrl = `${apiDomain}/shopper-addressbooks/v1/${shopperId}/AddressBook?siteId=${siteId}&api_key=${apiKey}`;
   const paymentUrl = `${apiDomain}/shopper-wallets/v1/Shopper/${shopperId}/Wallet?api_key=${apiKey}`;
   const checkoutUrl = `${apiDomain}/checkout-universal/v1/checkouts?api_key=${apiKey}`;
   const fetchOrderUrl = `${apiDomain}/checkout-universal/v1/checkouts/id/${cartId}?api_key=${apiKey}`;
 
   useEffect(() => {
-    handleSezzleCheckout(
-      location.search,
-      checkoutSezzle,
-      buildOrder,
-      generateChangeStoreResponse,
-      setIsLoading,
-      confirmOrder,
-      cartId
-    );
+    if(isSezzleSelectedPayment(location.search)){
+      const isSuccessfulSezzleCallback = isSezzleSuccessful(location.search);
+      setIsPlacingOrderWithThirdParty(isSuccessfulSezzleCallback);
+      setIsLoading(isSuccessfulSezzleCallback);
+      handleSezzleCheckout(
+          location.search,
+          checkoutSezzle,
+          buildOrder,
+          generateChangeStoreResponse,
+          setIsLoading,
+          confirmOrder,
+          cartId
+      );
+    }
   }, [location.search]);
 
   useEffect(() => {
@@ -275,6 +282,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
       const errorCode = error?.data?.response?.errors?.code || "N/A";
       setOrderErrorMessage(`Detail: ${errorMessage} (code: ${errorCode})`);
     }
+    setIsPlacingOrderWithThirdParty(false);
     setIsLoading(false);
   };
 
@@ -293,9 +301,9 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
 
     window.location.href = url;
 
-    setTimeout(() => {
-      // setIsLoading(false);
-    }, 3000);
+    // setTimeout(() => {
+    //   setIsLoading(false);
+    // }, 3000);
   };
 
   useEffect(() => {
@@ -373,7 +381,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
 
   return (
     <div>
-      {isLoading && <Spinner />}
+      {(isLoading || isPlacingOrderWithThirdParty) && <Spinner />}
       {orderData && (
         <>
           <div className="qa-checkout container">

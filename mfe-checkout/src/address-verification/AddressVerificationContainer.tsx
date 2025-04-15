@@ -55,7 +55,7 @@ export const AddressVerificationContainer = forwardRef<
         ""
       );
       const candidates = response.data.response.candidates;
-      const mappedAddresses: Address[] = candidates.map((address: any) => ({
+      let mappedAddresses: Address[] = candidates.map((address: any) => ({
         first: addressEntered.first,
         last: addressEntered.last,
         address1: address.shpAddr1,
@@ -66,6 +66,11 @@ export const AddressVerificationContainer = forwardRef<
         state: address.shpState,
         phone: addressEntered.phone,
       }));
+      //prevent duplicate addresses from displaying
+      mappedAddresses = mappedAddresses.filter(
+          (addr, index, self) =>
+              self.findIndex(a => a.addressHash === addr.addressHash) === index
+      );
       setAddressList(mappedAddresses);
       setAddressSuggestions(mappedAddresses.length > 0);
 

@@ -38,6 +38,8 @@ import { getVisibleCardOptionsImages } from "../utils/helpers/GetVisibleCardImag
 import { IPaymentMethod2 } from "../interfaces/Order";
 import Click2PayCardLoader from "../payment-method-click2pay/Click2PayCardLoader";
 import { RadioButton } from "../component/RadioButton/RadioButton";
+import { isSezzleSelectedPayment } from "../utils/helpers/SezzleHelper";
+import { updatedPaymentOptionsWithSelectedType } from "../utils/types/PaymentOptionUtils";
 
 interface IPaymentMethod {
   shopperId: string;
@@ -307,6 +309,12 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         updatedPMs = [...paymentMethods, sezzlePayment];
       }
     }
+
+    if(isSezzleSelectedPayment(location.search)){
+      updatedPMs = updatedPaymentOptionsWithSelectedType(updatedPMs, SEZZLE.typeId);
+      updatePaymentTypeId(SEZZLE.typeId);
+    }
+
     setPaymentMethods(updatedPMs);
   }, [order, isPaymentsFetched]);
 
