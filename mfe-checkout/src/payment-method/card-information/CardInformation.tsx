@@ -531,9 +531,10 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                     </form>
                 ) : (
                     <div className="address-saved-text">
-                      {shippingAddress?.first} {shippingAddress?.last}{" "}
-                      {shippingAddress?.address1}
-                      {shippingAddress?.address2} {shippingAddress?.city}{" "}
+                      {shippingAddress?.first} {shippingAddress?.last},{" "}
+                      {shippingAddress?.address1},{" "}
+                      {shippingAddress?.address2 ? `${shippingAddress.address2}, ` : ""}
+                      {shippingAddress?.city},{" "}
                       {shippingAddress?.zip}
                     </div>
                 )}
