@@ -256,7 +256,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
 
   return (
     <div className="shipping-container">
-      <FormHeading title="Shipping Methods & Review Items" />
+      <FormHeading title="Shipping Methods" />
       {isAddressSaved && orderConsolidateData?.showOrderConsolidate && (
         <div className="shipping-options-container">
           <div

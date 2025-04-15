@@ -646,7 +646,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               <div className="order-cashback">
                 <Cashback />
                 <span className="order-vift-cashback-earned">
-                  VIFT Cashback earned in this order
+                  VIFT Cashback earned on this order
                 </span>
               </div>
               <div>{`${order?.totals.cashBackStr}`}</div>
