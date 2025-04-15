@@ -110,6 +110,8 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     fetchSiteFlagInfo();
   }, []);
 
+  const isMobileDevice = () => window.innerWidth <= 768;
+
   useEffect(() => {
     const fetchShoppersSavedPayments = async (
       shopperId: string,
@@ -231,6 +233,16 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
 
         if (showPayPalSelected) {
           // set paypal as selected and only show items visible which are true
+
+          // when paypal is selected and user is on mobile scroll to the end of the screen
+          if (isMobileDevice()) {
+            setTimeout(() => {
+              window.scrollTo({
+                top: document.body.scrollHeight,
+                behavior: 'smooth',
+              });
+            }, 100); // delay to wait for re-render
+          }
 
           updatedPaymentOptions = updatedPaymentOptions.map((paymentOption) => {
             if (paymentOption.paymentMethod.typeID === PAYPAL.typeId) {
