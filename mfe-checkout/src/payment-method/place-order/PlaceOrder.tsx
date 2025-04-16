@@ -700,7 +700,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             {errorMessage.length > 0 && (
               <div className="error-message-order">
                 <div className="error-message-order--bold">
-                  There was an issue placing your order
+                Please complete your payment information
                 </div>
                 <div className="error-message-order__detail">
                   {errorMessage}
