@@ -6,7 +6,6 @@ import Click2PayLogger from "./Click2PayLogger";
 import Click2PayUtil from "./Click2PayUtil";
 import Click2PayPlaceOrder from "./Click2PayPlaceOrder";
 import Click2PayEventUtil from "./Click2PayCardEventUtil";
-import Click2PayElementUtil from "./Click2PayElementUtil";
 import Click2PayCards from "./Click2PayCards";
 import Click2PayCardLoader from "./Click2PayCardLoader";
 const Click2PayNewCard = (function () {
@@ -131,11 +130,16 @@ const Click2PayNewCard = (function () {
     }
 
     function refreshCardList(c2pInstance){
+        Click2PayUtil.showSpinner(true);
         const cardsPromise = Click2PayCards.getUserCards(c2pInstance);
         cardsPromise.then(cardsResponse => {
-                Click2PayCardLoader.loadSRCCardsOnPage(cardsResponse, window.c2pInstance, true, false, false)
+            Click2PayCardLoader.loadSRCCardsOnPage(cardsResponse, window.c2pInstance, true, false, false)
+            Click2PayUtil.showSpinner(false);
             }
-        )
+        ).catch(error => {
+            Click2PayUtil.showSpinner(false);
+            Click2PayLogger.logInfo("getUserCards() failed message on card refresh: " + error);
+        })
     }
 
     function checkoutWithNewCardFailedHandler(error){

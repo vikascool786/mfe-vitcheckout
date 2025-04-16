@@ -86,6 +86,9 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   >([]);
   const [isClick2PayCardSelected, setIsClick2PayCardSelected] =
     useState<boolean>(false);
+  
+  // To check mobile width 
+  const isMobileDevice = () => window.innerWidth <= 768;
 
   useEffect(() => {
     const paymentSiteFlagList = thirdPartyPaymentFlagList().join(",");
@@ -109,8 +112,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
 
     fetchSiteFlagInfo();
   }, []);
-
-  const isMobileDevice = () => window.innerWidth <= 768;
 
   useEffect(() => {
     const fetchShoppersSavedPayments = async (
@@ -243,7 +244,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
               });
             }, 100); // delay to wait for re-render
           }
-
+          
           updatedPaymentOptions = updatedPaymentOptions.map((paymentOption) => {
             if (paymentOption.paymentMethod.typeID === PAYPAL.typeId) {
               updatePaymentTypeId(paymentOption.paymentMethod.typeID);

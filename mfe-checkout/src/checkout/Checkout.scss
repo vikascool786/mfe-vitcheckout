@@ -270,7 +270,7 @@ body {
   z-index: 1;
 }
 
-.overlay-simple {
+.checkout-overlay-simple {
   @extend %overlay-main;
 
   &--no-padding {

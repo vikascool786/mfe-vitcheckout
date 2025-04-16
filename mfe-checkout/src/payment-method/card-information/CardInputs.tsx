@@ -10,8 +10,8 @@ interface ICardInputProps {
   values: any;
   handleBlur: any;
   isEditingExistingCard: boolean;
-  saveCardToWallet: boolean;
-  setSaveCardToWallet: any;
+  saveCardToWallet?: boolean;
+  setSaveCardToWallet?: any;
   isEditing: boolean;
   errorRefs?: React.MutableRefObject<{
     [key: string]: HTMLInputElement | null;
@@ -32,7 +32,7 @@ export const CardInputs: React.FC<ICardInputProps> = ({
   errorRefs = null,
   isFromClick2Pay = false,
 }) => {
-
+ 
   const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let formattedValue = e.target.value.replace(/\D/g, ""); // Remove non-numeric characters
     if (formattedValue.length > 16)
@@ -60,8 +60,6 @@ const getValidMonths = (selectedYear?: number | string) => {
     return { value, label: value };
   });
 };
-
-
 
   return (
     <>
@@ -110,33 +108,33 @@ const getValidMonths = (selectedYear?: number | string) => {
           errorMessage={touched.cardInfo?.expMonth && errors.cardInfo?.expMonth}
         />
         <DropdownField
-  qaTag="qa-expiration-year"
-  className="form-field-half"
-  required
-  label="Expiration Year"
-  formName="cardInfo.expYear"
-  selectedValue={values.cardInfo?.expYear?.toString() || ""}
-  options={years}
-  onChange={(value) => {
-    const validMonths = getValidMonths(value);
-    const selectedMonth = values.cardInfo?.expMonth?.toString().padStart(2, "0");
+          qaTag="qa-expiration-year"
+          className="form-field-half"
+          required
+          label="Expiration Year"
+          formName="cardInfo.expYear"
+          selectedValue={values.cardInfo?.expYear?.toString() || ""}
+          options={years}
+          onChange={(value) => {
+            const validMonths = getValidMonths(value);
+            const selectedMonth = values.cardInfo?.expMonth?.toString().padStart(2, "0");
 
-    const isMonthStillValid = validMonths.some(
-      (month) => month.value === selectedMonth
-    );
+            const isMonthStillValid = validMonths.some(
+              (month) => month.value === selectedMonth
+            );
 
-    handleChange("cardInfo.expYear")(value);
+            handleChange("cardInfo.expYear")(value);
 
-    // Only update if invalid and different
-    if (!isMonthStillValid && validMonths.length > 0) {
-      const newMonth = validMonths[0]?.value;
-      if (selectedMonth !== newMonth) {
-        handleChange("cardInfo.expMonth")(newMonth);
-      }
-    }
-  }}
-  errorMessage={touched.cardInfo?.expYear && errors.cardInfo?.expYear}
-/>
+            // Only update if invalid and different
+            if (!isMonthStillValid && validMonths.length > 0) {
+              const newMonth = validMonths[0]?.value;
+              if (selectedMonth !== newMonth) {
+                handleChange("cardInfo.expMonth")(newMonth);
+              }
+            }
+          }}
+          errorMessage={touched.cardInfo?.expYear && errors.cardInfo?.expYear}
+        />
       </div>
       {isEditing ? <p className="billing-address-styles">Billing Addess</p> : null }
       {!isEditing && (

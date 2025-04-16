@@ -32,6 +32,7 @@ export interface PaymentMethod {
 export interface ShippingSelection {
   id: number;
   method: string;
+  displayMethod: string;
   total: number;
   estShipDate: string;
   estShipDisplayDate: string;

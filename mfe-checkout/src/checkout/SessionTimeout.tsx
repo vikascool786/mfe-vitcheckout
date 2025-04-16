@@ -53,7 +53,7 @@ const SessionTimeout = () => {
     return (
         showOverlay ? (
             <div className="overlay-wrapper">
-                <div className="session-timeout-container overlay-simple max-500">
+                <div className="session-timeout-container checkout-overlay-simple max-500">
                     <h2>Session Timeout</h2>
                     <p>Your session has expired, you will be returned to the shopping cart</p>
                     <Button label="Okay" btnType="primary" onClick={handleLogout} />

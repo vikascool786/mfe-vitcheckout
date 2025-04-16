@@ -301,7 +301,7 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({ pcid, order 
                                                         <div>
                                                             <button
                                                                 ref={buttonRef}
-                                                                className="overlay-simple__close overlay-simple__close--dark margin-top"
+                                                                className="checkout-overlay-simple__close overlay-simple__close--dark margin-top"
                                                                 onClick={closeLearnMoreButton}>
                                                                 <span className="collapse-text">Close</span>
                                                                 <span className="material-icons"
@@ -344,7 +344,7 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({ pcid, order 
                      click-to-pay__iframe-modal--scrollable">
                             <div>
                                 <button
-                                    className="overlay-simple__close overlay-simple__close--dark margin-top"
+                                    className="checkout-overlay-simple__close overlay-simple__close--dark margin-top"
                                     onClick={handleCloseErrorMessage}>
                                     <span className="collapse-text">Close</span>
                                     <span className="material-icons" aria-hidden="true">close</span>
@@ -386,7 +386,7 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({ pcid, order 
                          click-to-pay__iframe-modal--scrollable">
                                 <div>
                                     <button
-                                        className="overlay-simple__close overlay-simple__close--dark margin-top margin-right"
+                                        className="checkout-overlay-simple__close overlay-simple__close--dark margin-top margin-right"
                                         onClick={closeAddCardOverlay}>
                                         <span className="collapse-text">Close</span>
                                         <span className="material-icons" aria-hidden="true">close</span>
