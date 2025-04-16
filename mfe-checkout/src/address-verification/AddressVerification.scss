@@ -24,6 +24,9 @@
   gap: 4px;
   font-size: 18px;
   font-weight: 400;
+  word-break: break-word; 
+  overflow-wrap: break-word;
+  white-space: normal;
 }
 
 .nowrap {

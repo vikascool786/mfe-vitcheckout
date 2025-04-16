@@ -201,7 +201,11 @@
   font-weight: 300;
   font-size: 18px;
   line-height: 100%;
+  max-width: 100%;
   letter-spacing: 0%;
+  word-break: break-word; 
+  overflow-wrap: break-word;
+  white-space: normal; 
   @media (max-width: 425px) {
     font-size: 14px;
   }
