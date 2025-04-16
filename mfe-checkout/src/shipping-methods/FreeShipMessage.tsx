@@ -141,15 +141,6 @@ export const FreeShipMessage: React.FC<IShippingMessageProps> = ({
         <div className="free-ship-container">
             {freeShipMessage.length > 0 && (
                 <div className="alert-message">{freeShipMessage}
-                    {freeShipPolicy.length > 0 && !freeShippingData.isFreeShipMet && (
-                        <button
-                            className="free-ship-policy-btn"
-                            type="button"
-                            onClick={() => window.location.href = '/s/*?exclusiveBrands=true'}
-                            >
-                            Continue Shopping
-                        </button>
-                    )}
                 </div>
             )}
         </div>
