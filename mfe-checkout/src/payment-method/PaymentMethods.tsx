@@ -677,6 +677,16 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       setShowNewCard(false);
       setIsExpanded(false);
     }, 300);
+
+    // user on mobile and selected paypal or sezzle scroll to the end of the screen
+    if (isMobileDevice()) {
+      setTimeout(() => {
+        window.scrollTo({
+          top: document.body.scrollHeight,
+          behavior: "smooth",
+        });
+      }, 100); // delay to wait for re-render
+    }
   };
 
   const setCVVFieldValue = (cvv: string) => {
