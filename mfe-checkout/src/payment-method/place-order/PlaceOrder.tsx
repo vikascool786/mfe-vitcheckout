@@ -699,10 +699,10 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             </div>
             {errorMessage.length > 0 && (
               <div className="error-message-order">
-                <div className="error-message-order--bold">
+                {/* <div className="error-message-order--bold">
                   Please complete your payment information
-                </div>
-                <div className="error-message-order__detail">
+                </div> */}
+                <div className="error-message-order--bold">
                   {errorMessage}
                 </div>
               </div>

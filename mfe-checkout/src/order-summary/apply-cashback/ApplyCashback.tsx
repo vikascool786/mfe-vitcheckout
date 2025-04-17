@@ -94,7 +94,7 @@ export const ApplyCashback: React.FC<IApplyCashbackContainer> = ({
         </div>
       </div>
       <p className="Bottom-Text-v-Vard-apply">
-        Earn an extra 1% cash when using VIFT balance for your entire order.
+        Earn an extra 1% cash when using your VIFT balance for your entire order
       </p>
     </div>
   );
