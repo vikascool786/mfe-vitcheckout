@@ -140,8 +140,7 @@ export const FreeShipMessage: React.FC<IShippingMessageProps> = ({
     return (
         <div className="free-ship-container">
             {freeShipMessage.length > 0 && (
-                <div className="alert-message">{freeShipMessage}
-                </div>
+                <div className="alert-message">{freeShipMessage}</div>
             )}
         </div>
     );

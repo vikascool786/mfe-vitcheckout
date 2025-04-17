@@ -48,6 +48,7 @@ import { GET_API_MODE } from "../utils/helpers/urlResolvers";
 import { getShippingAddressFromAddressList } from "../utils/AddressUtils";
 import {CreditCardFormProvider} from "../component/Form/CreditCardFormContext";
 import {siteApiData} from "./siteAtom";
+import { isSuccessfulPaypalCallback } from "../utils/helpers/PaypalHelper";
 
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
@@ -138,6 +139,9 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
           confirmOrder,
           cartId
       );
+    } else if(isSuccessfulPaypalCallback(location.search)){
+      setIsPlacingOrderWithThirdParty(true);
+      setIsLoading(true);
     }
   }, [location.search]);
 
