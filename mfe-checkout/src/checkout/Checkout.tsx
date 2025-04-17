@@ -650,11 +650,11 @@ const Checkout: React.FC<ICheckout> = ({
                   </div>
 
                   {isEditAddressClicked ||
-              
                   shopperAddressBook.filter((s) => s.hasAddress)?.length > 0 ? (
                     <div className="form-footer form-footer__dual-button">
                       <Button
                         qaTag="qa-cancel"
+                        disabled={loading}
                         label="Cancel"
                         btnType="secondary"
                         onClick={onCancelClick}

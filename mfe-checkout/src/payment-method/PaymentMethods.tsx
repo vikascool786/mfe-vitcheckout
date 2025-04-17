@@ -678,7 +678,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       setIsExpanded(false);
     }, 300);
 
-    // user on mobile and selected paypal or sezzle scroll to the end of the screen
     if (isMobileDevice()) {
       setTimeout(() => {
         window.scrollTo({
