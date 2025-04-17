@@ -193,6 +193,7 @@ const Checkout: React.FC<ICheckout> = ({
         setShippingAddress(validatedAddress);
         if (isValidAddress) {
           setValidAddressEntered(isValidAddress);
+          setShowShipAddressForm(false);
           setShowAVS(false);
         } else {
           setShowAVS(true);
@@ -649,6 +650,7 @@ const Checkout: React.FC<ICheckout> = ({
                   </div>
 
                   {isEditAddressClicked ||
+              
                   shopperAddressBook.filter((s) => s.hasAddress)?.length > 0 ? (
                     <div className="form-footer form-footer__dual-button">
                       <Button
