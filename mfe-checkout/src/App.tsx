@@ -47,11 +47,11 @@ const App: React.FC<AppProps> = () => {
         /> */}
         {/* coupon testing on dev  | couponTest_09282022@yopmail.com  / testing 10OFFMA */}
         <CheckoutContainer
-          cartId="cart_1670169332_W_USA_USA_ENG"
-          shopperId="XkxqqZwpzmeUkzhqeqzZXwXzkhqhqzUzwWpmzxjkpx"
-          pcid="1670169332"
+          cartId="cart_1277134169_W_USA_USA_ENG"
+          shopperId="qwWUphqUzhpxmzhYWZzqwqZzwUkjmXwqYpmzzxhhxe"
+          pcid="1277134169"
           siteId="222"
-          sessionId="3006701405"
+          sessionId="3006702492"
         />
 
         {/* vift cashback account  */}

@@ -439,6 +439,37 @@ div.order-charges-table {
   gap: 0.8rem;
   margin-top: 0.563rem;
   flex-wrap: wrap;
+
+  &__box {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0.375rem 0.438rem;
+  }
+  &__name {
+    font-family: Roboto;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 100%;
+    letter-spacing: 0;
+  }
+  &__term-text {
+    border-top: 0.5px solid #939393;
+    padding: 0.375rem 0.438rem;
+    padding: 0.375rem 0.438rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    p {
+      font-family: Roboto;
+      font-weight: 400;
+      font-size: 11px;
+      line-height: 100%;
+      letter-spacing: 0%;
+    }
+  }
 }
 
 .coupon-terms-link {
@@ -457,11 +488,7 @@ div.order-charges-table {
 }
 
 .order-applied-coupon {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.375rem 0.438rem;
+  display: block;
   gap: 0.2rem;
   background-color: #f0f1f7;
   font-weight: 500;

@@ -18,7 +18,7 @@ export interface Order {
   shouldShowInvalidCVVMessage?: string | null;
 }
 
-interface OrderStores {
+export interface OrderStores {
   [key: string]: OrderStore;
 }
 

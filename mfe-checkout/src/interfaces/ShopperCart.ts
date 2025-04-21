@@ -28,6 +28,8 @@ export interface ITotal {
   priceStr: string;
   gcBalance: string;
   cashBackStr: string;
+  couponCode: string;
+  couponTerms: any[];
   taxStr: string;
   shippingStr: string;
   cashBackAppliedStr: string;
@@ -36,7 +38,6 @@ export interface ITotal {
   gcApplied?: number;
   gcAppliedStr?: string;
   extraCashBack: number;
-  couponCode?: string;
   gcDispAppliedStr?: string[]
   gcBalanceStr?: string[];
   priceActualStr: string;

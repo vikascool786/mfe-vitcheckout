@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import { buildOrder, changeOrder } from "../api/service/Order";
 import { useShopperEWallet } from "../api/service/ShopperEWallet";
 import { Cashback } from "../assets/svgs/Cashback";
-import { Close } from "../assets/svgs/Close";
 import { Button } from "../component/Button/Button";
 import { FormField } from "../component/Form/Field/FormField";
 import { FormHeading } from "../component/Form/Heading/FormHeading";
@@ -24,6 +23,7 @@ import StoreHeading from "../component/StoreHeading";
 import { GET_API_MODE } from "../utils/helpers/urlResolvers";
 import { GiftCard } from "./GiftCard";
 import { IPaymentMethod } from "../interfaces/ShopperCart";
+import AppliedCoupons from "./AppliedCoupons";
 
 interface IOrderSummary {
   pcid: string;
@@ -454,7 +454,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         {order?.userOptions.coupons &&
           order?.userOptions.coupons?.length > 0 && (
             <div className="order-applied-coupons">
-              {order?.userOptions.coupons
+              {/* {order?.userOptions.coupons
                 ?.filter((appliedCoupon) => !hideCouponCode(appliedCoupon)) // Exclude hidden coupons
                 .map((appliedCoupon, index) => (
                   <li key={index} className="qa-cancel order-applied-coupon">
@@ -472,7 +472,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                     </div>
                     <Close onClick={() => handleRemoveCoupon(appliedCoupon)} />
                   </li>
-                ))}
+                ))} */}
+                <AppliedCoupons stores={order?.stores} handleRemoveCoupon={handleRemoveCoupon} />
             </div>
           )}
 

@@ -719,7 +719,8 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                 isLoading
                   ? "Loading..."
                   : paymentTypeId === SEZZLE.typeId ||
-                    paymentTypeId === PAYPAL.typeId
+                    paymentTypeId === PAYPAL.typeId ||
+                    paymentTypeId === CLICK2PAY.typeId
                   ? "Pay with"
                   : "Place Order"
               }
@@ -737,6 +738,8 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                   ? "https://img.shop.com/Image/resources/checkout/Sezzle-Color-White-Logo.svg"
                   : paymentTypeId === PAYPAL.typeId
                   ? "https://img.shop.com/Image/resources/checkout/PayPal-White-Logo.svg"
+                  : paymentTypeId === CLICK2PAY.typeId
+                  ? "https://img.shop.com/Image/resources/checkout/click-to-pay-white.svg"
                   : ""
               }
             />
