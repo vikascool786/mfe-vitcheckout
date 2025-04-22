@@ -6,7 +6,7 @@ import { Cashback } from "../assets/svgs/Cashback";
 import { Button } from "../component/Button/Button";
 import { FormField } from "../component/Form/Field/FormField";
 import { FormHeading } from "../component/Form/Heading/FormHeading";
-import { orderAtom } from "../store";
+import { loadingAtom, orderAtom } from "../store";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import { getCatalogName } from "../utils/helpers/GetCatalog";
 import { ApplyCashback } from "./apply-cashback/ApplyCashback";
@@ -57,6 +57,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
 }) => {
   const [order, setOrder] = useAtom(orderAtom);
   const { eWalletData, loading, error } = useShopperEWallet(pcid);
+  const [isLoading, setIsLoading] = useAtom(loadingAtom);
   const [coupon, setCoupon] = useState<ICouponState>({
     coupon: "",
     couponError: "",
@@ -125,6 +126,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
       );
 
       try {
+        setIsLoading(true);
         const updatedOrder = await buildOrder(
           generateChangeStoreResponse({
             ...order,
@@ -138,7 +140,9 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         );
 
         setOrder(updatedOrder.response?.success?.data);
+        setIsLoading(false);
       } catch (error) {
+        setIsLoading(false);
         console.error("Error while removing coupon:", error);
       }
     }
@@ -268,6 +272,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               ? [...coupons, trimmedCoupon]
               : [trimmedCoupon];
 
+            setIsLoading(true);
             const response = await changeOrder(
               generateChangeStoreResponse({
                 ...order,
@@ -289,6 +294,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
             }
 
             setOrder(response.response.success?.data);
+            setIsLoading(false);
             setCoupon({
               coupon: "",
               couponError: "",
@@ -296,6 +302,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           }
         }
       } else {
+        setIsLoading(false);
         setCoupon({
           coupon: "",
           couponError: "Please enter coupon",
@@ -418,7 +425,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         apiMode === "localhost" ? "height-180" : "height-245"
       }`}
     >
-      {gcLoading && <Spinner />}
+      {gcLoading || isLoading && <Spinner />}
       <>
         <FormHeading title="Order Summary" />
         {!hideCashback && (
@@ -454,25 +461,6 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         {order?.userOptions.coupons &&
           order?.userOptions.coupons?.length > 0 && (
             <div className="order-applied-coupons">
-              {/* {order?.userOptions.coupons
-                ?.filter((appliedCoupon) => !hideCouponCode(appliedCoupon)) // Exclude hidden coupons
-                .map((appliedCoupon, index) => (
-                  <li key={index} className="qa-cancel order-applied-coupon">
-                    <div>
-                      {appliedCoupon}
-                     <p className="coupon-terms-link">
-                     <a
-                        href={`/${appliedCoupon}.xhtml`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Terms & Conditions
-                      </a>
-                     </p>
-                    </div>
-                    <Close onClick={() => handleRemoveCoupon(appliedCoupon)} />
-                  </li>
-                ))} */}
                 <AppliedCoupons stores={order?.stores} handleRemoveCoupon={handleRemoveCoupon} />
             </div>
           )}
