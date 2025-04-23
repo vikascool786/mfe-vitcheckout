@@ -8,8 +8,17 @@
   padding: 20px 20px 30px 20px;
   overflow-y: auto;
 
+  .order-summary__total-d { display: block; }
+  .order-summary__total-m { display: none;}
   @media only screen and (max-width: 1024px) {
     overflow-y: unset;
+
+    .order-summary__total-d {
+      display: none;
+    }
+    .order-summary__total-m {
+      display: block;
+    }
   }
 
   @media only screen and (max-width: 560px) {
