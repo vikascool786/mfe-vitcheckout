@@ -49,6 +49,7 @@ import { getShippingAddressFromAddressList } from "../utils/AddressUtils";
 import {CreditCardFormProvider} from "../component/Form/CreditCardFormContext";
 import {siteApiData} from "./siteAtom";
 import { isSuccessfulPaypalCallback } from "../utils/helpers/PaypalHelper";
+import { TotalAmount } from "./TotalAmount";
 
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
@@ -395,6 +396,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                 <Notifications
                   notificationMessages={orderNotifications || []}
                 />
+                <TotalAmount />
                 <Checkout
                   shopperId={shopperId}
                   siteId={siteId}

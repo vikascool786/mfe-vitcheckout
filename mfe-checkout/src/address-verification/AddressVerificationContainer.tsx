@@ -42,8 +42,9 @@ export const AddressVerificationContainer = forwardRef<
     verifyAddress,
   }));
 
-  const verifyAddress = async (addressEntered: Address): Promise<boolean> => {
-    let isValidAddress = true;
+  const verifyAddress = async (addressEntered: Address): Promise<{ isValidAddress: boolean; hashCode: string }> => {
+    let isValid = true;
+    let avsHashCode = "";
     setLoading(true);
     try {
       const response = await postAVS(
@@ -60,7 +61,8 @@ export const AddressVerificationContainer = forwardRef<
         last: addressEntered.last,
         address1: address.shpAddr1,
         address2: address.shpAddr2,
-        addressHash: address.addressHash,
+        addressHash: address.addressHash, //property from avs endpoint
+        hashCode: address.addressHash, // property for addressbook
         zip: address.shpPCode,
         city: address.shpCity,
         state: address.shpState,
@@ -74,15 +76,17 @@ export const AddressVerificationContainer = forwardRef<
       setAddressList(mappedAddresses);
       setAddressSuggestions(mappedAddresses.length > 0);
 
-      isValidAddress = await response.data.response.indicators
-        .validAddressIndicator;
+      const avsResponse = await response.data.response;
+      isValid = avsResponse.indicators.validAddressIndicator;
+      avsHashCode = isValid ? avsResponse.addressHash : "";
+
     } catch (err) {
       // console.log(err);
     } finally {
       setLoading(false);
       setAddressToVerify(addressEntered);
     }
-    return isValidAddress;
+    return { isValidAddress: isValid, hashCode: avsHashCode };
   };
 
   if (!showAvs) return null;

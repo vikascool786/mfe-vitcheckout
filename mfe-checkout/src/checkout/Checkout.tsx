@@ -177,11 +177,11 @@ const Checkout: React.FC<ICheckout> = ({
 
     if (childRef.current) {
       try {
-        const isValidAddress = await childRef.current.verifyAddress({
+        const { isValidAddress, hashCode } = await childRef.current.verifyAddress({
           ...addressEntered,
         });
 
-        const validatedAddress = { ...addressEntered, defaultaddr: true };
+        const validatedAddress = { ...addressEntered, hashCode: hashCode, defaultaddr: true };
 
         const updatedAddresses = [
           { ...validatedAddress, isShip: 1 }, // Set the validated address as primary

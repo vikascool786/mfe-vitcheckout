@@ -6,6 +6,7 @@ import { ShippingOptionItem } from "../shipping-option-item/ShippingOptionItem";
 import { loadingAtom, orderAtom } from "../store";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import "./ShippingOptions.scss";
+import { Back } from "../assets/svgs/Back";
 
 interface IShippingOptions {
   store: OrderStore;
@@ -111,7 +112,20 @@ export const ShippingOptions: React.FC<IShippingOptions> = ({
 
   return (
     <div className="shipping-options-container">
-      {selectedShippingMethod && (
+      {shipping.length > 1 && (
+        <div
+          className="shipping-options-container__ship_selection"
+          onClick={toggleShipSelectionAccordion}
+        >
+          <span className="change-shipping-method">Change Shipping Method</span>
+          <Back
+            className={`qa-expand mfe-accordion ${
+              isShipExpanded ? "open" : "close"
+            }`}
+          />
+        </div>
+      )}
+      {!isShipExpanded && selectedShippingMethod && (
         <div onClick={toggleShipSelectionAccordion}>
           <ShippingOptionItem
             key={selectedShippingMethod.id}
@@ -120,31 +134,26 @@ export const ShippingOptions: React.FC<IShippingOptions> = ({
             size={0}
             isSelected={true}
             hasAutoship={storeHasAutoshipItems(store)}
-            isExpanded={isShipExpanded}
-            showAccordion={shipping.length > 1}
           />
         </div>
       )}
       {isShipExpanded &&
         shipping
-          .filter((item) => item.id !== selectedShippingMethod?.id)
           .sort((a, b) => a.total - b.total)
           .map((shippingOption, index) => (
-            <div onClick={toggleShipSelectionAccordion}>
-              <ShippingOptionItem
-                key={shippingOption.id}
-                shippingOption={shippingOption}
-                index={index}
-                size={shipping.length - 1}
-                isSelected={
-                  shippingOption?.isSelected ||
-                  (index === 0 && !shipping.some((opt) => opt.isSelected))
-                }
-                onChange={() => handleChange(shippingOption.method)}
-                hasAutoship={storeHasAutoshipItems(store)}
-                isExpanded={true}
-              />
-            </div>
+            <ShippingOptionItem
+              key={shippingOption.id}
+              shippingOption={shippingOption}
+              index={index}
+              size={shipping.length - 1}
+              isSelected={
+                shippingOption?.isSelected ||
+                (index === 0 && !shipping.some((opt) => opt.isSelected))
+              }
+              onChange={() => handleChange(shippingOption.method)}
+              hasAutoship={storeHasAutoshipItems(store)}
+              isExpanded={true}
+            />
           ))}
     </div>
   );

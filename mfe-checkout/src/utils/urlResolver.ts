@@ -73,14 +73,12 @@ export const GET_PAYPAL_RETURN_URL = () => {
   const mode = GET_API_MODE();
   switch (mode) {
     case "localhost":
-      return "https://dev.shop.com/nbts/checkout/v2";
+      return "http://localhost:3011/nbts/checkout/v2";
     case "dev":
-      return "https://dev.shop.com/nbts/checkout/v2";
     case "staging":
-      return "https://staging.shop.com/nbts/checkout/v2";
     case "prod":
     default:
-      return "https://shop.com/nbts/checkout/v2";
+      return `${GET_BASE_URL}/nbts/checkout/v2`;
   }
 };
 

@@ -3,7 +3,6 @@ import { RadioButton } from "../component/RadioButton/RadioButton";
 import { ShippingSelection } from "../interfaces/ShippingMethod";
 import "./ShippingOptionItem.scss";
 import { AutoshipIcon } from "../assets/icons/Autoship";
-import { Back } from "../assets/svgs/Back";
 
 interface IShippingOption {
   shippingType: string;
@@ -21,7 +20,6 @@ interface IShippingOptionItem {
   hasAutoship: boolean;
   qaTag?: string;
   isExpanded?: boolean;
-  showAccordion?: boolean;
 }
 
 export const ShippingOptionItem: React.FC<IShippingOptionItem> = ({
@@ -33,12 +31,10 @@ export const ShippingOptionItem: React.FC<IShippingOptionItem> = ({
   hasAutoship,
   qaTag = "",
   isExpanded = false,
-  showAccordion = false,
 }) => {
   const select = isSelected ? "selected" : "";
   const isFirst = index === 0 ? "start" : "";
   const isLast = index === size ? "end" : "";
-  console.log("boo", size > 0 || !shippingOption.isSelected);
 
   return (
     <div
@@ -59,22 +55,13 @@ export const ShippingOptionItem: React.FC<IShippingOptionItem> = ({
           <div className={`shipping-option-sub-container`}>
             <div>{shippingOption.displayMethod}</div>
             <div className="shipping-option-estShipDate">
-              {shippingOption.estShipDisplayDate}
+            {shippingOption.estShipDisplayDate}
             </div>
           </div>
         </div>
 
-        <div>{shippingOption.totalStr}</div>
-        <div className="mfe-accordion-shipping-item">
-          {shippingOption.isSelected && showAccordion && (
-            <div style={{ marginLeft: "8px" }}>
-              <Back
-                className={`qa-expand mfe-accordion ${
-                  isExpanded ? "open" : "close"
-                }`}
-              />
-            </div>
-          )}
+        <div>
+          {shippingOption.totalStr}
         </div>
       </div>
       {hasAutoship && shippingOption.isSelected && (

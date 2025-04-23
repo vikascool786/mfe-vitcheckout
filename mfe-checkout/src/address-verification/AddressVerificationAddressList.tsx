@@ -29,6 +29,7 @@ export const AddressVerificationAddressList: React.FC<AppProps> = ({
             state: address.state,
             defaultaddr: true,
             zip: address.zip,
+            hashCode: address.hashCode,
         });
     };
 
