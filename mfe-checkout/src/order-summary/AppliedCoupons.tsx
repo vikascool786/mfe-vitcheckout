@@ -32,7 +32,7 @@ const AppliedCoupons: React.FC<AppliedCouponsProps> = ({ stores, handleRemoveCou
               <div className="order-applied-coupons__name">
                 {invoiceData.totals?.couponCode}
                 <p className="coupon-terms-link">
-                  <a href="#" onClick={() => toggleTerms(invoiceKey)}>
+                  <a onClick={() => toggleTerms(invoiceKey)}>
                     Terms & Conditions
                   </a>
                 </p>
