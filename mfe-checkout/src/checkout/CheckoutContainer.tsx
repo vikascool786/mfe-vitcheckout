@@ -312,7 +312,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   };
 
   useEffect(() => {
-    if (isFetchOrderComplete) {
+    if (isFetchOrderComplete && !loadingAddresses && !loadingPaymentMethods) {
       if (!order) {
         let buildOrderPayload = getInitialBuildOrderData(
           cartId,
@@ -358,7 +358,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
         setOrderNotifications(getOrderNotifications(order.response.success));
       }
     }
-  }, [isFetchOrderComplete, defaultAddress, defaultPaymentMethod]);
+  }, [isFetchOrderComplete, loadingAddresses, loadingPaymentMethods, defaultAddress, defaultPaymentMethod]);
 
   useEffect(() => {
     const currentOrderData = order ? order.response.success.data : orderData;
