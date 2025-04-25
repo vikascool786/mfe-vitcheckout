@@ -49,7 +49,6 @@ import { getShippingAddressFromAddressList } from "../utils/AddressUtils";
 import {CreditCardFormProvider} from "../component/Form/CreditCardFormContext";
 import {siteApiData} from "./siteAtom";
 import { isSuccessfulPaypalCallback } from "../utils/helpers/PaypalHelper";
-import { TotalAmount } from "./TotalAmount";
 
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
@@ -110,7 +109,8 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   const addressList = useAtomValue(addressAtom);
   const paymentMethodOptions = useAtomValue(paymentMethodsAtom);
   const [portalData] = useAtom(portalApiData(shopperId));
-  const [siteData] = useAtom(siteApiData(siteId));
+  const memorizedSiteId = useMemo(() => siteId, [siteId]);
+  const [siteData] = useAtom(siteApiData(memorizedSiteId));
   const [hasPhoneError, setHasPhoneError] = useState<boolean>(false);
   const [mobileRequiredMessage, setMobileRequiredMessage] =
     useState<boolean>(false);
@@ -396,7 +396,6 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                 <Notifications
                   notificationMessages={orderNotifications || []}
                 />
-                <TotalAmount />
                 <Checkout
                   shopperId={shopperId}
                   siteId={siteId}

@@ -38,20 +38,12 @@ const App: React.FC<AppProps> = () => {
         /> */}
 
         {/* for old custoemr  */}
-        {/* <CheckoutContainer
-          cartId="cart_1242471732_W_USA_USA_ENG"
-          shopperId="weVeVjZhzZhzYzheZmzYXVXzXmqmWWkYUjVwzeheze"
-          pcid="1242471732"
-          siteId="66"
-          sessionId="3055361378"
-        /> */}
-        {/* coupon testing on dev  | couponTest_09282022@yopmail.com  / testing 10OFFMA */}
         <CheckoutContainer
-          cartId="cart_1277134169_W_USA_USA_ENG"
-          shopperId="qwWUphqUzhpxmzhYWZzqwqZzwUkjmXwqYpmzzxhhxe"
-          pcid="1277134169"
-          siteId="222"
-          sessionId="3006702492"
+          cartId="cart_1685596366_W_USA_USA_ENG"
+          shopperId="UzWWZZjYzUZVjzhVmYzZxqXzUxjxUxYkkVYUzezphj"
+          pcid="1685596366"
+          siteId="66"
+          sessionId="3055383252"
         />
 
         {/* vift cashback account  */}

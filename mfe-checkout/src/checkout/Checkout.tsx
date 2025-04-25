@@ -12,7 +12,6 @@ import {
   useCreateShopperAddressBookEntry,
   useUpdateShopperAddressBookEntry,
 } from "../api/service/ShopperAddressBook";
-import { fetchSiteData } from "../api/service/Site";
 import { Back } from "../assets/svgs/Back";
 import { Button } from "../component/Button/Button";
 import { Checkbox } from "../component/Form/Checkbox/Checkbox";
@@ -109,7 +108,6 @@ const Checkout: React.FC<ICheckout> = ({
     return filteredAddresses;
   };
 
-  const [familyNameFirst, setFamilyNameFirst] = useState(false);
   const shipFormRef = useRef<HTMLFormElement>(null);
   const childRef = useRef<AddressHandler>(null);
 
@@ -123,19 +121,6 @@ const Checkout: React.FC<ICheckout> = ({
   const toggleAccordion = () => {
     setIsExpanded(!isExpanded);
   };
-
-  useEffect(() => {
-    const fetchSiteInfo = async () => {
-      try {
-        const response = await fetchSiteData(siteId);
-        setFamilyNameFirst(response.locale.familyNameFirst);
-      } catch (error) {
-        console.error("Failed to fetch site info:", error);
-      }
-    };
-
-    fetchSiteInfo();
-  }, []);
 
   useEffect(() => {
     const fetchCountryAndStateData = async () => {
@@ -477,13 +462,13 @@ const Checkout: React.FC<ICheckout> = ({
               {!isExpanded && (
                 <AddressDisplay
                   address={shippingAddress}
-                  familyNameFirst={familyNameFirst}
+                  familyNameFirst={siteData.locale.familyNameFirst}
                 />
               )}
               {shopperAddressBook.length > 0 && isExpanded && (
                 <AddressList
                   addressBook={shopperAddressBook}
-                  familyNameFirst={familyNameFirst}
+                  familyNameFirst={siteData.locale.familyNameFirst}
                   onSelectChange={handleAddressSelectChange}
                   onAddNewAddressClick={handleNewAddressClick}
                   onEditAddressClick={handleEditAddressClick}
@@ -516,7 +501,7 @@ const Checkout: React.FC<ICheckout> = ({
                     enableAddressSuggestions={enableAddressSuggestions}
                     country={siteData?.locale?.countryCode}
                   />
-                  {familyNameFirst ? (
+                  {siteData.locale.familyNameFirst ? (
                     <div className="form-field-container">
                       <FormField
                         qaTag="qa-last-name"
