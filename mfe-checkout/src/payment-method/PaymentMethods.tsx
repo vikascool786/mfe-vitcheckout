@@ -46,6 +46,7 @@ interface IPaymentMethod {
   cartId: string;
   siteId: string;
   pcid: string;
+  payments: IPaymentOption[];
   updatePaymentTypeId: (newValue: number) => void;
   updateOrderErrorMessage: (newMessage: string) => void;
 }
@@ -55,6 +56,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   cartId,
   siteId,
   pcid,
+  payments,
   updatePaymentTypeId,
   updateOrderErrorMessage,
 }) => {
@@ -138,7 +140,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       );
 
       try {
-        const response = await fetchShoppersPaymentMethods(shopperId);
 
         let staticMethods = paymentMethods;
 
@@ -155,38 +156,45 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         }
 
         // case when user does not have any payment methods
-        if (!response) {
+        if (!payments) {
           if (isPaymentsFetched) return;
 
-          const isSelected = paymentMethods.some(
-            (method) => method.isSelected && method.isVisible
-          );
 
-          if (isSelected) {
-            setIsPaymentsFetched(true);
-            return;
+
+          if (showPayPalSelected) {
+            staticMethods = paymentMethods.map((method) => {
+              if (method.paymentMethod.typeID === PAYPAL.typeId) {
+                updatePaymentTypeId(method.paymentMethod.typeID);
+                return { ...method, isSelected: true };
+              }
+              return { ...method, isSelected: false };
+            });
+          } else {
+            const newCard = createPaymentMethod({
+              accountName: "",
+              imageUrl: CardOptions,
+              id: 0,
+              typeID: 9,
+              addressId: 0,
+              expMonth: new Date().getMonth() + 1,
+            });
+
+            staticMethods = [
+              {
+                paymentMethod: newCard,
+                paymentAddress: {} as Address,
+                isPaymentValidated: false,
+                isSelected: true,
+                isVisible: true,
+                isEditing: true,
+              },
+              ...paymentMethods.map((method) => ({
+                ...method,
+                isSelected: false,
+              })),
+            ];
           }
-          const newCard = createPaymentMethod({
-            accountName: "",
-            imageUrl: CardOptions,
-            id: 0,
-            typeID: 9,
-            addressId: 0,
-            expMonth: new Date().getMonth() + 1,
-          });
 
-          // [new card, paypal, sezzle]
-          staticMethods = [
-            {
-              paymentMethod: newCard,
-              paymentAddress: {} as Address,
-              isPaymentValidated: false,
-              isSelected: true,
-              isVisible: true,
-              isEditing: true,
-            },
-            ...paymentMethods,
-          ];
 
           setPaymentMethods(staticMethods);
           setIsPaymentsFetched(true);
@@ -197,7 +205,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
           staticMethods.map((sm) => sm.paymentMethod?.id)
         );
 
-        let paymentOptions = response
+        let paymentOptions = payments
           .filter((paymentMethod) => !staticMethodIds.has(paymentMethod.id)) // Exclude duplicates
           .map((paymentMethod) => {
             const isPreferred = paymentMethod.preferred;
