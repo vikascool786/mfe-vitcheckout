@@ -46,7 +46,6 @@ interface IPaymentMethod {
   cartId: string;
   siteId: string;
   pcid: string;
-  payments: IPaymentOption[];
   updatePaymentTypeId: (newValue: number) => void;
   updateOrderErrorMessage: (newMessage: string) => void;
 }
@@ -56,7 +55,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   cartId,
   siteId,
   pcid,
-  payments,
   updatePaymentTypeId,
   updateOrderErrorMessage,
 }) => {
@@ -88,8 +86,8 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   >([]);
   const [isClick2PayCardSelected, setIsClick2PayCardSelected] =
     useState<boolean>(false);
-
-  // To check mobile width
+  
+  // To check mobile width 
   const isMobileDevice = () => window.innerWidth <= 768;
 
   useEffect(() => {
@@ -140,7 +138,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       );
 
       try {
-        const response = payments;
+        const response = await fetchShoppersPaymentMethods(shopperId);
 
         let staticMethods = paymentMethods;
 
@@ -156,7 +154,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
           );
         }
 
-        // Case when user does not have any payment methods
+        // case when user does not have any payment methods
         if (!response) {
           if (isPaymentsFetched) return;
 
@@ -168,40 +166,27 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
             setIsPaymentsFetched(true);
             return;
           }
+          const newCard = createPaymentMethod({
+            accountName: "",
+            imageUrl: CardOptions,
+            id: 0,
+            typeID: 9,
+            addressId: 0,
+            expMonth: new Date().getMonth() + 1,
+          });
 
-          if (showPayPalSelected) {
-            staticMethods = paymentMethods.map((method) => {
-              if (method.paymentMethod.typeID === PAYPAL.typeId) {
-                updatePaymentTypeId(method.paymentMethod.typeID);
-                return { ...method, isSelected: true };
-              }
-              return { ...method, isSelected: false };
-            });
-          } else {
-            const newCard = createPaymentMethod({
-              accountName: "",
-              imageUrl: CardOptions,
-              id: 0,
-              typeID: 9,
-              addressId: 0,
-              expMonth: new Date().getMonth() + 1,
-            });
-
-            staticMethods = [
-              {
-                paymentMethod: newCard,
-                paymentAddress: {} as Address,
-                isPaymentValidated: false,
-                isSelected: true,
-                isVisible: true,
-                isEditing: true,
-              },
-              ...paymentMethods.map((method) => ({
-                ...method,
-                isSelected: false,
-              })),
-            ];
-          }
+          // [new card, paypal, sezzle]
+          staticMethods = [
+            {
+              paymentMethod: newCard,
+              paymentAddress: {} as Address,
+              isPaymentValidated: false,
+              isSelected: true,
+              isVisible: true,
+              isEditing: true,
+            },
+            ...paymentMethods,
+          ];
 
           setPaymentMethods(staticMethods);
           setIsPaymentsFetched(true);
@@ -255,11 +240,11 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
             setTimeout(() => {
               window.scrollTo({
                 top: document.body.scrollHeight,
-                behavior: "smooth",
+                behavior: 'smooth',
               });
             }, 100); // delay to wait for re-render
           }
-
+          
           updatedPaymentOptions = updatedPaymentOptions.map((paymentOption) => {
             if (paymentOption.paymentMethod.typeID === PAYPAL.typeId) {
               updatePaymentTypeId(paymentOption.paymentMethod.typeID);
@@ -338,11 +323,8 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       }
     }
 
-    if (isSezzleSelectedPayment(location.search)) {
-      updatedPMs = updatedPaymentOptionsWithSelectedType(
-        updatedPMs,
-        SEZZLE.typeId
-      );
+    if(isSezzleSelectedPayment(location.search)){
+      updatedPMs = updatedPaymentOptionsWithSelectedType(updatedPMs, SEZZLE.typeId);
       updatePaymentTypeId(SEZZLE.typeId);
     }
 

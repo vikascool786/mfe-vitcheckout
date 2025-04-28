@@ -5,7 +5,6 @@ import { generateChangeStoreResponse } from "./GenerateChangeStoreResponse";
 import { buildOrder } from "../../api/service/Order";
 import { CreditCardFormData } from "../../component/Form/CreditCardFormContext";
 import { Order } from "../../interfaces/Order";
-import { Axios, AxiosError } from "axios";
 
 export const handleSaveCard = async (
     creditCardFormData: CreditCardFormData,
@@ -94,9 +93,6 @@ export const handleSaveCard = async (
         }
 
     } catch (error: any) {
-        if (error?.response?.data) {
-            return {error: error?.response?.data};
-        }
         return {error: "There was an issue saving your credit card information"}
     } finally {
         const section = document.getElementById("pm-main");

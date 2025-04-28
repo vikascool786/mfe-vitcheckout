@@ -416,7 +416,6 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                       shopperId={shopperId}
                       siteId={siteId}
                       pcid={pcid}
-                      payments={paymentMethods}
                       updatePaymentTypeId={setPaymentTypeId}
                       updateOrderErrorMessage={handleUpdateOrderErrorMessage}
                     />
