@@ -40,12 +40,13 @@ import { Spinner } from "../component/Spinner/Spinner";
 import { FreeShipMessage } from "./FreeShipMessage";
 import StoreHeading from "../component/StoreHeading";
 import { OrderStore } from "../interfaces/Order";
-import { isGiftCardStore } from "../utils/StoreUtils";
+import { isGiftCardStore, storeHasCustomCocktail, storeHasOOSItems } from "../utils/StoreUtils";
 import { PAYPAL } from "../payment-method/PaymentType";
 import { createPaymentMethod } from "../utils/helpers/GeneratePaymentMethod";
 import { Address } from "../interfaces/Address";
 import PaypalIcon from "../assets/images/PayPal.png";
 import SezzleIcon from "../assets/images/Sezzle.png";
+import { getFreeShipMessagesForOrder } from "../utils/FreeShipMessageUtil";
 
 interface IShippingMethodProps {
   shopperID: string;
@@ -70,6 +71,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
   const [orderNotifications, setOrderNotifications] = useAtom(
     orderNotificationsAtom
   );
+  const [freeShipMessageMap, setFreeShipMessageMap] = useState(new Map<string, string>());
 
   if (!orders) {
     return <p>Loading shipping methods...</p>;
@@ -225,6 +227,32 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
     setOrderInDataObject();
   }, [orders]);
 
+  useEffect(() => {
+    const fetchFreeShipMessages = async () => {
+      if (!orders) return;
+
+      try {
+        const messages = await getFreeShipMessagesForOrder(orders, portalData);
+        setFreeShipMessageMap(messages);
+      } catch (error) {
+        console.error("Failed to fetch free shipping messages", error);
+      }
+    };
+
+    fetchFreeShipMessages();
+  }, [orders]);
+
+  const getShipFreeMessageForStore = (
+      store: OrderStore,
+      storeKey: string,
+  )=> {
+    //shipping calc does not work with OOS prods or custom cocktail
+    if(storeHasOOSItems(store) || storeHasCustomCocktail(store)){
+      return "";
+    }
+    return freeShipMessageMap.get(store?.store?.catalogId.toString()) || ""
+  }
+
   const handleChangeOOSConsolidate = (
     oosConsolidate: number,
   ) => {
@@ -328,8 +356,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
                 store && (
                   <div key={key}>
                     <FreeShipMessage
-                      orderStore={store}
-                      portalData={portalData}
+                        freeShipMessage={getShipFreeMessageForStore(store, key)}
                     />
                     <StoreHeading
                       qaTag={"qa-catalog"}

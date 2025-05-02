@@ -140,7 +140,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       );
 
       try {
-
         let staticMethods = paymentMethods;
 
         if (!isSezzleAllowed()) {
@@ -158,8 +157,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         // case when user does not have any payment methods
         if (!payments) {
           if (isPaymentsFetched) return;
-
-
 
           if (showPayPalSelected) {
             staticMethods = paymentMethods.map((method) => {
@@ -194,7 +191,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
               })),
             ];
           }
-
 
           setPaymentMethods(staticMethods);
           setIsPaymentsFetched(true);

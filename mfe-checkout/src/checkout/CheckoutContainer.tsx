@@ -49,6 +49,7 @@ import { getShippingAddressFromAddressList } from "../utils/AddressUtils";
 import {CreditCardFormProvider} from "../component/Form/CreditCardFormContext";
 import {siteApiData} from "./siteAtom";
 import { isSuccessfulPaypalCallback } from "../utils/helpers/PaypalHelper";
+import ShippingMethodHeading from "../shipping-methods/ShippingMethodHeading";
 
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
@@ -403,10 +404,13 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                   pcid={pcid}
                 />
 
+              {addressList.length > 0 ? (
                 <ShippingMethod
                   shopperID={shopperId}
                   isAddressSaved={isAddressSaved}
-                />
+                />) : (
+                  <ShippingMethodHeading />
+              )}
 
               {addressList.length > 0 ? (
                   (orderHasAutoshipItems(orderData) ||

@@ -37,13 +37,13 @@ const App: React.FC<AppProps> = () => {
           sessionId="3055290977"
         /> */}
 
-        {/* for old custoemr  */}
+        {/* for new custoemr  */}
         <CheckoutContainer
-          cartId="cart_1685596366_W_USA_USA_ENG"
-          shopperId="UzWWZZjYzUZVjzhVmYzZxqXzUxjxUxYkkVYUzezphj"
-          pcid="1685596366"
+          cartId="cart_1027266886_W_USA_USA_ENG"
+          shopperId="UjxYwWWwzexqqzhVhxzYYpXzXmXjZzjYYXwpzkkmz"
+          pcid="1027266886"
           siteId="66"
-          sessionId="3055383252"
+          sessionId="3055396696"
         />
 
         {/* vift cashback account  */}
