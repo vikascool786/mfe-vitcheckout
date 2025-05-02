@@ -178,18 +178,7 @@ export const GET_C2P_DPAID = () => {
 };
 
 export const GET_SHOP_CART_URL = () => {
-  switch (GET_API_MODE()) {
-    case "localhost":
-      return "https://dev.shop.com/nbts/ccn_cart.xhtml";
-    case "dev":
-      return "https://dev.shop.com/nbts/ccn_cart.xhtml";
-    case "staging":
-      return "https://staging.shop.com/nbts/ccn_cart.xhtml";
-    case "prod":
-      return "https://www.shop.com/nbts/ccn_cart.xhtml";
-    default:
-      return "https://dev.shop.com/nbts/ccn_cart.xhtml";
-  }
+  return `${GET_BASE_URL}/nbts/ccn_cart.xhtml`;
 };
 
 export const GET_TOKEN_SERVICE_SHOP = () => {
