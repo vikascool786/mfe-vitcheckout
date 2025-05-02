@@ -203,6 +203,19 @@ body {
   /* Subtle shadow for elevation */
   position: relative;
   min-height: 1.8rem;
+  word-wrap: break-word;
+  white-space: normal;
+  line-height: 1.5;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+
+  .a {
+    word-break: break-word;
+    overflow-wrap: break-word;
+    text-decoration: underline;
+    color: #0645ad;
+  }
   @media only screen and (max-width: 560px) {
     font-size: 12px;
     padding: 7px 5px;
