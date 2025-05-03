@@ -29,7 +29,11 @@ import {
   orderHasAutoshipItems,
 } from "../utils/OrderUtils";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
-import {handleSezzleCheckout, isSezzleSelectedPayment, isSezzleSuccessful} from "../utils/helpers/SezzleHelper";
+import {
+  handleSezzleCheckout,
+  isSezzleSelectedPayment,
+  isSezzleSuccessful,
+} from "../utils/helpers/SezzleHelper";
 import {
   GET_API_ENDPOINT_BASE_URL_ONLY,
   GET_API_KEY,
@@ -46,8 +50,8 @@ import PaymentMethodHeading from "../payment-method/PaymentMethodHeading";
 import { TextUpdates } from "../text-updates/TextUpdates";
 import { GET_API_MODE } from "../utils/helpers/urlResolvers";
 import { getShippingAddressFromAddressList } from "../utils/AddressUtils";
-import {CreditCardFormProvider} from "../component/Form/CreditCardFormContext";
-import {siteApiData} from "./siteAtom";
+import { CreditCardFormProvider } from "../component/Form/CreditCardFormContext";
+import { siteApiData } from "./siteAtom";
 import { isSuccessfulPaypalCallback } from "../utils/helpers/PaypalHelper";
 import ShippingMethodHeading from "../shipping-methods/ShippingMethodHeading";
 
@@ -116,11 +120,12 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   const [mobileRequiredMessage, setMobileRequiredMessage] =
     useState<boolean>(false);
   const isAddressSaved = useMemo(
-    () => addressList?.some((address) => address.hasAddress === 1),
+    () => addressList.length == 1 && addressList?.some((address) => address.hasAddress === 1),
     [addressList]
   );
 
-  const [isPlacingOrderWithThirdParty, setIsPlacingOrderWithThirdParty] = useState<boolean>(false);
+  const [isPlacingOrderWithThirdParty, setIsPlacingOrderWithThirdParty] =
+    useState<boolean>(false);
 
   const addressUrl = `${apiDomain}/shopper-addressbooks/v1/${shopperId}/AddressBook?siteId=${siteId}&api_key=${apiKey}`;
   const paymentUrl = `${apiDomain}/shopper-wallets/v1/Shopper/${shopperId}/Wallet?api_key=${apiKey}`;
@@ -128,20 +133,20 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   const fetchOrderUrl = `${apiDomain}/checkout-universal/v1/checkouts/id/${cartId}?api_key=${apiKey}`;
 
   useEffect(() => {
-    if(isSezzleSelectedPayment(location.search)){
+    if (isSezzleSelectedPayment(location.search)) {
       const isSuccessfulSezzleCallback = isSezzleSuccessful(location.search);
       setIsPlacingOrderWithThirdParty(isSuccessfulSezzleCallback);
       setIsLoading(isSuccessfulSezzleCallback);
       handleSezzleCheckout(
-          location.search,
-          checkoutSezzle,
-          buildOrder,
-          generateChangeStoreResponse,
-          setIsLoading,
-          confirmOrder,
-          cartId
+        location.search,
+        checkoutSezzle,
+        buildOrder,
+        generateChangeStoreResponse,
+        setIsLoading,
+        confirmOrder,
+        cartId
       );
-    } else if(isSuccessfulPaypalCallback(location.search)){
+    } else if (isSuccessfulPaypalCallback(location.search)) {
       setIsPlacingOrderWithThirdParty(true);
       setIsLoading(true);
     }
@@ -204,9 +209,14 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
 
   const defaultAddress = useMemo(() => {
     if (addresses) {
-      return getShippingAddressFromAddressList(addresses, siteData.siteCountryCode);
+      return getShippingAddressFromAddressList(
+        addresses,
+        siteData.siteCountryCode
+      );
     }
   }, [addresses]);
+
+  console.log("addressList", addressList);
 
   const defaultPaymentMethod: IPaymentMethod = useMemo<IPaymentMethod>(
     () =>
@@ -359,7 +369,13 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
         setOrderNotifications(getOrderNotifications(order.response.success));
       }
     }
-  }, [isFetchOrderComplete, loadingAddresses, loadingPaymentMethods, defaultAddress, defaultPaymentMethod]);
+  }, [
+    isFetchOrderComplete,
+    loadingAddresses,
+    loadingPaymentMethods,
+    defaultAddress,
+    defaultPaymentMethod,
+  ]);
 
   useEffect(() => {
     const currentOrderData = order ? order.response.success.data : orderData;
@@ -392,94 +408,95 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
         <>
           <div className="qa-checkout container">
             <CreditCardFormProvider>
-            <div className="checkout-container" id="mfe-checkout-container">
-              <div className="left-column">
-                <Notifications
-                  notificationMessages={orderNotifications || []}
-                />
-                <Checkout
-                  shopperId={shopperId}
-                  siteId={siteId}
-                  addresses={addresses || []}
-                  pcid={pcid}
-                />
+              <div className="checkout-container" id="mfe-checkout-container">
+                <div className="left-column">
+                  <Notifications
+                    notificationMessages={orderNotifications || []}
+                  />
+                  <Checkout
+                    shopperId={shopperId}
+                    siteId={siteId}
+                    addresses={addresses || []}
+                    pcid={pcid}
+                  />
 
-              {addressList.length > 0 ? (
-                <ShippingMethod
-                  shopperID={shopperId}
-                  isAddressSaved={isAddressSaved}
-                />) : (
-                  <ShippingMethodHeading />
-              )}
-
-              {addressList.length > 0 ? (
-                  (orderHasAutoshipItems(orderData) ||
-                    orderData.totals.price > 0) && (
-                    <PaymentMethod
-                      cartId={cartId}
-                      shopperId={shopperId}
-                      siteId={siteId}
-                      pcid={pcid}
-                      payments={paymentMethods}
-                      updatePaymentTypeId={setPaymentTypeId}
-                      updateOrderErrorMessage={handleUpdateOrderErrorMessage}
+                  {isAddressSaved ? (
+                    <ShippingMethod
+                      shopperID={shopperId}
+                      isAddressSaved={isAddressSaved}
                     />
-                  )
-                ) : (
-                  <PaymentMethodHeading />
-                )}
-                {isAddressSaved && 
-                 <TextUpdates 
-                  pcid={pcid} 
-                  siteId={siteId} 
-                  setHasPhoneError={setHasPhoneError}
-                  mobileRequiredMessage={mobileRequiredMessage}
-                  setMobileRequiredMessage={setMobileRequiredMessage}
-                 />
-                 }
-              </div>
-              <div
-                className={`right-column ${
-                  apiMode === "localhost" ? "top-1" : "top-475"
-                }`}
-              >
-                <OrderSummary
-                  pcid={pcid}
-                  shopperId={shopperId}
-                  cartId={cartId}
-                  siteId={siteId}
-                  isAddressSaved={isAddressSaved}
-                />
+                  ) : (
+                    <ShippingMethodHeading />
+                  )}
 
-                <div className="place-order">
-                  {isAddressSaved && paymentMethodOptions && (
-                    <PlaceOrder
-                      confirmOrder={confirmOrder}
-                      isLoading={isLoading}
-                      setIsLoading={setIsLoading}
-                      errorMessage={orderErrorMessage}
-                      paymentTypeId={paymentTypeId}
-                      paymentMethods={paymentMethodOptions}
-                      shopperId={shopperId}
+                  {isAddressSaved? (
+                    (orderHasAutoshipItems(orderData) ||
+                      orderData.totals.price > 0) && (
+                      <PaymentMethod
+                        cartId={cartId}
+                        shopperId={shopperId}
+                        siteId={siteId}
+                        pcid={pcid}
+                        payments={paymentMethods}
+                        updatePaymentTypeId={setPaymentTypeId}
+                        updateOrderErrorMessage={handleUpdateOrderErrorMessage}
+                      />
+                    )
+                  ) : (
+                    <PaymentMethodHeading />
+                  )}
+                  {isAddressSaved && (
+                    <TextUpdates
+                      pcid={pcid}
                       siteId={siteId}
-                      order={orderData}
-                      updateOrderErrorMessage={handleUpdateOrderErrorMessage}
-                      billingId={defaultAddress?.id || 0}
-                      setOrderData={setOrderData}
-                      setIsAutoShipChecked={setIsAutoShipChecked}
-                      isAutoShipChecked={isAutoShipChecked}
-                      hasPhoneError={hasPhoneError}
+                      setHasPhoneError={setHasPhoneError}
+                      mobileRequiredMessage={mobileRequiredMessage}
                       setMobileRequiredMessage={setMobileRequiredMessage}
-                      shippingId={
-                        defaultPaymentMethod?.addressId ??
-                        defaultAddress?.id ??
-                        0
-                      }
                     />
                   )}
                 </div>
+                <div
+                  className={`right-column ${
+                    apiMode === "localhost" ? "top-1" : "top-475"
+                  }`}
+                >
+                  <OrderSummary
+                    pcid={pcid}
+                    shopperId={shopperId}
+                    cartId={cartId}
+                    siteId={siteId}
+                    isAddressSaved={isAddressSaved}
+                  />
+
+                  <div className="place-order">
+                    {isAddressSaved && paymentMethodOptions && (
+                      <PlaceOrder
+                        confirmOrder={confirmOrder}
+                        isLoading={isLoading}
+                        setIsLoading={setIsLoading}
+                        errorMessage={orderErrorMessage}
+                        paymentTypeId={paymentTypeId}
+                        paymentMethods={paymentMethodOptions}
+                        shopperId={shopperId}
+                        siteId={siteId}
+                        order={orderData}
+                        updateOrderErrorMessage={handleUpdateOrderErrorMessage}
+                        billingId={defaultAddress?.id || 0}
+                        setOrderData={setOrderData}
+                        setIsAutoShipChecked={setIsAutoShipChecked}
+                        isAutoShipChecked={isAutoShipChecked}
+                        hasPhoneError={hasPhoneError}
+                        setMobileRequiredMessage={setMobileRequiredMessage}
+                        shippingId={
+                          defaultPaymentMethod?.addressId ??
+                          defaultAddress?.id ??
+                          0
+                        }
+                      />
+                    )}
+                  </div>
+                </div>
               </div>
-            </div>
             </CreditCardFormProvider>
 
             <div className="place-order">

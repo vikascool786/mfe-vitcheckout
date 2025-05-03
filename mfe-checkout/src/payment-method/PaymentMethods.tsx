@@ -157,7 +157,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         // case when user does not have any payment methods
         if (!payments) {
           if (isPaymentsFetched) return;
-
+        
           if (showPayPalSelected) {
             staticMethods = paymentMethods.map((method) => {
               if (method.paymentMethod.typeID === PAYPAL.typeId) {
@@ -167,36 +167,46 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
               return { ...method, isSelected: false };
             });
           } else {
-            const newCard = createPaymentMethod({
-              accountName: "",
-              imageUrl: CardOptions,
-              id: 0,
-              typeID: 9,
-              addressId: 0,
-              expMonth: new Date().getMonth() + 1,
-            });
-
-            staticMethods = [
-              {
-                paymentMethod: newCard,
-                paymentAddress: {} as Address,
-                isPaymentValidated: false,
-                isSelected: true,
-                isVisible: true,
-                isEditing: true,
-              },
-              ...paymentMethods.map((method) => ({
+            const isNewCardAlreadyPresent = paymentMethods.some(
+              (method) => method.paymentMethod.typeID === 9 && method.paymentMethod.id === 0
+            );
+        
+            if (!isNewCardAlreadyPresent) {
+              const newCard = createPaymentMethod({
+                accountName: "",
+                imageUrl: CardOptions,
+                id: 0,
+                typeID: 9,
+                addressId: 0,
+                expMonth: new Date().getMonth() + 1,
+              });
+        
+              staticMethods = [
+                {
+                  paymentMethod: newCard,
+                  paymentAddress: {} as Address,
+                  isPaymentValidated: false,
+                  isSelected: true,
+                  isVisible: true,
+                  isEditing: true,
+                },
+                ...paymentMethods.map((method) => ({
+                  ...method,
+                  isSelected: false,
+                })),
+              ];
+            } else {
+              staticMethods = paymentMethods.map((method) => ({
                 ...method,
-                isSelected: false,
-              })),
-            ];
+                isSelected: method.paymentMethod.typeID === 9 && method.paymentMethod.id === 0,
+              }));
+            }
           }
-
+        
           setPaymentMethods(staticMethods);
           setIsPaymentsFetched(true);
           return;
         }
-
         const staticMethodIds = new Set(
           staticMethods.map((sm) => sm.paymentMethod?.id)
         );
