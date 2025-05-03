@@ -40,7 +40,11 @@ import { Spinner } from "../component/Spinner/Spinner";
 import { FreeShipMessage } from "./FreeShipMessage";
 import StoreHeading from "../component/StoreHeading";
 import { OrderStore } from "../interfaces/Order";
-import { isGiftCardStore, storeHasCustomCocktail, storeHasOOSItems } from "../utils/StoreUtils";
+import {
+  isGiftCardStore,
+  storeHasCustomCocktail,
+  storeHasOOSItems,
+} from "../utils/StoreUtils";
 import { PAYPAL } from "../payment-method/PaymentType";
 import { createPaymentMethod } from "../utils/helpers/GeneratePaymentMethod";
 import { Address } from "../interfaces/Address";
@@ -71,7 +75,9 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
   const [orderNotifications, setOrderNotifications] = useAtom(
     orderNotificationsAtom
   );
-  const [freeShipMessageMap, setFreeShipMessageMap] = useState(new Map<string, string>());
+  const [freeShipMessageMap, setFreeShipMessageMap] = useState(
+    new Map<string, string>()
+  );
 
   if (!orders) {
     return <p>Loading shipping methods...</p>;
@@ -132,8 +138,21 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
 
       await removeProductFromCart(orders.id, itemKey);
 
+      const storeKeys = Object.keys(updatedStores);
+      const doesStoreHaveOOSItems = storeKeys.some((storeKey) =>
+        storeHasOOSItems(updatedStores[storeKey] as OrderStore)
+      );
+
       const response = await buildOrder(
-        generateChangeStoreResponse(updatedOrder)
+        generateChangeStoreResponse({
+          ...updatedOrder,
+          userOptions: {
+            ...updatedOrder.userOptions,
+            oosConsolidate: doesStoreHaveOOSItems
+              ? OOS_CONSOLIDATE_SPLIT_CODE
+              : OOS_CONSOLIDATE_CODE,
+          },
+        })
       );
 
       if (response.response.errors) {
@@ -242,20 +261,15 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
     fetchFreeShipMessages();
   }, [orders]);
 
-  const getShipFreeMessageForStore = (
-      store: OrderStore,
-      storeKey: string,
-  )=> {
+  const getShipFreeMessageForStore = (store: OrderStore, storeKey: string) => {
     //shipping calc does not work with OOS prods or custom cocktail
-    if(storeHasOOSItems(store) || storeHasCustomCocktail(store)){
+    if (storeHasOOSItems(store) || storeHasCustomCocktail(store)) {
       return "";
     }
-    return freeShipMessageMap.get(store?.store?.catalogId.toString()) || ""
-  }
+    return freeShipMessageMap.get(store?.store?.catalogId.toString()) || "";
+  };
 
-  const handleChangeOOSConsolidate = (
-    oosConsolidate: number,
-  ) => {
+  const handleChangeOOSConsolidate = (oosConsolidate: number) => {
     setLoading(true);
     setOrderConsolidateData((prev) => ({
       ...prev,
@@ -288,11 +302,14 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
       {isAddressSaved && orderConsolidateData?.showOrderConsolidate && (
         <div className="shipping-options-container">
           <div
-            className={`shipping-option-container start ${orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_SPLIT_CODE
+            className={`shipping-option-container start ${
+              orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_SPLIT_CODE
                 ? "selected"
                 : ""
-              }`}
-              onClick={() => handleChangeOOSConsolidate(OOS_CONSOLIDATE_SPLIT_CODE)}
+            }`}
+            onClick={() =>
+              handleChangeOOSConsolidate(OOS_CONSOLIDATE_SPLIT_CODE)
+            }
           >
             <div className="shipping-option-wrapper">
               <div className="shipping-option-select-container">
@@ -317,11 +334,12 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
             </div>
           </div>
           <div
-            className={`shipping-option-container end ${orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_CODE
+            className={`shipping-option-container end ${
+              orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_CODE
                 ? "selected"
                 : ""
-              }`}
-              onClick={() => handleChangeOOSConsolidate(OOS_CONSOLIDATE_CODE)}
+            }`}
+            onClick={() => handleChangeOOSConsolidate(OOS_CONSOLIDATE_CODE)}
           >
             <div className="shipping-option-wrapper">
               <div className="shipping-option-select-container">
@@ -356,7 +374,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
                 store && (
                   <div key={key}>
                     <FreeShipMessage
-                        freeShipMessage={getShipFreeMessageForStore(store, key)}
+                      freeShipMessage={getShipFreeMessageForStore(store, key)}
                     />
                     <StoreHeading
                       qaTag={"qa-catalog"}
