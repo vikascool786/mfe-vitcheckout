@@ -120,7 +120,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   const [mobileRequiredMessage, setMobileRequiredMessage] =
     useState<boolean>(false);
   const isAddressSaved = useMemo(
-    () => addressList.length == 1 && addressList?.some((address) => address.hasAddress === 1),
+    () => addressList.length >= 1 && addressList?.some((address) => address.hasAddress === 1)  ,
     [addressList]
   );
 
@@ -216,7 +216,6 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     }
   }, [addresses]);
 
-  console.log("addressList", addressList);
 
   const defaultPaymentMethod: IPaymentMethod = useMemo<IPaymentMethod>(
     () =>
