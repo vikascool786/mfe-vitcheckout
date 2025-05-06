@@ -437,7 +437,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               !error &&
               eWalletData &&
               parseInt(eWalletData.totalCoaCBAvail) > 0 &&
-              order?.totals?.price > 0 && (
+              !gcState.gcApplied && (
                 <ApplyCashback cashbackData={eWalletData} siteId={siteId} />
               )}
           </>
@@ -521,12 +521,15 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           <div className="error-message">{gcState.gcError}</div>
         )}
 
-        <div
-          className="qa-link order-sub-text underlined"
-          onClick={handleApplyGiftCard}
-        >
-          {gcState.gcVisible ? "Hide Gift Card" : "Apply Gift Card"}
-        </div>
+        {!order?.userOptions.applyEWallet &&
+          order?.totals.walletAppliedStr !== order?.totals.priceActualStr && (
+            <div
+              className="qa-link order-sub-text underlined"
+              onClick={handleApplyGiftCard}
+            >
+              {gcState.gcVisible ? "Hide Gift Card" : "Apply Gift Card"}
+            </div>
+          )}
 
         {storesTotals &&
           storesTotals
