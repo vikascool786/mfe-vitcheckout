@@ -76,15 +76,26 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
       element.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
-  
+
   useEffect(() => {
+    const selectedPayment = paymentMethods.find(
+      (pm) => pm.isSelected
+    )?.paymentMethod;
+
+    if (!selectedPayment) return;
+
+    const { expMonth, expYear } = selectedPayment;
     if (
-      isCardExpired() &&
+      isCardExpired(expMonth, expYear) &&
       order?.shouldShowInvalidCVVMessage === "The credit card has expired."
     ) {
       updateCvvError("The credit card has expired.");
       scrollToPMMain();
-    } else if (!order?.isOrderValid && order?.shouldShowInvalidCVVMessage) {
+    } else if (
+      !order?.isOrderValid &&
+      order?.shouldShowInvalidCVVMessage &&
+      formik.dirty
+    ) {
       updateCvvError("CVV is required");
     } else {
       updateCvvError("");
@@ -106,8 +117,15 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   };
 
   useEffect(() => {
+    const selectedPayment = paymentMethods.find(
+      (pm) => pm.isSelected
+    )?.paymentMethod;
+
+    if (!selectedPayment) return;
+
+    const { expMonth, expYear } = selectedPayment;
     if (
-      isCardExpired() &&
+      isCardExpired(expMonth, expYear) &&
       isSelected &&
       !isThirdPartyPayment(paymentMethod.typeID)
     ) {
@@ -126,7 +144,8 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   const handlePaymentMethodEdit = () => {
     if (isSelected && paymentMethod) {
       onCardEdit(paymentMethod.id);
-      if(formik.values.cvv){ //clear out cvv if something was entered
+      if (formik.values.cvv) {
+        //clear out cvv if something was entered
         setCVVFieldValue("");
       }
     }
@@ -167,7 +186,6 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     };
 
     try {
-
       // Prevent re-validating if already validated
       if (isPaymentValidated) {
         setLoading(false);
@@ -178,7 +196,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
 
       // Update order with validated payment method -
       // AI-110718 only call this if the payment method has been updated, build order takes too long when only cvv is entered
-      if(!order?.paymentMethod?.id || hasPaymentChanged){
+      if (!order?.paymentMethod?.id || hasPaymentChanged) {
         const updatedOrder = generateChangeStoreResponse({
           ...order,
           paymentMethod: {
@@ -203,7 +221,8 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
       // Reset all payment methods, only keep the validated one
       const updatedPaymentMethods = paymentMethods.map((method) => ({
         ...method,
-        isSelected: method?.paymentMethod.id === paymentOption?.paymentMethod.id,
+        isSelected:
+          method?.paymentMethod.id === paymentOption?.paymentMethod.id,
         isPaymentValidated:
           method.paymentMethod.id === paymentOption?.paymentMethod.id,
       }));
@@ -216,7 +235,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     } catch (error) {
       console.log(error);
       setOrder({ ...order, isOrderValid: false });
-      setErrorMessage("Something went wrong, please try again."); 
+      setErrorMessage("Something went wrong, please try again.");
     }
 
     setLoading(false);
@@ -238,8 +257,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     onAddNewCards(updatedPaymentOptions);
   };
 
-  const isCardExpired = () => {
-    const { expMonth, expYear } = paymentMethod;
+  const isCardExpired = (expMonth: number, expYear: number) => {
     if (!expMonth || !expYear) {
       return false;
     }
@@ -261,8 +279,9 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
       id={`[id=${paymentMethod.id}]`}
     >
       <div
-        className={`payment-option-select-container ${isEditing ? "form-mode" : ""
-          }`}
+        className={`payment-option-select-container ${
+          isEditing ? "form-mode" : ""
+        }`}
       >
         <div className="payment-option-sub-container">
           <RadioButton
@@ -356,9 +375,9 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                             (pm) =>
                               pm.paymentMethod.id === paymentMethod.id
                                 ? {
-                                  ...pm,
-                                  isPaymentValidated: false,
-                                }
+                                    ...pm,
+                                    isPaymentValidated: false,
+                                  }
                                 : pm
                           );
 
@@ -368,7 +387,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                       onBlur={formik.handleBlur}
                       required
                     />
-                     <div className="cvv-text">{maxLength} digits</div>
+                    <div className="cvv-text">{maxLength} digits</div>
                     {errorMessage ||
                       (formik.errors.cvv && (
                         <span className="error-message">
