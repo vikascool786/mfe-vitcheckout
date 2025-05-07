@@ -4,7 +4,7 @@ import SezzleIcon from "../assets/images/Sezzle.png";
 import { Address } from "../interfaces/Address";
 import { Order } from "../interfaces/Order";
 import { IPaymentMethod } from "../interfaces/PaymentMethod";
-import { PAYPAL, SEZZLE } from "../payment-method/PaymentType";
+import { PAYPAL, PAYPAL_RECURRING, SEZZLE } from "../payment-method/PaymentType";
 import { createPaymentMethod } from "../utils/helpers/GeneratePaymentMethod";
 
 export interface IPaymentOption {
@@ -24,6 +24,18 @@ export const initialPaymentMethods: IPaymentOption[] = [
       typeID: PAYPAL.typeId,
       imageUrl: PaypalIcon,
       id: -1001,
+    }),
+    paymentAddress: {} as Address,
+    isPaymentValidated: false,
+    isSelected: false,
+    isVisible: true,
+  },
+  {
+    paymentMethod: createPaymentMethod({
+      accountName: PAYPAL_RECURRING.name,
+      typeID: PAYPAL_RECURRING.typeId,
+      imageUrl: PaypalIcon,
+      id: -1003,
     }),
     paymentAddress: {} as Address,
     isPaymentValidated: false,

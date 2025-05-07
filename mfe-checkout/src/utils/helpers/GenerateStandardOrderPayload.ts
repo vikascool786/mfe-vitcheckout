@@ -17,7 +17,7 @@ export const generateStandardOrderPayload = (cartId: string, countryCode: string
             deliveryDate: "",
             signatureRequired: false,
             oosConsolidate: 3,
-            userSessionId: ""
+            userSessionID: ""
         },
     };
 };

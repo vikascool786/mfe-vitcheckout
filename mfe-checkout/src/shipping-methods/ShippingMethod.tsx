@@ -17,6 +17,7 @@ import {
 import { ShippingItem } from "../shipping-item/ShippingItem";
 import { ShippingOptions } from "../shipping-options/ShippingOptions";
 import {
+  initialPaymentMethods,
   loadingAtom,
   orderAtom,
   orderNotificationsAtom,
@@ -40,12 +41,8 @@ import { Spinner } from "../component/Spinner/Spinner";
 import { FreeShipMessage } from "./FreeShipMessage";
 import StoreHeading from "../component/StoreHeading";
 import { OrderStore } from "../interfaces/Order";
-import {
-  isGiftCardStore,
-  storeHasCustomCocktail,
-  storeHasOOSItems,
-} from "../utils/StoreUtils";
-import { PAYPAL } from "../payment-method/PaymentType";
+import { isGiftCardStore, storeHasCustomCocktail, storeHasOOSItems } from "../utils/StoreUtils";
+import {isPaypalPayment, PAYPAL, PAYPAL_RECURRING} from "../payment-method/PaymentType";
 import { createPaymentMethod } from "../utils/helpers/GeneratePaymentMethod";
 import { Address } from "../interfaces/Address";
 import PaypalIcon from "../assets/images/PayPal.png";
@@ -75,9 +72,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
   const [orderNotifications, setOrderNotifications] = useAtom(
     orderNotificationsAtom
   );
-  const [freeShipMessageMap, setFreeShipMessageMap] = useState(
-    new Map<string, string>()
-  );
+  const [freeShipMessageMap, setFreeShipMessageMap] = useState(new Map<string, string>());
 
   if (!orders) {
     return <p>Loading shipping methods...</p>;
@@ -138,22 +133,8 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
 
       await removeProductFromCart(orders.id, itemKey);
 
-      const orderConsolidateData = getOrderConsolidateData(orders);
-      // send oosConsolidate when current oosConsolidate is split and showOrderConsolidate is true
-      const isOOSConsolidateSplit =
-        orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_SPLIT_CODE &&
-        orderConsolidateData.showOrderConsolidate;
-
       const response = await buildOrder(
-        generateChangeStoreResponse({
-          ...updatedOrder,
-          userOptions: {
-            ...updatedOrder.userOptions,
-            oosConsolidate: isOOSConsolidateSplit
-              ? OOS_CONSOLIDATE_SPLIT_CODE
-              : OOS_CONSOLIDATE_CODE,
-          },
-        })
+        generateChangeStoreResponse(updatedOrder)
       );
 
       if (response.response.errors) {
@@ -165,10 +146,20 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
       // add paypal back if it exists in the payment methods
 
       const shouldShowPaypal = orderData?.paymentMethods.some(
-        (method) => method.type.toLowerCase() === PAYPAL.name.toLowerCase()
+        (method) => isPaypalPayment(method.typeID)
       );
 
       if (shouldShowPaypal) {
+        const isPaypalRecurring = orderData?.paymentMethods.some(
+            (method) =>
+                method.typeID === PAYPAL_RECURRING.typeId
+        );
+
+        const paypalPayment =
+            initialPaymentMethods.find(
+                (method) => method.paymentMethod.typeID === (isPaypalRecurring ? PAYPAL_RECURRING.typeId : PAYPAL.typeId)
+            ) || null;
+
         const sezzleIndex = paymentMethods.findIndex(
           (method) =>
             method.paymentMethod.accountName.toLowerCase() === "sezzle"
@@ -179,7 +170,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
         // Remove existing PayPal if present
         const existingPayPalIndex = updatedPaymentMethods.findIndex(
           (method) =>
-            method.paymentMethod.accountName.toLowerCase() === "paypal"
+            isPaypalPayment(method.paymentMethod.typeID)
         );
 
         if (existingPayPalIndex > -1) {
@@ -199,31 +190,13 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
               ? Math.max(newSezzleIndex - 1, updatedPaymentMethods.length - 1)
               : 1;
 
-          updatedPaymentMethods.splice(insertIndex, 0, {
-            paymentMethod: createPaymentMethod({
-              accountName: PAYPAL.name,
-              typeID: PAYPAL.typeId,
-              imageUrl: PaypalIcon,
-              id: -1001,
-            }),
-            paymentAddress: {} as Address,
-            isPaymentValidated: false,
-            isSelected: false,
-            isVisible: true,
-          });
+          if(paypalPayment){
+            updatedPaymentMethods.splice(insertIndex, 0, paypalPayment);
+          }
         } else {
-          updatedPaymentMethods.push({
-            paymentMethod: createPaymentMethod({
-              accountName: PAYPAL.name,
-              typeID: PAYPAL.typeId,
-              imageUrl: PaypalIcon,
-              id: -1001,
-            }),
-            paymentAddress: {} as Address,
-            isPaymentValidated: false,
-            isSelected: false,
-            isVisible: true,
-          });
+          if(paypalPayment){
+            updatedPaymentMethods.push(paypalPayment);
+          }
         }
 
         setPaymentMethods(updatedPaymentMethods);
@@ -262,15 +235,20 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
     fetchFreeShipMessages();
   }, [orders]);
 
-  const getShipFreeMessageForStore = (store: OrderStore, storeKey: string) => {
+  const getShipFreeMessageForStore = (
+      store: OrderStore,
+      storeKey: string,
+  )=> {
     //shipping calc does not work with OOS prods or custom cocktail
-    if (storeHasOOSItems(store) || storeHasCustomCocktail(store)) {
+    if(storeHasOOSItems(store) || storeHasCustomCocktail(store)){
       return "";
     }
-    return freeShipMessageMap.get(store?.store?.catalogId.toString()) || "";
-  };
+    return freeShipMessageMap.get(store?.store?.catalogId.toString()) || ""
+  }
 
-  const handleChangeOOSConsolidate = (oosConsolidate: number) => {
+  const handleChangeOOSConsolidate = (
+    oosConsolidate: number,
+  ) => {
     setLoading(true);
     setOrderConsolidateData((prev) => ({
       ...prev,
@@ -303,14 +281,11 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
       {isAddressSaved && orderConsolidateData?.showOrderConsolidate && (
         <div className="shipping-options-container">
           <div
-            className={`shipping-option-container start ${
-              orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_SPLIT_CODE
+            className={`shipping-option-container start ${orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_SPLIT_CODE
                 ? "selected"
                 : ""
-            }`}
-            onClick={() =>
-              handleChangeOOSConsolidate(OOS_CONSOLIDATE_SPLIT_CODE)
-            }
+              }`}
+              onClick={() => handleChangeOOSConsolidate(OOS_CONSOLIDATE_SPLIT_CODE)}
           >
             <div className="shipping-option-wrapper">
               <div className="shipping-option-select-container">
@@ -335,12 +310,11 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
             </div>
           </div>
           <div
-            className={`shipping-option-container end ${
-              orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_CODE
+            className={`shipping-option-container end ${orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_CODE
                 ? "selected"
                 : ""
-            }`}
-            onClick={() => handleChangeOOSConsolidate(OOS_CONSOLIDATE_CODE)}
+              }`}
+              onClick={() => handleChangeOOSConsolidate(OOS_CONSOLIDATE_CODE)}
           >
             <div className="shipping-option-wrapper">
               <div className="shipping-option-select-container">
@@ -375,7 +349,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
                 store && (
                   <div key={key}>
                     <FreeShipMessage
-                      freeShipMessage={getShipFreeMessageForStore(store, key)}
+                        freeShipMessage={getShipFreeMessageForStore(store, key)}
                     />
                     <StoreHeading
                       qaTag={"qa-catalog"}

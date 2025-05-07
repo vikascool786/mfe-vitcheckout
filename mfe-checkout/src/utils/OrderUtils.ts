@@ -107,3 +107,7 @@ export const orderHasGiftCards = (order: Order | null): boolean => {
     );
     return hasGCCatalogs || hasGCVolumes;
 };
+
+export const orderHasShippingAddress = (order: Order | undefined): boolean => {
+    return !!order?.shippingAddress?.address1?.length;
+};

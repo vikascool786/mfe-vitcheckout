@@ -50,7 +50,7 @@ export interface UserOptions {
   deliveryDate: string;
   signatureRequired: boolean;
   oosConsolidate: number;
-  userSessionId: string;
+  userSessionID: string;
   gcNum?: string[];
   gcPin?: string[];
   coupons?: string[];
@@ -58,4 +58,5 @@ export interface UserOptions {
   smsMessageType?: string;
   tempOrderID?: string;
   portalId?: string;
+  userAgent?: string;
 }

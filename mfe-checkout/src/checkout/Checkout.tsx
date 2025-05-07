@@ -38,6 +38,7 @@ import {
   getFilteredShippingAddresses,
   getShippingAddressFromFilteredList,
 } from "../utils/AddressUtils";
+import ScrollToError from "../component/Form/ScrollToError/ScrollToError";
 
 const defaultAddress: Address = {
   id: 0,
@@ -93,6 +94,10 @@ const Checkout: React.FC<ICheckout> = ({
   const [siteData] = useAtom(siteApiData(siteId));
   const [enableAddressSuggestions, setEnableAddressSuggestions] =
     useState(false);
+
+  const errorRefs = useRef<{
+    [key: string]: HTMLInputElement | null;
+  }>({});
 
   const buildShoppersAddressBookFromResponse = (
     addressBookResponse: Address[]
@@ -497,6 +502,7 @@ const Checkout: React.FC<ICheckout> = ({
                 submitForm,
               }) => (
                 <Form>
+                  <ScrollToError errorRefs={errorRefs} />
                   <AddressAutocomplete
                     enableAddressSuggestions={enableAddressSuggestions}
                     country={siteData?.locale?.countryCode}
@@ -512,6 +518,7 @@ const Checkout: React.FC<ICheckout> = ({
                         onChange={handleChange}
                         onBlur={handleBlur}
                         errorMessage={touched.last && errors.last}
+                        errorRefs={errorRefs}
                       />
                       <FormField
                         qaTag="qa-first-name"
@@ -522,6 +529,7 @@ const Checkout: React.FC<ICheckout> = ({
                         onChange={handleChange}
                         onBlur={handleBlur}
                         errorMessage={touched.first && errors.first}
+                        errorRefs={errorRefs}
                       />
                     </div>
                   ) : (
@@ -535,6 +543,7 @@ const Checkout: React.FC<ICheckout> = ({
                         onChange={handleChange}
                         onBlur={handleBlur}
                         errorMessage={touched.first && errors.first}
+                        errorRefs={errorRefs}
                       />
                       <FormField
                         qaTag="qa-last-name"
@@ -545,6 +554,7 @@ const Checkout: React.FC<ICheckout> = ({
                         onChange={handleChange}
                         onBlur={handleBlur}
                         errorMessage={touched.last && errors.last}
+                        errorRefs={errorRefs}
                       />
                     </div>
                   )}
@@ -561,6 +571,7 @@ const Checkout: React.FC<ICheckout> = ({
                       }
                       onBlur={handleBlur}
                       errorMessage={touched.address1 && errors.address1}
+                      errorRefs={errorRefs}
                     />
                   </div>
 
@@ -573,6 +584,7 @@ const Checkout: React.FC<ICheckout> = ({
                       onChange={handleChange}
                       onBlur={handleBlur}
                       errorMessage={touched.address2 && errors.address2}
+                      errorRefs={errorRefs}
                     />
                   </div>
 
@@ -586,6 +598,7 @@ const Checkout: React.FC<ICheckout> = ({
                       onChange={handleChange}
                       onBlur={handleBlur}
                       errorMessage={touched.city && errors.city}
+                      errorRefs={errorRefs}
                     />
                     <DropdownField
                       qaTag="qa-state"
@@ -620,6 +633,7 @@ const Checkout: React.FC<ICheckout> = ({
                         />
                       }
                       errorMessage={touched.zip && errors.zip}
+                      errorRefs={errorRefs}
                     />
                     <FormField
                       className="qa-phone js-ship-phone input-container"
@@ -631,6 +645,7 @@ const Checkout: React.FC<ICheckout> = ({
                       onChange={handleChange}
                       onBlur={handleBlur}
                       errorMessage={touched.phone && errors.phone}
+                      errorRefs={errorRefs}
                     />
                   </div>
 

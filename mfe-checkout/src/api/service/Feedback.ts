@@ -15,6 +15,7 @@ export const postFeedback = async (
     "{{path}}",
     getFeedbackPath(pcId)
   );
+  const fullStoryLink = window.FS.getCurrentSessionURL() || "";
   const feedbackPayload = {
     classid: 36,
     comments: feedback,
@@ -22,6 +23,7 @@ export const postFeedback = async (
     orderid: 0,
     surveytypeid: 17,
     userSessionId: sessionId || -1,
+    trackingID: fullStoryLink,
   };
 
   try {

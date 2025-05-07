@@ -1,5 +1,6 @@
 import { ChangeOrder } from "../../interfaces/ChangeOrder";
 import { Order } from "../../interfaces/Order";
+import { getAmosUserSessionID, getUserAgent } from "./UserSessionDataHelper";
 
 export const generateChangeStoreResponse = (order: Order): ChangeOrder => {
   const updatedPayload: ChangeOrder = {
@@ -26,7 +27,7 @@ export const generateChangeStoreResponse = (order: Order): ChangeOrder => {
       deliveryDate: order.userOptions.deliveryDate,
       signatureRequired: order.userOptions.signatureRequired,
       oosConsolidate: Number(order.userOptions.oosConsolidate),
-      userSessionId: order.userOptions.userSessionId,
+      userSessionID: order.userOptions.userSessionID,
       gcNum: order.userOptions.gcNum,
       gcPin: order.userOptions.gcPin,
       coupons: order.userOptions?.coupons
@@ -36,6 +37,7 @@ export const generateChangeStoreResponse = (order: Order): ChangeOrder => {
       smsPhone: order.userOptions?.smsPhone,
       smsMessageType: order.userOptions.smsMessageType,
       portalId: order.userOptions?.portalId,
+      userAgent: order.userOptions?.userAgent,
     },
   };
 
@@ -60,6 +62,14 @@ export const generateChangeStoreResponse = (order: Order): ChangeOrder => {
 
   if (order.paymentMethod?.id) {
     updatedPayload.paymentMethod = { id: order.paymentMethod.id };
+  }
+
+  if(!order.userOptions?.userAgent) {
+    updatedPayload.userOptions.userAgent = getUserAgent();
+  }
+
+  if(!order.userOptions?.userSessionID) {
+    updatedPayload.userOptions.userSessionID = getAmosUserSessionID();
   }
 
   return updatedPayload;

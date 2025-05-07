@@ -89,7 +89,7 @@ export interface IUserOptions {
   deliveryDate: string;
   signatureRequired: boolean;
   oosConsolidate: number;
-  userSessionId: string;
+  userSessionID: string;
   coupons: string[];
   gcNum: string[];
   gcPin: string[];
@@ -98,4 +98,5 @@ export interface IUserOptions {
   tempOrderID: string;
   portalId: string;
   walletAppliedStr?: string;
+  userAgent?: string;
 }

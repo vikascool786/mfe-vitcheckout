@@ -44,28 +44,35 @@ export const DropdownField: React.FC<DropdownProps> = ({
           {label}
         </label>
       )}
-      <select
-        className="input-container"
-        name={formName}
-        ref={(el: HTMLSelectElement | null) =>
-          el && errorRefs && errorRefs.current
-            ? (errorRefs.current[formName!] = el)
-            : null
-        }
-        value={selectedValue} // Controlled component behavior
-        onChange={handleChange} // Handle change events
-        required={required}
-        disabled={disabled}
-      >
-        <option value="" disabled>
-          {`Select ${label || "an option"}`}
-        </option>
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
+      <div className="select-wrapper">
+        <select
+          className={`input-container ${qaTag} ${
+            errorMessage ? "error-border" : ""
+          }`}
+          name={formName}
+          ref={(el: HTMLSelectElement | null) =>
+            el && errorRefs && errorRefs.current
+              ? (errorRefs.current[formName!] = el)
+              : null
+          }
+          value={selectedValue} // Controlled component behavior
+          onChange={handleChange} // Handle change events
+          required={required}
+          disabled={disabled}
+        >
+          <option value="" disabled>
+            {`Select ${label || "an option"}`}
           </option>
-        ))}
-      </select>
+          {options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        {errorMessage && (
+          <span className="material-symbols-outlined error-icon">error</span>
+        )}
+      </div>
       {errorMessage && <div className="error-message">{errorMessage}</div>}
     </div>
   );

@@ -1,17 +1,13 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { useAtom } from "jotai";
-import { Close } from "../assets/svgs/Close";
 import "./ShippingItem.scss";
 import { Cashback } from "../assets/svgs/Cashback";
-import { Address, Item, StoreDetail } from "../interfaces/ShippingMethod";
+import { Item, StoreDetail } from "../interfaces/ShippingMethod";
 import { ITotal } from "../interfaces/ShopperCart";
 import { Portal } from "../interfaces/Portal";
 import { AutoshipIcon } from "../assets/icons/Autoship";
 import { truncate } from "../utils/helpers/Helper";
-import { DropdownField } from "../component/Form/Field/DropdownField";
 import { DropdownOption } from "../interfaces/DropdownOption";
-import PaypalIcon from "../assets/images/PayPal.png";
-import SezzleIcon from "../assets/images/Sezzle.png";
 
 import {
   initialPaymentMethods,
@@ -30,12 +26,10 @@ import {
   GET_API_ENDPOINT_BASE_URL_ONLY,
   GET_API_KEY,
 } from "../utils/urlResolver";
-import { useApi } from "../hooks/useAPI";
 import { IOrderNotification } from "../utils/types/types";
 import { CustomDropdownField } from "../component/Form/Field/CustomDropdownField";
 import { getOptionStringValue } from "../utils/helpers/GetOptionStringValue";
-import { PAYPAL } from "../payment-method/PaymentType";
-import { createPaymentMethod } from "../utils/helpers/GeneratePaymentMethod";
+import { isPaypalPayment, PAYPAL, PAYPAL_RECURRING } from "../payment-method/PaymentType";
 import { isGiftCardStoreDetail } from "../utils/StoreUtils";
 import { Spinner } from "../component/Spinner/Spinner";
 interface IProduct {
@@ -83,9 +77,6 @@ const hasDenomination = (
 };
 
 const formattedNumber = (num: any) => Number(num).toFixed(2);
-
-const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
-const apiKey = GET_API_KEY();
 
 export const ShippingItem: React.FC<IShippingItemProps> = ({
   item,
@@ -222,15 +213,15 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
           setOrder(updatedOrder.response.success.data);
 
           // add paypal back if it exists in the payment methods
-
           const shouldShowPaypal =
-            orderData?.paymentMethods.some(
-              (method) =>
-                method.type.toLowerCase() === PAYPAL.name.toLowerCase()
-            ) &&
-            paymentMethods.some(
-              (method) => method.paymentMethod.typeID === PAYPAL.typeId
-            );
+              orderData?.paymentMethods.some(
+                  (method) =>
+                      isPaypalPayment(method.typeID)
+              ) &&
+              paymentMethods.some(
+                  (method) =>
+                      isPaypalPayment(method.paymentMethod.typeID)
+              );
 
           if (shouldShowPaypal) {
             // add paypal back if it exists in the payment methods on the 2nd last position if sezzle is present
@@ -238,9 +229,14 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
               (method) => method.type.toLowerCase() === "sezzle"
             );
 
+            const isPaypalRecurring = orderData?.paymentMethods.some(
+                (method) =>
+                    method.typeID === PAYPAL_RECURRING.typeId
+            );
+
             const paypalPayment =
               initialPaymentMethods.find(
-                (method) => method.paymentMethod.typeID === PAYPAL.typeId
+                (method) => method.paymentMethod.typeID === (isPaypalRecurring ? PAYPAL_RECURRING.typeId : PAYPAL.typeId)
               ) || null;
 
             if (sezzleIndex > -1) {
@@ -252,7 +248,7 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
 
               // Check if the PayPal account is already in the updatedPaymentMethods array
               const isPaypalAlreadyAdded = updatedPaymentMethods.some(
-                (method) => method.paymentMethod.accountName === PAYPAL.name
+                (method) => isPaypalPayment(method.paymentMethod.typeID)
               );
 
               if (!isPaypalAlreadyAdded && paypalPayment) {
@@ -262,7 +258,7 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
               setPaymentMethods(updatedPaymentMethods);
             } else {
               const isPaypalAlreadyAdded = paymentMethods.some(
-                (method) => method.paymentMethod.accountName === PAYPAL.name
+                (method) => isPaypalPayment(method.paymentMethod.typeID)
               );
               if (isPaypalAlreadyAdded) return;
               if (paypalPayment) {

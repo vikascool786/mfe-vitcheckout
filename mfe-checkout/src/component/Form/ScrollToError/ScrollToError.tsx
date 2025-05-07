@@ -22,11 +22,15 @@ const ScrollToError: React.FC<ScrollToErrorProps> = ({ errorRefs }) => {
   useEffect(() => {
     if (isSubmitting && !isValidating) {
       const firstErrorKey = findFirstErrorKey(errors);
-      if (firstErrorKey) {
-        errorRefs?.current[firstErrorKey]?.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
+      if (firstErrorKey && errorRefs?.current[firstErrorKey]) {
+        const element = errorRefs.current[firstErrorKey];
+        if (element) {
+          element.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+          element.focus();
+        }
       }
     }
   }, [errors, isSubmitting, isValidating]);

@@ -13,8 +13,6 @@ import { fetchSiteFlagData } from "../../api/service/SiteFlags";
 import { siteApiData } from "../../checkout/siteAtom";
 import { Button } from "../../component/Button/Button";
 import { Checkbox } from "../../component/Form/Checkbox/Checkbox";
-import { Spinner } from "../../component/Spinner/Spinner";
-import { useApi } from "../../hooks/useAPI";
 import { Address } from "../../interfaces/Address";
 import { Order } from "../../interfaces/Order";
 import { OrderConsolidationData } from "../../interfaces/OrderConsolidationData";
@@ -27,23 +25,20 @@ import {
 } from "../../store";
 import { generateChangeStoreResponse } from "../../utils/helpers/GenerateChangeStoreResponse";
 import { generateOrderTrackingId } from "../../utils/helpers/GenerateOrderTrackingId";
-import { hasPaypalToken } from "../../utils/helpers/PaypalHelper";
 import {
   getOrderConsolidateData,
-  orderHasAutoshipItems,
+  orderHasAutoshipItems, orderHasShippingAddress,
 } from "../../utils/OrderUtils";
 import {
-  GET_API_ENDPOINT_BASE_URL_ONLY,
-  GET_API_KEY,
   GET_PAYPAL_CHECKOUT_URL,
   GET_PAYPAL_CLIENT_ID,
-  GET_PAYPAL_RETURN_URL,
 } from "../../utils/urlResolver";
 import { placeOrderSchema } from "../../validation/placeOrderSchema";
-import { CLICK2PAY, isThirdPartyPayment, PAYPAL, SEZZLE } from "../PaymentType";
+import { CLICK2PAY, isPaypalPayment, isThirdPartyPayment, PAYPAL, PAYPAL_RECURRING, SEZZLE } from "../PaymentType";
 import "./PlaceOrder.scss";
 import { useCreditCardFormContext } from "../../component/Form/CreditCardFormContext";
 import { handleSaveCard } from "../../utils/helpers/CreditCardHelper";
+import { getPaypalToken } from "../../api/service/PaypalCheckout";
 
 interface IPlaceOrder {
   confirmOrder: () => void;
@@ -64,11 +59,6 @@ interface IPlaceOrder {
   hasPhoneError: boolean;
   isAutoShipChecked: boolean;
 }
-
-const PAYPAL_TOKEN_URL = (shopperId: string, totalAmountDue: number) =>
-  // make the return url and cancel url dynamic
-  // TODO: PICK THIS UP FROM ENVIORNMENT VARIABLES
-  `${GET_API_ENDPOINT_BASE_URL_ONLY()}/shoppingcart-checkouts/v1/Checkout/Paypal/${shopperId}/Token?creditFlow=false&hideShipping=true&markFlow=true&returnURL=${GET_PAYPAL_RETURN_URL()}&cancelURL=${GET_PAYPAL_RETURN_URL()}&api_key=${GET_API_KEY()}&total=${totalAmountDue}`;
 
 const PlaceOrder: React.FC<IPlaceOrder> = ({
   confirmOrder,
@@ -101,6 +91,9 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
 
   const { creditCardFormData } = useCreditCardFormContext();
 
+  const [paypalTokenId, setPaypalTokenId ] = useState<String>("");
+  const [paypalRecurringUrl, setPaypalRecurringUrl ] = useState<String>("");
+
   useEffect(() => {
     updateOrderErrorMessage("");
     if (order) {
@@ -108,12 +101,27 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     }
   }, [order]);
 
-  const { data: paypalToken } = useApi<{ tokenId: string }>(
-    hasPaypalToken(location.search) && order
-      ? PAYPAL_TOKEN_URL(shopperId, order.totals.price)
-      : PAYPAL_TOKEN_URL(shopperId, order?.totals.price),
-    "GET"
-  );
+  useEffect(() => {
+    if(isPaypalPayment(paymentTypeId) && order){
+      const isRecurring = PAYPAL_RECURRING.typeId === paymentTypeId;
+      const tokenResponse = getPaypalToken(shopperId, isRecurring, order?.totals.price)
+      tokenResponse
+          .then((response) => {
+            if(isRecurring){
+              setPaypalTokenId(response.data.token_id);
+              const approvalUrl = response.data.links.find((link: { rel: string; href: string }) =>
+                  link.rel === "approval_url"
+              )?.href || "";
+              setPaypalRecurringUrl(approvalUrl);
+            }else{
+              setPaypalTokenId(response.tokenId);
+            }
+          })
+    } else {
+      setPaypalTokenId("");
+      setPaypalRecurringUrl("");
+    }
+  }, [paymentTypeId]);
 
   useEffect(() => {
     const getQueryParams = () => {
@@ -121,21 +129,29 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
       return {
         token: params.get("token"),
         payerId: params.get("PayerID"),
+        baToken: params.get("ba_token"),
+        isRecurring: !!params.get("isRecurring"),
+        status: !!params.get("status"),
       };
     };
 
-    const { token, payerId } = getQueryParams();
+    const { token, payerId, baToken, isRecurring, status } = getQueryParams();
+
+    const isPaypalCallback = !!(token && payerId);
+    const isRecurringPaypalCallback = !!(baToken && isRecurring);
+    const isCanceledCallback = status;
 
     const fetchPayPalTransactionDetails = async () => {
       setIsLoading(true);
 
-      if (token && payerId) {
+      if (isPaypalCallback || isRecurringPaypalCallback) {
+        const transactionToken = isRecurringPaypalCallback ? baToken : token || "";
         try {
           const response = await generatePayPalTransactionDetails(
             shopperId,
-            token,
+              transactionToken,
             true,
-            false
+            isRecurring
           );
 
           if (order) {
@@ -168,7 +184,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
       }
     };
 
-    if (token && payerId) {
+    if ((isPaypalCallback || isRecurringPaypalCallback) && !isCanceledCallback) {
       fetchPayPalTransactionDetails();
     }
   }, []); // Ensure dependencies are correctly handled
@@ -296,6 +312,13 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
       }
     }
 
+    //confirm we have a shipping address for the order
+    if (!orderHasShippingAddress(order)) {
+      updateOrderErrorMessage("Please select your shipping address");
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const excludedPaymentTypes = [48, 56, 60];
 
@@ -382,39 +405,10 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
           await handleSezzleOrder();
           break;
         case PAYPAL.typeId:
-          // fetch paypal site flags
-          const siteFlags = await fetchSiteFlagData(siteId, "393");
-          const data = JSON.parse(siteFlags[0].auxDataText);
-
-          // loading paypal sdk
-          loadScript({
-            clientId: GET_PAYPAL_CLIENT_ID(), // Your PayPal Client ID
-            merchantId: data.merchantId, // Optional: Specify merchant ID
-            environment: data.environment, // Use "sandbox" or "production"
-            currency: "USD", // Set your currency
-            intent: "capture", // "capture" for immediate payment
-            components: "buttons",
-          })
-            .then((paypal) => {
-              if (!paypal) {
-                console.error("PayPal SDK failed to load correctly");
-                return;
-              }
-              // console.log("PayPal SDK loaded:", paypal);
-            })
-            .catch((error) =>
-              console.error("PayPal SDK failed to load", error)
-            );
-
-          if (!paypalToken) {
-            alert("Failed to fetch PayPal token, check console for message");
-            setIsLoading(false);
-            return;
-          }
-          const url = `${GET_PAYPAL_CHECKOUT_URL()}?token=${
-            paypalToken.tokenId
-          }&useraction=commit`;
-          window.open(url, "_self");
+          await handlePaypalOrderRedirect(false);
+          break;
+        case PAYPAL_RECURRING.typeId:
+          await handlePaypalOrderRedirect(true);
           break;
         default:
           const selectedPaymentMethod = paymentMethods.find(
@@ -491,6 +485,48 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
       console.error("Error placing order:", error);
     }
   };
+
+  const handlePaypalOrderRedirect = async (isRecurring: boolean) => {
+    // fetch paypal site flags
+    const siteFlags = await fetchSiteFlagData(siteId, "393");
+    const data = JSON.parse(siteFlags[0].auxDataText);
+
+    // loading paypal sdk
+    loadScript({
+      clientId: GET_PAYPAL_CLIENT_ID(), // Your PayPal Client ID
+      merchantId: data.merchantId, // Optional: Specify merchant ID
+      environment: data.environment, // Use "sandbox" or "production"
+      currency: "USD", // Set your currency
+      intent: "capture", // "capture" for immediate payment
+      components: "buttons",
+    })
+        .then((paypal) => {
+          if (!paypal) {
+            console.error("PayPal SDK failed to load correctly");
+            return;
+          }
+          // console.log("PayPal SDK loaded:", paypal);
+        })
+        .catch((error) =>
+            console.error("PayPal SDK failed to load", error)
+        );
+
+    if (paypalTokenId.length < 1) {
+      alert("Failed to fetch PayPal token, check console for message");
+      setIsLoading(false);
+      return;
+    }
+    const url = getPaypalUrl(isRecurring);
+    window.open(url, "_self");
+  }
+
+  const getPaypalUrl = (isRecurring: boolean) => {
+    const paypalRedirectUrl = isRecurring ? paypalRecurringUrl : `${GET_PAYPAL_CHECKOUT_URL()}?token=${
+        paypalTokenId
+    }`;
+
+    return `${paypalRedirectUrl}&useraction=commit`;
+  }
 
   const handleFinalPlaceOrderUpdate = () => {
     if (!order) return;
@@ -719,7 +755,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                 isLoading
                   ? "Loading..."
                   : paymentTypeId === SEZZLE.typeId ||
-                    paymentTypeId === PAYPAL.typeId ||
+                    isPaypalPayment(paymentTypeId) ||
                     paymentTypeId === CLICK2PAY.typeId
                   ? "Pay with"
                   : "Place Order"
@@ -728,7 +764,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
               btnType={
                 paymentTypeId === SEZZLE.typeId
                   ? "sezzle"
-                  : paymentTypeId === PAYPAL.typeId
+                  : isPaypalPayment(paymentTypeId)
                   ? "paypal"
                   : "primary"
               }
@@ -736,7 +772,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
               logo={
                 paymentTypeId === SEZZLE.typeId
                   ? "https://img.shop.com/Image/resources/checkout/Sezzle-Color-White-Logo.svg"
-                  : paymentTypeId === PAYPAL.typeId
+                  : isPaypalPayment(paymentTypeId)
                   ? "https://img.shop.com/Image/resources/checkout/PayPal-White-Logo.svg"
                   : paymentTypeId === CLICK2PAY.typeId
                   ? "https://img.shop.com/Image/resources/checkout/click-to-pay-white.svg"

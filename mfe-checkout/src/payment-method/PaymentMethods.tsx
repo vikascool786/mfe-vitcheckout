@@ -26,7 +26,7 @@ import {
   CLICK2PAY,
   creditCardTypeIds,
   isThirdPartyPayment,
-  PAYPAL,
+  PAYPAL, PAYPAL_RECURRING,
   SEZZLE,
   thirdPartyPaymentFlagList,
 } from "./PaymentType";
@@ -75,10 +75,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   );
   const [showClick2Pay, setShowClick2Pay] = useState(shouldShowClick2Pay);
 
-  const shouldShowPaypal = order?.paymentMethods.some(
-    (method) => method.type.toLowerCase() === PAYPAL.name.toLowerCase()
-  );
-
   const [isPaymentsFetched, setIsPaymentsFetched] = useState<boolean>(false);
 
   const [showNewCard, setShowNewCard] = useState<boolean>(false);
@@ -125,15 +121,18 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         return {
           token: params.get("token"),
           payerId: params.get("PayerID"),
+          baToken: params.get("ba_token"),
         };
       };
 
       // checking paypal order success
-      const { token, payerId } = getQueryParams();
+      const { token, payerId, baToken } = getQueryParams();
 
       const isPaypalOrderSuccess = token && payerId;
       const addressMap = new Map<string, Address>();
-      const showPayPalSelected = !!token;
+      const isPaypalCallback = !!token;
+      const isPaypalRecurringCallBack = !!baToken;
+      const showPayPalSelected = isPaypalCallback || isPaypalRecurringCallBack;
 
       Object.keys(addresses).map((id) =>
         addressMap.set(id, addresses[parseInt(id)] as Address)
@@ -142,71 +141,50 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       try {
         let staticMethods = paymentMethods;
 
-        if (!isSezzleAllowed()) {
-          staticMethods = staticMethods.filter(
-            (method) => method.paymentMethod.typeID !== SEZZLE.typeId
-          );
-        }
-
-        if (!shouldShowPaypal) {
-          staticMethods = staticMethods.filter(
-            (method) => method.paymentMethod.typeID !== PAYPAL.typeId
-          );
-        }
-
         // case when user does not have any payment methods
         if (!payments) {
           if (isPaymentsFetched) return;
-        
+
           if (showPayPalSelected) {
             staticMethods = paymentMethods.map((method) => {
-              if (method.paymentMethod.typeID === PAYPAL.typeId) {
+              const paypalPaymentType = isPaypalRecurringCallBack ? PAYPAL_RECURRING : PAYPAL;
+              if (method.paymentMethod.typeID === paypalPaymentType.typeId) {
                 updatePaymentTypeId(method.paymentMethod.typeID);
                 return { ...method, isSelected: true };
               }
               return { ...method, isSelected: false };
             });
           } else {
-            const isNewCardAlreadyPresent = paymentMethods.some(
-              (method) => method.paymentMethod.typeID === 9 && method.paymentMethod.id === 0
-            );
-        
-            if (!isNewCardAlreadyPresent) {
-              const newCard = createPaymentMethod({
-                accountName: "",
-                imageUrl: CardOptions,
-                id: 0,
-                typeID: 9,
-                addressId: 0,
-                expMonth: new Date().getMonth() + 1,
-              });
-        
-              staticMethods = [
-                {
-                  paymentMethod: newCard,
-                  paymentAddress: {} as Address,
-                  isPaymentValidated: false,
-                  isSelected: true,
-                  isVisible: true,
-                  isEditing: true,
-                },
-                ...paymentMethods.map((method) => ({
-                  ...method,
-                  isSelected: false,
-                })),
-              ];
-            } else {
-              staticMethods = paymentMethods.map((method) => ({
+            const newCard = createPaymentMethod({
+              accountName: "",
+              imageUrl: CardOptions,
+              id: 0,
+              typeID: 9,
+              addressId: 0,
+              expMonth: new Date().getMonth() + 1,
+            });
+
+            staticMethods = [
+              {
+                paymentMethod: newCard,
+                paymentAddress: {} as Address,
+                isPaymentValidated: false,
+                isSelected: true,
+                isVisible: true,
+                isEditing: true,
+              },
+              ...paymentMethods.map((method) => ({
                 ...method,
-                isSelected: method.paymentMethod.typeID === 9 && method.paymentMethod.id === 0,
-              }));
-            }
+                isSelected: false,
+              })),
+            ];
           }
-        
-          setPaymentMethods(staticMethods);
+
+          setPaymentMethods(handleThirdPartyPaymentVisibility(staticMethods));
           setIsPaymentsFetched(true);
           return;
         }
+
         const staticMethodIds = new Set(
           staticMethods.map((sm) => sm.paymentMethod?.id)
         );
@@ -260,7 +238,8 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
           }
           
           updatedPaymentOptions = updatedPaymentOptions.map((paymentOption) => {
-            if (paymentOption.paymentMethod.typeID === PAYPAL.typeId) {
+            const paypalPaymentType = isPaypalRecurringCallBack ? PAYPAL_RECURRING : PAYPAL;
+            if (paymentOption.paymentMethod.typeID === paypalPaymentType.typeId) {
               updatePaymentTypeId(paymentOption.paymentMethod.typeID);
               // set paypal true
               return {
@@ -281,7 +260,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         }
 
         setTimeout(() => {
-          setPaymentMethods(updatedPaymentOptions);
+          setPaymentMethods(handleThirdPartyPaymentVisibility(updatedPaymentOptions));
           setIsPaymentsFetched(true);
         }, 300);
       } catch (error) {
@@ -306,7 +285,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
             }
           });
 
-          setPaymentMethods(updatedPaymentOptions);
+          setPaymentMethods(handleThirdPartyPaymentVisibility(updatedPaymentOptions));
           setIsPaymentsFetched(true);
         }
       }
@@ -316,6 +295,35 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       fetchShoppersSavedPayments(shopperId, addresses);
     }
   }, [shopperId, addresses]);
+
+  const handleThirdPartyPaymentVisibility = (paymentOptions : IPaymentOption[]) : IPaymentOption[] => {
+    const shouldShowPaypal = order?.paymentMethods.some(
+        (method) => method.type.toLowerCase() === PAYPAL.name.toLowerCase()
+    );
+
+    const showPaypalRecurring = order?.paymentMethods.some(
+        (method) => method.typeID === PAYPAL_RECURRING.typeId
+    );
+
+    if (!isSezzleAllowed()) {
+      paymentOptions = paymentOptions.filter(
+          (method) => method.paymentMethod.typeID !== SEZZLE.typeId
+      );
+    }
+
+    if (!shouldShowPaypal) {
+      paymentOptions = paymentOptions.filter(
+          (method) => method.paymentMethod.typeID !== PAYPAL.typeId
+      );
+    }
+
+    if (!showPaypalRecurring) {
+      paymentOptions = paymentOptions.filter(
+          (method) => method.paymentMethod.typeID !== PAYPAL_RECURRING.typeId
+      );
+    }
+    return paymentOptions;
+  }
 
   useEffect(() => {
     let updatedPMs = paymentMethods;
@@ -658,7 +666,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         }
 
         // when selected paypal or sezzle, set editing false
-        if (id === -1001 || id === -1002) {
+        if (id === -1001 || id === -1002 || id === -1003) {
           updatePaymentTypeId(id);
           return {
             ...paymentMethod,

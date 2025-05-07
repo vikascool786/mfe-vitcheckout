@@ -14,6 +14,11 @@ import {siteApiData} from "../checkout/siteAtom";
 import {SHOP_SHIP_UPDATE_TEXT_PREF_CODE} from "../interfaces/ShopperCommunicationPreferences";
 import {fetchTwilioLookupData, PHONE_TYPE_MOBILE} from "../api/service/TwilioPhoneLookup";
 import { getCountryName } from "../utils/helpers/LocaleHelper";
+import {
+  INVALID_COUNTRY_MOBILE_NUMBER,
+  MOBILE_NUMBER_NOT_VALID,
+  NOT_A_MOBILE_PHONE_NUMBER,
+} from "../constant";
 
 // Validation schema
 interface FormValues {
@@ -53,6 +58,8 @@ const FormContent = React.memo(
     handleSubmit,
     setFieldValue,
     setFieldError,
+    siteData,
+    validateField,
     setHasPhoneError,
     setMobileRequiredMessage,
     mobileRequiredMessage,
@@ -125,7 +132,20 @@ const FormContent = React.memo(
               (mobileRequiredMessage && errors.phone)
             }
             onChange={handlePhoneChange}
-            onBlur={handleBlur}
+            onBlur={(e) => {
+              if (
+                errors.phone !== NOT_A_MOBILE_PHONE_NUMBER &&
+                errors.phone !== MOBILE_NUMBER_NOT_VALID &&
+                errors.phone !==
+                  INVALID_COUNTRY_MOBILE_NUMBER(
+                    getCountryName(siteData.locale.countryCode) as string,
+                    getCountryName(siteData.locale.countryCode) as string
+                  )
+              ) {
+                handleBlur(e);
+                validateField("phone");
+              }
+            }}
           />
         </div>
         <div className="save-for-later-txtupdate">
@@ -210,9 +230,10 @@ export const TextUpdates = React.memo(
                     getCountryName(matchingCountryCode);
                   setFieldError(
                     "phone",
-                    `The mobile phone number you have entered is for ${matchingCountryName}. Please add a mobile phone number for ${getCountryName(
-                      siteData.locale.countryCode
-                    )} or leave empty.`
+                    INVALID_COUNTRY_MOBILE_NUMBER(
+                      matchingCountryName as string,
+                      getCountryName(siteData.locale.countryCode) as string
+                    )
                   );
                   isValidMobilePhone = false;
                   setHasPhoneError(true);
@@ -223,7 +244,7 @@ export const TextUpdates = React.memo(
                   setHasPhoneError(false);
                 }
               } else {
-                setFieldError("phone", "The phone number entered is not valid");
+                setFieldError("phone", MOBILE_NUMBER_NOT_VALID);
                 setHasPhoneError(true);
                 isValidMobilePhone = false;
                 return;
@@ -275,6 +296,7 @@ export const TextUpdates = React.memo(
               setHasPhoneError={setHasPhoneError}
               setMobileRequiredMessage={setMobileRequiredMessage}
               mobileRequiredMessage={mobileRequiredMessage}
+              siteData={siteData}
             />
           )}
         </Formik>

@@ -43,14 +43,26 @@ export const SEZZLE: PaymentType = {
 
 export const PAYPAL: PaymentType = {
     name: "Paypal",
-    typeId: 48,
+    typeId: 31,
     siteflagTypeId: 393
+}
+
+export const PAYPAL_RECURRING: PaymentType = {
+    name: "Paypal", //display as Paypal in UI to user
+    typeId: 58,
+    siteflagTypeId: 580
 }
 
 const thirdPartyPayments = [
     CLICK2PAY,
     SEZZLE,
     PAYPAL,
+    PAYPAL_RECURRING,
+]
+
+const paypalPayments = [
+    PAYPAL,
+    PAYPAL_RECURRING,
 ]
 
 export const thirdPartyPaymentFlagList = (): number[] => {
@@ -62,6 +74,10 @@ export const thirdPartyPaymentTypeIdList  = (): number[] => {
 
 export const isThirdPartyPayment  = (paymentTypeId: number): boolean => {
     return thirdPartyPaymentTypeIdList().includes(paymentTypeId);
+}
+
+export const isPaypalPayment  = (paymentTypeId: number): boolean => {
+    return paypalPayments.some(payment => payment.typeId === paymentTypeId);
 }
 
 export const creditCards = [
