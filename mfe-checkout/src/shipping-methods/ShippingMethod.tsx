@@ -138,17 +138,18 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
 
       await removeProductFromCart(orders.id, itemKey);
 
-      const storeKeys = Object.keys(updatedStores);
-      const doesStoreHaveOOSItems = storeKeys.some((storeKey) =>
-        storeHasOOSItems(updatedStores[storeKey] as OrderStore)
-      );
+      const orderConsolidateData = getOrderConsolidateData(orders);
+      // send oosConsolidate when current oosConsolidate is split and showOrderConsolidate is true
+      const isOOSConsolidateSplit =
+        orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_SPLIT_CODE &&
+        orderConsolidateData.showOrderConsolidate;
 
       const response = await buildOrder(
         generateChangeStoreResponse({
           ...updatedOrder,
           userOptions: {
             ...updatedOrder.userOptions,
-            oosConsolidate: doesStoreHaveOOSItems
+            oosConsolidate: isOOSConsolidateSplit
               ? OOS_CONSOLIDATE_SPLIT_CODE
               : OOS_CONSOLIDATE_CODE,
           },
