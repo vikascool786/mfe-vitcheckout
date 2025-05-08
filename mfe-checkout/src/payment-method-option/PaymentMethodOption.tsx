@@ -78,13 +78,24 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   };
   
   useEffect(() => {
+    const selectedPayment = paymentMethods.find(
+      (pm) => pm.isSelected
+    )?.paymentMethod;
+
+    if (!selectedPayment) return;
+
+    const { expMonth, expYear } = selectedPayment;
     if (
-      isCardExpired() &&
+      isCardExpired(expMonth, expYear) &&
       order?.shouldShowInvalidCVVMessage === "The credit card has expired."
     ) {
       updateCvvError("The credit card has expired.");
       scrollToPMMain();
-    } else if (!order?.isOrderValid && order?.shouldShowInvalidCVVMessage) {
+    } else if (
+      !order?.isOrderValid &&
+      order?.shouldShowInvalidCVVMessage &&
+      formik.dirty
+    ) {
       updateCvvError("CVV is required");
     } else {
       updateCvvError("");
@@ -104,8 +115,15 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   };
 
   useEffect(() => {
+    const selectedPayment = paymentMethods.find(
+      (pm) => pm.isSelected
+    )?.paymentMethod;
+
+    if (!selectedPayment) return;
+
+    const { expMonth, expYear } = selectedPayment;
     if (
-      isCardExpired() &&
+      isCardExpired(expMonth, expYear) &&
       isSelected &&
       !isThirdPartyPayment(paymentMethod.typeID)
     ) {
@@ -236,8 +254,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     onAddNewCards(updatedPaymentOptions);
   };
 
-  const isCardExpired = () => {
-    const { expMonth, expYear } = paymentMethod;
+  const isCardExpired = (expMonth: number, expYear: number) => {
     if (!expMonth || !expYear) {
       return false;
     }

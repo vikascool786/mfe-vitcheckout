@@ -117,7 +117,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   const [mobileRequiredMessage, setMobileRequiredMessage] =
     useState<boolean>(false);
   const isAddressSaved = useMemo(
-    () => addressList?.some((address) => address.hasAddress === 1),
+    () => addressList.length >= 1 && addressList?.some((address) => address.hasAddress === 1)  ,
     [addressList]
   );
 
@@ -409,7 +409,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                   pcid={pcid}
                 />
 
-              {addressList.length > 0 ? (
+              {isAddressSaved ? (
                 <ShippingMethod
                   shopperID={shopperId}
                   isAddressSaved={isAddressSaved}
@@ -417,7 +417,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                   <ShippingMethodHeading />
               )}
 
-              {addressList.length > 0 ? (
+              {isAddressSaved ? (
                   (orderHasAutoshipItems(orderData) ||
                     orderData.totals.price > 0) && (
                     <PaymentMethod
