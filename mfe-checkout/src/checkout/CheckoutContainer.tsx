@@ -385,7 +385,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     setOrderErrorMessage(message);
   };
 
-  if (loadingAddresses || loadingPaymentMethods || loadingOrder)
+  if (loadingAddresses || loadingPaymentMethods || loadingOrder || !orderData)
     return <Skeleton />;
 
   if (addressError || paymentError) return <div>Failed to load data</div>;

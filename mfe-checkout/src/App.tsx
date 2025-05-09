@@ -46,13 +46,13 @@ const App: React.FC<AppProps> = () => {
           sessionId="3055410409"
         /> */}
 
-        {/* vift cashback account  */}
+        {/* vift + Gift cashback account  */}
         {/* <CheckoutContainer
-          cartId="cart_1316760835_W_USA_USA_ENG"
-          shopperId="mkYxXjppzhzmjzhxWzzpkYjzmYXZVzYWkeZjzwjhx"
-          pcid="1316760835"
+          cartId="cart_1918885741_W_USA_USA_ENG"
+          shopperId="YUXUeYeqzeYzUzhkYVzZhUezzwUwUmqUpVmYzjqzz"
+          pcid="1918885741"
           siteId="66"
-          sessionId="3055307133"
+          sessionId="3055418875"
         /> */}
 
         {/* expired credit card account  */}
@@ -72,12 +72,13 @@ const App: React.FC<AppProps> = () => {
           siteId="66"
           sessionId="3055249126"
         /> */}
+        {/* for VIFT Cards  */}
         {/* <CheckoutContainer
-          cartId="cart_1762863970_W_USA_USA_ENG"
-          shopperId="qYmmqpWZzVjeZzhZqpzpVYwzkmqWjqkhZVqjzxqjqp"
-          pcid="1762863970"
+         cartId="cart_1316760835_W_USA_USA_ENG"
+          shopperId="mkYxXjppzhzmjzhxWzzpkYjzmYXZVzYWkeZjzwjhx"
+          pcid="1316760835"
           siteId="66"
-          sessionId="3055290977"
+          sessionId="3055421110"
         /> */}
         {/* for vikas card custoemr  */}
         {/* <CheckoutContainer
