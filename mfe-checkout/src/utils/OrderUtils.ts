@@ -42,6 +42,7 @@ export const getOrderConsolidateData = (
     };
     if (!order) return orderConsolidateData;
     let availabilityDates: string[] = [];
+    let availabilityDisplayDates: string[] = [];
     let canConsolidate = Object.values(order.stores).filter(
         (store) => store.canConsolidate
     );
@@ -55,7 +56,8 @@ export const getOrderConsolidateData = (
             value.items.forEach((i) => {
                 if (i?.availableDisplayDate !== "0") {
                     if (i?.availableDisplayDate != null) {
-                      availabilityDates.push(i.availableDisplayDate);
+                        availabilityDisplayDates.push(i.availableDisplayDate);
+                        availabilityDates.push(i.availableDisplayDate);
                     }
                   }
             });
@@ -63,8 +65,14 @@ export const getOrderConsolidateData = (
     }
     orderConsolidateData.oosConsolidate = order.userOptions.oosConsolidate;
     if (availabilityDates.length > 0) {
-        const dateObjects = availabilityDates.map((date) => date);
-        orderConsolidateData.availabilityDate = dateObjects.map((date) => date).toString();
+        const dateObjects = availabilityDates.map((date) => new Date(date));
+        const latestDate = new Date(
+            Math.max(...dateObjects.map((date) => date.getTime()))
+        );
+        const latestDateIndex = dateObjects.findIndex(
+            (date) => date.getTime() === latestDate.getTime()
+        );
+        orderConsolidateData.availabilityDate = availabilityDisplayDates[latestDateIndex] || "";
     }
     if (orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_SPLIT_CODE) {
         Object.entries(order.stores).forEach(([key, value]) => {
