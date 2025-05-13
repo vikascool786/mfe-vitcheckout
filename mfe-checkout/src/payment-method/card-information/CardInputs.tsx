@@ -32,7 +32,6 @@ export const CardInputs: React.FC<ICardInputProps> = ({
   errorRefs = null,
   isFromClick2Pay = false,
 }) => {
- 
   const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let formattedValue = e.target.value.replace(/\D/g, ""); // Remove non-numeric characters
     if (formattedValue.length > 16)
@@ -41,25 +40,55 @@ export const CardInputs: React.FC<ICardInputProps> = ({
     handleChange("cardInfo.number")(formattedValue);
   };
 
+  const currentYear = new Date().getFullYear();
+  const selectedExpYear = parseInt(values.cardInfo?.expYear, 10);
+  const currentMonth = new Date().getMonth() + 1;
+  const selectedExpMonth = parseInt(values.cardInfo?.expMonth, 10);
+  const isExpired =
+    selectedExpYear < currentYear ||
+    (selectedExpYear === currentYear && selectedExpMonth < currentMonth);
 
-const currentYear = new Date().getFullYear();
+  // Use the earlier of current year or selected year (to allow past expired dates like 2024 to still show up)
+  const minYear = Math.min(currentYear, selectedExpYear || currentYear);
+
   const years = Array.from({ length: 15 }, (_, i) => {
     const year = currentYear + i;
     return { value: year.toString(), label: year.toString() };
-});
-
-const currentMonth = new Date().getMonth() + 1;
-
-const getValidMonths = (selectedYear?: number | string) => {
-  const selected = parseInt(selectedYear as string, 10);
-  const startMonth = selected === currentYear ? currentMonth : 1;
-
-  return Array.from({ length: 12 - startMonth + 1 }, (_, i) => {
-    const month = i + startMonth;
-    const value = month.toString().padStart(2, "0");
-    return { value, label: value };
   });
-};
+
+  const getValidMonths = (selectedYear?: number | string) => {
+    const selectedMonth = values.cardInfo?.expMonth
+      ?.toString()
+      .padStart(2, "0");
+    const selectedYearInt = parseInt(selectedYear as string, 10);
+    const includeExpired =
+      selectedYearInt === currentYear &&
+      parseInt(selectedMonth || "", 10) < currentMonth;
+
+    const months = Array.from({ length: 12 }, (_, i) => {
+      const month = i + 1;
+      const value = month.toString().padStart(2, "0");
+      return { value, label: value };
+    });
+
+    return months.filter(({ value }) => {
+      const monthInt = parseInt(value, 10);
+
+      if (!selectedYear) return true;
+
+      if (selectedYearInt > currentYear) return true;
+
+      if (selectedYearInt === currentYear) {
+        if (monthInt >= currentMonth) return true;
+        // Include expired only if it's currently selected
+        if (value === selectedMonth && includeExpired) return true;
+        return false;
+      }
+
+      // Past year — don't allow anything unless it's selected
+      return value === selectedMonth;
+    });
+  };
 
   return (
     <>
@@ -101,11 +130,15 @@ const getValidMonths = (selectedYear?: number | string) => {
           selectedValue={
             values.cardInfo?.expMonth
               ? values.cardInfo.expMonth.toString().padStart(2, "0")
-              : new Date().getMonth() + (1).toString().padStart(2, "0") // Default to the current month
+              : new Date().getMonth() + (1).toString().padStart(2, "0")
           }
           options={getValidMonths(values.cardInfo?.expYear)}
           onChange={(value) => handleChange("cardInfo.expMonth")(value)}
-          errorMessage={touched.cardInfo?.expMonth && errors.cardInfo?.expMonth}
+          errorMessage={
+            (touched.cardInfo?.expMonth && errors.cardInfo?.expMonth) ||
+            (isExpired &&
+              "Card is expired. Please use a valid expiration date.")
+          }
         />
         <DropdownField
           qaTag="qa-expiration-year"
@@ -117,7 +150,9 @@ const getValidMonths = (selectedYear?: number | string) => {
           options={years}
           onChange={(value) => {
             const validMonths = getValidMonths(value);
-            const selectedMonth = values.cardInfo?.expMonth?.toString().padStart(2, "0");
+            const selectedMonth = values.cardInfo?.expMonth
+              ?.toString()
+              .padStart(2, "0");
 
             const isMonthStillValid = validMonths.some(
               (month) => month.value === selectedMonth
@@ -133,10 +168,15 @@ const getValidMonths = (selectedYear?: number | string) => {
               }
             }
           }}
-          errorMessage={touched.cardInfo?.expYear && errors.cardInfo?.expYear}
+          errorMessage={
+            (touched.cardInfo?.expYear && errors.cardInfo?.expYear) ||
+            (isExpired && "Card is expired. Please use a valid expiration date.")
+          }
         />
       </div>
-      {isEditing ? <p className="billing-address-styles">Billing Addess</p> : null }
+      {isEditing ? (
+        <p className="billing-address-styles">Billing Addess</p>
+      ) : null}
       {!isEditing && (
         <div className="form-field-container">
           <FormField
@@ -146,8 +186,9 @@ const getValidMonths = (selectedYear?: number | string) => {
             name="cardInfo.cvv"
             type="text"
             disablePasswordManager
-            autoComplete="off" 
-            data-1p-ignore data-lpignore="true" 
+            autoComplete="off"
+            data-1p-ignore
+            data-lpignore="true"
             data-protonpass-ignore="true"
             inputMode="numeric"
             value={values.cardInfo?.cvv || ""}
