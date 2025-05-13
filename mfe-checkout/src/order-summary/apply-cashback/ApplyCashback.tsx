@@ -35,8 +35,13 @@ export const ApplyCashback: React.FC<IApplyCashbackContainer> = ({
       setLoading(true);
       const isCashbackApplied = !order?.userOptions.applyEWallet;
 
-      // set message  when cashback is applied and order balance is 0
-      if (order?.totals.price === 0) {
+      // set message  when cashback is applied and order balance is 0 and do not add it message is already there
+      if (
+        order?.totals.price === 0 &&
+        !notificationMessages?.includes(
+          "Your order balance is already $0.00. You cannot apply VIFT to your order"
+        )
+      ) {
         setOrderNotifications([
           ...(notificationMessages || []),
           "Your order balance is already $0.00. You cannot apply VIFT to your order",
