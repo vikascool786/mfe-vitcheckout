@@ -19,6 +19,7 @@ const AppliedCoupons: React.FC<AppliedCouponsProps> = ({ stores, handleRemoveCou
     }));
   };
 
+  //setting unique coupons here
   const seenCoupons = new Set<string>();
 
   return (
@@ -35,56 +36,60 @@ const AppliedCoupons: React.FC<AppliedCouponsProps> = ({ stores, handleRemoveCou
         .map(([invoiceKey, invoiceData]) => {
           const couponCode = invoiceData.totals?.couponCode;
           return (
-            <li key={invoiceKey} className="qa-cancel order-applied-coupon">
-              <div className="order-applied-coupons__box">
-                <div className="order-applied-coupons__name">
-                  {isHiddenCouponCode(couponCode) ? (
-                    <span>{getCouponAliasForCouponCode(couponCode)}</span>
+          <li key={invoiceKey} className="qa-cancel order-applied-coupon">
+            <div className="order-applied-coupons__box">
+              <div className="order-applied-coupons__name">
+                {isHiddenCouponCode(couponCode) ? (
+                    <span>
+                      {getCouponAliasForCouponCode(couponCode)}
+                    </span>
+                ) : (
+                    <span>
+                      {couponCode}
+                    </span>
+                )}
+                <p className="coupon-terms-link">
+                  {invoiceData.totals?.couponTerms?.some((term: string) =>
+                    term.includes("href")
+                  ) ? (
+                    (() => {
+                      const linkTerm = invoiceData.totals?.couponTerms?.find(
+                        (term: string) => term.includes("href")
+                      );
+                      const hrefMatch = linkTerm?.match(/href="([^"]+)"/);
+                      const extractedHref = hrefMatch?.[1] || "#";
+
+                      return (
+                        <a
+                          href={extractedHref}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Terms & Conditions
+                        </a>
+                      );
+                    })()
                   ) : (
-                    <span>{couponCode}</span>
+                    <a onClick={() => toggleTerms(invoiceKey)}>
+                      Terms & Conditions
+                    </a>
                   )}
-                  <p className="coupon-terms-link">
-                    {invoiceData.totals?.couponTerms?.some((term: string) =>
-                      term.includes("href")
-                    ) ? (
-                      (() => {
-                        const linkTerm = invoiceData.totals?.couponTerms?.find(
-                          (term: string) => term.includes("href")
-                        );
-                        const hrefMatch = linkTerm?.match(/href="([^"]+)"/);
-                        const extractedHref = hrefMatch?.[1] || "#";
-
-                        return (
-                          <a
-                            href={extractedHref}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            Terms & Conditions
-                          </a>
-                        );
-                      })()
-                    ) : (
-                      <a onClick={() => toggleTerms(invoiceKey)}>
-                        Terms & Conditions
-                      </a>
-                    )}
-                  </p>
-                </div>
-                <Close onClick={() => handleRemoveCoupon(couponCode)} />
+                </p>
               </div>
+              <Close onClick={() => handleRemoveCoupon(invoiceData.totals?.couponCode)} />
+            </div>
 
-              {openTerms[invoiceKey] && (
-                <div className="order-applied-coupons__term-text">
-                  {invoiceData.totals?.couponTerms?.map(
-                    (term: any, index: number) => (
-                      <p key={index}>{term}</p>
-                    )
-                  )}
-                </div>
-              )}
-            </li>
-          );
+            {openTerms[invoiceKey] && (
+               <div className="order-applied-coupons__term-text">
+               {invoiceData.totals?.couponTerms?.map(
+                 (term: any, index: number) => (
+                   <p key={index}>{term}</p>
+                 )
+               )}
+             </div>
+            )}
+          </li>
+          )
         })}
     </>
   );

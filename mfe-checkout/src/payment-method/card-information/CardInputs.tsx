@@ -42,48 +42,22 @@ export const CardInputs: React.FC<ICardInputProps> = ({
   };
 
 
-  const currentYear = new Date().getFullYear();
-  const selectedExpYear = parseInt(values.cardInfo?.expYear, 10);
-  
-  // Use the earlier of current year or selected year (to allow past expired dates like 2024 to still show up)
-  const minYear = Math.min(currentYear, selectedExpYear || currentYear);
-  
+const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 15 }, (_, i) => {
-    const year = minYear + i;
+    const year = currentYear + i;
     return { value: year.toString(), label: year.toString() };
-  });
+});
 
 const currentMonth = new Date().getMonth() + 1;
 
 const getValidMonths = (selectedYear?: number | string) => {
-  const selectedMonth = values.cardInfo?.expMonth?.toString().padStart(2, "0");
-  const selectedYearInt = parseInt(selectedYear as string, 10);
-  const includeExpired =
-    selectedYearInt === currentYear &&
-    parseInt(selectedMonth || "", 10) < currentMonth;
+  const selected = parseInt(selectedYear as string, 10);
+  const startMonth = selected === currentYear ? currentMonth : 1;
 
-  const months = Array.from({ length: 12 }, (_, i) => {
-    const month = i + 1;
+  return Array.from({ length: 12 - startMonth + 1 }, (_, i) => {
+    const month = i + startMonth;
     const value = month.toString().padStart(2, "0");
     return { value, label: value };
-  });
-
-  return months.filter(({ value }) => {
-    const monthInt = parseInt(value, 10);
-
-    if (!selectedYear) return true;
-
-    if (selectedYearInt > currentYear) return true;
-
-    if (selectedYearInt === currentYear) {
-      if (monthInt >= currentMonth) return true;
-      // Include expired only if it's currently selected
-      if (value === selectedMonth && includeExpired) return true;
-      return false;
-    }
-
-    // Past year — don't allow anything unless it's selected
-    return value === selectedMonth;
   });
 };
 
