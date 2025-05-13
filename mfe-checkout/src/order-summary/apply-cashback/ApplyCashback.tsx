@@ -35,6 +35,16 @@ export const ApplyCashback: React.FC<IApplyCashbackContainer> = ({
       setLoading(true);
       const isCashbackApplied = !order?.userOptions.applyEWallet;
 
+      // set message  when cashback is applied and order balance is 0
+      if (order?.totals.price === 0) {
+        setOrderNotifications([
+          ...(notificationMessages || []),
+          "Your order balance is already $0.00. You cannot apply VIFT to your order",
+        ]);
+        setLoading(false);
+        return;
+      }
+
       changeOrder(
         generateChangeStoreResponse({
           ...order,
@@ -50,7 +60,7 @@ export const ApplyCashback: React.FC<IApplyCashbackContainer> = ({
           setOrderNotifications(
             getOrderNotifications(response.response.success)
           );
-          setLoading(false)
+          setLoading(false);
         }
       });
     }
@@ -67,9 +77,14 @@ export const ApplyCashback: React.FC<IApplyCashbackContainer> = ({
         }
       >
         <div className="left-part-middle-container">
-          <div className={order?.userOptions.applyEWallet ? "image-border-container" : "image-border-container notselected" }>
-          {order?.userOptions.applyEWallet ?
-            <VIFT /> : <VIFT />}
+          <div
+            className={
+              order?.userOptions.applyEWallet
+                ? "image-border-container"
+                : "image-border-container notselected"
+            }
+          >
+            {order?.userOptions.applyEWallet ? <VIFT /> : <VIFT />}
           </div>
           <p
             className={
