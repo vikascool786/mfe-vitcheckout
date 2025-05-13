@@ -6,7 +6,7 @@ import { Cashback } from "../assets/svgs/Cashback";
 import { Button } from "../component/Button/Button";
 import { FormField } from "../component/Form/Field/FormField";
 import { FormHeading } from "../component/Form/Heading/FormHeading";
-import { loadingAtom, orderAtom } from "../store";
+import { loadingAtom, orderAtom, orderNotificationsAtom } from "../store";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import { getCatalogName } from "../utils/helpers/GetCatalog";
 import { ApplyCashback } from "./apply-cashback/ApplyCashback";
@@ -18,7 +18,10 @@ import { fetchShopperAttributes } from "../api/service/ShopperDetail";
 import { ShopperAttribute } from "../interfaces/ShopperAttribute";
 import { getOrderValidatePromoCode } from "../api/service/PromoCodeAPI";
 import { portalApiData } from "../checkout/portalAtom";
-import { getCouponAliasForCouponCode, isHiddenCouponCode } from "../utils/CouponUtils";
+import {
+  getCouponAliasForCouponCode,
+  isHiddenCouponCode,
+} from "../utils/CouponUtils";
 import StoreHeading from "../component/StoreHeading";
 import { GET_API_MODE } from "../utils/helpers/urlResolvers";
 import { GiftCard } from "./GiftCard";
@@ -58,6 +61,9 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
   const [order, setOrder] = useAtom(orderAtom);
   const { eWalletData, loading, error } = useShopperEWallet(pcid);
   const [isLoading, setIsLoading] = useAtom(loadingAtom);
+    const [notificationMessages, setOrderNotifications] = useAtom(
+      orderNotificationsAtom
+    );
   const [coupon, setCoupon] = useState<ICouponState>({
     coupon: "",
     couponError: "",
@@ -148,10 +154,35 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
     }
   };
 
-  // Add gift card to the order
   const handleAddGiftCard = async (isGCApplied: boolean, index?: number) => {
-    if (isGCApplied && order) {
-      // Remove gift card from the order
+    if (!order) return;
+  
+    const isApplyingGiftCard = !isGCApplied;
+  
+    if (isApplyingGiftCard && order.totals.price === 0) {
+      const msg = "Your order balance is already $0.00. You cannot apply gift card to your order";
+  
+      if (!notificationMessages?.includes(msg)) {
+        setOrderNotifications([
+          ...(notificationMessages || []),
+          msg,
+        ]);
+      }
+  
+      setOrder({
+        ...order,
+        userOptions: {
+          ...order.userOptions,
+          gcNum: [...order.userOptions.gcNum],
+          gcPin: [...order.userOptions.gcPin],
+        },
+      });
+  
+      return;
+    }
+  
+    // === If removing gift card ===
+    if (!isApplyingGiftCard) {
       try {
         const updatedOrder = await buildOrder(
           generateChangeStoreResponse({
@@ -163,7 +194,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
             },
           })
         );
-
+  
         setgcState((prevState) => ({
           ...prevState,
           gcNum: "",
@@ -172,7 +203,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           gcVisible: false,
           gcApplied: false,
         }));
-
+  
         setOrder(updatedOrder.response?.success?.data);
         setGCLoading(false);
         return;
@@ -180,6 +211,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         console.error("Error while removing gift card:", error);
       }
     }
+  
+    // === If applying gift card ===
     if (!gcState.gcNum?.trim()) {
       setgcState((prevState) => ({
         ...prevState,
@@ -187,7 +220,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
       }));
       return;
     }
-
+  
     if (!gcState.gcPin?.trim()) {
       setgcState((prevState) => ({
         ...prevState,
@@ -195,67 +228,62 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
       }));
       return;
     }
-
+  
     setGCLoading(true);
-
-    if (order) {
-      try {
-        const updatedOrder = await buildOrder(
+  
+    try {
+      const updatedOrder = await buildOrder(
+        generateChangeStoreResponse({
+          ...order,
+          userOptions: {
+            ...order.userOptions,
+            gcNum: [...(order.userOptions.gcNum || []), gcState.gcNum],
+            gcPin: [...(order.userOptions.gcPin || []), gcState.gcPin],
+          },
+        })
+      );
+  
+      const notifications = updatedOrder.response.success.notifications;
+  
+      if (notifications && notifications.length > 0) {
+        setgcState((prevState) => ({
+          ...prevState,
+          gcError: notifications[0]?.reason || "Gift card error",
+          gcVisible: true,
+          gcApplied: false,
+        }));
+  
+        await buildOrder(
           generateChangeStoreResponse({
             ...order,
             userOptions: {
-              ...order?.userOptions,
-              // gcNum: [...order?.userOptions?.gcNum, gcState?.gcNum],
-              // gcPin: [...order?.userOptions?.gcPin, gcState?.gcPin],
-              gcNum: [...(order?.userOptions?.gcNum || []), gcState?.gcNum],
-              gcPin: [...(order?.userOptions?.gcPin || []), gcState?.gcPin],
+              ...order.userOptions,
+              gcNum: [],
+              gcPin: [],
             },
           })
         );
-
-        if (
-          updatedOrder.response.success.notifications &&
-          updatedOrder.response.success.notifications.length > 0
-        ) {
-          setgcState((prevState) => ({
-            ...prevState,
-            gcError: updatedOrder?.response?.success?.notifications.at(0)
-              ?.reason as string,
-            gcVisible: true,
-            gcApplied: false,
-          }));
-
-          buildOrder(
-            generateChangeStoreResponse({
-              ...order,
-              userOptions: {
-                ...order.userOptions,
-                gcNum: [],
-                gcPin: [],
-              },
-            })
-          );
-          return;
-        }
-        setOrder(updatedOrder.response?.success?.data);
-        setgcState((prevState) => ({
-          ...prevState,
-          gcNum: "",
-          gcError: "",
-          gcPin: "",
-          gcVisible: false,
-          gcApplied: false,
-        }));
-        setGCLoading(false);
-      } catch (error) {
-        console.error("Error while adding gift card:", error);
-        setgcState((prevState) => ({
-          ...prevState,
-          gcError: "An unexpected error occurred while adding the gift card.",
-        }));
-      } finally {
-        setGCLoading(false);
+  
+        return;
       }
+  
+      setOrder(updatedOrder.response?.success?.data);
+      setgcState((prevState) => ({
+        ...prevState,
+        gcNum: "",
+        gcError: "",
+        gcPin: "",
+        gcVisible: false,
+        gcApplied: false,
+      }));
+    } catch (error) {
+      console.error("Error while adding gift card:", error);
+      setgcState((prevState) => ({
+        ...prevState,
+        gcError: "An unexpected error occurred while adding the gift card.",
+      }));
+    } finally {
+      setGCLoading(false);
     }
   };
 
@@ -387,25 +415,24 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
     setgcState((prevState) => ({
       ...prevState,
       gcApplied: order?.userOptions?.gcNum
-      ? order?.userOptions?.gcNum?.length > 0
-      : false,
+        ? order?.userOptions?.gcNum?.length > 0
+        : false,
     }));
   }, [order?.userOptions.gcNum]);
 
-  // not to send payment method id if Gift card covers whole order 
+  // not to send payment method id if Gift card covers whole order
   useEffect(() => {
     if (order?.totals?.price == 0) {
       console.log(order?.totals?.price == 0, "order?.totals?.price");
 
       const handlePaymentOnGCCover = async () => {
         try {
-
           const { id: _, ...pmId } = order?.paymentMethod || {};
-        
+
           const updatedOrder = await buildOrder(
             generateChangeStoreResponse({
               ...order,
-              paymentMethod: pmId  as IPaymentMethod,
+              paymentMethod: pmId as IPaymentMethod,
             })
           );
           setOrder(updatedOrder.response?.success?.data);
@@ -434,7 +461,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
             {!loading &&
               !error &&
               eWalletData &&
-              parseInt(eWalletData.totalCoaCBAvail) > 0 &&  (
+              parseInt(eWalletData.totalCoaCBAvail) > 0 && (
                 <ApplyCashback cashbackData={eWalletData} siteId={siteId} />
               )}
           </>
@@ -462,7 +489,10 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         {order?.userOptions.coupons &&
           order?.userOptions.coupons?.length > 0 && (
             <div className="order-applied-coupons">
-                <AppliedCoupons stores={order?.stores} handleRemoveCoupon={handleRemoveCoupon} />
+              <AppliedCoupons
+                stores={order?.stores}
+                handleRemoveCoupon={handleRemoveCoupon}
+              />
             </div>
           )}
 
@@ -509,21 +539,20 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               index={index}
               order={order}
             />
-        ))}
+          ))}
 
         {gcState.gcError && gcState.gcVisible && (
           <div className="error-message">{gcState.gcError}</div>
         )}
-        
-        {!order?.userOptions.applyEWallet &&
-          order?.totals.walletAppliedStr !== order?.totals.priceActualStr && (
-            <div
-              className="qa-link order-sub-text underlined"
-              onClick={handleApplyGiftCard}
-            >
-              {gcState.gcVisible ? "Hide Gift Card" : "Apply Gift Card"}
-            </div>
-          )}
+
+        {order?.totals.walletAppliedStr !== order?.totals.priceActualStr && (
+          <div
+            className="qa-link order-sub-text underlined"
+            onClick={handleApplyGiftCard}
+          >
+            {gcState.gcVisible ? "Hide Gift Card" : "Apply Gift Card"}
+          </div>
+        )}
 
         {storesTotals &&
           storesTotals
@@ -558,27 +587,29 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                     </div>
                   </div>
                   {store?.store?.totals?.couponCode && (
-                      <div className="order-summary-row order-summary-row__coupon">
-                        <div className="order-summary-coupon-applied">
-                          Coupon
-                          <span
-                              key={index}
-                              className="order-summary-coupon-applied__code"
-                          >
-                            {isHiddenCouponCode(store?.store?.totals?.couponCode) ? (
-                                <span>
-                                {getCouponAliasForCouponCode(store?.store?.totals?.couponCode)}
-                              </span>
-                            ) : (
-                                <span>
-                                {store?.store?.totals?.couponCode}
-                              </span>
-                            )}
-                          </span>
-                        </div>
-
-                        <div>{store?.store?.totals?.couponsStr}</div>
+                    <div className="order-summary-row order-summary-row__coupon">
+                      <div className="order-summary-coupon-applied">
+                        Coupon
+                        <span
+                          key={index}
+                          className="order-summary-coupon-applied__code"
+                        >
+                          {isHiddenCouponCode(
+                            store?.store?.totals?.couponCode
+                          ) ? (
+                            <span>
+                              {getCouponAliasForCouponCode(
+                                store?.store?.totals?.couponCode
+                              )}
+                            </span>
+                          ) : (
+                            <span>{store?.store?.totals?.couponCode}</span>
+                          )}
+                        </span>
                       </div>
+
+                      <div>{store?.store?.totals?.couponsStr}</div>
+                    </div>
                   )}
                   <div className="order-summary-row">
                     <div>Tax</div>

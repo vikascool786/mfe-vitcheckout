@@ -29,46 +29,55 @@ export const ApplyCashback: React.FC<IApplyCashbackContainer> = ({
   const [siteData] = useAtom(siteApiData(siteId));
 
   const handleAddApplyCashback = () => {
-    // Determine if cashback is being applied or removed
-
-    if (order) {
-      setLoading(true);
-      const isCashbackApplied = !order?.userOptions.applyEWallet;
-
-      // set message  when cashback is applied and order balance is 0 and do not add it message is already there
-      if (
-        order?.totals.price === 0 &&
-        !notificationMessages?.includes(
-          "Your order balance is already $0.00. You cannot apply VIFT to your order"
-        )
-      ) {
+    if (!order) return;
+  
+    const isApplyingCashback = !order.userOptions.applyEWallet;
+  
+    // Prevent applying if order total is already $0.00
+    if (
+      isApplyingCashback &&
+      order.totals.price === 0
+    ) {
+      const msg = "Your order balance is already $0.00. You cannot apply VIFT to your order";
+  
+      if (!notificationMessages?.includes(msg)) {
         setOrderNotifications([
-          ...(notificationMessages || []),
-          "Your order balance is already $0.00. You cannot apply VIFT to your order",
+          ...(notificationMessages || []).filter((m) => m !== msg),
+          msg,
         ]);
-        setLoading(false);
-        return;
       }
-
-      changeOrder(
-        generateChangeStoreResponse({
-          ...order,
-          userOptions: {
-            ...order.userOptions,
-            applyEWallet: isCashbackApplied,
-          },
-        }),
-        order.id
-      ).then((response) => {
-        if (response) {
-          setOrder(response.response.success.data);
-          setOrderNotifications(
-            getOrderNotifications(response.response.success)
-          );
-          setLoading(false);
-        }
+  
+      // Ensure cashback is not applied
+      setOrder({
+        ...order,
+        userOptions: {
+          ...order.userOptions,
+          applyEWallet: false,
+        },
       });
+  
+      setLoading(false);
+      return;
     }
+  
+    setLoading(true);
+  
+    changeOrder(
+      generateChangeStoreResponse({
+        ...order,
+        userOptions: {
+          ...order.userOptions,
+          applyEWallet: isApplyingCashback,
+        },
+      }),
+      order.id
+    ).then((response) => {
+      if (response) {
+        setOrder(response.response.success.data);
+        setOrderNotifications(getOrderNotifications(response.response.success));
+        setLoading(false);
+      }
+    });
   };
 
   return (
