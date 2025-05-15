@@ -136,6 +136,8 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
           });
         return;
       }, 300);
+    }  else {
+      updateCvvError("");
     }
   }, [paymentMethod]);
 
