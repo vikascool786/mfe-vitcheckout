@@ -16,6 +16,11 @@ interface IFormFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   formName?: string;
 }
 
+const sanitizeInput = (value: string) => {
+  // Remove any HTML tags or scripts
+  return value.replace(/<[^>]*>?/gm, "");
+};
+
 export const FormField: React.FC<IFormFieldProps> = ({
   label,
   required,
@@ -54,7 +59,6 @@ export const FormField: React.FC<IFormFieldProps> = ({
       <div className="input-wrapper">
         <input
           className={baseClasses}
-          name={name}
           type={type}
           ref={(el: HTMLInputElement | null) =>
             el && errorRefs && errorRefs.current
@@ -62,7 +66,18 @@ export const FormField: React.FC<IFormFieldProps> = ({
               : null
           }
           {...props}
+          name={name}
           maxLength={maxLength}
+          onChange={(e) => {
+            console.log("event.target.name", e.target.name); //
+            const sanitizedValue = sanitizeInput(e.target.value);
+        
+            // Mutate the event directly to keep Formik happy
+            e.target.value = sanitizedValue;
+        
+            // Call original handler
+            props.onChange?.(e);
+          }}
         />
         {errorMessage && (
           <span className="material-symbols-outlined error-icon">error</span>
