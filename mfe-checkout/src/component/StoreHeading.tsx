@@ -59,9 +59,7 @@ const StoreHeading: React.FC<IStoreHeadingProps> = ({ storeName, storeKey, isMAS
             if(storeKey.includes("*OOS*")){
                 shipmentNumber = Number(storeKey.split("*").pop()) + 1;
             }
-            storeHeading = shipmentNumber && !isNaN(shipmentNumber)
-            ? `${storeName} ${shipmentNumber}`
-            : storeName;
+            storeHeading = `${storeName} ${shipmentNumber}`;
 
             if(!isOrderSummary){
                 if(storeKey.includes("*OOS*")) {

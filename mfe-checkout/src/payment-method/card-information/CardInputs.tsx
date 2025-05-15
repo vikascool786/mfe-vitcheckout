@@ -32,6 +32,7 @@ export const CardInputs: React.FC<ICardInputProps> = ({
   errorRefs = null,
   isFromClick2Pay = false,
 }) => {
+ 
   const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let formattedValue = e.target.value.replace(/\D/g, ""); // Remove non-numeric characters
     if (formattedValue.length > 16)
@@ -40,55 +41,50 @@ export const CardInputs: React.FC<ICardInputProps> = ({
     handleChange("cardInfo.number")(formattedValue);
   };
 
-  const currentYear = new Date().getFullYear();
-  const selectedExpYear = parseInt(values.cardInfo?.expYear, 10);
-  const currentMonth = new Date().getMonth() + 1;
-  const selectedExpMonth = parseInt(values.cardInfo?.expMonth, 10);
-  const isExpired =
-    selectedExpYear < currentYear ||
-    (selectedExpYear === currentYear && selectedExpMonth < currentMonth);
 
+const currentYear = new Date().getFullYear();
+const selectedExpYear = parseInt(values.cardInfo?.expYear, 10);
+  
   // Use the earlier of current year or selected year (to allow past expired dates like 2024 to still show up)
   const minYear = Math.min(currentYear, selectedExpYear || currentYear);
-
   const years = Array.from({ length: 15 }, (_, i) => {
-    const year = currentYear + i;
+    const year = minYear + i;
     return { value: year.toString(), label: year.toString() };
+});
+
+const currentMonth = new Date().getMonth() + 1;
+
+const getValidMonths = (selectedYear?: number | string) => {
+  const selectedMonth = values.cardInfo?.expMonth?.toString().padStart(2, "0");
+  const selectedYearInt = parseInt(selectedYear as string, 10);
+  const includeExpired =
+    selectedYearInt === currentYear &&
+    parseInt(selectedMonth || "", 10) < currentMonth;
+
+  const months = Array.from({ length: 12 }, (_, i) => {
+    const month = i + 1;
+    const value = month.toString().padStart(2, "0");
+    return { value, label: value };
   });
 
-  const getValidMonths = (selectedYear?: number | string) => {
-    const selectedMonth = values.cardInfo?.expMonth
-      ?.toString()
-      .padStart(2, "0");
-    const selectedYearInt = parseInt(selectedYear as string, 10);
-    const includeExpired =
-      selectedYearInt === currentYear &&
-      parseInt(selectedMonth || "", 10) < currentMonth;
+  return months.filter(({ value }) => {
+    const monthInt = parseInt(value, 10);
 
-    const months = Array.from({ length: 12 }, (_, i) => {
-      const month = i + 1;
-      const value = month.toString().padStart(2, "0");
-      return { value, label: value };
-    });
+    if (!selectedYear) return true;
 
-    return months.filter(({ value }) => {
-      const monthInt = parseInt(value, 10);
+    if (selectedYearInt > currentYear) return true;
 
-      if (!selectedYear) return true;
+    if (selectedYearInt === currentYear) {
+      if (monthInt >= currentMonth) return true;
+      // Include expired only if it's currently selected
+      if (value === selectedMonth && includeExpired) return true;
+      return false;
+    }
 
-      if (selectedYearInt > currentYear) return true;
-
-      if (selectedYearInt === currentYear) {
-        if (monthInt >= currentMonth) return true;
-        // Include expired only if it's currently selected
-        if (value === selectedMonth && includeExpired) return true;
-        return false;
-      }
-
-      // Past year — don't allow anything unless it's selected
-      return value === selectedMonth;
-    });
-  };
+    // Past year — don't allow anything unless it's selected
+    return value === selectedMonth;
+  });
+};
 
   return (
     <>
@@ -130,15 +126,11 @@ export const CardInputs: React.FC<ICardInputProps> = ({
           selectedValue={
             values.cardInfo?.expMonth
               ? values.cardInfo.expMonth.toString().padStart(2, "0")
-              : new Date().getMonth() + (1).toString().padStart(2, "0")
+              : new Date().getMonth() + (1).toString().padStart(2, "0") // Default to the current month
           }
           options={getValidMonths(values.cardInfo?.expYear)}
           onChange={(value) => handleChange("cardInfo.expMonth")(value)}
-          errorMessage={
-            (touched.cardInfo?.expMonth && errors.cardInfo?.expMonth) ||
-            (isExpired &&
-              "Card is expired. Please use a valid expiration date.")
-          }
+          errorMessage={touched.cardInfo?.expMonth && errors.cardInfo?.expMonth}
         />
         <DropdownField
           qaTag="qa-expiration-year"
@@ -150,9 +142,7 @@ export const CardInputs: React.FC<ICardInputProps> = ({
           options={years}
           onChange={(value) => {
             const validMonths = getValidMonths(value);
-            const selectedMonth = values.cardInfo?.expMonth
-              ?.toString()
-              .padStart(2, "0");
+            const selectedMonth = values.cardInfo?.expMonth?.toString().padStart(2, "0");
 
             const isMonthStillValid = validMonths.some(
               (month) => month.value === selectedMonth
@@ -168,15 +158,10 @@ export const CardInputs: React.FC<ICardInputProps> = ({
               }
             }
           }}
-          errorMessage={
-            (touched.cardInfo?.expYear && errors.cardInfo?.expYear) ||
-            (isExpired && "Card is expired. Please use a valid expiration date.")
-          }
+          errorMessage={touched.cardInfo?.expYear && errors.cardInfo?.expYear}
         />
       </div>
-      {isEditing ? (
-        <p className="billing-address-styles">Billing Addess</p>
-      ) : null}
+      {isEditing ? <p className="billing-address-styles">Billing Addess</p> : null }
       {!isEditing && (
         <div className="form-field-container">
           <FormField
@@ -186,9 +171,8 @@ export const CardInputs: React.FC<ICardInputProps> = ({
             name="cardInfo.cvv"
             type="text"
             disablePasswordManager
-            autoComplete="off"
-            data-1p-ignore
-            data-lpignore="true"
+            autoComplete="off" 
+            data-1p-ignore data-lpignore="true" 
             data-protonpass-ignore="true"
             inputMode="numeric"
             value={values.cardInfo?.cvv || ""}

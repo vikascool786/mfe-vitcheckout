@@ -18,10 +18,7 @@ import { fetchShopperAttributes } from "../api/service/ShopperDetail";
 import { ShopperAttribute } from "../interfaces/ShopperAttribute";
 import { getOrderValidatePromoCode } from "../api/service/PromoCodeAPI";
 import { portalApiData } from "../checkout/portalAtom";
-import {
-  getCouponAliasForCouponCode,
-  isHiddenCouponCode,
-} from "../utils/CouponUtils";
+import { getCouponAliasForCouponCode, isHiddenCouponCode } from "../utils/CouponUtils";
 import StoreHeading from "../component/StoreHeading";
 import { GET_API_MODE } from "../utils/helpers/urlResolvers";
 import { GiftCard } from "./GiftCard";
@@ -61,9 +58,9 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
   const [order, setOrder] = useAtom(orderAtom);
   const { eWalletData, loading, error } = useShopperEWallet(pcid);
   const [isLoading, setIsLoading] = useAtom(loadingAtom);
-    const [notificationMessages, setOrderNotifications] = useAtom(
+  const [notificationMessages, setOrderNotifications] = useAtom(
       orderNotificationsAtom
-    );
+  );
   const [coupon, setCoupon] = useState<ICouponState>({
     coupon: "",
     couponError: "",
@@ -154,6 +151,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
     }
   };
 
+  // Add gift card to the order
   const handleAddGiftCard = async (isGCApplied: boolean, index?: number) => {
     if (!order) return;
   
@@ -286,7 +284,6 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
       setGCLoading(false);
     }
   };
-
   const handleAddCoupon = async () => {
     try {
       if (coupon.coupon) {
@@ -415,24 +412,25 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
     setgcState((prevState) => ({
       ...prevState,
       gcApplied: order?.userOptions?.gcNum
-        ? order?.userOptions?.gcNum?.length > 0
-        : false,
+      ? order?.userOptions?.gcNum?.length > 0
+      : false,
     }));
   }, [order?.userOptions.gcNum]);
 
-  // not to send payment method id if Gift card covers whole order
+  // not to send payment method id if Gift card covers whole order 
   useEffect(() => {
     if (order?.totals?.price == 0) {
       console.log(order?.totals?.price == 0, "order?.totals?.price");
 
       const handlePaymentOnGCCover = async () => {
         try {
-          const { id: _, ...pmId } = order?.paymentMethod || {};
 
+          const { id: _, ...pmId } = order?.paymentMethod || {};
+        
           const updatedOrder = await buildOrder(
             generateChangeStoreResponse({
               ...order,
-              paymentMethod: pmId as IPaymentMethod,
+              paymentMethod: pmId  as IPaymentMethod,
             })
           );
           setOrder(updatedOrder.response?.success?.data);
@@ -453,7 +451,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         apiMode === "localhost" ? "height-180" : "height-245"
       }`}
     >
-      {gcLoading || (isLoading && <Spinner />)}
+      {gcLoading || isLoading && <Spinner />}
       <>
         <FormHeading title="Order Summary" />
         {!hideCashback && (
@@ -489,10 +487,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         {order?.userOptions.coupons &&
           order?.userOptions.coupons?.length > 0 && (
             <div className="order-applied-coupons">
-              <AppliedCoupons
-                stores={order?.stores}
-                handleRemoveCoupon={handleRemoveCoupon}
-              />
+                <AppliedCoupons stores={order?.stores} handleRemoveCoupon={handleRemoveCoupon} />
             </div>
           )}
 
@@ -539,12 +534,12 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               index={index}
               order={order}
             />
-          ))}
+        ))}
 
         {gcState.gcError && gcState.gcVisible && (
           <div className="error-message">{gcState.gcError}</div>
         )}
-
+        
         {order?.totals.walletAppliedStr !== order?.totals.priceActualStr && (
           <div
             className="qa-link order-sub-text underlined"
@@ -587,29 +582,27 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                     </div>
                   </div>
                   {store?.store?.totals?.couponCode && (
-                    <div className="order-summary-row order-summary-row__coupon">
-                      <div className="order-summary-coupon-applied">
-                        Coupon
-                        <span
-                          key={index}
-                          className="order-summary-coupon-applied__code"
-                        >
-                          {isHiddenCouponCode(
-                            store?.store?.totals?.couponCode
-                          ) ? (
-                            <span>
-                              {getCouponAliasForCouponCode(
-                                store?.store?.totals?.couponCode
-                              )}
-                            </span>
-                          ) : (
-                            <span>{store?.store?.totals?.couponCode}</span>
-                          )}
-                        </span>
-                      </div>
+                      <div className="order-summary-row order-summary-row__coupon">
+                        <div className="order-summary-coupon-applied">
+                          Coupon
+                          <span
+                              key={index}
+                              className="order-summary-coupon-applied__code"
+                          >
+                            {isHiddenCouponCode(store?.store?.totals?.couponCode) ? (
+                                <span>
+                                {getCouponAliasForCouponCode(store?.store?.totals?.couponCode)}
+                              </span>
+                            ) : (
+                                <span>
+                                {store?.store?.totals?.couponCode}
+                              </span>
+                            )}
+                          </span>
+                        </div>
 
-                      <div>{store?.store?.totals?.couponsStr}</div>
-                    </div>
+                        <div>{store?.store?.totals?.couponsStr}</div>
+                      </div>
                   )}
                   <div className="order-summary-row">
                     <div>Tax</div>

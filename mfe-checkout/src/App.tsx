@@ -47,22 +47,22 @@ const App: React.FC<AppProps> = () => {
         /> */}
 
         {/* vift + Gift cashback account  */}
-        {/* <CheckoutContainer
-          cartId="cart_1918885741_W_USA_USA_ENG"
-          shopperId="YUXUeYeqzeYzUzhkYVzZhUezzwUwUmqUpVmYzjqzz"
-          pcid="1918885741"
+        <CheckoutContainer
+          cartId="cart_6565841_W_USA_USA_ENG"
+          shopperId="ZpXYpYwzzXVYUzhkZhzYpYmzYxpUmjmejWpqzjqzz"
+          pcid="6565841"
           siteId="66"
-          sessionId="3055418875"
-        /> */}
+          sessionId="3055429806"
+        />
 
         {/* expired credit card account  */}
-        <CheckoutContainer
+        {/* <CheckoutContainer
           cartId="cart_1602997422_W_USA_USA_ENG"
           shopperId="XmWZkXwhzXpmXzhhejzqhmZzUzWYZwkpkZjWzpmqe"
           pcid="1602997422"
           siteId="66"
           sessionId="3055421110"
-        />
+        /> */}
 
         {/* for GC Card Customer */}
         {/* <CheckoutContainer

@@ -26,7 +26,7 @@ import {
 } from "../store";
 import {
   getOrderNotifications,
-  orderHasAutoshipItems,
+  orderHasAutoshipItems, orderHasDefaultMAShipAddress,
 } from "../utils/OrderUtils";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import {handleSezzleCheckout, isSezzleSelectedPayment, isSezzleSuccessful} from "../utils/helpers/SezzleHelper";
@@ -116,10 +116,13 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   const [hasPhoneError, setHasPhoneError] = useState<boolean>(false);
   const [mobileRequiredMessage, setMobileRequiredMessage] =
     useState<boolean>(false);
-  const isAddressSaved = useMemo(
-    () => addressList.length >= 1 && addressList?.some((address) => address.hasAddress === 1)  ,
-    [addressList]
-  );
+  const isAddressSaved = useMemo(() => {
+    const hasSavedAddress = addressList.length >= 1 && addressList.some(
+        (address) => address.hasAddress === 1
+    );
+    const orderHasSavedShipAddress = !orderHasDefaultMAShipAddress(orderData || null);
+    return hasSavedAddress && orderHasSavedShipAddress;
+  }, [addressList, orderData]);
 
   const [isPlacingOrderWithThirdParty, setIsPlacingOrderWithThirdParty] = useState<boolean>(false);
 

@@ -7,6 +7,7 @@ import {
 } from "../interfaces/OrderConsolidationData";
 import { Success } from "../api/service/Order";
 import {GIFT_CARD_STORE_CATALOGS, GIFT_CARD_STORE_VOLUMES, isGiftCardStore} from "./StoreUtils";
+import { isAddressDefaultMAAddress } from "./AddressUtils";
 
 export function updatePaymentMethod(
     order: ChangeOrder,
@@ -29,6 +30,11 @@ export const orderHasAutoshipItems = (order: Order | null): boolean => {
     return Object.values(order.stores)
         .flatMap((store) => store.items)
         .some((item) => item.autoshipFreq > 0 || item.autoShipId !== undefined);
+};
+
+export const orderHasDefaultMAShipAddress = (order: Order | null): boolean => {
+    if (!order) return false;
+    return isAddressDefaultMAAddress(order.shippingAddress);
 };
 
 export const getOrderConsolidateData = (
