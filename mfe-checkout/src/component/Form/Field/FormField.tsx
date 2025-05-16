@@ -15,9 +15,7 @@ interface IFormFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   disablePasswordManager?: boolean;
   formName?: string;
 }
-
 const sanitizeInput = (value: string) => {
-  // Remove any HTML tags or scripts
   return value.replace(/<[^>]*>?/gm, "");
 };
 

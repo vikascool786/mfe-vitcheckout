@@ -91,7 +91,7 @@
       min-height: 42px;
       line-height: 18px;
       font-weight: normal;
-      max-width: 40%;
+      width: 100%;
 
       @media only screen and (max-width: 560px) {
         &::placeholder {
@@ -99,9 +99,7 @@
           font-size: 12px;
         }
 
-        width: 100px;
         min-height: 28px;
-        max-width: 55%;
       }
     }
 
@@ -150,6 +148,25 @@
   }
 }
 
+.cvv-error {
+  border: 1px solid #dd1f1f !important;
+}
+.cvv-input-wrapper {
+  position: relative;
+  max-width: 40%;
+  display: flex;
+  align-items: center;
+  @media only screen and (max-width: 560px) {
+    max-width: 50%;
+  }
+}
+
+.cvv-error-icon {
+  position: absolute;
+  right: 5px;
+  color: #dd1f1f;
+  font-size: 20px !important;
+}
 .payment-option-add-container {
   &__card {
     display: flex;

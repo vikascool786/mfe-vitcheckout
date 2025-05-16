@@ -136,7 +136,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
           });
         return;
       }, 300);
-    }  else {
+    } else {
       updateCvvError("");
     }
   }, [paymentMethod]);
@@ -344,9 +344,16 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                     CVV
                   </div>
                   <div>
+                    <div className="cvv-input-wrapper">
                     <input
                       name="cvv"
-                      className="qa-cvv payment-option-container__card-cvv-form"
+                      className={`qa-cvv payment-option-container__card-cvv-form ${
+                        errorMessage ||
+                        formik.errors.cvv ||
+                        (formik.values.cvvError && !formik.errors.cvv)
+                          ? "cvv-error"
+                          : ""
+                      }`}
                       value={formik.values.cvv}
                       type="text"
                       pattern="\d*"
@@ -385,7 +392,15 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                       onBlur={formik.handleBlur}
                       required
                     />
-                     <div className="cvv-text">{maxLength} digits</div>
+                    {(errorMessage ||
+                      formik.errors.cvv ||
+                      (formik.values.cvvError && !formik.errors.cvv)) && (
+                      <span className="material-symbols-outlined cvv-error-icon">
+                        error
+                      </span>
+                    )}
+                    </div>
+                    <div className="cvv-text">{maxLength} digits</div>
                     {errorMessage ||
                       (formik.errors.cvv && (
                         <span className="error-message">
