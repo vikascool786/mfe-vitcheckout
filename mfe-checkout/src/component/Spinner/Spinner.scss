@@ -31,5 +31,5 @@
   border-top-color: #4a90e2;
   border-right-color: #1c3559;
   border-radius: 50%;
-  animation: spin 0.25s linear infinite;
+  animation: spin 0.75s linear infinite; // Safer speed: ~1.33 Hz
 }
