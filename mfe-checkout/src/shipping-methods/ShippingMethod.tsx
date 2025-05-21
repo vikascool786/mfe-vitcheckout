@@ -41,7 +41,12 @@ import { Spinner } from "../component/Spinner/Spinner";
 import { FreeShipMessage } from "./FreeShipMessage";
 import StoreHeading from "../component/StoreHeading";
 import { OrderStore } from "../interfaces/Order";
-import { isGiftCardStore, storeHasCustomCocktail, storeHasOOSItems } from "../utils/StoreUtils";
+import {
+  getSortedStores,
+  isGiftCardStore,
+  storeHasCustomCocktail,
+  storeHasOOSItems
+} from "../utils/StoreUtils";
 import {isPaypalPayment, PAYPAL, PAYPAL_RECURRING} from "../payment-method/PaymentType";
 import { createPaymentMethod } from "../utils/helpers/GeneratePaymentMethod";
 import { Address } from "../interfaces/Address";
@@ -354,10 +359,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
 
       {orders?.stores && (
         <div className="qa-shipping-item shipping-item-container">
-          {Object.entries(orders?.stores)
-            .sort(([, storeA], [, storeB]) => {
-              return (storeB?.store?.isMA ?? 0) - (storeA?.store?.isMA ?? 0);
-            })
+          {getSortedStores(orders)
             .map(([key, store]) => {
               return (
                 store && (

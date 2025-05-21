@@ -9,9 +9,9 @@ import {
     orderHasGiftCards,
     orderIsMAOnly
 } from "../utils/OrderUtils";
-import {Order, OrderStore} from "../interfaces/Order";
-import { getStoreDataFromKey, isGiftCardForStoreKey } from "../utils/StoreUtils";
-import {getItemEstimatedShipDate, hasEstimatedShipDate} from "../utils/ItemUtils";
+import { Order, OrderStore } from "../interfaces/Order";
+import { getSortedStores, getStoreDataFromKey, isGiftCardForStoreKey } from "../utils/StoreUtils";
+import { getItemEstimatedShipDate, hasEstimatedShipDate } from "../utils/ItemUtils";
 
 interface IStoreHeadingProps {
     storeName: string;
@@ -48,9 +48,9 @@ const StoreHeading: React.FC<IStoreHeadingProps> = ({ storeName, storeKey, isMAS
         setShowStoreShipmentHeading((isOnlySingleMAOOSItemInStore(order, storeKey) && !isOrderSummary) || !orderIsMAOnly(order) || consolidateData.oosConsolidate === OOS_CONSOLIDATE_SPLIT_CODE || orderHasGiftCards(order));
     }, [order, storeKey]);
 
-    const getShipmentNumber = (order: Order, storeKey: string): number => {
-        const keys = Object.keys(order.stores);
-        const storeIndex = keys.indexOf(storeKey);
+    const getShipmentNumber = (order: Order, key: string): number => {
+        const sortedStores = getSortedStores(order);
+        const storeIndex = sortedStores.findIndex(([storeKey]) => storeKey === key);
         return storeIndex + 1;
     };
 

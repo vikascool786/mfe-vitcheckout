@@ -39,7 +39,13 @@ import { IPaymentMethod2 } from "../interfaces/Order";
 import Click2PayCardLoader from "../payment-method-click2pay/Click2PayCardLoader";
 import { RadioButton } from "../component/RadioButton/RadioButton";
 import { isSezzleSelectedPayment } from "../utils/helpers/SezzleHelper";
-import { updatedPaymentOptionsWithSelectedType } from "../utils/types/PaymentOptionUtils";
+import {
+  createNewCardOption,
+  getSelectedPaymentOption,
+  isNewCardInPaymentOptions,
+  isSelectedPaymentInAllowedOrderPayments, returnPaymentOptionsWithDefaultSelection,
+  updatedPaymentOptionsWithSelectedType
+} from "../utils/types/PaymentOptionUtils";
 
 interface IPaymentMethod {
   shopperId: string;
@@ -155,29 +161,12 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
               return { ...method, isSelected: false };
             });
           } else {
-            const isNewCardAlreadyPresent = paymentMethods.some(
-              (method) => method.paymentMethod.typeID === 9 && method.paymentMethod.id === 0
-            );
+            const isNewCardAlreadyPresent = isNewCardInPaymentOptions(paymentMethods);
         
             if (!isNewCardAlreadyPresent) {
-              const newCard = createPaymentMethod({
-                accountName: "",
-                imageUrl: CardOptions,
-                id: 0,
-                typeID: 9,
-                addressId: 0,
-                expMonth: new Date().getMonth() + 1,
-              });
         
               staticMethods = [
-                {
-                  paymentMethod: newCard,
-                  paymentAddress: {} as Address,
-                  isPaymentValidated: false,
-                  isSelected: true,
-                  isVisible: true,
-                  isEditing: true,
-                },
+                createNewCardOption(),
                 ...paymentMethods.map((method) => ({
                   ...method,
                   isSelected: false,
@@ -361,6 +350,20 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       updatePaymentTypeId(SEZZLE.typeId);
     }
 
+    if(order){
+      if(!isSelectedPaymentInAllowedOrderPayments(updatedPMs, order.paymentMethods)){
+        updatedPMs = returnPaymentOptionsWithDefaultSelection(updatedPMs);
+        const selectedPaymentTypeId = getSelectedPaymentOption(updatedPMs);
+        if(selectedPaymentTypeId){
+          updatePaymentTypeId(selectedPaymentTypeId.paymentMethod.typeID);
+        } else if (isPaymentsFetched && !selectedPaymentTypeId){
+          const newCartPM = createNewCardOption();
+          updatedPMs.push(newCartPM);
+          updatePaymentTypeId(newCartPM.paymentMethod.typeID);
+        }
+      }
+    }
+
     setPaymentMethods(updatedPMs);
   }, [order, isPaymentsFetched]);
 
@@ -509,14 +512,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
 
     setPaymentMethods([
       ...updatedPaymentOptions,
-      {
-        paymentMethod: newCard,
-        paymentAddress: {} as Address,
-        isPaymentValidated: false,
-        isSelected: true,
-        isVisible: true,
-        isEditing: true,
-      },
+      createNewCardOption(),
     ]);
   };
 

@@ -36,3 +36,9 @@ export const storeHasCustomCocktail = (store: OrderStore | null): boolean => {
 export const getStoreDataFromKey = (order: Order, storeKey: string): OrderStore | null => {
     return order?.stores?.[storeKey] || null;
 };
+
+export const getSortedStores = (order: Order): [string, OrderStore][] => {
+    return Object.entries(order?.stores ?? {}).sort(([, storeA], [, storeB]) => {
+        return (storeB?.store?.isMA ?? 0) - (storeA?.store?.isMA ?? 0);
+    });
+};
