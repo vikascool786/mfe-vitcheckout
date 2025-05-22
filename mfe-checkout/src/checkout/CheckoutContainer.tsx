@@ -51,6 +51,7 @@ import {siteApiData} from "./siteAtom";
 import { isSuccessfulPaypalCallback } from "../utils/helpers/PaypalHelper";
 import ShippingMethodHeading from "../shipping-methods/ShippingMethodHeading";
 import { getUserAgent } from "../utils/helpers/UserSessionDataHelper";
+import { initiateCheckoutEventListeners } from "./CheckoutEventListeners";
 
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
@@ -183,6 +184,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   }
   useEffect(() => {
     window.addEventListener("resize", handleWindowSizeChange);
+    initiateCheckoutEventListeners();
     return () => {
       window.removeEventListener("resize", handleWindowSizeChange);
     };

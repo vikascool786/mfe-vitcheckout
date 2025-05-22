@@ -463,7 +463,7 @@ const Checkout: React.FC<ICheckout> = ({
 
           {/* show details fields based on accordion state close  */}
           {!showShipAddressForm && (
-            <div className="shipping-address">
+            <div className="shipping-address js-checkout-shipping-address" data-ship-address-id={shippingAddress.id}>
               {!isExpanded && (
                 <AddressDisplay
                   address={shippingAddress}
