@@ -1,18 +1,6 @@
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
 .checkout-spinner-wrapper {
   position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
+  inset: 0;
   background: rgba(0, 0, 0, 0.3);
   z-index: 15;
   display: flex;
@@ -21,11 +9,22 @@
 }
 
 .checkout-spinner {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: conic-gradient(#4a90e2 10%, #1c3559 80%, transparent 60%);
-  mask: radial-gradient(farthest-side, transparent 25%, black 76%);
-  -webkit-mask: radial-gradient(farthest-side, transparent 75%, black 76%);
-  animation: spin 0.75s linear infinite;
+  width: 69px;
+  height: 69px;
+  animation: checkout-spin 0.75s linear infinite;
+}
+
+.checkout-spinner-path {
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-dasharray: 90, 150;
+  stroke-dashoffset: 0;
+  transform: rotate(-90deg);
+  transform-origin: center;
+}
+
+@keyframes checkout-spin {
+  100% {
+    transform: rotate(360deg);
+  }
 }
