@@ -1,14 +1,14 @@
 import React from "react";
-import { Close } from "../assets/svgs/Close";
+import { Close } from "../../assets/svgs/Close";
 
-interface GiftCardProps {
+interface GiftCardDisplayItemProps {
   order: any;
   index: number;
   gcDispApplied: string;
   handleAddGiftCard: (isRemove: boolean, index: number) => void;
 }
 
-export const GiftCard: React.FC<GiftCardProps> = ({
+export const GiftCardDisplayItem: React.FC<GiftCardDisplayItemProps> = ({
   handleAddGiftCard,
   gcDispApplied,
   index,

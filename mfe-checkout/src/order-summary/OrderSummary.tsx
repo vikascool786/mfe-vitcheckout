@@ -21,7 +21,7 @@ import { portalApiData } from "../checkout/portalAtom";
 import { getCouponAliasForCouponCode, isHiddenCouponCode } from "../utils/CouponUtils";
 import StoreHeading from "../component/StoreHeading";
 import { GET_API_MODE } from "../utils/helpers/urlResolvers";
-import { GiftCard } from "./GiftCard";
+import { GiftCardComponent } from "./gift-card/GCComponent";
 import { IPaymentMethod } from "../interfaces/ShopperCart";
 import AppliedCoupons from "./AppliedCoupons";
 
@@ -66,17 +66,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
     couponError: "",
   });
 
-  const [gcState, setgcState] = useState<IGCState>({
-    gcNum: "",
-    gcPin: "",
-    gcError: "",
-    gcVisible:
-      order?.userOptions.gcNum && order?.userOptions?.gcNum[0] ? true : false,
-    gcApplied:
-      order?.userOptions.gcNum && order?.userOptions?.gcNum[0] ? true : false,
-  });
 
-  const [gcLoading, setGCLoading] = useState(false);
   const [portalData] = useAtom(portalApiData(shopperId));
   const apiMode = GET_API_MODE();
 
@@ -89,32 +79,6 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
       coupon: value,
       // Clear the error if the coupon text is cleared
       couponError: value.trim() === "" ? "" : prev.couponError,
-    }));
-  };
-
-  // Handle input changes for gift card fields
-  const handleGcNumChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setgcState((prevState) => ({
-      ...prevState,
-      gcNum: e.target.value,
-      gcError: "", // Clear error on input change
-    }));
-  };
-
-  const handleGcPinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setgcState((prevState) => ({
-      ...prevState,
-      gcPin: e.target.value,
-      gcError: "", // Clear error on input change
-    }));
-  };
-
-  // Toggle gift card visibility and reset gcApplied when hiding
-  const handleApplyGiftCard = () => {
-    setgcState((prevState) => ({
-      ...prevState,
-      gcVisible: !prevState.gcVisible,
-      gcApplied: !prevState.gcVisible ? false : prevState.gcApplied, // Reset gcApplied when hiding
     }));
   };
 
@@ -151,139 +115,6 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
     }
   };
 
-  // Add gift card to the order
-  const handleAddGiftCard = async (isGCApplied: boolean, index?: number) => {
-    if (!order) return;
-  
-    const isApplyingGiftCard = !isGCApplied;
-  
-    if (isApplyingGiftCard && order.totals.price === 0) {
-      const msg = "Your order balance is already $0.00. You cannot apply gift card to your order";
-  
-      if (!notificationMessages?.includes(msg)) {
-        setOrderNotifications([
-          ...(notificationMessages || []),
-          msg,
-        ]);
-      }
-  
-      setOrder({
-        ...order,
-        userOptions: {
-          ...order.userOptions,
-          gcNum: [...order.userOptions.gcNum],
-          gcPin: [...order.userOptions.gcPin],
-        },
-      });
-  
-      return;
-    }
-  
-    // === If removing gift card ===
-    if (!isApplyingGiftCard) {
-      try {
-        const updatedOrder = await buildOrder(
-          generateChangeStoreResponse({
-            ...order,
-            userOptions: {
-              ...order.userOptions,
-              gcNum: [...order.userOptions.gcNum.filter((_, i) => i !== index)],
-              gcPin: [...order.userOptions.gcPin.filter((_, i) => i !== index)],
-            },
-          })
-        );
-  
-        setgcState((prevState) => ({
-          ...prevState,
-          gcNum: "",
-          gcError: "",
-          gcPin: "",
-          gcVisible: false,
-          gcApplied: false,
-        }));
-  
-        setOrder(updatedOrder.response?.success?.data);
-        setGCLoading(false);
-        return;
-      } catch (error) {
-        console.error("Error while removing gift card:", error);
-      }
-    }
-  
-    // === If applying gift card ===
-    if (!gcState.gcNum?.trim()) {
-      setgcState((prevState) => ({
-        ...prevState,
-        gcError: "Please enter number",
-      }));
-      return;
-    }
-  
-    if (!gcState.gcPin?.trim()) {
-      setgcState((prevState) => ({
-        ...prevState,
-        gcError: "Please enter pin",
-      }));
-      return;
-    }
-  
-    setGCLoading(true);
-  
-    try {
-      const updatedOrder = await buildOrder(
-        generateChangeStoreResponse({
-          ...order,
-          userOptions: {
-            ...order.userOptions,
-            gcNum: [...(order.userOptions.gcNum || []), gcState.gcNum],
-            gcPin: [...(order.userOptions.gcPin || []), gcState.gcPin],
-          },
-        })
-      );
-  
-      const notifications = updatedOrder.response.success.notifications;
-  
-      if (notifications && notifications.length > 0) {
-        setgcState((prevState) => ({
-          ...prevState,
-          gcError: notifications[0]?.reason || "Gift card error",
-          gcVisible: true,
-          gcApplied: false,
-        }));
-  
-        await buildOrder(
-          generateChangeStoreResponse({
-            ...order,
-            userOptions: {
-              ...order.userOptions,
-              gcNum: [],
-              gcPin: [],
-            },
-          })
-        );
-  
-        return;
-      }
-  
-      setOrder(updatedOrder.response?.success?.data);
-      setgcState((prevState) => ({
-        ...prevState,
-        gcNum: "",
-        gcError: "",
-        gcPin: "",
-        gcVisible: false,
-        gcApplied: false,
-      }));
-    } catch (error) {
-      console.error("Error while adding gift card:", error);
-      setgcState((prevState) => ({
-        ...prevState,
-        gcError: "An unexpected error occurred while adding the gift card.",
-      }));
-    } finally {
-      setGCLoading(false);
-    }
-  };
   const handleAddCoupon = async () => {
     try {
       if (coupon.coupon) {
@@ -408,42 +239,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
       });
   }, []);
 
-  useEffect(() => {
-    setgcState((prevState) => ({
-      ...prevState,
-      gcApplied: order?.userOptions?.gcNum
-      ? order?.userOptions?.gcNum?.length > 0
-      : false,
-    }));
-  }, [order?.userOptions.gcNum]);
 
-  // not to send payment method id if Gift card covers whole order 
-  useEffect(() => {
-    if (order?.totals?.price == 0) {
-      console.log(order?.totals?.price == 0, "order?.totals?.price");
 
-      const handlePaymentOnGCCover = async () => {
-        try {
-
-          const { id: _, ...pmId } = order?.paymentMethod || {};
-        
-          const updatedOrder = await buildOrder(
-            generateChangeStoreResponse({
-              ...order,
-              paymentMethod: pmId  as IPaymentMethod,
-            })
-          );
-          setOrder(updatedOrder.response?.success?.data);
-        } catch (error) {
-          console.error("Error while adding gift card:", error);
-        } finally {
-          setGCLoading(false);
-        }
-      };
-
-      handlePaymentOnGCCover();
-    }
-  }, [order?.totals?.price]);
 
   return (
     <div
@@ -451,7 +248,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         apiMode === "localhost" ? "height-180" : "height-245"
       }`}
     >
-      {gcLoading || isLoading && <Spinner />}
+      {isLoading && <Spinner />}
       <>
         <FormHeading title="Order Summary" />
         {!hideCashback && (
@@ -491,63 +288,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
             </div>
           )}
 
-        {gcState.gcVisible && (
-          <div className="qa-order-gift gift-card-wrapper">
-            <div className="gift-card-wrapper-fields">
-              <div className="gift-card-wrapper-field-1">
-                <div className="order-redeem-coupon-text">Gift Card Number</div>
-                <FormField
-                  qaTag={"qa-card-number"}
-                  value={gcState.gcNum}
-                  onChange={handleGcNumChange}
-                />
-              </div>
-              <div className="gift-card-wrapper-field-2">
-                <div className="order-redeem-coupon-text">PIN</div>
-                <FormField
-                  qaTag={"qa-input"}
-                  disablePasswordManager
-                  value={gcState.gcPin}
-                  onChange={handleGcPinChange}
-                />
-              </div>
-            </div>
+        <GiftCardComponent order={order} setOrder={setOrder} />
 
-            <div className="gift-card-apply">
-              <Button
-                qaTag={"qa-button"}
-                label="Apply"
-                btnType="secondary"
-                onClick={() => handleAddGiftCard(false)}
-              />
-            </div>
-          </div>
-        )}
-
-        {order?.totals.gcDispAppliedStr &&
-          order?.totals?.gcBalanceStr &&
-          order.totals.gcDispAppliedStr.map((gcDispApplied, index) => (
-            <GiftCard
-              key={gcDispApplied}
-              gcDispApplied={gcDispApplied}
-              handleAddGiftCard={handleAddGiftCard}
-              index={index}
-              order={order}
-            />
-        ))}
-
-        {gcState.gcError && gcState.gcVisible && (
-          <div className="error-message">{gcState.gcError}</div>
-        )}
-        
-        {order?.totals.walletAppliedStr !== order?.totals.priceActualStr && (
-          <div
-            className="qa-link order-sub-text underlined"
-            onClick={handleApplyGiftCard}
-          >
-            {gcState.gcVisible ? "Hide Gift Card" : "Apply Gift Card"}
-          </div>
-        )}
 
         {storesTotals &&
           storesTotals
