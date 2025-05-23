@@ -16,7 +16,7 @@ interface IFormFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   formName?: string;
 }
 const sanitizeInput = (value: string) => {
-  return value.replace(/<[^>]*>?/gm, "");
+  return value.replace(/[^a-zA-Z0-9 .,]/g, "");
 };
 
 export const FormField: React.FC<IFormFieldProps> = ({
