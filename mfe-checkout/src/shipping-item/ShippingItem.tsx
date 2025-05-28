@@ -32,6 +32,7 @@ import { getOptionStringValue } from "../utils/helpers/GetOptionStringValue";
 import { isPaypalPayment, PAYPAL, PAYPAL_RECURRING } from "../payment-method/PaymentType";
 import { isGiftCardStoreDetail } from "../utils/StoreUtils";
 import { Spinner } from "../component/Spinner/Spinner";
+import { isCustomCocktailProdContainerId } from "../utils/ItemUtils";
 interface IProduct {
   imageUrl: string;
   name: string;
@@ -317,6 +318,10 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
                 </div>
 
                 {!isGiftCard && <div>{optionStringValue()}</div>}
+
+                { isCustomCocktailProdContainerId(item.prodContainerId) &&
+                    <div>{item.special_formula}</div>
+                }
               </div>
 
               <div className="shippingItem-priceStr">{totals?.priceStr}</div>

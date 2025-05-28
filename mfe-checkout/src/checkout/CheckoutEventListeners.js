@@ -16,6 +16,11 @@ function handleReturnToCartListener(){
 
 function handleReturnToCart(event, cartHref) {
     event.preventDefault();
-    const shippingId = document.querySelector(shippingAddress).getAttribute('data-ship-address-id');
+    let shippingId = "";
+    const shipAddressElement = document.querySelector(shippingAddress);
+    if(shipAddressElement){
+        shippingId = document.querySelector(shippingAddress).getAttribute('data-ship-address-id');
+    }
+
     window.location.href = `${cartHref}?shippingId=${shippingId}`;
 }

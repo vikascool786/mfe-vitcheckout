@@ -60,6 +60,8 @@ export interface Item {
     priceStr?: string;
   };
   product_hash: string;
+  prodContainerId: string;
+  special_formula: string;
 }
 export interface StoreDetail {
   catalogId: number;

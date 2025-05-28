@@ -8,6 +8,11 @@ export const isCustomCocktail = (item: Item | null): boolean => {
     return item?.prodContainerId === CUSTOM_COCKTAIL_PROD_CONTAINER_ID;
 };
 
+export const isCustomCocktailProdContainerId = (prodContainer: string): boolean => {
+    if (!prodContainer) return false;
+    return prodContainer === CUSTOM_COCKTAIL_PROD_CONTAINER_ID;
+};
+
 export const isInStockItem = (item: Item | null): boolean => {
     if (!item) return false;
     const inventoryStatus = item?.permutation?.inventoryStatus || "";

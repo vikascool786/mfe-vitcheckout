@@ -66,7 +66,6 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
     couponError: "",
   });
 
-
   const [portalData] = useAtom(portalApiData(shopperId));
   const apiMode = GET_API_MODE();
 
@@ -239,9 +238,6 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
       });
   }, []);
 
-
-
-
   return (
     <div
       className={`qa-order-summary order-summary-container ${
@@ -289,7 +285,6 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           )}
 
         <GiftCardComponent order={order} setOrder={setOrder} />
-
 
         {storesTotals &&
           storesTotals
