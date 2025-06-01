@@ -1,29 +1,30 @@
 import { useAtom } from "jotai";
 import React, { useEffect, useState } from "react";
 import { buildOrder, changeOrder } from "../api/service/Order";
+import { getOrderValidatePromoCode } from "../api/service/PromoCodeAPI";
+import { fetchShopperAttributes } from "../api/service/ShopperDetail";
 import { useShopperEWallet } from "../api/service/ShopperEWallet";
 import { Cashback } from "../assets/svgs/Cashback";
-import { Button } from "../component/Button/Button";
-import { FormField } from "../component/Form/Field/FormField";
+import { VIFT } from "../assets/svgs/VIFT";
+import { portalApiData } from "../checkout/portalAtom";
 import { FormHeading } from "../component/Form/Heading/FormHeading";
+import { Spinner } from "../component/Spinner/Spinner";
+import StoreHeading from "../component/StoreHeading";
+import { Order } from "../interfaces/Order";
+import { ShopperAttribute } from "../interfaces/ShopperAttribute";
 import { loadingAtom, orderAtom, orderNotificationsAtom } from "../store";
+import {
+  getCouponAliasForCouponCode,
+  isHiddenCouponCode,
+} from "../utils/CouponUtils";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import { getCatalogName } from "../utils/helpers/GetCatalog";
-import { ApplyCashback } from "./apply-cashback/ApplyCashback";
-import "./OrderSummary.scss";
-import { formattedNumber } from "../utils/OrderUtils";
-import { Spinner } from "../component/Spinner/Spinner";
-import { VIFT } from "../assets/svgs/VIFT";
-import { fetchShopperAttributes } from "../api/service/ShopperDetail";
-import { ShopperAttribute } from "../interfaces/ShopperAttribute";
-import { getOrderValidatePromoCode } from "../api/service/PromoCodeAPI";
-import { portalApiData } from "../checkout/portalAtom";
-import { getCouponAliasForCouponCode, isHiddenCouponCode } from "../utils/CouponUtils";
-import StoreHeading from "../component/StoreHeading";
 import { GET_API_MODE } from "../utils/helpers/urlResolvers";
+import { formattedNumber } from "../utils/OrderUtils";
+import { ApplyCashback } from "./apply-cashback/ApplyCashback";
+import OrderCoupons from "./coupons/OrderCoupons";
 import { GiftCardComponent } from "./gift-card/GCComponent";
-import { IPaymentMethod } from "../interfaces/ShopperCart";
-import AppliedCoupons from "./AppliedCoupons";
+import "./OrderSummary.scss";
 
 interface IOrderSummary {
   pcid: string;
@@ -59,7 +60,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
   const { eWalletData, loading, error } = useShopperEWallet(pcid);
   const [isLoading, setIsLoading] = useAtom(loadingAtom);
   const [notificationMessages, setOrderNotifications] = useAtom(
-      orderNotificationsAtom
+    orderNotificationsAtom
   );
   const [coupon, setCoupon] = useState<ICouponState>({
     coupon: "",
@@ -258,31 +259,14 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           </>
         )}
 
-        <div className="order-redeem-coupon-text">Redeem Coupon</div>
-        <div className="qa-order-coupon order-summary-coupon-container">
-          <div className="order-input-container">
-            <FormField
-              qaTag={"qa-input"}
-              value={coupon.coupon}
-              onChange={handleCouponTextChange}
-              errorMessage={coupon.couponError}
-            />
-          </div>
-          <div className="order-apply-container">
-            <Button
-              qaTag={"qa-button"}
-              label="Apply"
-              btnType="secondary"
-              onClick={handleAddCoupon}
-            />
-          </div>
-        </div>
-        {order?.userOptions.coupons &&
-          order?.userOptions.coupons?.length > 0 && (
-            <div className="order-applied-coupons">
-                <AppliedCoupons stores={order?.stores} handleRemoveCoupon={handleRemoveCoupon} />
-            </div>
-          )}
+        <OrderCoupons
+          cartId={cartId}
+          order={order as Order}
+          setOrder={setOrder}
+          isLoading={isLoading}
+          setIsLoading={setIsLoading}
+          shopperId={shopperId}
+        />
 
         <GiftCardComponent order={order} setOrder={setOrder} />
 
@@ -319,27 +303,29 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                     </div>
                   </div>
                   {store?.store?.totals?.couponCode && (
-                      <div className="order-summary-row order-summary-row__coupon">
-                        <div className="order-summary-coupon-applied">
-                          Coupon
-                          <span
-                              key={index}
-                              className="order-summary-coupon-applied__code"
-                          >
-                            {isHiddenCouponCode(store?.store?.totals?.couponCode) ? (
-                                <span>
-                                {getCouponAliasForCouponCode(store?.store?.totals?.couponCode)}
-                              </span>
-                            ) : (
-                                <span>
-                                {store?.store?.totals?.couponCode}
-                              </span>
-                            )}
-                          </span>
-                        </div>
-
-                        <div>{store?.store?.totals?.couponsStr}</div>
+                    <div className="order-summary-row order-summary-row__coupon">
+                      <div className="order-summary-coupon-applied">
+                        Coupon
+                        <span
+                          key={index}
+                          className="order-summary-coupon-applied__code"
+                        >
+                          {isHiddenCouponCode(
+                            store?.store?.totals?.couponCode
+                          ) ? (
+                            <span>
+                              {getCouponAliasForCouponCode(
+                                store?.store?.totals?.couponCode
+                              )}
+                            </span>
+                          ) : (
+                            <span>{store?.store?.totals?.couponCode}</span>
+                          )}
+                        </span>
                       </div>
+
+                      <div>{store?.store?.totals?.couponsStr}</div>
+                    </div>
                   )}
                   <div className="order-summary-row">
                     <div>Tax</div>
@@ -390,7 +376,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           </div>
         ) : null}
 
-        <div className={`order-summary-total ${
+        <div
+          className={`order-summary-total ${
             order?.totals?.priceActualStr !== order?.totals.priceStr
               ? `order-summary-total-line`
               : ``
@@ -437,7 +424,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               <div className="order-cashback">
                 <VIFT />
                 <span className="total-cash-added">
-                Total Cash added to your VIFT balance
+                  Total Cash added to your VIFT balance
                 </span>
               </div>
               <div>{`$${formattedNumber(
