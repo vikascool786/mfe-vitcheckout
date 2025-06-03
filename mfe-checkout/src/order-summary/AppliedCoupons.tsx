@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { OrderStores } from '../../interfaces/Order';
-import { getCouponAliasForCouponCode, isHiddenCouponCode } from '../../utils/CouponUtils';
-import { Close } from '../../assets/svgs/Close';
+import { IStores } from '../interfaces/ShopperCart';
+import { OrderStores } from '../interfaces/Order';
+import { Close } from "../assets/svgs/Close";
+import { getCouponAliasForCouponCode, isHiddenCouponCode } from '../utils/CouponUtils';
 
 interface AppliedCouponsProps {
   stores: OrderStores;

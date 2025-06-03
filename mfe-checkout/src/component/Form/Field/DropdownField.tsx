@@ -2,9 +2,11 @@ import React from "react";
 import { DropdownOption } from "../../../interfaces/DropdownOption";
 import "./DropdownField.scss";
 
-type DropdownProps = {
+interface DropdownProps
+  extends Omit<React.InputHTMLAttributes<HTMLSelectElement>, "onChange"> {
   options: DropdownOption[]; // Array of options to populate the dropdown
   label?: string; // Optional label for the dropdown
+  placeholder?: string; // Optional placeholder for the dropdown
   required?: boolean; // Whether the field is required
   selectedValue?: string; // Default selected value
   formName?: string; // Form name for the dropdown
@@ -16,11 +18,12 @@ type DropdownProps = {
   }> | null;
   disabled?: boolean;
   qaTag?: string;
-};
+}
 
 export const DropdownField: React.FC<DropdownProps> = ({
   options,
   label,
+  placeholder = "",
   required = false,
   selectedValue,
   formName,
@@ -30,6 +33,7 @@ export const DropdownField: React.FC<DropdownProps> = ({
   qaTag = "",
   errorRefs = null,
   disabled = false,
+  ...props
 }) => {
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
@@ -37,6 +41,7 @@ export const DropdownField: React.FC<DropdownProps> = ({
       onChange(value); // Pass the selected value to the parent
     }
   };
+
   return (
     <div className={`${className || ""} field-item-container`}>
       {label && (
@@ -59,9 +64,10 @@ export const DropdownField: React.FC<DropdownProps> = ({
           onChange={handleChange} // Handle change events
           required={required}
           disabled={disabled}
+          {...props}
         >
           <option value="" disabled>
-            {`Select ${label || "an option"}`}
+            {placeholder ? placeholder : `Select ${label || "an option"}`}
           </option>
           {options.map((option) => (
             <option key={option.value} value={option.value}>

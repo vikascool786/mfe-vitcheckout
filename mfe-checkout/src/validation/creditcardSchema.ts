@@ -20,7 +20,15 @@ export const creditCardSchema = Yup.object({
   expMonth: Yup.number()
     .min(1, "Invalid month")
     .max(12, "Invalid month")
-    .required("Expiration Month is required"),
+    .required("Expiration Month is required")
+    .when("expYear", (expYear, schema) => {
+      const currentYear = new Date().getFullYear();
+      const currentMonth = new Date().getMonth() + 1;
+      if (expYear[0] === currentYear) {
+        return schema.min(currentMonth, "Card is expired");
+      }
+      return schema;
+    }),
   expYear: Yup.number()
     .min(new Date().getFullYear(), "Invalid year")
     .required("Expiration Year is required"),

@@ -12,12 +12,12 @@ export interface IPaymentMethod {
   cvv: number;
   token: string;
   accountName: string;
-  expMonth: number;
-  expYear: number;
+  expMonth: number | undefined;
+  expYear: number | undefined;
   addressId: number;
   shopperAccountDisabled: number;
   links: Link[];
-  preferred?: boolean
+  preferred?: boolean;
 }
 
 export interface Link {

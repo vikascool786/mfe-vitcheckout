@@ -78,6 +78,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
     orderNotificationsAtom
   );
   const [freeShipMessageMap, setFreeShipMessageMap] = useState(new Map<string, string>());
+  const [isSplitOrderPickUpSelected, setIsSplitOrderPickUpSelected] = useState(false);
 
   if (!orders) {
     return <p>Loading shipping methods...</p>;
@@ -414,7 +415,9 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
                       </div>
                     )}
                     {isAddressSaved && showShippingOptions(store) && (
-                      <ShippingOptions store={store} storeKey={key} />
+                      <ShippingOptions store={store} storeKey={key}
+                                       onSplitPickUpChange={setIsSplitOrderPickUpSelected}
+                                       isSplitOrderPickUpSelected={isSplitOrderPickUpSelected} />
                     )}
                   </div>
                 )
