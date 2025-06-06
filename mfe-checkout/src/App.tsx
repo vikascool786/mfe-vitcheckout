@@ -37,31 +37,31 @@ const App: React.FC<AppProps> = () => {
           sessionId="3055290977"
         /> */}
 
-        {/* for new custoemr  */}
-        {/* <CheckoutContainer
-          cartId="cart_1027266886_W_USA_USA_ENG"
-          shopperId="UjxYwWWwzexqqzhVhxzYYpXzXmXjZzjYYXwpzkkmz"
-          pcid="1027266886"
-          siteId="66"
-          sessionId="3055410409"
-        /> */}
-
-        {/* vift + Gift cashback account  */}
+        {/* for old custoemr  */}
         <CheckoutContainer
-          cartId="cart_6565841_W_USA_USA_ENG"
-          shopperId="ZpXYpYwzzXVYUzhkZhzYpYmzYxpUmjmejWpqzjqzz"
-          pcid="6565841"
+          cartId="cart_1316760835_W_USA_USA_ENG"
+          shopperId="mkYxXjppzhzmjzhxWzzpkYjzmYXZVzYWkeZjzwjhx"
+          pcid="1316760835"
           siteId="66"
-          sessionId="3055458276"
+          sessionId="3055317105"
         />
+
+        {/* vift cashback account  */}
+        {/* <CheckoutContainer
+          cartId="cart_1316760835_W_USA_USA_ENG"
+          shopperId="mkYxXjppzhzmjzhxWzzpkYjzmYXZVzYWkeZjzwjhx"
+          pcid="1316760835"
+          siteId="66"
+          sessionId="3055307133"
+        /> */}
 
         {/* expired credit card account  */}
         {/* <CheckoutContainer
-          cartId="cart_1602997422_W_USA_USA_ENG"
-          shopperId="XmWZkXwhzXpmXzhhejzqhmZzUzWYZwkpkZjWzpmqe"
-          pcid="1602997422"
+          cartId="cart_1947765337_W_USA_USA_ENG"
+          shopperId="hmUhkqpzzezhXzhhVqzZmxWzqeYXkUjzqXjpzpqqm"
+          pcid="1947765337"
           siteId="66"
-          sessionId="3055421110"
+          sessionId="3055311904"
         /> */}
 
         {/* for GC Card Customer */}
@@ -72,21 +72,12 @@ const App: React.FC<AppProps> = () => {
           siteId="66"
           sessionId="3055249126"
         /> */}
-        {/* for CouponCustomer */}
         {/* <CheckoutContainer
-          cartId="cart_1316760835_W_USA_USA_ENG"
-          shopperId="mkYxXjppzhzmjzhxWzzpkYjzmYXZVzYWkeZjzwjhx"
-          pcid="1316760835"
+          cartId="cart_1762863970_W_USA_USA_ENG"
+          shopperId="qYmmqpWZzVjeZzhZqpzpVYwzkmqWjqkhZVqjzxqjqp"
+          pcid="1762863970"
           siteId="66"
-          sessionId="3055421110"
-        /> */}
-        {/* for VIFT Cards  */}
-        {/* <CheckoutContainer
-         cartId="cart_1316760835_W_USA_USA_ENG"
-          shopperId="mkYxXjppzhzmjzhxWzzpkYjzmYXZVzYWkeZjzwjhx"
-          pcid="1316760835"
-          siteId="66"
-          sessionId="3055421110"
+          sessionId="3055290977"
         /> */}
         {/* for vikas card custoemr  */}
         {/* <CheckoutContainer

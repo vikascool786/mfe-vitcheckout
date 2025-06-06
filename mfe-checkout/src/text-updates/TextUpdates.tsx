@@ -14,6 +14,7 @@ import {siteApiData} from "../checkout/siteAtom";
 import {SHOP_SHIP_UPDATE_TEXT_PREF_CODE} from "../interfaces/ShopperCommunicationPreferences";
 import {fetchTwilioLookupData, PHONE_TYPE_MOBILE} from "../api/service/TwilioPhoneLookup";
 import { getCountryName } from "../utils/helpers/LocaleHelper";
+import { Back } from "../assets/svgs/Back";
 import {
   INVALID_COUNTRY_MOBILE_NUMBER,
   MOBILE_NUMBER_NOT_VALID,
@@ -64,6 +65,8 @@ const FormContent = React.memo(
     setMobileRequiredMessage,
     mobileRequiredMessage,
     isSubmitting,
+    isExpanded,
+    toggleAccordion,
   }: any) => {
     useEffect(() => {
       if (values.boxChecked && values.phone.length === 10) {
@@ -94,7 +97,6 @@ const FormContent = React.memo(
     const handleCheckboxChange = useCallback(
       (e: React.ChangeEvent<HTMLInputElement>) => {
         const { checked } = e.target;
-        const phoneValue = values.phone;
         if (!checked) {
           setFieldValue("phone", "");
           setFieldError("phone", "");
@@ -102,6 +104,7 @@ const FormContent = React.memo(
           setHasPhoneError(false);
         } else {
           values.phone.length !== 10 && setHasPhoneError(true);
+          !isExpanded && toggleAccordion();
         }
         handleChange(e);
         handleSubmit();
@@ -113,42 +116,14 @@ const FormContent = React.memo(
         setMobileRequiredMessage,
         setHasPhoneError,
         handleChange,
+        isExpanded,
+        toggleAccordion,
       ]
     );
 
     return (
       <Form className="tm-form-container">
-        <div className={"qa-mobile-texts"}>
-          <FormField
-            qaTag={"qa-input"}
-            label={<span className="form-field-label">Mobile Phone</span>}
-            extraLabel="10 digits"
-            name="phone"
-            maxLength={10}
-            value={values.phone}
-            required={values.boxChecked}
-            errorMessage={
-              (values.boxChecked && touched.phone && errors.phone) ||
-              (mobileRequiredMessage && errors.phone)
-            }
-            onChange={handlePhoneChange}
-            onBlur={(e) => {
-              if (
-                errors.phone !== NOT_A_MOBILE_PHONE_NUMBER &&
-                errors.phone !== MOBILE_NUMBER_NOT_VALID &&
-                errors.phone !==
-                  INVALID_COUNTRY_MOBILE_NUMBER(
-                    getCountryName(siteData.locale.countryCode) as string,
-                    getCountryName(siteData.locale.countryCode) as string
-                  )
-              ) {
-                handleBlur(e);
-                validateField("phone");
-              }
-            }}
-          />
-        </div>
-        <div className="save-for-later-txtupdate">
+        <div className="text-updates-header">
           <FormField
             type="checkbox"
             name="boxChecked"
@@ -156,9 +131,44 @@ const FormContent = React.memo(
             className="checkbox"
             checked={values.boxChecked}
             onChange={handleCheckboxChange}
-            extraLabel="Send order updates"
+            extraLabel="Want to receive text message on this order?"
+          />
+          <Back
+            className={`qa-expand mfe-accordion ${
+              isExpanded ? "open" : "close"
+            }`}
+            onClick={toggleAccordion}
+            style={{
+              pointerEvents: values.boxChecked ? "none" : "auto",
+              opacity: values.boxChecked ? 0.5 : 1,
+            }}
           />
         </div>
+
+        {isExpanded && (
+          <div className="text-updates-content">
+            <div className="mobile-header">
+              <span className="mobile-label">Mobile Phone</span>
+              <span className="rates-text">
+                Message and data rates may apply.
+              </span>
+            </div>
+            <FormField
+              qaTag={"qa-input"}
+              name="phone"
+              maxLength={10}
+              value={values.phone}
+              required={values.boxChecked}
+              errorMessage={
+                (values.boxChecked && touched.phone && errors.phone) ||
+                (mobileRequiredMessage && errors.phone)
+              }
+              onChange={handlePhoneChange}
+              onBlur={handleBlur}
+              extraLabel="10 digits"
+            />
+          </div>
+        )}
       </Form>
     );
   }
@@ -179,6 +189,7 @@ export const TextUpdates = React.memo(
       customerData?.cell_phone || ""
     );
     const [isAlertChecked, setIsAlertChecked] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(false);
 
     useEffect(() => {
       fetchCustomerPreferenceData(pcid, siteData).then((response) => {
@@ -189,7 +200,7 @@ export const TextUpdates = React.memo(
               preference.optIn === 1
           );
           setIsAlertChecked(hasTextAlertsPreference);
-
+          setIsExpanded(hasTextAlertsPreference);
           if (hasTextAlertsPreference) {
             updateOrderWithTextAlerts(customerProfileMobilePhone);
           }
@@ -197,6 +208,11 @@ export const TextUpdates = React.memo(
       });
     }, []);
 
+    useEffect(() => {
+      if (mobileRequiredMessage || isAlertChecked) {
+        setIsExpanded(true);
+      }
+    }, [mobileRequiredMessage, isAlertChecked]);
     const handleSendOrderUpdates = async (
       values: FormValues,
       { setSubmitting, setFieldError }: FormikHelpers<FormValues>
@@ -277,10 +293,12 @@ export const TextUpdates = React.memo(
       }
     };
 
+    const toggleAccordion = () => {
+      setIsExpanded(!isExpanded);
+    };
+
     return (
       <div className="tm-container">
-        <FormHeading title="Text Updates for this Order" />
-        <div className="tm-rates-mobile">Message and data rates may apply.</div>
         <Formik
           initialValues={{
             phone: customerProfileMobilePhone || "",
@@ -296,6 +314,8 @@ export const TextUpdates = React.memo(
               setHasPhoneError={setHasPhoneError}
               setMobileRequiredMessage={setMobileRequiredMessage}
               mobileRequiredMessage={mobileRequiredMessage}
+              isExpanded={isExpanded}
+              toggleAccordion={toggleAccordion}
               siteData={siteData}
             />
           )}

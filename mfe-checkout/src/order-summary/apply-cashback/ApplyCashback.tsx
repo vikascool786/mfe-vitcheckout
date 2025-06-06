@@ -1,14 +1,15 @@
 import { useAtom } from "jotai";
 import React from "react";
-import { changeOrder } from "../../api/service/Order";
-import { VIFT } from "../../assets/svgs/VIFT";
-import { siteApiData } from "../../checkout/siteAtom";
 import { EWallet } from "../../interfaces/EWallet";
-import { loadingAtom, orderAtom, orderNotificationsAtom } from "../../store";
-import { getFormattedPrice } from "../../utils/helpers/CurrencyFormatterUtil";
-import { generateChangeStoreResponse } from "../../utils/helpers/GenerateChangeStoreResponse";
-import { getOrderNotifications } from "../../utils/OrderUtils";
 import "../OrderSummary.scss";
+import { loadingAtom, orderAtom, orderNotificationsAtom } from "../../store";
+import { changeOrder } from "../../api/service/Order";
+import { generateChangeStoreResponse } from "../../utils/helpers/GenerateChangeStoreResponse";
+import { VIFT } from "../../assets/svgs/VIFT";
+import { VIFTinit } from "../../assets/svgs/VIFTinit";
+import { getOrderNotifications } from "../../utils/OrderUtils";
+import { siteApiData } from "../../checkout/siteAtom";
+import { getFormattedPrice } from "../../utils/helpers/CurrencyFormatterUtil";
 
 interface IApplyCashbackContainer {
   cashbackData: EWallet;

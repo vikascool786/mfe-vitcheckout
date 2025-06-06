@@ -14,13 +14,140 @@
     box-shadow: none;
     gap: 0px;
   }
+
+  .text-updates-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    .field-extra-label {
+      font-weight: 400;
+      color: #000000;
+      font-family: Roboto;
+    }
+    .checkbox-wrapper {
+      flex: 1;
+
+      .checkbox {
+        display: flex;
+        align-items: center;
+        margin: 0;
+
+        input[type="checkbox"] {
+          margin: 0;
+          width: auto;
+          height: auto;
+        }
+
+        .form-field-label {
+          margin-left: 8px;
+          display: flex;
+          align-items: center;
+        }
+      }
+    }
+
+    .mfe-accordion {
+      cursor: pointer;
+      transition: transform 0.3s ease;
+      margin-left: 16px;
+      display: flex;
+      align-items: center;
+
+      &.open {
+        transform: rotate(180deg);
+      }
+    }
+  }
+
+  .text-updates-content {
+    width: 100%;
+    .field-item-container {
+      flex-direction: column;
+    }
+    .mobile-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+
+      .mobile-label {
+        font-weight: 400;
+        font-size: 16px;
+      }
+
+      .rates-text {
+        font-size: 13px;
+        font-style: italic;
+        font-weight: 300;
+      }
+    }
+
+    .form-field {
+      width: 100%;
+
+      input {
+        width: 100%;
+      }
+    }
+  }
+
+  .collapsed-content,
+  .expanded-content {
+    margin-bottom: 1rem;
+  }
+
+  .checkbox {
+    display: flex;
+    align-items: center;
+
+    .form-field-label {
+      margin-left: 0.5rem;
+    }
+  }
+
+  .phone-preview {
+    color: #666;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+  }
+
+  .qa-mobile-texts {
+    margin-bottom: 1rem;
+  }
+
+  .tm-form-container {
+    background-color: #fff;
+    padding: 1.5rem;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    @media (max-width: 560px) {
+      padding: 0px;
+      box-shadow: none;
+    }
+  }
+
+  .tm-rates-mobile {
+    color: #666;
+    font-size: 0.9rem;
+    margin-top: 1rem;
+    padding: 0 1rem;
+  }
+
+  .mobile-input-section {
+    margin-top: 1rem;
+    padding: 0 1rem;
+
+    .form-field-label {
+      font-weight: 500;
+    }
+  }
 }
 
 .tm-form-container {
   display: flex;
   justify-content: flex-start;
-  flex-direction: row;
-  gap: 36px;
+  flex-direction: column;
   align-items: flex-start;
   width: 100%;
   .field-item-container {
@@ -35,6 +162,13 @@
   flex: 1;
 }
 
+.text-updates-header {
+  .field-item-container {
+    .input-wrapper {
+      width: auto !important;
+    }
+  }
+}
 .save-for-later-txtupdate {
   display: flex;
   flex-direction: row;
@@ -106,7 +240,8 @@
 
 .tm-form-container .field-item-container {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  gap: 10px;
 }
 
 .form-field-error {
@@ -126,6 +261,10 @@
     .field-item-container {
       min-width: auto;
       width: 100%;
+      gap: 1px;
+    }
+    .field-extra-label {
+      letter-spacing: -1px;
     }
   }
 

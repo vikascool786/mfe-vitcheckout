@@ -1,21 +1,27 @@
 import { useAtom, useSetAtom } from "jotai";
 import React, { useEffect, useState } from "react";
 import { changeOrder } from "../api/service/Order";
-import { OrderStore, ShippingSelection } from "../interfaces/Order";
+import { OrderStore, OrderStores, ShippingSelection } from "../interfaces/Order";
 import { ShippingOptionItem } from "../shipping-option-item/ShippingOptionItem";
 import { loadingAtom, orderAtom } from "../store";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import "./ShippingOptions.scss";
 import { Back } from "../assets/svgs/Back";
+import { OOS_CONSOLIDATE_SPLIT_CODE } from "../interfaces/OrderConsolidationData";
+import { getShippingSelectionById, isPickUp, SHIP_ID_STANDARD } from "../utils/ShippingMethodUtils";
 
 interface IShippingOptions {
   store: OrderStore;
   storeKey: string;
+  onSplitPickUpChange: (isSplitOrderPickUpSelected: boolean) => void;
+  isSplitOrderPickUpSelected: boolean;
 }
 
 export const ShippingOptions: React.FC<IShippingOptions> = ({
   store,
   storeKey,
+  onSplitPickUpChange,
+  isSplitOrderPickUpSelected,
 }) => {
   const { shippingSelections, shippingMethod } = store;
   const [order, setOrder] = useAtom(orderAtom); // Access both getter and setter for the atom
@@ -48,7 +54,43 @@ export const ShippingOptions: React.FC<IShippingOptions> = ({
     setSelectedShippingMethod(getSelectedShippingOption(shipping));
   }, [shipping]);
 
-  const handleChange = (method: string) => {
+  const handleStoreShippingSelections = (method: string, id: number): OrderStores => {
+    let updatedStores = updateStoreShippingMethod(order?.stores || {}, storeKey, method);
+    const isSplitOrder = order?.userOptions.oosConsolidate === OOS_CONSOLIDATE_SPLIT_CODE;
+      if(isSplitOrder && (isPickUp(id) || isSplitOrderPickUpSelected)){
+        updatedStores = Object.entries(order.stores).reduce((acc, [storeId, store]) => {
+          acc[storeId] = store.store.isMA
+              ? {
+                ...store,
+                shippingMethod: storeId !== storeKey ? getSplitShipmentShipSelectionForStore(store, id)?.method || method : method,
+              }
+              : store;
+          return acc;
+        }, { ...updatedStores });
+      }
+      return updatedStores;
+  }
+
+  function updateStoreShippingMethod(stores: OrderStores, storeKey: string, method: string): OrderStores {
+    const store = stores[storeKey];
+    if (!store) return stores;
+
+    return {
+      ...stores,
+      [storeKey]: {
+        ...store,
+        shippingMethod: method,
+      },
+    };
+  }
+
+  function getSplitShipmentShipSelectionForStore(store: OrderStore, shipId: number){
+    const selectedShipId = !isPickUp(shipId) && isSplitOrderPickUpSelected ? SHIP_ID_STANDARD : shipId;
+    onSplitPickUpChange(isPickUp(selectedShipId));
+    return getShippingSelectionById(selectedShipId, store.shippingSelections);
+  }
+
+  const handleChange = (method: string, id: number) => {
     // Map through the selections to update the isSelected flag
     setLoading(true);
     const updatedOptions = shippingSelections.map((option) => ({
@@ -63,13 +105,7 @@ export const ShippingOptions: React.FC<IShippingOptions> = ({
       changeOrder(
         generateChangeStoreResponse({
           ...order, // Spread other stores
-          stores: {
-            ...order.stores,
-            [storeKey]: {
-              ...store,
-              shippingMethod: method,
-            },
-          },
+          stores: handleStoreShippingSelections(method, id),
         }),
         order.id
       )
@@ -150,7 +186,7 @@ export const ShippingOptions: React.FC<IShippingOptions> = ({
                 shippingOption?.isSelected ||
                 (index === 0 && !shipping.some((opt) => opt.isSelected))
               }
-              onChange={() => handleChange(shippingOption.method)}
+              onChange={() => handleChange(shippingOption.method, shippingOption.id)}
               hasAutoship={storeHasAutoshipItems(store)}
               isExpanded={true}
             />
