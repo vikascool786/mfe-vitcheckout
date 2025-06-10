@@ -8,11 +8,14 @@ import { FormHeading } from "../component/Form/Heading/FormHeading";
 import { orderAtom } from "../store";
 import "./TextUpdates.scss";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
-import {customerApiData} from "../checkout/customerAtom";
-import {fetchCustomerPreferenceData} from "../api/service/CommunicationPreferences";
-import {siteApiData} from "../checkout/siteAtom";
-import {SHOP_SHIP_UPDATE_TEXT_PREF_CODE} from "../interfaces/ShopperCommunicationPreferences";
-import {fetchTwilioLookupData, PHONE_TYPE_MOBILE} from "../api/service/TwilioPhoneLookup";
+import { customerApiData } from "../checkout/customerAtom";
+import { fetchCustomerPreferenceData } from "../api/service/CommunicationPreferences";
+import { siteApiData } from "../checkout/siteAtom";
+import { SHOP_SHIP_UPDATE_TEXT_PREF_CODE } from "../interfaces/ShopperCommunicationPreferences";
+import {
+  fetchTwilioLookupData,
+  PHONE_TYPE_MOBILE,
+} from "../api/service/TwilioPhoneLookup";
 import { getCountryName } from "../utils/helpers/LocaleHelper";
 import { Back } from "../assets/svgs/Back";
 import {
@@ -35,20 +38,24 @@ interface ITextUpdatesProps {
   setMobileRequiredMessage: React.Dispatch<SetStateAction<boolean>>;
 }
 
-const TextUpdatesSchema = Yup.object().shape({
-  phone: Yup.string()
-    .when("boxChecked", {
-      is: true,
-      then: (schema) =>
-        schema
-          .required("Mobile Phone is required")
-          .matches(/^\d{10}$/, "Phone number must be exactly 10 digits"),
-      otherwise: (schema) => schema.notRequired(),
-    })
-    .matches(/^\d{10}$/, "Phone number must be exactly 10 digits"),
+const TextUpdatesSchema = Yup.object({
+  phone: Yup.string().when("boxChecked", {
+    is: true,
+    then: (schema) =>
+      schema
+        .required("Mobile Phone is required")
+        .test(
+          "valid-phone-format",
+          "Phone number must contain exactly 10 digits",
+          function (value) {
+            const normalized = (value || "").replace(/\D/g, ""); // Remove non-digit characters
+            return /^\d{10}$/.test(normalized);
+          }
+        ),
+    otherwise: (schema) => schema.notRequired(),
+  }),
   boxChecked: Yup.boolean(),
 });
-
 const FormContent = React.memo(
   ({
     errors,
@@ -82,12 +89,12 @@ const FormContent = React.memo(
 
     const handlePhoneChange = useCallback(
       (e: React.ChangeEvent<HTMLInputElement>) => {
-        const numericValue = e.target.value.replace(/\D/g, "");
+        const inputValue = e.target.value.replace(/[^\d-]/g, ""); // allow digits and hyphens
         handleChange({
-          target: { name: "phone", value: numericValue },
+          target: { name: "phone", value: inputValue },
         } as React.ChangeEvent<HTMLInputElement>);
 
-        if (values.boxChecked && numericValue.length === 10) {
+        if (values.boxChecked && inputValue.length === 10) {
           setHasPhoneError(false);
         }
       },
@@ -156,7 +163,7 @@ const FormContent = React.memo(
             <FormField
               qaTag={"qa-input"}
               name="phone"
-              maxLength={10}
+              maxLength={14}
               value={values.phone}
               required={values.boxChecked}
               errorMessage={
@@ -218,7 +225,9 @@ export const TextUpdates = React.memo(
       { setSubmitting, setFieldError }: FormikHelpers<FormValues>
     ) => {
       try {
-        const phoneNumber = values.boxChecked ? values.phone : "";
+        const phoneNumber = values.boxChecked
+          ? values.phone.replace(/\D/g, "")
+          : "";
 
         if (values.boxChecked) {
           if (
