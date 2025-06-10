@@ -15,12 +15,7 @@ interface IFormFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   disablePasswordManager?: boolean;
   formName?: string;
 }
-
-const sanitizeInput = (value: string, fieldName: string) => {
-  // Allow hyphens only for the "phone" field
-  if (fieldName === "phone") {
-    return value.replace(/[^0-9-]/g, ""); // only digits and hyphens
-  }
+const sanitizeInput = (value: string) => {
   return value.replace(/[^a-zA-Z0-9 .,]/g, "");
 };
 
@@ -39,6 +34,7 @@ export const FormField: React.FC<IFormFieldProps> = ({
   type,
   ...props
 }) => {
+
   const shouldAddInputContainer =
     type !== "checkbox" && !className?.includes("input-container");
   const baseClasses = [
@@ -71,8 +67,13 @@ export const FormField: React.FC<IFormFieldProps> = ({
           name={name}
           maxLength={maxLength}
           onChange={(e) => {
-            const sanitizedValue = sanitizeInput(e.target.value, name!); // pass field name
+            console.log("event.target.name", e.target.name); //
+            const sanitizedValue = sanitizeInput(e.target.value);
+        
+            // Mutate the event directly to keep Formik happy
             e.target.value = sanitizedValue;
+        
+            // Call original handler
             props.onChange?.(e);
           }}
         />

@@ -659,7 +659,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               : ``
           } `}
         >
-          <div>Total Due</div>
+          <div className="order-summary__total-d">Total Due</div>
+          <div className="order-summary__total-m">Total</div>
           <div className={"qa-total"}>{order?.totals?.priceStr}</div>
         </div>
         {Number(order?.totals?.cashBack) > 0 && (

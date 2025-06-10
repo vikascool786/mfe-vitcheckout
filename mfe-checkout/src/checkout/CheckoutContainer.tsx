@@ -51,6 +51,7 @@ import {siteApiData} from "./siteAtom";
 import { isSuccessfulPaypalCallback } from "../utils/helpers/PaypalHelper";
 import ShippingMethodHeading from "../shipping-methods/ShippingMethodHeading";
 import { getUserAgent } from "../utils/helpers/UserSessionDataHelper";
+import { TotalAmount } from "./TotalAmount";
 import { initiateCheckoutEventListeners } from "./CheckoutEventListeners";
 
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
@@ -407,6 +408,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                 <Notifications
                   notificationMessages={orderNotifications || []}
                 />
+                <TotalAmount />
                 <Checkout
                   shopperId={shopperId}
                   siteId={siteId}

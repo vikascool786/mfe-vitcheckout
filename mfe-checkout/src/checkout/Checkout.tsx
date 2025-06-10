@@ -158,7 +158,6 @@ const Checkout: React.FC<ICheckout> = ({
     const addressEntered = {
       ...defaultAddress,
       ...address,
-      phone: address.phone.replace(/\D/g, ""),
       id: shippingAddress.id || 0,
       country: "USA",
     };
@@ -168,16 +167,11 @@ const Checkout: React.FC<ICheckout> = ({
 
     if (childRef.current) {
       try {
-        const { isValidAddress, hashCode } =
-          await childRef.current.verifyAddress({
-            ...addressEntered,
-          });
-
-        const validatedAddress = {
+        const { isValidAddress, hashCode } = await childRef.current.verifyAddress({
           ...addressEntered,
-          hashCode: hashCode,
-          defaultaddr: true,
-        };
+        });
+
+        const validatedAddress = { ...addressEntered, hashCode: hashCode, defaultaddr: true };
 
         const updatedAddresses = [
           { ...validatedAddress, isShip: 1 }, // Set the validated address as primary
@@ -423,15 +417,8 @@ const Checkout: React.FC<ICheckout> = ({
       .matches(/^\d{5}(-\d{4})?$/, "Invalid ZIP code format")
       .required("Please enter your zip code"),
     phone: Yup.string()
-      .required("Mobile Phone is required")
-      .test(
-        "valid-phone-format",
-        "Phone number must contain exactly 10 digits",
-        function (value) {
-          const normalized = (value || "").replace(/\D/g, ""); // Remove non-digit characters
-          return /^\d{10}$/.test(normalized);
-        }
-      ),
+      .matches(/^\d{10}$/, "Please enter a 10 digit number")
+      .required("Please enter your phone number"),
   });
 
   const handleAddress1Change = (
@@ -476,10 +463,7 @@ const Checkout: React.FC<ICheckout> = ({
 
           {/* show details fields based on accordion state close  */}
           {!showShipAddressForm && (
-            <div
-              className="shipping-address js-checkout-shipping-address"
-              data-ship-address-id={shippingAddress.id}
-            >
+            <div className="shipping-address js-checkout-shipping-address" data-ship-address-id={shippingAddress.id}>
               {!isExpanded && (
                 <AddressDisplay
                   address={shippingAddress}

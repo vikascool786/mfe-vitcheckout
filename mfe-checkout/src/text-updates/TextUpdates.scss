@@ -64,12 +64,15 @@
     width: 100%;
     .field-item-container {
       flex-direction: column;
+      label {
+        margin-bottom: 0px;
+      }
     }
     .mobile-header {
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-end;
       align-items: center;
-      margin-bottom: 0.5rem;
+      margin-bottom: -1rem;
 
       .mobile-label {
         font-weight: 400;
@@ -261,7 +264,7 @@
     .field-item-container {
       min-width: auto;
       width: 100%;
-      gap: 1px;
+      gap: 3px;
     }
     .field-extra-label {
       letter-spacing: -1px;
