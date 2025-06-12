@@ -1,6 +1,7 @@
 import React from "react";
 import { DropdownOption } from "../../../interfaces/DropdownOption";
 import "./DropdownField.scss";
+import { useContentStrings } from "../../../hooks/useContentStrings";
 
 interface DropdownProps
   extends Omit<React.InputHTMLAttributes<HTMLSelectElement>, "onChange"> {
@@ -35,6 +36,7 @@ export const DropdownField: React.FC<DropdownProps> = ({
   disabled = false,
   ...props
 }) => {
+  const { getString } = useContentStrings();
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
     if (onChange) {
@@ -67,7 +69,7 @@ export const DropdownField: React.FC<DropdownProps> = ({
           {...props}
         >
           <option value="" disabled>
-            {placeholder ? placeholder : `Select ${label || "an option"}`}
+            {placeholder ? placeholder : `${getString("select")} ${label || getString("anOption")}`}
           </option>
           {options.map((option) => (
             <option key={option.value} value={option.value}>

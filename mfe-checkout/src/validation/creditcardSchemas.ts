@@ -3,11 +3,14 @@ import * as Yup from "yup";
 const amexRegex = /^3[47]\d{13}$/; // Amex cards start with 34 or 37 and have 15 digits
 const genericCardRegex = /^\d{16}$/; // All other cards must have 16 digits
 
-export const getCreditCardSchema = (paymentId: number) =>
+export const getCreditCardSchema = (
+  paymentId: number,
+  getString: (key: string) => string
+) =>
   Yup.object({
     accountName:
       paymentId === 0
-        ? Yup.string().required("Name on Card is required")
+        ? Yup.string().required(getString("orders-nameOnCard"))
         : Yup.string(),
 
     number:
@@ -15,38 +18,38 @@ export const getCreditCardSchema = (paymentId: number) =>
         ? Yup.string()
             .test(
               "valid-card-number",
-              "Card Number must be 15 digits for Amex or 16 digits for other cards",
+              getString("cardNumberLengthAmexOther"),
               (value) => {
                 if (!value) return false;
                 return amexRegex.test(value) || genericCardRegex.test(value);
               }
             )
-            .required("Card Number is required")
+            .required(getString("cardNumberRequired"))
         : Yup.string(),
 
     expMonth: Yup.number()
-      .min(1, "Invalid month")
-      .max(12, "Invalid month")
-      .required("Expiration Month is required")
+      .min(1, getString("cardInvalidMonth"))
+      .max(12, getString("cardInvalidMonth"))
+      .required(getString("cardExpirationMonthRequired"))
       .when("expYear", (expYear, schema) => {
         const currentYear = new Date().getFullYear();
         const currentMonth = new Date().getMonth() + 1;
         if (expYear[0] === currentYear) {
-          return schema.min(currentMonth, "Card is expired");
+          return schema.min(currentMonth, getString("cardExpired"));
         }
         return schema;
       }),
 
     expYear: Yup.number()
-      .min(new Date().getFullYear(), "Invalid year")
-      .required("Expiration Year is required"),
+      .min(new Date().getFullYear(), getString("cardInvalidYear"))
+      .required(getString("cardExpirationYearRequired")),
 
     cvv:
       paymentId === 0
         ? Yup.string()
             .test(
               "valid-cvv",
-              "CVV must be 4 digits for Amex or 3 digits for other cards",
+              getString("cvvLengthError"),
               function (value) {
                 if (!value) return false;
                 const cardNumber = this.parent.number || "";
@@ -56,8 +59,8 @@ export const getCreditCardSchema = (paymentId: number) =>
                 return /^[0-9]{3}$/.test(value); // Other cards require exactly 3 digits
               }
             )
-            .min(3, "CVV must be at least 3 digits")
-            .max(4, "CVV cannot exceed 4 digits")
-            .required("CVV is required")
+            .min(3, getString("cvvMinLength"))
+            .max(4, getString("cvvMaxLength"))
+            .required(getString("cvvIsRequired"))
         : Yup.string(),
   });

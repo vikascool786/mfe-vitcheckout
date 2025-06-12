@@ -32,6 +32,7 @@ import { getOptionStringValue } from "../utils/helpers/GetOptionStringValue";
 import { isPaypalPayment, PAYPAL, PAYPAL_RECURRING } from "../payment-method/PaymentType";
 import { isGiftCardStoreDetail } from "../utils/StoreUtils";
 import { Spinner } from "../component/Spinner/Spinner";
+import { useContentStrings } from "../hooks/useContentStrings";
 import { isCustomCocktailProdContainerId } from "../utils/ItemUtils";
 interface IProduct {
   imageUrl: string;
@@ -101,7 +102,7 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
   const [itemError, setItemError] = useState<string | null>(null);
   const [order, setOrder] = useAtom(orderAtom);
   const [paymentMethods, setPaymentMethods] = useAtom(paymentMethodsAtom);
-
+  const { getString } = useContentStrings();
   useEffect(() => {
     setSelectedQuantity(item.quantity.toString());
     setPendingQuantity(item.quantity.toString());
@@ -333,7 +334,7 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
                     + {totals?.cashBackStr}
                   </div>
                   <Cashback viewBox="0 -2 24 22" />
-                  Cashback{" "}
+                  {getString("cashBack")}{" "}
                 </>
               )}{" "}
               {bv > 0 && isMA && isMA === 1
@@ -367,19 +368,19 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
               item.hasAutoShipDiscount ? (
                 <div className="item-autoship">
                   <AutoshipIcon />
-                  Saving {portalData.autoShipDiscount}% with Autoship
+                  {getString("saving")} {portalData.autoShipDiscount}% {getString("withAutoShip")}
                 </div>
               ) : (
                 <div className="item-autoship">
                   <AutoshipIcon />
-                  Repeating with Autoship
+                  {getString("repeatingWithAutoship")}
                 </div>
               ))}
             {item.autoshipFreq > 0 && (
               <div>
-                Frequency:{" "}
+                {getString("Frequency")}:{" "}
                 <span className="item-autoship-frequency">
-                  {item.autoshipFreq} days
+                  {item.autoshipFreq} {getString("days")}
                 </span>
               </div>
             )}

@@ -6,7 +6,7 @@ import { isGiftCardStore, storeHasCustomCocktail, storeHasOOSItems } from "./Sto
 import { formattedNumber } from "./OrderUtils";
 
 
-export const getFreeShipMessagesForOrder = async (order: Order | undefined, portalData: Portal): Promise<Map<string, string>> => {
+export const getFreeShipMessagesForOrder = async (order: Order | undefined, portalData: Portal,getString:any): Promise<Map<string, string>> => {
     let freeShipMessageStoreMap = new Map<string, string>();
     if (!order) return freeShipMessageStoreMap;
 
@@ -50,7 +50,7 @@ export const getFreeShipMessagesForOrder = async (order: Order | undefined, port
                             // with shipping calc
                             // hiding the free ship message if threshold is not met and there are oos or cc items
                             if (!freeShipData.isFreeShipMet && !storeHasOOSItems(store) && !storeHasCustomCocktail(store)) {
-                                const message = `Add ${freeShipData.freeShipDifference} in ${freeShipData.storeName} products for free shipping.`;
+                                const message = getString("addForFreeShip",[freeShipData.freeShipDifference,freeShipData.storeName]);
                                 freeShipMessageStoreMap.set(catalogId, message);
                             }
                         }

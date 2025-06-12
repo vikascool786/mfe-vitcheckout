@@ -2,6 +2,7 @@ import React from "react";
 import { RadioButton } from "../component/RadioButton/RadioButton";
 import { AddressDisplay } from "./AddressDisplay";
 import { Address } from "../interfaces/Address";
+import { useContentStrings } from "../hooks/useContentStrings";
 
 interface AppProps {
     addressList: Address[];
@@ -16,7 +17,8 @@ export const AddressVerificationAddressList: React.FC<AppProps> = ({
 }) => {
     const [selectedAddress, setSelectedAddress] =
         React.useState<Address>(addressToVerify);
-
+    const { getString } = useContentStrings();
+    
     const handleSelectedAddressChange = (address: Address) => {
         setSelectedAddress(address);
         setAddressToVerify({
@@ -64,7 +66,7 @@ export const AddressVerificationAddressList: React.FC<AppProps> = ({
                     onChange={() => handleSelectedAddressChange(addressToVerify)}
                 />
                 <div className="addresslist-container__content">
-                    <div className="addresslist__subtitle">Address Entered</div>
+                    <div className="addresslist__subtitle">{getString('addressEntered')}</div>
                     <AddressDisplay address={addressToVerify} familyNameFirst={false} />
                 </div>
             </div>

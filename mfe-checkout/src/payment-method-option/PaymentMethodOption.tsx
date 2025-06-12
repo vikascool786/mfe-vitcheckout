@@ -26,6 +26,7 @@ import "./PaymentMethodOption.scss";
 import { ThirdPartyLinkOff } from "./ThirdPartyLinkOff";
 import CardOptions from "../assets/images/CardOptions.png";
 import { getVisibleCardOptionsImages } from "../utils/helpers/GetVisibleCardImages";
+import { useContentStrings } from "../hooks/useContentStrings";
 
 export interface IPaymentOptionProps {
   handleCancelNewCard: () => void;
@@ -70,6 +71,8 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     isEditing,
   } = paymentOption;
 
+   const { getString } = useContentStrings();
+
   const scrollToPMMain = () => {
     const element = document.getElementById("pm-main");
     if (element) {
@@ -86,17 +89,17 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
 
     const { expMonth, expYear } = selectedPayment;
     if (
-      isCardExpired(expMonth, expYear) &&
-      order?.shouldShowInvalidCVVMessage === "The credit card has expired."
+      isCardExpired(expMonth as number, expYear as number) &&
+      order?.shouldShowInvalidCVVMessage === `${getString("creditCardExpired")}.`
     ) {
-      updateCvvError("The credit card has expired.");
+      updateCvvError(`${getString("creditCardExpired")}.`);
       scrollToPMMain();
     } else if (
       !order?.isOrderValid &&
       order?.shouldShowInvalidCVVMessage &&
       formik.dirty
     ) {
-      updateCvvError("CVV is required");
+      updateCvvError(getString("cvvIsRequired") as string);
     } else {
       updateCvvError("");
     }
@@ -123,7 +126,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
 
     const { expMonth, expYear } = selectedPayment;
     if (
-      isCardExpired(expMonth, expYear) &&
+      isCardExpired(expMonth as number, expYear as number) &&
       isSelected &&
       !isThirdPartyPayment(paymentMethod.typeID)
     ) {
@@ -132,7 +135,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
           setOrder({
             ...order,
             isOrderValid: false,
-            shouldShowInvalidCVVMessage: "The credit card has expired.",
+            shouldShowInvalidCVVMessage: `${getString("creditCardExpired")}.`,
           });
         return;
       }, 300);
@@ -234,7 +237,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     } catch (error) {
       console.log(error);
       setOrder({ ...order, isOrderValid: false });
-      setErrorMessage("Something went wrong, please try again."); 
+      setErrorMessage(getString("unexpectedErrorTryAgain") as string); 
     }
 
     setLoading(false);
@@ -305,14 +308,14 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                 </div>
               </div>
               <div className="payment-option-container__card-expiration">
-                Expires {paymentMethod.expires}
+                {getString("expires")} {paymentMethod.expires}
               </div>
             </div>
           )}
           {isEditing && !isCardEdit && isCard && (
             <div className="payment-option-add-container__card">
               <div className="payment-option-add-container__card-title">
-                Credit or Debit Card
+                {getString("creditOrDebitCard")}
               </div>
               <div className="payment-creditcard-wrapper">
                 {order?.paymentMethods
@@ -341,7 +344,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
               {isSelected && (
                 <div className="payment-option-container__card-cvv">
                   <div className="payment-option-container__card-cvv-text">
-                    CVV
+                    {getString('cvv')}
                   </div>
                   <div>
                     <div className="cvv-input-wrapper">
@@ -424,7 +427,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                     handlePaymentMethodEdit();
                   }}
                 >
-                  edit
+                  {getString("edit")?.toLocaleLowerCase()}
                 </div>
               )}
             </div>

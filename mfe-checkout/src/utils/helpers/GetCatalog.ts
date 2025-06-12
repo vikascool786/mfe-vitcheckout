@@ -1,3 +1,4 @@
+import { useContentStrings } from "../../hooks/useContentStrings";
 import { Order, OrderStore } from "../../interfaces/Order";
 import { isGiftCardStore } from "../StoreUtils";
 

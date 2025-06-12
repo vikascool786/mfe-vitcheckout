@@ -54,6 +54,19 @@ export const GET_API_ENDPOINT_BASE_URL = (
   }
 };
 
+export const GET_API_ENDPOINT_BASE_URL_FOR_TRANSLATIONS = (mode: APIMODE) => {
+  switch (mode) {
+    case "localhost":
+      return `https://devapi2.shop.com{{path}}?api_key=0cf27ca394e94667ad6729d427b700d4`;
+    case "dev":
+      return `https://devapi2.shop.com{{path}}?api_key=0cf27ca394e94667ad6729d427b700d4`;
+    case "staging":
+      return `https://stagingapi2.shop.com{{path}}?api_key=0cf27ca394e94667ad6729d427b700d4`;
+    case "prod":
+    default:
+      return `https://api2.shop.com{{path}}?api_key=0cf27ca394e94667ad6729d427b700d4`;
+  }
+};
 export const GET_API_ENDPOINT_BASE_URL_ONLY = () => {
   const mode = GET_API_MODE();
   switch (mode) {

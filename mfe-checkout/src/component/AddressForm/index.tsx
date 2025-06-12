@@ -6,6 +6,7 @@ import { Address } from "../../interfaces/Address";
 import { DropdownOption } from "../../interfaces/DropdownOption";
 import { DropdownField } from "../Form/Field/DropdownField";
 import { FormField } from "../Form/Field/FormField";
+import { useContentStrings } from "../../hooks/useContentStrings";
 
 interface IAddressFormProps {
   siteId: string;
@@ -23,7 +24,7 @@ export const AddressForm: React.FC<IAddressFormProps> = ({
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
+  const { getString } = useContentStrings();
   // Fetch states and countries on mount
   useEffect(() => {
     const fetchCountryAndStateData = async () => {
@@ -36,7 +37,7 @@ export const AddressForm: React.FC<IAddressFormProps> = ({
         }));
         setStateDropdownList(stateList);
       } catch (error) {
-        setError("Failed to load state data. Please try again.");
+        setError(`${getString("failedToLoadStates")}.`);
       } finally {
         setLoading(false);
       }
@@ -47,21 +48,21 @@ export const AddressForm: React.FC<IAddressFormProps> = ({
   // Yup validation schema
   const validationSchema = Yup.object({
     first: Yup.string()
-      .required("First name is required")
-      .max(30, "First name cannot exceed 30 characters."),
+      .required(getString("errFirstNameEmpty"))
+      .max(30, getString("firstNameMax30Chars")),
     last: Yup.string()
-      .required("Last name is required")
-      .max(30, "Last name cannot exceed 30 characters."),
+      .required(getString("errLastNameRequired"))
+      .max(30, getString("lastNameMax30Chars")),
     address1: Yup.string()
-      .required("Address Line 1 is required")
-      .max(200, "Address cannot exceed 200 characters."),
+      .required(getString("pcReg-errAddr1Req"))
+      .max(200, getString("addressMax200Chars")),
     city: Yup.string()
-      .required("City is required")
-      .max(100, "City name cannot exceed 100 characters."),
-    state: Yup.string().required("State/Province is required"),
+      .required(getString("hpPortalAdmin-errCityReq"))
+      .max(100, getString("cityNameExceeds100Characters")),
+    state: Yup.string().required(getString("errRequiredState")),
     zip: Yup.string()
-      .matches(/^\d{5}$/, "Zip code must be 5 digits")
-      .required("Zip code is required"),
+      .matches(/^\d{5}$/, getString("zipCodeLengthError"))
+      .required(getString("nmEvents-errZipRequired")),
   });
 
   // Formik setup
@@ -82,7 +83,7 @@ export const AddressForm: React.FC<IAddressFormProps> = ({
   });
 
   if (loading) {
-    return <p>Loading states...</p>;
+    return <p>{getString("loadingStates")}...</p>;
   }
 
   if (error) {
@@ -95,7 +96,7 @@ export const AddressForm: React.FC<IAddressFormProps> = ({
     <form onSubmit={handleAddressForm}>
       <div className="form-field-container">
         <FormField
-          label="First Name"
+          label={getString("firstName")}
           required
           name="first"
           value={formik.values.first}
@@ -104,7 +105,7 @@ export const AddressForm: React.FC<IAddressFormProps> = ({
           errorMessage={formik.touched.first && formik.errors.first}
         />
         <FormField
-          label="Last Name"
+          label={getString("lastName")}
           required
           name="last"
           value={formik.values.last}
@@ -115,7 +116,7 @@ export const AddressForm: React.FC<IAddressFormProps> = ({
       </div>
       <div className="form-field-container-full">
         <FormField
-          label="Address Line 1"
+          label={getString("addressLine1")}
           required
           name="address1"
           value={formik.values.address1}
@@ -126,7 +127,7 @@ export const AddressForm: React.FC<IAddressFormProps> = ({
       </div>
       <div className="form-field-container-full">
         <FormField
-          label="Address Line 2"
+          label={getString("addressLine2")}
           name="address2"
           value={formik.values.address2}
           onChange={formik.handleChange}
@@ -134,7 +135,7 @@ export const AddressForm: React.FC<IAddressFormProps> = ({
       </div>
       <div className="form-field-container">
         <FormField
-          label="City"
+          label={getString("city")}
           required
           name="city"
           value={formik.values.city}
@@ -144,7 +145,7 @@ export const AddressForm: React.FC<IAddressFormProps> = ({
         />
         <DropdownField
           options={stateDropdownList}
-          label="State/Province"
+          label={getString("deliverDelayMessageStateOrProvince")}
           required
           selectedValue={formik.values.state}
           formName="state"
@@ -154,7 +155,7 @@ export const AddressForm: React.FC<IAddressFormProps> = ({
       </div>
       <div className="form-field-container">
         <FormField
-          label="Zip Code"
+          label={getString("zipCode")}
           required
           name="zip"
           value={formik.values.zip}
@@ -169,7 +170,9 @@ export const AddressForm: React.FC<IAddressFormProps> = ({
             name="isPoBox"
             onChange={formik.handleChange}
           />
-          <span className="shipping-text">This address is a PO box</span>
+          <span className="shipping-text">
+            {getString("thisAddressIsAPOBox")}
+          </span>
         </div>
       </div>
     </form>

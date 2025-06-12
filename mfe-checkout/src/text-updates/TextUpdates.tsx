@@ -8,21 +8,15 @@ import { FormHeading } from "../component/Form/Heading/FormHeading";
 import { orderAtom } from "../store";
 import "./TextUpdates.scss";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
-import { customerApiData } from "../checkout/customerAtom";
-import { fetchCustomerPreferenceData } from "../api/service/CommunicationPreferences";
-import { siteApiData } from "../checkout/siteAtom";
-import { SHOP_SHIP_UPDATE_TEXT_PREF_CODE } from "../interfaces/ShopperCommunicationPreferences";
-import {
-  fetchTwilioLookupData,
-  PHONE_TYPE_MOBILE,
-} from "../api/service/TwilioPhoneLookup";
+import {customerApiData} from "../checkout/customerAtom";
+import {fetchCustomerPreferenceData} from "../api/service/CommunicationPreferences";
+import {siteApiData} from "../checkout/siteAtom";
+import {SHOP_SHIP_UPDATE_TEXT_PREF_CODE} from "../interfaces/ShopperCommunicationPreferences";
+import {fetchTwilioLookupData, PHONE_TYPE_MOBILE} from "../api/service/TwilioPhoneLookup";
 import { getCountryName } from "../utils/helpers/LocaleHelper";
 import { Back } from "../assets/svgs/Back";
-import {
-  INVALID_COUNTRY_MOBILE_NUMBER,
-  MOBILE_NUMBER_NOT_VALID,
-  NOT_A_MOBILE_PHONE_NUMBER,
-} from "../constant";
+import { INVALID_COUNTRY_MOBILE_NUMBER } from "../constant";
+import { useContentStrings } from "../hooks/useContentStrings";
 
 // Validation schema
 interface FormValues {
@@ -38,24 +32,25 @@ interface ITextUpdatesProps {
   setMobileRequiredMessage: React.Dispatch<SetStateAction<boolean>>;
 }
 
-const TextUpdatesSchema = Yup.object({
-  phone: Yup.string().when("boxChecked", {
-    is: true,
-    then: (schema) =>
-      schema
-        .required("Mobile Phone is required")
-        .test(
-          "valid-phone-format",
-          "Phone number must contain exactly 10 digits",
-          function (value) {
-            const normalized = (value || "").replace(/\D/g, ""); // Remove non-digit characters
-            return /^\d{10}$/.test(normalized);
-          }
-        ),
-    otherwise: (schema) => schema.notRequired(),
-  }),
-  boxChecked: Yup.boolean(),
-});
+// const TextUpdatesSchema = Yup.object({
+//   phone: Yup.string().when("boxChecked", {
+//     is: true,
+//     then: (schema) =>
+//       schema
+//         .required("Mobile Phone is required")
+//         .test(
+//           "valid-phone-format",
+//           "Phone number must contain exactly 10 digits",
+//           function (value) {
+//             const normalized = (value || "").replace(/\D/g, ""); // Remove non-digit characters
+//             return /^\d{10}$/.test(normalized);
+//           }
+//         ),
+//     otherwise: (schema) => schema.notRequired(),
+//   }),
+//   boxChecked: Yup.boolean(),
+// });
+
 const FormContent = React.memo(
   ({
     errors,
@@ -74,6 +69,7 @@ const FormContent = React.memo(
     isSubmitting,
     isExpanded,
     toggleAccordion,
+    getString,
   }: any) => {
     useEffect(() => {
       if (values.boxChecked && values.phone.length === 10) {
@@ -83,7 +79,8 @@ const FormContent = React.memo(
 
     useEffect(() => {
       if (mobileRequiredMessage) {
-        !errors.phone && setFieldError("phone", "Mobile Phone is required");
+        !errors.phone &&
+          setFieldError("phone", getString("mobilePhoneRequired"));
       }
     }, [mobileRequiredMessage, setFieldError]);
 
@@ -138,7 +135,7 @@ const FormContent = React.memo(
             className="checkbox"
             checked={values.boxChecked}
             onChange={handleCheckboxChange}
-            extraLabel="Want to receive text message on this order?"
+            extraLabel={getString("receiveTextMessage")}
           />
           <Back
             className={`qa-expand mfe-accordion ${
@@ -155,13 +152,15 @@ const FormContent = React.memo(
         {isExpanded && (
           <div className="text-updates-content">
             <div className="mobile-header">
-              <span className="mobile-label">Mobile Phone</span>
               <span className="rates-text">
                 Message and data rates may apply.
               </span>
             </div>
             <FormField
               qaTag={"qa-input"}
+              label={
+                <span className="mobile-label">{getString("mobilePhone")}</span>
+              }
               name="phone"
               maxLength={14}
               value={values.phone}
@@ -172,7 +171,7 @@ const FormContent = React.memo(
               }
               onChange={handlePhoneChange}
               onBlur={handleBlur}
-              extraLabel="10 digits"
+              extraLabel={getString("tenDigits")}
             />
           </div>
         )}
@@ -192,11 +191,26 @@ export const TextUpdates = React.memo(
     const [order, setOrder] = useAtom(orderAtom);
     const [siteData] = useAtom(siteApiData(siteId));
     const [customerData] = useAtom(customerApiData(pcid));
+    const { getString } = useContentStrings();
     const [customerProfileMobilePhone] = useState(
       customerData?.cell_phone || ""
     );
     const [isAlertChecked, setIsAlertChecked] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
+
+    const TextUpdatesSchema = Yup.object().shape({
+      phone: Yup.string()
+        .when("boxChecked", {
+          is: true,
+          then: (schema) =>
+            schema
+              .required(getString('mobilePhoneRequired'))
+              .matches(/^\d{10}$/,getString("phoneNumber10Digits")),
+          otherwise: (schema) => schema.notRequired(),
+        })
+        .matches(/^\d{10}$/, getString('phoneNumber10Digits')),
+      boxChecked: Yup.boolean(),
+    });
 
     useEffect(() => {
       fetchCustomerPreferenceData(pcid, siteData).then((response) => {
@@ -242,10 +256,7 @@ export const TextUpdates = React.memo(
                   response.response?.carrier?.type?.toLowerCase() !==
                   PHONE_TYPE_MOBILE
                 ) {
-                  setFieldError(
-                    "phone",
-                    "The phone number you entered is not a mobile phone number"
-                  );
+                  setFieldError("phone", getString("notAMobilePhoneNumber"));
                   setHasPhoneError(true);
                   isValidMobilePhone = false;
                   return;
@@ -257,7 +268,8 @@ export const TextUpdates = React.memo(
                     "phone",
                     INVALID_COUNTRY_MOBILE_NUMBER(
                       matchingCountryName as string,
-                      getCountryName(siteData.locale.countryCode) as string
+                      getCountryName(siteData.locale.countryCode) as string,
+                      getString
                     )
                   );
                   isValidMobilePhone = false;
@@ -269,7 +281,7 @@ export const TextUpdates = React.memo(
                   setHasPhoneError(false);
                 }
               } else {
-                setFieldError("phone", MOBILE_NUMBER_NOT_VALID);
+                setFieldError("phone", getString("invalidPhoneNumber"));
                 setHasPhoneError(true);
                 isValidMobilePhone = false;
                 return;
@@ -326,6 +338,7 @@ export const TextUpdates = React.memo(
               isExpanded={isExpanded}
               toggleAccordion={toggleAccordion}
               siteData={siteData}
+              getString={getString}
             />
           )}
         </Formik>

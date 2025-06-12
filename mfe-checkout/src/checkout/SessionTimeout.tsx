@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { throttle } from "lodash";
 import { Button } from "../component/Button/Button";
 import "./SessionTimeout.scss"
+import { useContentStrings } from "../hooks/useContentStrings";
 import { doFAMOSSessionPing } from "../api/ajaxaction/FamosSession";
 
 const SESSION_TIMEOUT = 20 * 60 * 1000; // 20 minutes - MFE timeout to show timeout overlay
@@ -9,6 +10,7 @@ const FAMOS_PING_INTERVAL = 5 * 60 * 1000; // 5 minutes - how often to ping FAMO
 
 const SessionTimeout = () => {
     const [showOverlay, setShowOverlay] = useState(false);
+    const { getString } = useContentStrings();
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
     const lastActivityRef = useRef<number>(Date.now());
     const famosPingIntervalId = useRef<NodeJS.Timeout | null>(null);
@@ -94,9 +96,9 @@ const SessionTimeout = () => {
         showOverlay ? (
             <div className="overlay-wrapper">
                 <div className="session-timeout-container checkout-overlay-simple max-500">
-                    <h2>Session Timeout</h2>
-                    <p>Your session has expired, you will be returned to the shopping cart</p>
-                    <Button label="Okay" btnType="primary" onClick={handleLogout} />
+                    <h2>{getString('sessionTimeout-text')}</h2>
+                    <p>{getString('yourSessionExpiredReturnedToCart')}</p>
+                    <Button label={getString('Okay') as string} btnType="primary" onClick={handleLogout} />
                 </div>
             </div>
         ) : null

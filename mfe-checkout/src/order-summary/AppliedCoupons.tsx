@@ -3,6 +3,7 @@ import { IStores } from '../interfaces/ShopperCart';
 import { OrderStores } from '../interfaces/Order';
 import { Close } from "../assets/svgs/Close";
 import { getCouponAliasForCouponCode, isHiddenCouponCode } from '../utils/CouponUtils';
+import { useContentStrings } from '../hooks/useContentStrings';
 
 interface AppliedCouponsProps {
   stores: OrderStores;
@@ -11,7 +12,7 @@ interface AppliedCouponsProps {
 
 const AppliedCoupons: React.FC<AppliedCouponsProps> = ({ stores, handleRemoveCoupon }) => {
   const [openTerms, setOpenTerms] = useState<{ [key: string]: boolean }>({});
-
+  const { getString } = useContentStrings();
   const toggleTerms = (invoiceKey: string) => {
     setOpenTerms((prev) => ({
       ...prev,
@@ -65,13 +66,13 @@ const AppliedCoupons: React.FC<AppliedCouponsProps> = ({ stores, handleRemoveCou
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          Terms & Conditions
+                           {getString("termsAndConditions")}
                         </a>
                       );
                     })()
                   ) : (
                     <a onClick={() => toggleTerms(invoiceKey)}>
-                      Terms & Conditions
+                      {getString("termsAndConditions")}
                     </a>
                   )}
                 </p>

@@ -1,7 +1,8 @@
 import * as Yup from "yup";
 
-export const placeOrderSchema = Yup.object({
+export const placeOrderSchema = (getString: any) =>
+  Yup.object({
     autoshipTerms: Yup.boolean()
-        .oneOf([true], "You must accept the Autoship terms and conditions.")
-        .required("Required"),
-});
+      .oneOf([true], getString("acceptAutoshipTerms"))
+      .required("Required"),
+  });

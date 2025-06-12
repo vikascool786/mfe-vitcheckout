@@ -7,6 +7,7 @@ import { loadingAtom, orderAtom } from "../store";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import "./ShippingOptions.scss";
 import { Back } from "../assets/svgs/Back";
+import { useContentStrings } from "../hooks/useContentStrings";
 import { OOS_CONSOLIDATE_SPLIT_CODE } from "../interfaces/OrderConsolidationData";
 import { getShippingSelectionById, isPickUp, SHIP_ID_STANDARD } from "../utils/ShippingMethodUtils";
 
@@ -31,7 +32,7 @@ export const ShippingOptions: React.FC<IShippingOptions> = ({
   const [selectedShippingMethod, setSelectedShippingMethod] = useState<
     ShippingSelection | null | undefined
   >(null);
-
+ const { getString } = useContentStrings();
   const getSelectedShippingOption = (
     selections: ShippingSelection[]
   ): ShippingSelection | null | undefined => {
@@ -153,7 +154,9 @@ export const ShippingOptions: React.FC<IShippingOptions> = ({
           className="shipping-options-container__ship_selection"
           onClick={toggleShipSelectionAccordion}
         >
-          <span className="change-shipping-method">Change Shipping Method</span>
+          <span className="change-shipping-method">
+            {getString("changeShippingMethod")}
+          </span>
           <Back
             className={`qa-expand mfe-accordion ${
               isShipExpanded ? "open" : "close"

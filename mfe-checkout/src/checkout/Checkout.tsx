@@ -38,6 +38,7 @@ import {
   getFilteredShippingAddresses,
   getShippingAddressFromFilteredList,
 } from "../utils/AddressUtils";
+import { useContentStrings } from "../hooks/useContentStrings";
 import ScrollToError from "../component/Form/ScrollToError/ScrollToError";
 
 const defaultAddress: Address = {
@@ -67,7 +68,7 @@ const Checkout: React.FC<ICheckout> = ({
   pcid,
 }) => {
   // State to manage whether the form is expanded or collapsed
-
+  const { getString } = useContentStrings();
   const { createShopperAddressBookEntry } = useCreateShopperAddressBookEntry();
   const { updateShopperAddressBookEntry } = useUpdateShopperAddressBookEntry();
   const [isEditAddressClicked, SetIsEditAddressClicked] =
@@ -137,7 +138,7 @@ const Checkout: React.FC<ICheckout> = ({
         }));
         setStateDropdownList(stateList);
       } catch (error) {
-        console.error("Failed to fetch data:", error);
+        console.error(`${getString("failedToFetchData")}:`, error);
       }
     };
 
@@ -168,16 +169,11 @@ const Checkout: React.FC<ICheckout> = ({
 
     if (childRef.current) {
       try {
-        const { isValidAddress, hashCode } =
-          await childRef.current.verifyAddress({
-            ...addressEntered,
-          });
-
-        const validatedAddress = {
+        const { isValidAddress, hashCode } = await childRef.current.verifyAddress({
           ...addressEntered,
-          hashCode: hashCode,
-          defaultaddr: true,
-        };
+        });
+
+        const validatedAddress = { ...addressEntered, hashCode: hashCode, defaultaddr: true };
 
         const updatedAddresses = [
           { ...validatedAddress, isShip: 1 }, // Set the validated address as primary
@@ -407,23 +403,23 @@ const Checkout: React.FC<ICheckout> = ({
 
   const validationSchema = Yup.object().shape({
     first: Yup.string()
-      .required("First name is required")
-      .max(30, "First name cannot exceed 30 characters."),
+      .required(getString("errFirstNameEmpty"))
+      .max(30, getString("firstNameMax30Chars")),
     last: Yup.string()
-      .required("Last name is required")
-      .max(30, "Last name cannot exceed 30 characters."),
+      .required(getString("errLastNameRequired"))
+      .max(30, getString("lastNameMax30Chars")),
     address1: Yup.string()
-      .required("Please enter your address")
-      .max(200, "Address cannot exceed 200 characters."),
+      .required(getString("hpPortalAdmin-errAddrReq"))
+      .max(200, getString("addressMax200Chars")),
     city: Yup.string()
-      .required("Please enter your city")
-      .max(100, "City name cannot exceed 100 characters."),
-    state: Yup.string().required("Please enter your State/Province"),
+      .required(getString("hpPortalAdmin-errCityReq"))
+      .max(100, getString("cityNameExceeds100Characters")),
+    state: Yup.string().required(getString("pleaseEnterStateOrProvince")),
     zip: Yup.string()
-      .matches(/^\d{5}(-\d{4})?$/, "Invalid ZIP code format")
-      .required("Please enter your zip code"),
+      .matches(/^\d{5}(-\d{4})?$/, getString("invalidZipCode"))
+      .required(getString("hpPortalAdmin-errPostalReq")),
     phone: Yup.string()
-      .required("Mobile Phone is required")
+      .required(getString("pleaseEnterPhoneNumber"))
       .test(
         "valid-phone-format",
         "Phone number must contain exactly 10 digits",
@@ -476,10 +472,7 @@ const Checkout: React.FC<ICheckout> = ({
 
           {/* show details fields based on accordion state close  */}
           {!showShipAddressForm && (
-            <div
-              className="shipping-address js-checkout-shipping-address"
-              data-ship-address-id={shippingAddress.id}
-            >
+            <div className="shipping-address js-checkout-shipping-address" data-ship-address-id={shippingAddress.id}>
               {!isExpanded && (
                 <AddressDisplay
                   address={shippingAddress}
@@ -528,7 +521,7 @@ const Checkout: React.FC<ICheckout> = ({
                       <FormField
                         qaTag="qa-last-name"
                         name="last"
-                        label="Last Name"
+                        label={getString("lastName")}
                         required
                         value={values.last}
                         onChange={handleChange}
@@ -539,7 +532,7 @@ const Checkout: React.FC<ICheckout> = ({
                       <FormField
                         qaTag="qa-first-name"
                         name="first"
-                        label="First Name"
+                        label={getString("firstName")}
                         required
                         value={values.first}
                         onChange={handleChange}
@@ -553,7 +546,7 @@ const Checkout: React.FC<ICheckout> = ({
                       <FormField
                         qaTag="qa-first-name"
                         name="first"
-                        label="First Name"
+                        label={getString("firstName")}
                         required
                         value={values.first}
                         onChange={handleChange}
@@ -564,7 +557,7 @@ const Checkout: React.FC<ICheckout> = ({
                       <FormField
                         qaTag="qa-last-name"
                         name="last"
-                        label="Last Name"
+                        label={getString("lastName")}
                         required
                         value={values.last}
                         onChange={handleChange}
@@ -579,7 +572,7 @@ const Checkout: React.FC<ICheckout> = ({
                     <FormField
                       className="qa-address input-container js-ship-address1"
                       name="address1"
-                      label="Address Line 1"
+                      label={getString("addressLine1")}
                       required
                       value={values.address1}
                       onChange={(e) =>
@@ -595,7 +588,7 @@ const Checkout: React.FC<ICheckout> = ({
                     <FormField
                       qaTag="qa-address-2"
                       name="address2"
-                      label="Address Line 2"
+                      label={getString("addressLine2")}
                       value={values.address2}
                       onChange={handleChange}
                       onBlur={handleBlur}
@@ -608,7 +601,7 @@ const Checkout: React.FC<ICheckout> = ({
                     <FormField
                       qaTag="qa-city"
                       name="city"
-                      label="City"
+                      label={getString("city")}
                       required
                       value={values.city}
                       onChange={handleChange}
@@ -619,7 +612,7 @@ const Checkout: React.FC<ICheckout> = ({
                     <DropdownField
                       qaTag="qa-state"
                       options={stateDropdownList}
-                      label="State/Province"
+                      label={getString("deliverDelayMessageStateOrProvince")}
                       required
                       selectedValue={values.state}
                       formName="state"
@@ -632,7 +625,7 @@ const Checkout: React.FC<ICheckout> = ({
                     <FormField
                       className="qa-zipcode input-container"
                       name="zip"
-                      label="Zip Code"
+                      label={getString("zipCode")}
                       required
                       value={values.zip}
                       onChange={handleChange}
@@ -640,7 +633,7 @@ const Checkout: React.FC<ICheckout> = ({
                       renderCheckBox={
                         <Checkbox
                           qaTag="qa-po-box"
-                          title="This address is a PO box"
+                          title={getString("thisAddressIsAPOBox") as string}
                           checked={values.isPoBox}
                           name="isPoBox"
                           onChange={() =>
@@ -654,9 +647,9 @@ const Checkout: React.FC<ICheckout> = ({
                     <FormField
                       className="qa-phone js-ship-phone input-container"
                       name="phone"
-                      label="Phone"
+                      label={getString("phone")}
                       required
-                      extraLabel="10 digits"
+                      extraLabel={getString("tenDigits")}
                       value={values.phone}
                       onChange={handleChange}
                       onBlur={handleBlur}
@@ -670,15 +663,15 @@ const Checkout: React.FC<ICheckout> = ({
                     <div className="form-footer form-footer__dual-button">
                       <Button
                         qaTag="qa-cancel"
+                        label={getString("cancel") as string}
                         disabled={loading}
-                        label="Cancel"
                         btnType="secondary"
                         onClick={onCancelClick}
                       />
                       <Button
                         qaTag="qa-submit"
                         disabled={loading}
-                        label="Save & Continue"
+                        label={getString("saveAndContinue") as string}
                         btnType="primary"
                         onClick={submitForm}
                       />
@@ -688,7 +681,9 @@ const Checkout: React.FC<ICheckout> = ({
                       <Button
                         qaTag="qa-submit"
                         disabled={loading}
-                        label="Save Shipping Address & Continue"
+                        label={
+                          getString("saveShippingAddressAndContinue") as string
+                        }
                         btnType="primary"
                         onClick={submitForm}
                       />

@@ -4,6 +4,7 @@ import { AddressDisplay } from "../address-verification/AddressDisplay";
 import { Address } from "../interfaces/Address";
 import { Add } from "../assets/icons/Add";
 import "./AddressList.scss";
+import { useContentStrings } from "../hooks/useContentStrings";
 
 interface AppProps {
   addressBook: Address[];
@@ -20,6 +21,8 @@ export const AddressList: React.FC<AppProps> = ({
   onEditAddressClick,
   onAddNewAddressClick,
 }) => {
+  const { getString } = useContentStrings();
+
   return (
     <div className="qa-addresses addresslist">
       {addressBook.map((address, index) => {
@@ -50,7 +53,7 @@ export const AddressList: React.FC<AppProps> = ({
               className="qa-edit edit"
               onClick={() => onEditAddressClick(address)}
             >
-              edit
+              {getString("edit")?.toLocaleLowerCase()}
             </span>
           </div>
         );
@@ -61,7 +64,7 @@ export const AddressList: React.FC<AppProps> = ({
         onClick={onAddNewAddressClick}
       >
         <div className="address-center">
-          <Add /> Add New Address
+          <Add /> {getString("addNewAddress")}
         </div>
       </div>
     </div>

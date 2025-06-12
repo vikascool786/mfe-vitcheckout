@@ -2,14 +2,16 @@ import React from "react";
 import "./Feedback.scss";
 import FeedbackForm from "../FeedbackForm/FeedbackForm";
 import { IFeedback } from "../utils/types/types";
+import { useContentStrings } from "../hooks/useContentStrings";
 
 const Feedback: React.FC<IFeedback> = ({ pcId, sessionId, siteId }) => {
   const [isFormDisplayed, setFromDisplayed] = React.useState<boolean>(false);
+  const { getString } = useContentStrings();
   return (
     <>
       <div className="feedback-container">
-        <h2>Want to Provide Feedback?</h2>
-        <p>We are constantly looking for ways to improve.</p>
+        <h2>{getString("wantToProvideFeedback")}</h2>
+        <p>{getString("constantlyLookingToImprove")}</p>
         <button
           className="feedback-button"
           onClick={() => setFromDisplayed(true)}

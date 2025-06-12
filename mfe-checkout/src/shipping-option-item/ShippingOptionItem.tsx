@@ -3,6 +3,7 @@ import { RadioButton } from "../component/RadioButton/RadioButton";
 import { ShippingSelection } from "../interfaces/ShippingMethod";
 import "./ShippingOptionItem.scss";
 import { AutoshipIcon } from "../assets/icons/Autoship";
+import { useContentStrings } from "../hooks/useContentStrings";
 
 interface IShippingOption {
   shippingType: string;
@@ -35,7 +36,7 @@ export const ShippingOptionItem: React.FC<IShippingOptionItem> = ({
   const select = isSelected ? "selected" : "";
   const isFirst = index === 0 ? "start" : "";
   const isLast = index === size ? "end" : "";
-
+  const { getString } = useContentStrings();
   return (
     <div
       className={`qa-selection shipping-option-container ${select} ${isFirst} ${isLast}`}
@@ -55,14 +56,12 @@ export const ShippingOptionItem: React.FC<IShippingOptionItem> = ({
           <div className={`shipping-option-sub-container`}>
             <div>{shippingOption.displayMethod}</div>
             <div className="shipping-option-estShipDate">
-             {shippingOption.estShipDisplayDate && `Estimated Delivery Date: ${shippingOption.estShipDisplayDate}`}
+             {shippingOption.estShipDisplayDate && `${getString("estimatedDeliveryDate")}: ${shippingOption.estShipDisplayDate}`}
             </div>
           </div>
         </div>
 
-        <div>
-          {shippingOption.totalStr}
-        </div>
+        <div>{shippingOption.totalStr}</div>
       </div>
       {hasAutoship && shippingOption.isSelected && (
         <div
@@ -71,7 +70,7 @@ export const ShippingOptionItem: React.FC<IShippingOptionItem> = ({
           }`}
         >
           <AutoshipIcon />
-          Recurring Autoship orders with ship via Standard Shipping
+          {getString("recurringAutoshipStandardShipping")}
         </div>
       )}
 
@@ -79,43 +78,17 @@ export const ShippingOptionItem: React.FC<IShippingOptionItem> = ({
         shippingOption.method === "@ Market America's Office" && (
           <div className="shipping-option-office">
             <h4 className="shipping-option-office-title">
-              Pickup Instructions
+              {getString("pickupInstructions-title")}
             </h4>
             <ul className="shipping-option-office-address">
-              <li>
-                Orders will be available for pickup the next business day after
-                the order has been placed.
-              </li>
-              <li>
-                You will receive an email and/or SMS when your order is ready
-                for pickup.
-              </li>
-              <li>
-                Our contactless pickup hours are{" "}
-                <strong>9:00 AM - 4:00 PM, Monday - Friday.</strong>
-              </li>
-              <li>
-                Please come to our contract-free pickup area and call{" "}
-                <a href="tel:+13364784037">(336) 478-4037</a> when you arrive.
-              </li>
-              <li>
-                The pickup location is the front right glass door at the front
-                of the corporate office building - there are signs that will
-                direct you.
-              </li>
-              <li>
-                A member of our staff will bring your order(s) outside for you
-                to collect.
-              </li>
-              <li>
-                Please sign a copy of your invoice and leave it on the table
-                after you check your order.
-              </li>
-              <li>
-                If you have any issues with your order, please call{" "}
-                <a href="tel:+13364784037">(336) 478-4037</a>, and a staff
-                member will assist you.
-              </li>
+              <li>{getString("pickupNextBusinessDay")}</li>
+              <li>{getString("pickupNotificationEmailSms")}</li>
+              <li>{getString("contactlessPickupHours")}</li>
+              <li>{getString("contractFreePickupCallWhenArrive")}</li>
+              <li>{getString("pickupLocationFrontRightDoor")}</li>
+              <li>{getString("staffWillBringOrderOutside")}</li>
+              <li>{getString("signInvoiceLeaveOnTable")}</li>
+              <li>{getString("callForOrderAssistance")}</li>
             </ul>
           </div>
         )}
