@@ -1,0 +1,28 @@
+.section-card {
+  margin-bottom: 1.5rem;
+}
+
+.section-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.section-card-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.section-card-header span {
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.section-card-body {
+  background-color: #f9f9f9;
+  padding: 1.25rem;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+}
