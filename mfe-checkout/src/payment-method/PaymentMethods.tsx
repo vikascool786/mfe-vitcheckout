@@ -41,9 +41,10 @@ import { RadioButton } from "../component/RadioButton/RadioButton";
 import { useContentStrings } from "../hooks/useContentStrings";
 import { isSezzleSelectedPayment } from "../utils/helpers/SezzleHelper";
 import {
+  convertPaymentMethodsToPaymentOptions,
   createNewCardOption,
   getSelectedPaymentOption,
-  isNewCardInPaymentOptions,
+  isNewCardInPaymentOptions, isPaymentMethodExistingInPaymentOption,
   isSelectedPaymentInAllowedOrderPayments, returnPaymentOptionsWithDefaultSelection,
   updatedPaymentOptionsWithSelectedType
 } from "../utils/types/PaymentOptionUtils";
@@ -419,11 +420,19 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       filteredPaymentMethods = paymentMethods.filter(
         (payment) => payment.paymentMethod.id !== 0
       );
+      filteredPaymentMethods = handleThirdPartyPaymentVisibility(filteredPaymentMethods);
+
+      const hasSavedPayments = payments && payments.length > 0;
+      if(hasSavedPayments && !isPaymentMethodExistingInPaymentOption(payments, filteredPaymentMethods)){
+        //add shopper saved pms if they are missing
+        filteredPaymentMethods = [...convertPaymentMethodsToPaymentOptions(payments), ...filteredPaymentMethods];
+      }
+
       setPaymentMethods(
-        filteredPaymentMethods.map((item) => ({
-          ...item,
-          isSelected: false,
-        }))
+          filteredPaymentMethods.map((item) => ({
+            ...item,
+            isSelected: false, //deselect all PMs
+          }))
       );
       updatePaymentTypeId(CLICK2PAY.typeId);
       setIsClick2PayCardSelected(true);

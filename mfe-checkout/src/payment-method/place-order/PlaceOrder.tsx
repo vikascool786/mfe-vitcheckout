@@ -481,9 +481,11 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
           confirmOrder();
           break;
       }
-    } catch (error) {
+    } catch (error: any) {
       setIsLoading(false);
-      console.error("Error placing order:", error);
+      const errorMessage =
+          error?.response?.data?.message || error?.message || "We're sorry, there was an error placing your order";
+      updateOrderErrorMessage(errorMessage);
     }
   };
 
@@ -554,8 +556,11 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
       return new Promise((resolve) => {
         resolve(response);
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error(`${getString("failedToFetchData")}:`, error);
+      const errorMessage =
+          error?.response?.data?.message || error?.message || "Unknown error";
+      throw new Error(errorMessage);
     }
   };
 

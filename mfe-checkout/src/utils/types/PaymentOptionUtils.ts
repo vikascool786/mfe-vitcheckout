@@ -3,6 +3,7 @@ import { IPaymentMethod2 } from "../../interfaces/Order";
 import { createPaymentMethod } from "../helpers/GeneratePaymentMethod";
 import CardOptions from "../..//assets/images/CardOptions.png";
 import { Address } from "../../interfaces/Address";
+import { IPaymentMethod } from "../../interfaces/PaymentMethod";
 
 export const createNewCardOption = (): IPaymentOption => {
   const newCard = createPaymentMethod({
@@ -89,4 +90,24 @@ export const isSelectedPaymentInAllowedOrderPayments = (
     );
   }
   return false;
+};
+
+export const isPaymentMethodExistingInPaymentOption = (
+    paymentMethods: IPaymentMethod[],
+    paymentOptions: IPaymentOption[]
+) : boolean => {
+  const existingIds = new Set(paymentOptions.map(pm => pm.paymentMethod.id));
+  return paymentMethods.some(pm => existingIds.has(pm.id));
+};
+
+export const convertPaymentMethodsToPaymentOptions = (
+    paymentMethods: IPaymentMethod[],
+) : IPaymentOption[] => {
+  return paymentMethods.map((paymentMethod) => ({
+    paymentMethod,
+    isPaymentValidated: false,
+    paymentAddress: {} as Address,
+    isVisible: true,
+    isSelected: false,
+  }));
 };

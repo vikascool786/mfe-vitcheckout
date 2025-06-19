@@ -84,7 +84,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
   const { getString } = useContentStrings();
 
   if (!orders) {
-    return <p>Loading shipping methods...</p>;
+    return <p>{`${getString("loading")} ${getString("shippingMethods")?.toLocaleLowerCase()}...`}</p>;
   }
 
   const setOrderInDataObject = () => {
