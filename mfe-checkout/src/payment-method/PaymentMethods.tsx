@@ -38,11 +38,13 @@ import { getVisibleCardOptionsImages } from "../utils/helpers/GetVisibleCardImag
 import { IPaymentMethod2 } from "../interfaces/Order";
 import Click2PayCardLoader from "../payment-method-click2pay/Click2PayCardLoader";
 import { RadioButton } from "../component/RadioButton/RadioButton";
+import { useContentStrings } from "../hooks/useContentStrings";
 import { isSezzleSelectedPayment } from "../utils/helpers/SezzleHelper";
 import {
+  convertPaymentMethodsToPaymentOptions,
   createNewCardOption,
   getSelectedPaymentOption,
-  isNewCardInPaymentOptions,
+  isNewCardInPaymentOptions, isPaymentMethodExistingInPaymentOption,
   isSelectedPaymentInAllowedOrderPayments, returnPaymentOptionsWithDefaultSelection,
   updatedPaymentOptionsWithSelectedType
 } from "../utils/types/PaymentOptionUtils";
@@ -68,7 +70,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
 }) => {
   // initial payment methods
   const [paymentMethods, setPaymentMethods] = useAtom(paymentMethodsAtom);
-
+  const { getString } = useContentStrings();
   const [isExpanded, setIsExpanded] = useState(false);
 
   // addresses for user wallet
@@ -418,11 +420,19 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       filteredPaymentMethods = paymentMethods.filter(
         (payment) => payment.paymentMethod.id !== 0
       );
+      filteredPaymentMethods = handleThirdPartyPaymentVisibility(filteredPaymentMethods);
+
+      const hasSavedPayments = payments && payments.length > 0;
+      if(hasSavedPayments && !isPaymentMethodExistingInPaymentOption(payments, filteredPaymentMethods)){
+        //add shopper saved pms if they are missing
+        filteredPaymentMethods = [...convertPaymentMethodsToPaymentOptions(payments), ...filteredPaymentMethods];
+      }
+
       setPaymentMethods(
-        filteredPaymentMethods.map((item) => ({
-          ...item,
-          isSelected: false,
-        }))
+          filteredPaymentMethods.map((item) => ({
+            ...item,
+            isSelected: false, //deselect all PMs
+          }))
       );
       updatePaymentTypeId(CLICK2PAY.typeId);
       setIsClick2PayCardSelected(true);
@@ -548,7 +558,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   const getValidationSchema = (paymentTypeId: number) =>
     Yup.object().shape({
       cvv: Yup.string()
-        .matches(/^\d+$/, "CVV must be numeric")
+        .matches(/^\d+$/, getString("cvvMustBeNumeric"))
         .test("cvv-length", function (value) {
           const expectedLength = paymentTypeId === 1 ? 4 : 3;
 
@@ -556,14 +566,14 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
             return this.createError({
               message:
                 paymentTypeId === 1
-                  ? "CVV must be 4 digits"
-                  : "CVV must be 3 digits",
+                  ? getString("cvvMustBe4Digits")
+                  : getString("cvvMustBe3Digits"),
             });
           }
 
           return true;
         })
-        .required("CVV is required"),
+        .required(getString("cvvIsRequired")),
     });
 
   const formik = useFormik({
@@ -737,10 +747,10 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       <div className="pm-main-container">
         <div className="pm-container" id="pm-main">
           <div className="pm-title-container">
-            <FormHeading title="Payment Method" />
+            <FormHeading title={getString("paymentMethod") as string} />
             {showShouldToggleAccordian && (
               <div className="pm-show-card" onClick={toggleAccordion}>
-                <div>{isExpanded ? "Hide other cards" : "See other cards"}</div>
+                <div>{isExpanded ? getString('hideOtherCards') : getString('seeOtherCards')}</div>
                 <Back
                   className={`mfe-accordion ${isExpanded ? "open" : "close"}`}
                 />
@@ -782,7 +792,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
               <div className="checkout-add-card" onClick={onAddNewCard}>
                 <div className="checkout-add-card-text">
                   <RadioButton id={"39812031823"} />
-                  <div>Add New Card</div>
+                  <div>{getString("addNewCard")}</div>
                 </div>
                 <div className="checkout-add-new-card-image">
                   {order?.paymentMethods

@@ -5,6 +5,7 @@ import { generateChangeStoreResponse } from "./GenerateChangeStoreResponse";
 import { buildOrder } from "../../api/service/Order";
 import { CreditCardFormData } from "../../component/Form/CreditCardFormContext";
 import { Order } from "../../interfaces/Order";
+import { useContentStrings } from "../../hooks/useContentStrings";
 
 export const handleSaveCard = async (
     creditCardFormData: CreditCardFormData,
@@ -16,14 +17,14 @@ export const handleSaveCard = async (
     const {
         order,
     } = dependencies;
-
+    const { getString } = useContentStrings();
     const typeId = getTypeIdByAltName(getCardType(creditCardFormData.cardInfo.number).toLowerCase()) || 9;
     const acceptablePaymentMethods = order?.paymentMethods
         .filter((pm: { typeID: number | undefined; }) => pm.typeID === typeId)
         .map((pm: { typeID: any; }) => pm.typeID);
 
     if (acceptablePaymentMethods?.length === 0 || !acceptablePaymentMethods?.includes(typeId)) {
-        return {error: "This card type is not accepted"};
+        return {error: getString("cardTypeNotAccepted") as string};
     }
 
     try {

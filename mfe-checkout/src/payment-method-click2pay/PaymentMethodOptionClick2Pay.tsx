@@ -17,6 +17,7 @@ import { CardInputs } from "../payment-method/card-information/CardInputs";
 import { Formik } from "formik";
 import { creditCardSchema } from "../validation/creditcardSchema";
 import * as Yup from "yup";
+import { useContentStrings } from "../hooks/useContentStrings";
 import { useAtom } from "jotai/index";
 import { customerApiData } from "../checkout/customerAtom";
 
@@ -44,9 +45,7 @@ const c2pCustomerData: Click2PayData = {
   },
 };
 
-const validationSchema = Yup.object().shape({
-  cardInfo: creditCardSchema,
-});
+
 
 export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({
   pcid,
@@ -59,7 +58,7 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({
   const [customerData] = useAtom(customerApiData(pcid));
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [showLearnMoreModal, setShowLearnMoreModal] = useState(false);
-
+  const { getString } = useContentStrings();
   const cardBrandsString = c2pData.cardBrands.join(",");
   const shopperSavedPayment: ShopperSavedPayments = {
     //used to prefill address for new c2p card
@@ -72,6 +71,10 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({
     address: c2pData.address,
     accountName: "",
   };
+
+  const validationSchema = Yup.object().shape({
+    cardInfo: creditCardSchema(getString),
+  });
 
   useEffect(() => {
     if (order) {
@@ -263,15 +266,14 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({
             <div className="js-c2p-container click-to-pay">
               <div className="js-c2p-access-cards-msg click-to-pay">
                 <div className="checkout-method-click-to-pay-text">
-                  Pay with your cards saved to Click to Pay for fast, secure
-                  checkout
+                  {getString("payWithSavedCards")}
                 </div>
                 <button
                   className="checkout-method-click-to-pay-text checkout-method-click-to-pay-text--black click-to-pay__btn"
                   type="button"
                   onClick={() => initiateOTPValidation()}
                 >
-                  Click here to access your cards
+                  {getString("clickToAccessCards")}
                 </button>
               </div>
               <src-card-list
@@ -287,8 +289,7 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({
                 <div className="checkout-method-click-to-pay-text click-to-pay__warn">
                   <Warn />
                   <p className="click-to-pay__warn-text">
-                    There are no cards in your Click to Pay wallet. Add a card
-                    to check out with your Click to Pay Profile.
+                    {getString("noCardsInClickToPayWallet")}
                   </p>
                 </div>
               </div>
@@ -304,7 +305,7 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({
                   type="button"
                   onClick={() => addNewClick2PayCard()}
                 >
-                  Add new card with Click to Pay
+                  {getString("clickToPay-addNewCard")}
                 </button>
               </div>
             </div>
@@ -325,17 +326,16 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({
                       className="checkout-add-card-text"
                       onClick={() => addNewClick2PayCard()}
                     >
-                      Continue to Click to Pay
+                     {getString("continueToClickToPay")}
                     </div>
                     <div className="checkout-method-save-information__text">
-                      Save my information with Click to Pay for fast, secure
-                      checkout.
+                     {getString("saveInfoWithClickToPay")}
                       <button
                         className="checkout-method-click-to-pay-text__learn-more click-to-pay__btn click-to-pay__btn--inline"
                         type="button"
                         onClick={showLearnMoreButton}
                       >
-                        Learn More
+                       {getString("learnMore")}
                       </button>
                       {showLearnMoreModal && (
                         <div
@@ -354,12 +354,14 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({
                                 className="checkout-overlay-simple__close checkout-overlay-simple__close--dark margin-top"
                                 onClick={closeLearnMoreButton}
                               >
-                                <span className="collapse-text">Close</span>
+                                <span className="collapse-text">
+                                  {getString("close")}
+                                </span>
                                 <span
                                   className="material-icons"
                                   aria-hidden="true"
                                 >
-                                  close
+                                  {getString("close")?.toLocaleLowerCase()}
                                 </span>
                               </button>
                             </div>
@@ -418,9 +420,9 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({
                   className="checkout-overlay-simple__close checkout-overlay-simple__close--dark margin-top"
                   onClick={handleCloseErrorMessage}
                 >
-                  <span className="collapse-text">Close</span>
+                  <span className="collapse-text">{getString("close")}</span>
                   <span className="material-icons" aria-hidden="true">
-                    close
+                    {getString("close")}
                   </span>
                 </button>
               </div>
@@ -468,22 +470,21 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({
                     className="checkout-overlay-simple__close checkout-overlay-simple__close--dark margin-top margin-right"
                     onClick={closeAddCardOverlay}
                   >
-                    <span className="collapse-text">Close</span>
+                    <span className="collapse-text">{getString("close")}</span>
                     <span className="material-icons" aria-hidden="true">
-                      close
+                      {getString("close")?.toLocaleLowerCase()}
                     </span>
                   </button>
                 </div>
                 <div>
                   <div className="click-to-pay__iframe-content--scrollable click-to-pay__iframe-content--padding">
                     <div className="click-to-pay__heading">
-                      Card Information
+                      {getString("cardInformation")}
                     </div>
                     <div>
                       <src-card-list card-brands={cardBrandsString} />
                       <div className="checkout-method-click-to-pay-text margin-bottom">
-                        Save my information with Click to Pay for fast, secure
-                        checkout.
+                        {getString("saveInfoWithClickToPay")}
                       </div>
                     </div>
                     <CardInputs
@@ -499,7 +500,7 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({
                   </div>
                   <div className="form-footer form-footer__dual-button">
                     <Button
-                      label="Cancel"
+                      label={getString("cancel") as string}
                       btnType="secondary"
                       onClick={closeAddCardOverlay}
                     />

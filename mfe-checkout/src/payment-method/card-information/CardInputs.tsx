@@ -2,6 +2,7 @@ import React from "react";
 import { DropdownField } from "../../component/Form/Field/DropdownField";
 import { FormField } from "../../component/Form/Field/FormField";
 import "./CardInformation.scss";
+import { useContentStrings } from "../../hooks/useContentStrings";
 
 interface ICardInputProps {
   touched: any;
@@ -32,6 +33,8 @@ export const CardInputs: React.FC<ICardInputProps> = ({
   errorRefs = null,
   isFromClick2Pay = false,
 }) => {
+  const { getString } = useContentStrings();
+ 
   const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let formattedValue = e.target.value.replace(/\D/g, ""); // Remove non-numeric characters
     if (formattedValue.length > 16)
@@ -65,7 +68,7 @@ export const CardInputs: React.FC<ICardInputProps> = ({
       {!isEditing && (
         <FormField
           qaTag="qa-name"
-          label="Name on Card"
+          label={getString("nameOnCard")}
           required
           name="cardInfo.accountName"
           value={values.cardInfo?.accountName || ""}
@@ -80,7 +83,7 @@ export const CardInputs: React.FC<ICardInputProps> = ({
       {!isEditing && (
         <FormField
           qaTag="qa-card-number"
-          label="Card Number"
+          label={getString("cardNumber")}
           required
           name="cardInfo.number"
           value={values.cardInfo?.number || ""}
@@ -95,7 +98,7 @@ export const CardInputs: React.FC<ICardInputProps> = ({
           qaTag="qa-expiration-month"
           className="form-field-half"
           required
-          label="Expiration Month"
+          label={getString("expirationMonth")}
           onBlur={handleBlur}
           formName="cardInfo.expMonth"
           placeholder="MM"
@@ -110,7 +113,7 @@ export const CardInputs: React.FC<ICardInputProps> = ({
           qaTag="qa-expiration-year"
           className="form-field-half"
           required
-          label="Expiration Year"
+          label={getString("expirationYear")}
           onBlur={handleBlur}
           placeholder="YYYY"
           formName="cardInfo.expYear"
@@ -129,7 +132,7 @@ export const CardInputs: React.FC<ICardInputProps> = ({
         <div className="form-field-container">
           <FormField
             qaTag="qa-cvv"
-            label="CVV"
+            label={getString("cvv")}
             required
             name="cardInfo.cvv"
             type="text"
@@ -154,7 +157,7 @@ export const CardInputs: React.FC<ICardInputProps> = ({
                 checked={saveCardToWallet}
                 onChange={(e) => setSaveCardToWallet(!saveCardToWallet)}
               />
-              <span>Save card for later</span>
+              <span>{getString("saveCardForLater")}</span>
             </div>
           )}
         </div>

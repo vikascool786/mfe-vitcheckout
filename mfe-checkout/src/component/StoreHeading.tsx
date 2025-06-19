@@ -12,6 +12,7 @@ import {
 import { Order, OrderStore } from "../interfaces/Order";
 import { getSortedStores, getStoreDataFromKey, isGiftCardForStoreKey } from "../utils/StoreUtils";
 import { getItemEstimatedShipDate, hasEstimatedShipDate } from "../utils/ItemUtils";
+import { useContentStrings } from "../hooks/useContentStrings";
 
 interface IStoreHeadingProps {
     storeName: string;
@@ -32,6 +33,8 @@ const StoreHeading: React.FC<IStoreHeadingProps> = ({ storeName, storeKey, isMAS
             shipDateMessageMap: new Map<string, string>(),
         });
 
+    const { getString } = useContentStrings();
+
     const isOnlySingleMAOOSItemInStore = (order: Order, storeKey: string): boolean => {
         const store: OrderStore | null = getStoreDataFromKey(order, storeKey);
         const isOnlySingleItemInStore = store?.items.length === 1;
@@ -43,7 +46,7 @@ const StoreHeading: React.FC<IStoreHeadingProps> = ({ storeName, storeKey, isMAS
     };
 
     useEffect(() => {
-        let consolidateData = getOrderConsolidateData(order);
+        let consolidateData = getOrderConsolidateData(order,getString);
         setOrderConsolidateData(consolidateData);
         setShowStoreShipmentHeading((isOnlySingleMAOOSItemInStore(order, storeKey) && !isOrderSummary) || !orderIsMAOnly(order) || consolidateData.oosConsolidate === OOS_CONSOLIDATE_SPLIT_CODE || orderHasGiftCards(order));
     }, [order, storeKey]);
@@ -59,7 +62,7 @@ const StoreHeading: React.FC<IStoreHeadingProps> = ({ storeName, storeKey, isMAS
         //condition when there is only one MA oos item to show ship date - AI-110731
         if(isMAStore && isOnlySingleMAOOSItemInStore(order, storeKey) && oosConsolidateData?.oosConsolidate !== OOS_CONSOLIDATE_SPLIT_CODE && !isOrderSummary){
             const estimatedShipDate = getItemEstimatedShipDate(getStoreDataFromKey(order, storeKey)?.items[0] || null);
-            storeHeading = `Shipping on ${estimatedShipDate}`;
+            storeHeading = `${getString("shippingOn")} ${estimatedShipDate}`;
         } else if(oosConsolidateData?.oosConsolidate === OOS_CONSOLIDATE_SPLIT_CODE && isMAStore && !isGiftCardForStoreKey(order, storeKey)){
             let shipmentNumber = getShipmentNumber(order, storeKey);
             storeHeading = `${storeName} ${shipmentNumber}`;
@@ -68,7 +71,7 @@ const StoreHeading: React.FC<IStoreHeadingProps> = ({ storeName, storeKey, isMAS
                 if(storeKey.includes("*OOS*")) {
                     storeHeading = storeHeading + " - " + orderConsolidateData?.shipDateMessageMap.get(storeKey) || "";
                 } else{
-                    storeHeading = storeHeading + " - Shipping Now";
+                    storeHeading = storeHeading + ` - ${getString("shipNow")}`;
                 }
             }
         }

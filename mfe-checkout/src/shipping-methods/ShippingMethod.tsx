@@ -52,6 +52,7 @@ import { createPaymentMethod } from "../utils/helpers/GeneratePaymentMethod";
 import { Address } from "../interfaces/Address";
 import PaypalIcon from "../assets/images/PayPal.png";
 import SezzleIcon from "../assets/images/Sezzle.png";
+import { useContentStrings } from "../hooks/useContentStrings";
 import { getFreeShipMessagesForOrder } from "../utils/FreeShipMessageUtil";
 
 interface IShippingMethodProps {
@@ -80,8 +81,10 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
   const [freeShipMessageMap, setFreeShipMessageMap] = useState(new Map<string, string>());
   const [isSplitOrderPickUpSelected, setIsSplitOrderPickUpSelected] = useState(false);
 
+  const { getString } = useContentStrings();
+
   if (!orders) {
-    return <p>Loading shipping methods...</p>;
+    return <p>{`${getString("loading")} ${getString("shippingMethods")?.toLocaleLowerCase()}...`}</p>;
   }
 
   const setOrderInDataObject = () => {
@@ -139,7 +142,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
 
       await removeProductFromCart(orders.id, itemKey);
 
-      const orderConsolidateData = getOrderConsolidateData(orders);
+      const orderConsolidateData = getOrderConsolidateData(orders,getString);
       // send oosConsolidate when current oosConsolidate is split and showOrderConsolidate is true
       const isOOSConsolidateSplit =
         orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_SPLIT_CODE &&
@@ -236,7 +239,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
   };
 
   useEffect(() => {
-    setOrderConsolidateData(getOrderConsolidateData(orders));
+    setOrderConsolidateData(getOrderConsolidateData(orders,getString));
     setOrderInDataObject();
   }, [orders]);
 
@@ -245,7 +248,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
       if (!orders) return;
 
       try {
-        const messages = await getFreeShipMessagesForOrder(orders, portalData);
+        const messages = await getFreeShipMessagesForOrder(orders, portalData,getString);
         setFreeShipMessageMap(messages);
       } catch (error) {
         console.error("Failed to fetch free shipping messages", error);
@@ -301,11 +304,14 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
       {isAddressSaved && orderConsolidateData?.showOrderConsolidate && (
         <div className="shipping-options-container">
           <div
-            className={`shipping-option-container start ${orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_SPLIT_CODE
+            className={`shipping-option-container start ${
+              orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_SPLIT_CODE
                 ? "selected"
                 : ""
-              }`}
-              onClick={() => handleChangeOOSConsolidate(OOS_CONSOLIDATE_SPLIT_CODE)}
+            }`}
+            onClick={() =>
+              handleChangeOOSConsolidate(OOS_CONSOLIDATE_SPLIT_CODE)
+            }
           >
             <div className="shipping-option-wrapper">
               <div className="shipping-option-select-container">
@@ -321,20 +327,19 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
                   onClick={(e) => e.stopPropagation()} // Prevent triggering div click
                 />
                 <div className={`shipping-option-sub-container`}>
-                  <div>
-                    Ship available products now and create multiple shipments
-                  </div>
-                  <div>Separate shipping charges apply.</div>
+                  <div>{getString("shipNowMultipleShipments")}</div>
+                  <div>{getString("separateShippingChargesApply")}</div>
                 </div>
               </div>
             </div>
           </div>
           <div
-            className={`shipping-option-container end ${orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_CODE
+            className={`shipping-option-container end ${
+              orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_CODE
                 ? "selected"
                 : ""
-              }`}
-              onClick={() => handleChangeOOSConsolidate(OOS_CONSOLIDATE_CODE)}
+            }`}
+            onClick={() => handleChangeOOSConsolidate(OOS_CONSOLIDATE_CODE)}
           >
             <div className="shipping-option-wrapper">
               <div className="shipping-option-select-container">
@@ -349,8 +354,8 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
                   onClick={(e) => e.stopPropagation()} // Prevent triggering div click
                 />
                 <div className={`shipping-option-sub-container`}>
-                  <div>Wait and ship together. Save on shipping.</div>
-                  <div>Ships on {orderConsolidateData?.availabilityDate}</div>
+                  <div>{getString("waitAndShipTogetherSaveOnShipping")}</div>
+                  <div>{getString("shipOnDate",[orderConsolidateData?.availabilityDate])}</div>
                 </div>
               </div>
             </div>
@@ -366,7 +371,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
                 store && (
                   <div key={key}>
                     <FreeShipMessage
-                        freeShipMessage={getShipFreeMessageForStore(store, key)}
+                      freeShipMessage={getShipFreeMessageForStore(store, key)}
                     />
                     <StoreHeading
                       qaTag={"qa-catalog"}
@@ -380,8 +385,8 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
                     {isGiftCardStore(store) && (
                       <div className="shipping-email-delivery">
                         {store?.store?.isMA
-                          ? "Email Delivery - Within 5 minutes"
-                          : "Email Delivery"}
+                          ? getString("emailDeliveryWithin5Minutes")
+                          : getString("orders-70")}
                       </div>
                     )}
 

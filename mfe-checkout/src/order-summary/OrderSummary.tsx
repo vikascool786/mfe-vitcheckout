@@ -23,6 +23,7 @@ import StoreHeading from "../component/StoreHeading";
 import { GET_API_MODE } from "../utils/helpers/urlResolvers";
 import { GiftCard } from "./GiftCard";
 import { IPaymentMethod } from "../interfaces/ShopperCart";
+import { useContentStrings } from "../hooks/useContentStrings";
 import AppliedCoupons from "./AppliedCoupons";
 
 interface IOrderSummary {
@@ -65,6 +66,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
     coupon: "",
     couponError: "",
   });
+
+  const { getString } = useContentStrings();
 
   const [gcState, setgcState] = useState<IGCState>({
     gcNum: "",
@@ -278,7 +281,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
       console.error("Error while adding gift card:", error);
       setgcState((prevState) => ({
         ...prevState,
-        gcError: "An unexpected error occurred while adding the gift card.",
+        gcError: getString("errorAddingGiftCard") as string,
       }));
     } finally {
       setGCLoading(false);
@@ -338,7 +341,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
       console.error("Error while adding coupon:", error);
       setCoupon({
         coupon: coupon.coupon,
-        couponError: "An unexpected error occurred while adding the coupon.",
+        couponError: getString("errorAddingCoupon") as string,
       });
     }
   };
@@ -451,9 +454,9 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         apiMode === "localhost" ? "height-180" : "height-245"
       }`}
     >
-      {gcLoading || isLoading && <Spinner />}
+      {gcLoading || (isLoading && <Spinner />)}
       <>
-        <FormHeading title="Order Summary" />
+        <FormHeading title={getString("orderSummary") as string} />
         {!hideCashback && (
           <>
             {!loading &&
@@ -465,7 +468,9 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           </>
         )}
 
-        <div className="order-redeem-coupon-text">Redeem Coupon</div>
+        <div className="order-redeem-coupon-text">
+          {getString("redeemCoupon")}
+        </div>
         <div className="qa-order-coupon order-summary-coupon-container">
           <div className="order-input-container">
             <FormField
@@ -478,7 +483,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           <div className="order-apply-container">
             <Button
               qaTag={"qa-button"}
-              label="Apply"
+              label={getString("apply") as string}
               btnType="secondary"
               onClick={handleAddCoupon}
             />
@@ -487,7 +492,10 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         {order?.userOptions.coupons &&
           order?.userOptions.coupons?.length > 0 && (
             <div className="order-applied-coupons">
-                <AppliedCoupons stores={order?.stores} handleRemoveCoupon={handleRemoveCoupon} />
+              <AppliedCoupons
+                stores={order?.stores}
+                handleRemoveCoupon={handleRemoveCoupon}
+              />
             </div>
           )}
 
@@ -503,7 +511,9 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                 />
               </div>
               <div className="gift-card-wrapper-field-2">
-                <div className="order-redeem-coupon-text">PIN</div>
+                <div className="order-redeem-coupon-text">
+                  {getString("pin")}
+                </div>
                 <FormField
                   qaTag={"qa-input"}
                   disablePasswordManager
@@ -516,7 +526,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
             <div className="gift-card-apply">
               <Button
                 qaTag={"qa-button"}
-                label="Apply"
+                label={getString("apply") as string}
                 btnType="secondary"
                 onClick={() => handleAddGiftCard(false)}
               />
@@ -534,18 +544,20 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               index={index}
               order={order}
             />
-        ))}
+          ))}
 
         {gcState.gcError && gcState.gcVisible && (
           <div className="error-message">{gcState.gcError}</div>
         )}
-        
+
         {order?.totals.walletAppliedStr !== order?.totals.priceActualStr && (
           <div
             className="qa-link order-sub-text underlined"
             onClick={handleApplyGiftCard}
           >
-            {gcState.gcVisible ? "Hide Gift Card" : "Apply Gift Card"}
+            {gcState.gcVisible
+              ? getString("hideGiftCard")
+              : getString("applyGiftCard")}
           </div>
         )}
 
@@ -582,27 +594,29 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                     </div>
                   </div>
                   {store?.store?.totals?.couponCode && (
-                      <div className="order-summary-row order-summary-row__coupon">
-                        <div className="order-summary-coupon-applied">
-                          Coupon
-                          <span
-                              key={index}
-                              className="order-summary-coupon-applied__code"
-                          >
-                            {isHiddenCouponCode(store?.store?.totals?.couponCode) ? (
-                                <span>
-                                {getCouponAliasForCouponCode(store?.store?.totals?.couponCode)}
-                              </span>
-                            ) : (
-                                <span>
-                                {store?.store?.totals?.couponCode}
-                              </span>
-                            )}
-                          </span>
-                        </div>
-
-                        <div>{store?.store?.totals?.couponsStr}</div>
+                    <div className="order-summary-row order-summary-row__coupon">
+                      <div className="order-summary-coupon-applied">
+                        {getString("coupon")}
+                        <span
+                          key={index}
+                          className="order-summary-coupon-applied__code"
+                        >
+                          {isHiddenCouponCode(
+                            store?.store?.totals?.couponCode
+                          ) ? (
+                            <span>
+                              {getCouponAliasForCouponCode(
+                                store?.store?.totals?.couponCode
+                              )}
+                            </span>
+                          ) : (
+                            <span>{store?.store?.totals?.couponCode}</span>
+                          )}
+                        </span>
                       </div>
+
+                      <div>{store?.store?.totals?.couponsStr}</div>
+                    </div>
                   )}
                   <div className="order-summary-row">
                     <div>Tax</div>
@@ -616,7 +630,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                       {" "}
                       {order.totals.shipping == 0
                         ? "Free Shipping"
-                        : "Shipping"}{" "}
+                        : getString("shipping")}{" "}
                     </div>
                     <div className={"qa-shipping"}>
                       {store?.store?.totals?.shippingStr}
@@ -648,19 +662,22 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
 
         {order?.totals?.gcApplied && order?.totals?.gcApplied < 0 ? (
           <div className="order-summary-row">
-            <div className="order-summary-row-bold">Gift Card</div>
+            <div className="order-summary-row-bold">
+              {getString("giftCard")}
+            </div>
             <div>{order?.totals.gcAppliedStr}</div>
           </div>
         ) : null}
 
-        <div className={`order-summary-total ${
+        <div
+          className={`order-summary-total ${
             order?.totals?.priceActualStr !== order?.totals.priceStr
               ? `order-summary-total-line`
               : ``
           } `}
         >
-          <div className="order-summary__total-d">Total Due</div>
-          <div className="order-summary__total-m">Total</div>
+          <div className="order-summary__total-d">{getString("totalDue")}</div>
+          <div className="order-summary__total-m">{getString("total")}</div>
           <div className={"qa-total"}>{order?.totals?.priceStr}</div>
         </div>
         {Number(order?.totals?.cashBack) > 0 && (
@@ -669,7 +686,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               <div className="order-cashback">
                 <Cashback />
                 <span className="order-vift-cashback-earned">
-                  VIFT Cashback earned on this order
+                  {getString("viftCashbackEarned")}
                 </span>
               </div>
               <div>{`${order?.totals.cashBackStr}`}</div>
@@ -683,7 +700,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               <div className="order-cashback">
                 <VIFT />
                 <span className="vift-earned-cash">
-                  You earned 1% extra Cash using VIFT
+                  {getString("youEarnedExtraUsingVift")}
                 </span>
               </div>
               <div className={"qa-cashback"}>{`$${formattedNumber(
@@ -701,7 +718,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               <div className="order-cashback">
                 <VIFT />
                 <span className="total-cash-added">
-                Total Cash added to your VIFT balance
+                 {getString("totalCashToVift")}
                 </span>
               </div>
               <div>{`$${formattedNumber(
@@ -716,7 +733,9 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           order?.totals?.bv > 0 && (
             <div className="shipping-item-container">
               <div className="order-summary-cashback-container">
-                <div className="order-cashback">BV earned in this order</div>
+                <div className="order-cashback">
+                  {getString("bvEarnedInOrder")}
+                </div>
                 <div>{formattedNumber(order.totals.bv)}</div>
               </div>
             </div>
@@ -726,7 +745,9 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           order?.totals?.ibv > 0 && (
             <div className="shipping-item-container">
               <div className="order-summary-cashback-container">
-                <div className="order-cashback">IBV earned in this order</div>
+                <div className="order-cashback">
+                  {getString("ibvEarnedInOrder")}
+                </div>
                 <div>{formattedNumber(order.totals.ibv)}</div>
               </div>
             </div>

@@ -14,7 +14,18 @@ export const getTransactionData = async (
         const c2pTransactionApiEndpoint =
             `${apiDomain}/shoppingcart-checkouts/v1/Checkout/ShoppingCart/MasterPass/C2P/Flow/${flowId}/Transaction/${transId}/total/${total}?api_key=${apiKey}`;
         return await axiosInstance(c2pTransactionApiEndpoint).get("");
-    } catch (error) {
-        console.error('Error getting transaction data for click2pay:', error);
+    } catch (error: any) {
+        let errorMessage = 'Error getting transaction data for click2pay';
+        if (error?.response?.data) {
+            const data = error.response.data;
+            if (typeof data === 'string') {
+                errorMessage = data;
+            } else if (typeof data === 'object' && data.error.message) {
+                errorMessage = data.error.message;
+            }
+        }
+
+        console.error('Error getting transaction data for click2pay:', errorMessage);
+        throw new Error(errorMessage);
     }
 };

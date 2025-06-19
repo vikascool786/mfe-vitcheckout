@@ -38,7 +38,8 @@ export const orderHasDefaultMAShipAddress = (order: Order | null): boolean => {
 };
 
 export const getOrderConsolidateData = (
-    order: Order | null
+    order: Order | null,
+    getString:any
 ): OrderConsolidationData => {
     let orderConsolidateData = {
         showOrderConsolidate: false,
@@ -85,7 +86,7 @@ export const getOrderConsolidateData = (
             const dateAvailable = value.items?.[0]?.available || "";
             orderConsolidateData.shipDateMessageMap.set(
                 key,
-                `Shipping on ${dateAvailable}`
+                `${getString("shippingOn")} ${dateAvailable}`
             );
         });
     }

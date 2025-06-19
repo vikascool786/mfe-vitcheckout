@@ -7,6 +7,7 @@ import { AddressVerificationAddressList } from "./AddressVerificationAddressList
 import { Address } from "../interfaces/Address";
 import { AddressDisplay } from "./AddressDisplay";
 import { AddressList } from "../address-list/AddressList";
+import { useContentStrings } from "../hooks/useContentStrings";
 
 interface AppProps {
   addressList: Address[];
@@ -27,6 +28,7 @@ export const AddressVerification: React.FC<AppProps> = ({
 }) => {
   const [isNewSelectedAddress, setIsNewSelectedAddress] =
   React.useState<boolean>(false);
+  const { getString } = useContentStrings();
 
   const onChangeVericationAddress = (address: Address) => {
     // set is new selected address to false if address does not exist on the addressList
@@ -41,14 +43,14 @@ export const AddressVerification: React.FC<AppProps> = ({
   return (
     <div>
       <div className="form-header">
-        <FormHeading title="Address Verification Required" />
+        <FormHeading title={getString("addressVerificationRequired") as string} />
       </div>
       {!hasAddressSuggestions ? (
         <div className="avs-address-container">
           <div className="avs-alert-container">
             <Alert />
             <div className="avs-alert-container__text">
-              There are no suggestions for the address entered
+              {getString("noAddressSuggestions")}
             </div>
           </div>
           <div className="avs-address-container__address">
@@ -56,12 +58,12 @@ export const AddressVerification: React.FC<AppProps> = ({
           </div>
           <div className="form-footer form-footer__dual-button">
             <Button
-              label="Edit Address"
+              label={getString("editAddress") as string}
               btnType="secondary"
               onClick={handleEditClick}
             />
             <Button
-              label="Use Address Entered"
+              label={getString("useEnteredAddress")as string}
               btnType="primary"
               onClick={handleUseSelectedAddress}
             />
@@ -72,8 +74,7 @@ export const AddressVerification: React.FC<AppProps> = ({
           <div className="avs-alert-container">
             <Alert />
             <span className="avs-alert-container__text">
-              Please select one of the address corrections, or you may select to
-              keep the address as entered
+              {getString("selectAddressCorrection")}
             </span>
           </div>
           <AddressVerificationAddressList
@@ -83,13 +84,13 @@ export const AddressVerification: React.FC<AppProps> = ({
           />
           <div className="form-footer form-footer__dual-button">
             <Button
-              label="Edit Address"
+              label={getString("editAddress") as string}
               btnType="secondary"
               disabled={isNewSelectedAddress}
               onClick={handleEditClick}
             />
             <Button
-              label="Use Selected Address"
+              label={getString("useSelectedAddress") as string}
               btnType="primary"
               onClick={handleUseSelectedAddress}
             />

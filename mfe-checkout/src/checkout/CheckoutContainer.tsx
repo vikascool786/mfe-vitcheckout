@@ -48,6 +48,7 @@ import { GET_API_MODE } from "../utils/helpers/urlResolvers";
 import { getShippingAddressFromAddressList } from "../utils/AddressUtils";
 import {CreditCardFormProvider} from "../component/Form/CreditCardFormContext";
 import {siteApiData} from "./siteAtom";
+import { useContentStrings } from "../hooks/useContentStrings";
 import { isSuccessfulPaypalCallback } from "../utils/helpers/PaypalHelper";
 import ShippingMethodHeading from "../shipping-methods/ShippingMethodHeading";
 import { getUserAgent } from "../utils/helpers/UserSessionDataHelper";
@@ -98,7 +99,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   sessionId,
 }) => {
   const [orderData, setOrderData] = useAtom(orderAtom);
-
+  const { getContent,getString } = useContentStrings();
   const [showEmptyOrder, setShowEmptyOrder] = useState(false);
   const [isLoading, setIsLoading] = useAtom(loadingAtom);
   const [orderErrorMessage, setOrderErrorMessage] = useState("");
@@ -154,6 +155,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   }, [location.search]);
 
   useEffect(() => {
+    getContent(siteData);
     setDataObjectProperty("pageName", "singlePage");
     setDataObjectProperty("pageType", "checkout");
   }, []);
@@ -293,7 +295,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
       const errorMessage =
         error?.data?.response?.errors?.message || "Unknown error";
       const errorCode = error?.data?.response?.errors?.code || "N/A";
-      setOrderErrorMessage(`Detail: ${errorMessage} (code: ${errorCode})`);
+      setOrderErrorMessage(getString("errorDetailMessage",[errorMessage,errorCode]) as string);
     }
     setIsPlacingOrderWithThirdParty(false);
     setIsLoading(false);
@@ -346,7 +348,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
         orderResponse.then((response) => {
           if (
             response.response?.errors?.message ===
-            "There are no items in your cart."
+            `${getString("emptyCartMessage")}.`
           ) {
             window.location.href = GET_SHOP_CART_URL();
           }
@@ -394,7 +396,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   if (loadingAddresses || loadingPaymentMethods || loadingOrder || !orderData)
     return <Skeleton />;
 
-  if (addressError || paymentError) return <div>Failed to load data</div>;
+  if (addressError || paymentError) return <div>{getString("failedToLoadData")}</div>;
 
   return (
     <div>
@@ -514,7 +516,9 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   );
 };
 
-export default withErrorBoundary(
-  CheckoutContainer,
-  <div>An unexpected error occurred. Please try again later.</div>
-);
+const ErrorFallback = () => {
+  const { getString } = useContentStrings();
+  return <div>{getString("unexpectedErrorTryAgain")}</div>;
+};
+
+export default withErrorBoundary(CheckoutContainer, <ErrorFallback />);

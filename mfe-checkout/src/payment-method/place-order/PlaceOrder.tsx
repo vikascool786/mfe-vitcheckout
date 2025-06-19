@@ -38,6 +38,7 @@ import { CLICK2PAY, isPaypalPayment, isThirdPartyPayment, PAYPAL, PAYPAL_RECURRI
 import "./PlaceOrder.scss";
 import { useCreditCardFormContext } from "../../component/Form/CreditCardFormContext";
 import { handleSaveCard } from "../../utils/helpers/CreditCardHelper";
+import { useContentStrings } from "../../hooks/useContentStrings";
 import { getPaypalToken } from "../../api/service/PaypalCheckout";
 
 interface IPlaceOrder {
@@ -83,9 +84,9 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     orderNotificationsAtom
   );
   const selectedPaymentMethod = paymentMethods.find((pm) => pm.isSelected);
-
+  const { getString } = useContentStrings();
   const [orderConsolidateData, setOrderConsolidateData] =
-    useState<OrderConsolidationData>(getOrderConsolidateData(order || null));
+    useState<OrderConsolidationData>(getOrderConsolidateData(order || null,getString));
 
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
@@ -97,7 +98,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   useEffect(() => {
     updateOrderErrorMessage("");
     if (order) {
-      setOrderConsolidateData(getOrderConsolidateData(order));
+      setOrderConsolidateData(getOrderConsolidateData(order,getString));
     }
   }, [order]);
 
@@ -290,7 +291,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
 
     if (isCreditCardRequired && selectedPaymentMethod?.paymentMethod.id === 0) {
       if (!hasNewCreditCardDataToSave) {
-        updateOrderErrorMessage("Please complete your payment information");
+        updateOrderErrorMessage(getString("completePaymentInfo") as string);
         setIsLoading(false);
         return;
       } else {
@@ -314,7 +315,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
 
     //confirm we have a shipping address for the order
     if (!orderHasShippingAddress(order)) {
-      updateOrderErrorMessage("Please select your shipping address");
+      updateOrderErrorMessage(getString("selectShippingAddress") as string);
       setIsLoading(false);
       return;
     }
@@ -326,7 +327,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
         selectedPaymentMethod?.isEditing &&
         selectedPaymentMethod?.paymentMethod.id !== 0
       ) {
-        updateOrderErrorMessage("Please save your payment method");
+        updateOrderErrorMessage(getString("pleaseSavePayment") as string);
         setIsLoading(false);
         return;
       }
@@ -338,7 +339,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             !selectedPaymentMethod?.isPaymentValidated &&
             selectedPaymentMethod?.isEditing
           ) {
-            updateOrderErrorMessage("Please save your payment method");
+            updateOrderErrorMessage(getString("pleaseSavePayment") as string);
             setIsLoading(false);
           }
           if (selectedPaymentMethod?.isEditing) {
@@ -352,7 +353,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             !excludedPaymentTypes.includes(paymentTypeId) &&
             !selectedPaymentMethod?.isPaymentValidated
           ) {
-            updateOrderErrorMessage("Please save your payment method");
+            updateOrderErrorMessage(getString("pleaseSavePayment") as string);
             setIsLoading(false);
             return;
           }
@@ -371,7 +372,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             !excludedPaymentTypes.includes(paymentTypeId) &&
             !selectedPaymentMethod?.isPaymentValidated
           ) {
-            updateOrderErrorMessage("Please save your payment method");
+            updateOrderErrorMessage(getString("pleaseSavePayment") as string);
             setIsLoading(false);
           }
         } else if (
@@ -382,7 +383,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             !excludedPaymentTypes.includes(paymentTypeId) &&
             !selectedPaymentMethod?.isPaymentValidated
           ) {
-            updateOrderErrorMessage("Please save your payment method");
+            updateOrderErrorMessage(getString("pleaseSavePayment") as string);
             setIsLoading(false);
             return;
           }
@@ -424,7 +425,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             order &&
               setOrderData({
                 ...order,
-                shouldShowInvalidCVVMessage: "The credit card has expired.",
+                shouldShowInvalidCVVMessage: `${getString("creditCardExpired")}.`,
               });
             setIsLoading(false);
             return;
@@ -436,15 +437,15 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             !selectedPaymentMethod.isPaymentValidated &&
             order
           ) {
-            let message = "Please check CVV";
+            let message = getString("checkCvv") as string;
 
             if (isCardExpiredFlag) {
-              message = "The credit card has expired.";
+              message = `${getString("creditCardExpired")}.`;
             }
 
             if (
               order.shouldShowInvalidCVVMessage &&
-              message === "The credit card has expired."
+              message === `${getString("creditCardExpired")}.`
             )
               break;
 
@@ -467,9 +468,9 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                 ...order,
                 shouldShowInvalidCVVMessage:
                   order?.shouldShowInvalidCVVMessage ===
-                  "The credit card has expired."
+                  `${getString("creditCardExpired")}.`
                     ? order.shouldShowInvalidCVVMessage
-                    : "Please check CVV",
+                    : getString("checkCvv"),
               });
             scrollToCVV(selectedPaymentMethod);
             setIsLoading(false);
@@ -480,9 +481,11 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
           confirmOrder();
           break;
       }
-    } catch (error) {
+    } catch (error: any) {
       setIsLoading(false);
-      console.error("Error placing order:", error);
+      const errorMessage =
+          error?.response?.data?.message || error?.message || "We're sorry, there was an error placing your order";
+      updateOrderErrorMessage(errorMessage);
     }
   };
 
@@ -553,8 +556,11 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
       return new Promise((resolve) => {
         resolve(response);
       });
-    } catch (error) {
-      console.error("Failed to fetch data:", error);
+    } catch (error: any) {
+      console.error(`${getString("failedToFetchData")}:`, error);
+      const errorMessage =
+          error?.response?.data?.message || error?.message || "Unknown error";
+      throw new Error(errorMessage);
     }
   };
 
@@ -642,7 +648,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     if (typeof sezzleResponse.url != "undefined") {
       window.location = sezzleResponse.url;
     } else {
-      let errMsg = "Error connecting with Sezzle";
+      let errMsg = getString("sezzleConnectionError") as string;
       if (typeof sezzleResponse.error != "undefined") {
         errMsg = sezzleResponse.error;
       }
@@ -659,7 +665,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     <div className="checkout-place-order margin-5">
       <Formik
         initialValues={{ autoshipTerms: !orderHasAutoshipItems(order || null) }}
-        validationSchema={placeOrderSchema}
+        validationSchema={placeOrderSchema(getString)}
         onSubmit={() => handlePlaceOrder(paymentMethods)}
       >
         {({ touched, errors, setFieldValue, submitForm, values }) => (
@@ -668,7 +674,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
               <div className="checkout-place-order-autoship checkout-place-order-text">
                 <div className="checkout-place-order-text__flex">
                   <div className="checkout-place-order-text__heading">
-                    Autoship Terms and Conditions
+                    {getString("autoShipTermsAndConditions")}
                   </div>
                   <Back
                     className={`qa-expand mfe-accordion ${
@@ -685,20 +691,10 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                   }`}
                 >
                   <div className="checkout-place-order-text">
-                    When submitting your AutoShip along with providing payment
-                    and a shipping address, you authorize us to charge the same
-                    selected payment method each time your AutoShip order is
-                    processed. This is for your initial AutoShip order and
-                    subsequent AutoShip orders until you cancel your AutoShip.
-                    There is no obligation and you may cancel at any time. After
-                    you cancel, you will not be billed for, or receive, any
-                    future automatic shipments.
+                    {getString("autoShipAgreement")}
                   </div>
                   <div className="checkout-place-order-text__note">
-                    Please note that at the time of your order pulling, the
-                    shipping, tax and/or fee cost could change or be adjusted
-                    based on current rates and the availability of the products
-                    being shipped.
+                   {getString("shipTaxAdjustAtTimeOfPulling")}
                   </div>
                 </div>
 
@@ -715,13 +711,13 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
               </div>
             )}
             <div className="checkout-place-order-text-terms-policy">
-              By clicking place order, you agree to the SHOP.COM{" "}
+              {getString("agreeToTerms")}{" "}
               <a
                 href="/info/terms-of-use"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Terms of Use
+                {getString("termsOfUse")}
               </a>{" "}
               and{" "}
               <a
@@ -729,7 +725,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Privacy Policy
+                {getString("privacyPolicy")}
               </a>
               .
             </div>
@@ -738,14 +734,12 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                 {/* <div className="error-message-order--bold">
                   Please complete your payment information
                 </div> */}
-                <div className="error-message-order--bold">
-                  {errorMessage}
-                </div>
+                <div className="error-message-order--bold">{errorMessage}</div>
               </div>
             )}
             {orderConsolidateData.oosConsolidate === 2 && (
               <div className="alert-message">
-                You will be charged when product(s) are available for shipment
+                {getString("chargedWhenShipped")}
               </div>
             )}
             <Button
@@ -753,12 +747,12 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
               qaTag={"qa-order"}
               label={
                 isLoading
-                  ? "Loading..."
+                  ? `${getString("loading")}...`
                   : paymentTypeId === SEZZLE.typeId ||
                     isPaypalPayment(paymentTypeId) ||
                     paymentTypeId === CLICK2PAY.typeId
-                  ? "Pay with"
-                  : "Place Order"
+                  ? getString("payWith") as string
+                  : (getString("placeOrder") as string)
               }
               disabled={isLoading}
               btnType={

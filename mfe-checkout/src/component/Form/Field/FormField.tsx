@@ -15,7 +15,6 @@ interface IFormFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   disablePasswordManager?: boolean;
   formName?: string;
 }
-
 const sanitizeInput = (value: string, fieldName: string) => {
   // Allow hyphens only for the "phone" field
   if (fieldName === "phone") {
@@ -39,6 +38,7 @@ export const FormField: React.FC<IFormFieldProps> = ({
   type,
   ...props
 }) => {
+
   const shouldAddInputContainer =
     type !== "checkbox" && !className?.includes("input-container");
   const baseClasses = [

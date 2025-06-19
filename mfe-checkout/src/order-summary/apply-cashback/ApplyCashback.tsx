@@ -10,6 +10,7 @@ import { VIFTinit } from "../../assets/svgs/VIFTinit";
 import { getOrderNotifications } from "../../utils/OrderUtils";
 import { siteApiData } from "../../checkout/siteAtom";
 import { getFormattedPrice } from "../../utils/helpers/CurrencyFormatterUtil";
+import { useContentStrings } from "../../hooks/useContentStrings";
 
 interface IApplyCashbackContainer {
   cashbackData: EWallet;
@@ -25,7 +26,7 @@ export const ApplyCashback: React.FC<IApplyCashbackContainer> = ({
   const [notificationMessages, setOrderNotifications] = useAtom(
     orderNotificationsAtom
   );
-
+  const { getString } = useContentStrings();
   const [siteData] = useAtom(siteApiData(siteId));
 
   const handleAddApplyCashback = () => {
@@ -38,7 +39,7 @@ export const ApplyCashback: React.FC<IApplyCashbackContainer> = ({
       isApplyingCashback &&
       order.totals.price === 0
     ) {
-      const msg = "Your order balance is already $0.00. You cannot apply VIFT to your order";
+      const msg = getString("zeroOrderBalance") as string;
   
       if (!notificationMessages?.includes(msg)) {
         setOrderNotifications([
@@ -82,7 +83,7 @@ export const ApplyCashback: React.FC<IApplyCashbackContainer> = ({
 
   return (
     <div className="GiftCard-container-apply-giftcard">
-      <p className="Top-Text-v-Vard-apply">Pay with VIFT Cashback Balance</p>
+      <p className="Top-Text-v-Vard-apply">{getString('payWithVIFTBalance')}</p>
       <div
         className={
           order?.userOptions.applyEWallet
@@ -107,7 +108,7 @@ export const ApplyCashback: React.FC<IApplyCashbackContainer> = ({
         </div>
         <div className="Right-part-middle-container">
           <p className="Right-text-part">
-            {order?.userOptions.applyEWallet ? "Applied" : "Not Applied"}
+            {order?.userOptions.applyEWallet ? getString('applied') : getString('notApplied')}
           </p>
           <input
             type="checkbox"
@@ -118,7 +119,7 @@ export const ApplyCashback: React.FC<IApplyCashbackContainer> = ({
         </div>
       </div>
       <p className="Bottom-Text-v-Vard-apply">
-        Earn an extra 1% cash when using your VIFT balance for your entire order
+        {getString('earnExtra1PercentVIFT')}
       </p>
     </div>
   );

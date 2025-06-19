@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { DropdownOption } from "../../../interfaces/DropdownOption";
 import "./CustomDropdownField.scss";
 import { Back } from "../../../assets/svgs/Back";
+import { useContentStrings } from "../../../hooks/useContentStrings";
 
 type DropdownProps = {
   options: DropdownOption[];
@@ -35,6 +36,7 @@ export const CustomDropdownField: React.FC<DropdownProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState<string | undefined>(selectedValue);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { getString } = useContentStrings();
 
   const handleSelect = (
     value: string,
@@ -81,7 +83,7 @@ export const CustomDropdownField: React.FC<DropdownProps> = ({
         <div className="dropdown-selected">
           {selected
             ? options.find((opt) => opt.value === selected)?.label
-            : `Select ${label || "an option"}`}
+            : `${getString("select")} ${label || getString("anOption")}`}
           <Back
             className={`mfe-accordion ${isOpen ? "open" : "close"}`}
             width="13"

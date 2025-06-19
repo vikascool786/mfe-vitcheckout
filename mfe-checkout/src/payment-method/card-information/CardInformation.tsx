@@ -35,6 +35,7 @@ import ScrollToError from "../../component/Form/ScrollToError/ScrollToError";
 import {getShippingAddressFromAddressList} from "../../utils/AddressUtils";
 import { CreditCardValidationWatcher } from "./CreditCardValidationWatcher";
 import {siteApiData} from "../../checkout/siteAtom";
+import { useContentStrings } from "../../hooks/useContentStrings";
 
 interface ICardInformationProps {
   paymentMethod: IPaymentMethod;
@@ -63,7 +64,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   siteId
 }) => {
   const setLoading = useSetAtom(loadingAtom);
-
+const { getString } = useContentStrings();
   const errorRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
 
   const [isCardSavedInWallet, setIsCardSavedInWallet] = useState(
@@ -87,28 +88,31 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
 
   const validationSchema = Yup.object().shape({
     // Card Information Validation
-    cardInfo: getCreditCardSchema(paymentMethod.id),
+    cardInfo: getCreditCardSchema(
+      paymentMethod.id,
+      getString as (key: string) => string
+    ),
 
     // Conditionally apply address validation if sameShippingAddress is true
     ...(!sameShippingAddress
       ? {
-        first: Yup.string()
-          .required("First name is required")
-          .max(30, "First name cannot exceed 30 characters."),
-        last: Yup.string()
-          .required("Last name is required")
-          .max(30, "Last name cannot exceed 30 characters."),
-        address1: Yup.string()
-          .required("Address is required")
-          .max(200, "Address cannot exceed 200 characters."),
-        city: Yup.string()
-          .required("City is required")
-          .max(100, "City name cannot exceed 100 characters."),
-        state: Yup.string().required("State is required"),
-        zip: Yup.string()
-          .required("Please enter your zip code")
-          .max(10, "Zip code cannot exceed 10 characters."),
-      }
+          first: Yup.string()
+            .required(getString("errFirstNameEmpty"))
+            .max(30, getString("firstNameMax30Chars")),
+          last: Yup.string()
+            .required(getString("errLastNameRequired"))
+            .max(30, getString("lastNameMax30Chars")),
+          address1: Yup.string()
+            .required(getString("addressRequired"))
+            .max(200, getString("addressMax200Chars")),
+          city: Yup.string()
+            .required("City is required")
+            .max(100, getString("cityNameExceeds100Characters")),
+          state: Yup.string().required(getString("pcReg-errStateReq")),
+          zip: Yup.string()
+            .required(getString("hpPortalAdmin-errPostalReq"))
+            .max(10, getString("zipCodeMaxLength")),
+        }
       : {}),
   });
 
@@ -172,7 +176,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
         const orderResponse = await buildOrder(updatedOrder);
 
         if (orderResponse?.response?.errors?.message) {
-          setCardError("Something went wrong. Please try again.");
+          setCardError(getString("unexpectedErrorTryAgain") as string);
           return;
         }
 
@@ -251,13 +255,13 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
       .filter((pm) => pm.typeID === typeId)
       .map((pm) => pm.typeID);
     if (acceptablePaymentMethods?.length === 0) {
-      setCardError("This card type is not accepted");
+      setCardError(getString("cardTypeNotAccepted") as string);
       setLoading(false);
       return;
     }
 
     if (typeId && !acceptablePaymentMethods?.includes(typeId)) {
-      setCardError("This card type is not accepted");
+      setCardError(getString("cardTypeNotAccepted") as string);
       setLoading(false);
       return;
     }
@@ -342,7 +346,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
         }));
         setStateDropdownList(stateList);
       } catch (error) {
-        setError("Failed to load state data. Please try again.");
+        setError(`${getString("failedToLoadStates")}.`);
       } finally {
         setLoading(false);
       }
@@ -351,7 +355,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   }, []);
 
   if (loadingStates) {
-    return <p>Loading states...</p>;
+    return <p>{getString("loadingStates")}...</p>;
   }
 
   if (error) {
@@ -425,7 +429,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
 
                 {addressList.length > 0 && paymentMethod.id < 1 && (
                     <div className="billing">
-                      <span className="billing-text">Billing Address</span>
+                      <span className="billing-text"> {getString("billingAddress")}</span>
                       <input
                           type="checkbox"
                           className="qa-same-shipping checkbox"
@@ -434,7 +438,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                             setSameShippingAddress(!sameShippingAddress);
                           }}
                       />
-                      <span>Same as shipping</span>
+                      <span>{getString("sameAsShipping")}</span>
                     </div>
                 )}
 
@@ -442,7 +446,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                     <form>
                       <div className="form-field-container">
                         <FormField
-                            label="First Name"
+                            label={getString("firstName")}
                             required
                             name="first"
                             value={values.first}
@@ -452,7 +456,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                             errorRefs={errorRefs}
                         />
                         <FormField
-                            label="Last Name"
+                            label={getString("lastName")}
                             required
                             name="last"
                             value={values.last}
@@ -464,7 +468,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                       </div>
                       <div className="form-field-container-full">
                         <FormField
-                            label="Address Line 1"
+                            label={getString("addressLine1")}
                             required
                             name="address1"
                             value={values.address1}
@@ -476,7 +480,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                       </div>
                       <div className="form-field-container-full">
                         <FormField
-                            label="Address Line 2"
+                            label={getString("addressLine2")}
                             name="address2"
                             value={values.address2}
                             onChange={handleChange}
@@ -485,7 +489,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                       </div>
                       <div className="form-field-container state-provinces">
                         <FormField
-                            label="City"
+                            label={getString('city')}
                             required
                             name="city"
                             value={values.city}
@@ -496,7 +500,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                         />
                         <DropdownField
                             options={stateDropdownList}
-                            label="State/Province"
+                            label={getString("deliverDelayMessageStateOrProvince")}
                             required
                             selectedValue={values.state}
                             formName="state"
@@ -507,7 +511,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                       </div>
                       <div className="form-field-container">
                         <FormField
-                            label="Zip Code"
+                            label={getString("zipCode")}
                             required
                             name="zip"
                             value={values.zip}
@@ -524,7 +528,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                               onChange={handleChange}
                           />
                           <span className="shipping-text">
-                          This address is a PO box
+                         {getString("thisAddressIsAPOBox")}
                         </span>
                         </div>
                       </div>
@@ -544,7 +548,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
                       <Button
                           qaTag="qa-cancel"
                           btnType="secondary"
-                          label="Cancel"
+                          label={getString('cancel') as string}
                           onClick={(e) => {
                             e.stopPropagation();
                             onCancel();

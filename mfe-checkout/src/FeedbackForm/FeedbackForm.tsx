@@ -7,6 +7,7 @@ import {
   GET_API_ENDPOINT_BASE_URL,
   GET_API_MODE,
 } from "../utils/helpers/urlResolvers";
+import { useContentStrings } from "../hooks/useContentStrings";
 
 const FeedbackForm: React.FC<IFeedback> = ({ pcId, sessionId, siteId }) => {
   const [isloading, setLoading] = useState(false);
@@ -14,6 +15,7 @@ const FeedbackForm: React.FC<IFeedback> = ({ pcId, sessionId, siteId }) => {
   const [feedback, setFeedback] = useState("");
   const [error, setError] = useState("");
   const feedbackFormRef = useRef<HTMLDivElement>(null);
+  const { getString } = useContentStrings();
 
   const apiMode = useMemo(() => GET_API_MODE(), []);
   const apiBaseUrl = useMemo(() => {
@@ -34,7 +36,7 @@ const FeedbackForm: React.FC<IFeedback> = ({ pcId, sessionId, siteId }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!feedback.trim()) {
-      const errorString = "Please enter a comment!" || "";
+      const errorString = getString('pleaseEnterComment')  || "";
       setError(errorString);
     } else {
       setLoading(true);
@@ -61,38 +63,35 @@ const FeedbackForm: React.FC<IFeedback> = ({ pcId, sessionId, siteId }) => {
       {!isFeebbackSubmitted ? (
         <>
           <p className="feedback-form__text">
-            We constantly strive to improve the customer experience and greatly
-            appreciate your feedback.
+            {getString("weConstantlyStriveAndGreatly")}
           </p>
           <p className="feedback-form__email-prompt">
-            Please provide your email if you would like to be contacted.
+            {getString("provideEmailForContact")}
           </p>
           <form onSubmit={handleSubmit}>
             <div className="feedback-form__input-group">
-              <label className="feedback_label">Feedback</label>
+              <label className="feedback_label">{getString("feedback")}</label>
               <textarea
                 id="feedback"
                 className={"feedback-form__textarea"}
                 value={feedback}
                 onChange={(e) => setFeedback(e.target.value)}
-                placeholder="Enter feedback here."
+                placeholder={getString("enterFeedbackHere-placeholder")}
               />
               {error && <p className="feedback-form__error">{error}</p>}
             </div>
             <button className="feedback-form__submit-button" type="submit">
-              Submit Feedback
+              {getString("submitFeedback")}
             </button>
           </form>
         </>
       ) : (
         <>
           <p className="feedback-form__thanks">
-            Thank you for submitting your feedback!
+            {getString("thanksForFeedback")}
           </p>
           <p className="feedback-form__review">
-            We appreciate you taking the time to help us improve our search
-            experience. Your insights will directly shape a better search
-            experience for you and others.
+            {getString("ngSearchFeedback")}
           </p>
         </>
       )}
