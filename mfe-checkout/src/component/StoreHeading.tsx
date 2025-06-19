@@ -35,24 +35,18 @@ const StoreHeading: React.FC<IStoreHeadingProps> = ({ storeName, storeKey, isMAS
 
     const { getString } = useContentStrings();
 
-    const isOnlySingleMAOOSItemInStore = (order: Order, storeKey: string): boolean => {
+    const getMAOOSItemCountWithEstimatedShipDate = (order: Order, storeKey: string): number => {
         const store: OrderStore | null = getStoreDataFromKey(order, storeKey);
-        const isOnlySingleItemInStore = store?.items.length === 1;
-        if(isOnlySingleItemInStore){
-            return hasEstimatedShipDate(store?.items[0] || null);
-        } else{
-            return false;
-        }
+        if (!store || !store.items.length) return 0;
+        return store.items.filter(item => hasEstimatedShipDate(item)).length;
     };
 
-        const multipleMAOOSItemInStore = (order: Order, storeKey: string): boolean => {
-        const store: OrderStore | null = getStoreDataFromKey(order, storeKey);
-        const multipleItemsInStore = store?.items.length  && store?.items.length > 1;
-        if(multipleItemsInStore){
-            return hasEstimatedShipDate(store?.items[0] || null); 
-        } else{
-            return false;
-        }
+    const isOnlySingleMAOOSItemInStore = (order: Order, storeKey: string): boolean => {
+        return getMAOOSItemCountWithEstimatedShipDate(order, storeKey) === 1;
+    };
+
+    const multipleMAOOSItemInStore = (order: Order, storeKey: string): boolean => {
+        return getMAOOSItemCountWithEstimatedShipDate(order, storeKey) > 1;
     };
 
     useEffect(() => {
