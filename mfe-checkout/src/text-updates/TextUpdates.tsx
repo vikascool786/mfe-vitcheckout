@@ -1,4 +1,4 @@
-import { Form, Formik, FormikHelpers } from "formik";
+import { Form, Formik, FormikHelpers, FormikErrors } from "formik";
 import { useAtom } from "jotai";
 import React, { SetStateAction, useEffect, useState, useCallback } from "react";
 import * as Yup from "yup";
@@ -8,11 +8,14 @@ import { FormHeading } from "../component/Form/Heading/FormHeading";
 import { orderAtom } from "../store";
 import "./TextUpdates.scss";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
-import {customerApiData} from "../checkout/customerAtom";
-import {fetchCustomerPreferenceData} from "../api/service/CommunicationPreferences";
-import {siteApiData} from "../checkout/siteAtom";
-import {SHOP_SHIP_UPDATE_TEXT_PREF_CODE} from "../interfaces/ShopperCommunicationPreferences";
-import {fetchTwilioLookupData, PHONE_TYPE_MOBILE} from "../api/service/TwilioPhoneLookup";
+import { customerApiData } from "../checkout/customerAtom";
+import { fetchCustomerPreferenceData } from "../api/service/CommunicationPreferences";
+import { siteApiData } from "../checkout/siteAtom";
+import { SHOP_SHIP_UPDATE_TEXT_PREF_CODE } from "../interfaces/ShopperCommunicationPreferences";
+import {
+  fetchTwilioLookupData,
+  PHONE_TYPE_MOBILE,
+} from "../api/service/TwilioPhoneLookup";
 import { getCountryName } from "../utils/helpers/LocaleHelper";
 import { Back } from "../assets/svgs/Back";
 import { INVALID_COUNTRY_MOBILE_NUMBER } from "../constant";
@@ -28,6 +31,7 @@ interface ITextUpdatesProps {
   pcid: string;
   siteId: string;
   mobileRequiredMessage: boolean;
+  hasPhoneError?: boolean;
   setHasPhoneError: React.Dispatch<SetStateAction<boolean>>;
   setMobileRequiredMessage: React.Dispatch<SetStateAction<boolean>>;
 }
@@ -72,8 +76,14 @@ const FormContent = React.memo(
     getString,
   }: any) => {
     useEffect(() => {
-      if (values.boxChecked && values.phone.length === 10) {
-        handleSubmit();
+      // clean values.phones and remove hyphens
+      if (values.phone) {
+        const cleanedPhone = values.phone.replace(/-/g, "");
+        if (values.boxChecked && cleanedPhone.length === 10) {
+          handleSubmit();
+        } else {
+          setHasPhoneError(true);
+        }
       }
     }, [values.phone]);
 
@@ -91,11 +101,14 @@ const FormContent = React.memo(
           target: { name: "phone", value: inputValue },
         } as React.ChangeEvent<HTMLInputElement>);
 
-        if (values.boxChecked && inputValue.length === 10) {
+        const normalized = inputValue.replace(/\D/g, "");
+
+        if (values.boxChecked && normalized.length === 10) {
+          validateField("phone");
           setHasPhoneError(false);
         }
       },
-      [handleChange, values.boxChecked, setHasPhoneError, isSubmitting]
+      [handleChange, values.boxChecked, setHasPhoneError, isSubmitting, validateField]
     );
 
     const handleCheckboxChange = useCallback(
@@ -185,6 +198,7 @@ export const TextUpdates = React.memo(
     pcid,
     siteId,
     mobileRequiredMessage,
+    hasPhoneError,
     setHasPhoneError,
     setMobileRequiredMessage,
   }: ITextUpdatesProps) => {
@@ -198,19 +212,6 @@ export const TextUpdates = React.memo(
     const [isAlertChecked, setIsAlertChecked] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
 
-    const TextUpdatesSchema = Yup.object().shape({
-      phone: Yup.string()
-        .when("boxChecked", {
-          is: true,
-          then: (schema) =>
-            schema
-              .required(getString('mobilePhoneRequired'))
-              .matches(/^\d{10}$/,getString("phoneNumber10Digits")),
-          otherwise: (schema) => schema.notRequired(),
-        })
-        .matches(/^\d{10}$/, getString('phoneNumber10Digits')),
-      boxChecked: Yup.boolean(),
-    });
 
     useEffect(() => {
       fetchCustomerPreferenceData(pcid, siteData).then((response) => {
@@ -240,16 +241,18 @@ export const TextUpdates = React.memo(
     ) => {
       try {
         const phoneNumber = values.boxChecked
-          ? values.phone.replace(/\D/g, "")
+          ? (values.phone || "").replace(/\D/g, "")
           : "";
 
         if (values.boxChecked) {
+          // Normalize customerProfileMobilePhone for comparison
+          const normalizedCustomerPhone = customerProfileMobilePhone.replace(/\D/g, "");
           if (
-            phoneNumber.length &&
             phoneNumber.length === 10 &&
-            phoneNumber !== customerProfileMobilePhone
+            phoneNumber !== normalizedCustomerPhone
           ) {
             let isValidMobilePhone = true;
+
             fetchTwilioLookupData(phoneNumber, siteData).then((response) => {
               if (response) {
                 if (
@@ -326,7 +329,21 @@ export const TextUpdates = React.memo(
             boxChecked: isAlertChecked,
           }}
           enableReinitialize={true}
-          validationSchema={TextUpdatesSchema}
+          validate={(values) => {
+            const errors: FormikErrors<FormValues> = {};
+            const normalized = values.phone.replace(/\D/g, "");
+            if (values.boxChecked) {
+              if (!normalized || normalized.length !== 10) {
+                errors.phone = getString("phoneNumber10Digits");
+              } else if (hasPhoneError) {
+                errors.phone = getString("invalidPhoneNumber");
+              }
+            }
+            return errors;
+          }}
+          validateOnBlur={true}
+          validateOnChange={false}
+          validateOnMount={false}
           onSubmit={handleSendOrderUpdates}
         >
           {(formikProps) => (
