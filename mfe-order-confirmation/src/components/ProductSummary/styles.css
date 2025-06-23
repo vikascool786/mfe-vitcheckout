@@ -1,0 +1,47 @@
+.product-container {
+  display: flex;
+  flex-direction: row;
+  background-color: white;
+  align-items: start;
+  gap: 1rem;
+}
+
+.product-price-container {
+  display: flex;
+  gap: 0.5rem;
+  flex-direction: column;
+  align-items: start;
+  justify-content: center;
+}
+
+.product-name {
+  font-family: Roboto;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 100%;
+  letter-spacing: 0%;
+}
+
+.product-description {
+  font-family: Roboto;
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 100%;
+  letter-spacing: 0%;
+}
+
+.product-cashback {
+  font-family: Roboto;
+  font-weight: 300;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: 0%;
+}
+
+.product-quantity {
+  font-family: Roboto;
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 100%;
+  letter-spacing: 0%;
+}

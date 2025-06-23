@@ -7,6 +7,11 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
+  font-family: Roboto;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 100%;
+  letter-spacing: 0%;
 }
 
 .section-card-header h3 {
@@ -18,10 +23,15 @@
 .section-card-header span {
   font-size: 0.95rem;
   color: #333;
+  font-family: Roboto;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 100%;
+  letter-spacing: 0%;
 }
 
 .section-card-body {
-  background-color: #f9f9f9;
+  background-color: white;
   padding: 1.25rem;
   border-radius: 12px;
   border: 1px solid #e0e0e0;

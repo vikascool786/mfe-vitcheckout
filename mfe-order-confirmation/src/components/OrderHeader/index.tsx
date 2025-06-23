@@ -3,6 +3,7 @@ import "./styles.css";
 
 interface OrderHeaderProps {
   orderId: string;
+  name: string;
   amount: string;
   deliveryDate: string;
   email: string;
@@ -10,30 +11,23 @@ interface OrderHeaderProps {
 
 const OrderHeader: React.FC<OrderHeaderProps> = ({
   orderId,
+  name,
   amount,
   deliveryDate,
   email,
 }) => {
   return (
-    <section className="order-header" style={{
-      textAlign: "center",
-      backgroundColor: "#f8f8f8",
-      padding: "1.5rem",
-    }}>
-      <h2 style={{ fontSize: "1.5rem", fontWeight: "600", marginBottom: "0.5rem" }}>
-        Order #{orderId}
-      </h2>
-      <h3 style={{ fontSize: "1.25rem", color: "#2e7d32", fontWeight: "bold", margin: 0 }}>
-        ${amount}
-      </h3>
-      <p style={{ marginTop: "0.75rem", fontWeight: 500 }}>
+    <div className="order-header-container">
+      <span className="order-id">Order #{orderId}</span>
+      <span className="order-heading">{name}, thank you for shopping with us!</span>
+      <span className="order-estimated-delivery">
         Estimated Delivery Date {deliveryDate}
-      </p>
-      <p style={{ marginBottom: "0.25rem" }}>We sent a confirmation email to {email}</p>
-      <a href="#" style={{ color: "purple", textDecoration: "underline", fontSize: "0.9rem" }}>
-        Print Order Confirmation
-      </a>
-    </section>
+      </span>
+      <span className="order-confirmation">
+        We sent a confirmation email to {email}
+      </span>
+      <span className="order-confirmation-print">Print Order Confirmation</span>
+    </div>
   );
 };
 

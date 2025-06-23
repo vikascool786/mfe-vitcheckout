@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkmfe_order_confirmation=self.webpackChunkmfe_order_confirmation||[]).push([[683],{683:(e,r,n)=>{n.r(r),n.d(r,{default:()=>c});var i=n(212),t=n.n(i);const c=function(e){return t().createElement("div",{className:"checkout-container-wrapper"},t().createElement("div",{style:{border:"2px solid green",padding:"20px"}},"Checking visibility"))}}}]);

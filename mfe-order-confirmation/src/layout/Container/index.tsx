@@ -7,7 +7,7 @@ interface ContainerProps {
 
 const Container = ({ left, right }: ContainerProps) => {
   return (
-    <div className="container-fluid layout-grid">
+    <div className="layout-grid">
       <div className="left-column">{left}</div>
       <div className="right-column">{right}</div>
     </div>
