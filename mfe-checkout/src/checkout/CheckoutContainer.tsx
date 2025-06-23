@@ -446,6 +446,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                  <TextUpdates 
                   pcid={pcid} 
                   siteId={siteId} 
+                  hasPhoneError={hasPhoneError}
                   setHasPhoneError={setHasPhoneError}
                   mobileRequiredMessage={mobileRequiredMessage}
                   setMobileRequiredMessage={setMobileRequiredMessage}

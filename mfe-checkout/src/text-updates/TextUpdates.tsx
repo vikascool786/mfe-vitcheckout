@@ -8,14 +8,11 @@ import { FormHeading } from "../component/Form/Heading/FormHeading";
 import { orderAtom } from "../store";
 import "./TextUpdates.scss";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
-import { customerApiData } from "../checkout/customerAtom";
-import { fetchCustomerPreferenceData } from "../api/service/CommunicationPreferences";
-import { siteApiData } from "../checkout/siteAtom";
-import { SHOP_SHIP_UPDATE_TEXT_PREF_CODE } from "../interfaces/ShopperCommunicationPreferences";
-import {
-  fetchTwilioLookupData,
-  PHONE_TYPE_MOBILE,
-} from "../api/service/TwilioPhoneLookup";
+import {customerApiData} from "../checkout/customerAtom";
+import {fetchCustomerPreferenceData} from "../api/service/CommunicationPreferences";
+import {siteApiData} from "../checkout/siteAtom";
+import {SHOP_SHIP_UPDATE_TEXT_PREF_CODE} from "../interfaces/ShopperCommunicationPreferences";
+import {fetchTwilioLookupData, PHONE_TYPE_MOBILE} from "../api/service/TwilioPhoneLookup";
 import { getCountryName } from "../utils/helpers/LocaleHelper";
 import { Back } from "../assets/svgs/Back";
 import { INVALID_COUNTRY_MOBILE_NUMBER } from "../constant";
@@ -35,25 +32,6 @@ interface ITextUpdatesProps {
   setHasPhoneError: React.Dispatch<SetStateAction<boolean>>;
   setMobileRequiredMessage: React.Dispatch<SetStateAction<boolean>>;
 }
-
-// const TextUpdatesSchema = Yup.object({
-//   phone: Yup.string().when("boxChecked", {
-//     is: true,
-//     then: (schema) =>
-//       schema
-//         .required("Mobile Phone is required")
-//         .test(
-//           "valid-phone-format",
-//           "Phone number must contain exactly 10 digits",
-//           function (value) {
-//             const normalized = (value || "").replace(/\D/g, ""); // Remove non-digit characters
-//             return /^\d{10}$/.test(normalized);
-//           }
-//         ),
-//     otherwise: (schema) => schema.notRequired(),
-//   }),
-//   boxChecked: Yup.boolean(),
-// });
 
 const FormContent = React.memo(
   ({
@@ -76,16 +54,14 @@ const FormContent = React.memo(
     getString,
   }: any) => {
     useEffect(() => {
-      if (!values.boxChecked) return;
-
-      const cleanedPhone = values.phone.replace(/\D/g, "");
-
-      if (cleanedPhone.length === 10) {
-        validateField("phone");
-        setHasPhoneError(false);
-        handleSubmit(); // always attempt Twilio validation when number becomes valid
-      } else {
-        setHasPhoneError(true);
+       // clean values.phones and remove hyphens
+      if (values.phone) {
+        const cleanedPhone = values.phone.replace(/-/g, "");
+        if (values.boxChecked && cleanedPhone.length === 10) {
+          handleSubmit();
+        } else {
+          setHasPhoneError(true);
+        }
       }
     }, [values.phone]);
 
@@ -108,17 +84,9 @@ const FormContent = React.memo(
         if (values.boxChecked && normalized.length === 10) {
           validateField("phone");
           setHasPhoneError(false);
-          handleSubmit(); // ensure lookup is retried when value becomes valid
         }
       },
-      [
-        handleChange,
-        values.boxChecked,
-        setHasPhoneError,
-        isSubmitting,
-        validateField,
-        handleSubmit,
-      ]
+      [handleChange, values.boxChecked, setHasPhoneError, isSubmitting, validateField]
     );
 
     const handleCheckboxChange = useCallback(
@@ -221,9 +189,6 @@ export const TextUpdates = React.memo(
     );
     const [isAlertChecked, setIsAlertChecked] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
-    const [phoneErrorMessage, setPhoneErrorMessage] = useState<
-      string | undefined
-    >();
 
     useEffect(() => {
       fetchCustomerPreferenceData(pcid, siteData).then((response) => {
@@ -252,22 +217,18 @@ export const TextUpdates = React.memo(
       { setSubmitting, setFieldError }: FormikHelpers<FormValues>
     ) => {
       try {
-        setPhoneErrorMessage(undefined);
-        let isValidMobilePhone = true;
         const phoneNumber = values.boxChecked
           ? (values.phone || "").replace(/\D/g, "")
           : "";
 
-        if (values.boxChecked) {
+         if (values.boxChecked) {
           // Normalize customerProfileMobilePhone for comparison
-          const normalizedCustomerPhone = customerProfileMobilePhone.replace(
-            /\D/g,
-            ""
-          );
+          const normalizedCustomerPhone = customerProfileMobilePhone.replace(/\D/g, "");
           if (
             phoneNumber.length === 10 &&
             phoneNumber !== normalizedCustomerPhone
           ) {
+            let isValidMobilePhone = true;
             fetchTwilioLookupData(phoneNumber, siteData).then((response) => {
               if (response) {
                 if (
@@ -275,7 +236,6 @@ export const TextUpdates = React.memo(
                   PHONE_TYPE_MOBILE
                 ) {
                   setFieldError("phone", getString("notAMobilePhoneNumber"));
-                  setPhoneErrorMessage(getString("notAMobilePhoneNumber"));
                   setHasPhoneError(true);
                   isValidMobilePhone = false;
                   return;
@@ -293,13 +253,6 @@ export const TextUpdates = React.memo(
                   );
                   isValidMobilePhone = false;
                   setHasPhoneError(true);
-                  setPhoneErrorMessage(
-                    INVALID_COUNTRY_MOBILE_NUMBER(
-                      matchingCountryName as string,
-                      getCountryName(siteData.locale.countryCode) as string,
-                      getString
-                    )
-                  );
                   return;
                 }
                 if (isValidMobilePhone) {
@@ -308,7 +261,6 @@ export const TextUpdates = React.memo(
                 }
               } else {
                 setFieldError("phone", getString("invalidPhoneNumber"));
-                setPhoneErrorMessage(getString("invalidPhoneNumber"));
                 setHasPhoneError(true);
                 isValidMobilePhone = false;
                 return;
@@ -359,8 +311,9 @@ export const TextUpdates = React.memo(
             if (values.boxChecked) {
               if (!normalized || normalized.length !== 10) {
                 errors.phone = getString("phoneNumber10Digits");
-              } 
-              // do not block submission if number is now valid (Twilio will revalidate)
+              } else if (hasPhoneError) {
+                errors.phone = getString("invalidPhoneNumber");
+              }
             }
             return errors;
           }}
