@@ -29,8 +29,10 @@ interface ITextUpdatesProps {
   siteId: string;
   mobileRequiredMessage: boolean;
   hasPhoneError?: boolean;
+  isCheckboxChecked?: boolean;
   setHasPhoneError: React.Dispatch<SetStateAction<boolean>>;
   setMobileRequiredMessage: React.Dispatch<SetStateAction<boolean>>;
+  setIsCheckboxChecked: React.Dispatch<SetStateAction<boolean>>;
 }
 
 const FormContent = React.memo(
@@ -48,23 +50,30 @@ const FormContent = React.memo(
     setHasPhoneError,
     setMobileRequiredMessage,
     mobileRequiredMessage,
+    setIsCheckboxChecked,
     isSubmitting,
     isExpanded,
     toggleAccordion,
     getString,
   }: any) => {
     useEffect(() => {
-       // clean values.phones and remove hyphens
+      // clean values.phones and remove hyphens
       if (values.phone) {
         const cleanedPhone = values.phone.replace(/-/g, "");
         if (values.boxChecked && cleanedPhone.length === 10) {
           handleSubmit();
-        } else {
-          setHasPhoneError(true);
-        }
+        } 
       }
     }, [values.phone]);
 
+    useEffect(() => {
+      if (values.boxChecked) {;
+        !values.phone &&
+          !errors.phone &&
+          setFieldError("phone", getString("mobilePhoneRequired"));
+      }
+    }, [values.boxChecked]);
+    
     useEffect(() => {
       if (mobileRequiredMessage && values.boxChecked) {
         !errors.phone &&
@@ -97,12 +106,16 @@ const FormContent = React.memo(
           setFieldError("phone", "");
           setMobileRequiredMessage(false);
           setHasPhoneError(false);
+          setIsCheckboxChecked(false);
         } else {
-          values.phone.length !== 10 && setHasPhoneError(true);
+          setIsCheckboxChecked(true);
+          values.phone.replace(/-/g, "").length !== 10 && setHasPhoneError(true);
           !isExpanded && toggleAccordion();
         }
         handleChange(e);
-        handleSubmit();
+        setTimeout(() => {
+          handleSubmit();
+        }, 0);
       },
       [
         values.phone,
@@ -158,7 +171,8 @@ const FormContent = React.memo(
               required={values.boxChecked}
               errorMessage={
                 (values.boxChecked && touched.phone && errors.phone) ||
-                (mobileRequiredMessage && errors.phone)
+                (mobileRequiredMessage && errors.phone) ||
+                (values.boxChecked && errors.phone)
               }
               onChange={handlePhoneChange}
               onBlur={handleBlur}
@@ -179,6 +193,7 @@ export const TextUpdates = React.memo(
     hasPhoneError,
     setHasPhoneError,
     setMobileRequiredMessage,
+    setIsCheckboxChecked,
   }: ITextUpdatesProps) => {
     const [order, setOrder] = useAtom(orderAtom);
     const [siteData] = useAtom(siteApiData(siteId));
@@ -199,6 +214,10 @@ export const TextUpdates = React.memo(
               preference.optIn === 1
           );
           setIsAlertChecked(hasTextAlertsPreference);
+          setIsCheckboxChecked(hasTextAlertsPreference);
+          if (hasTextAlertsPreference) {
+            !customerProfileMobilePhone && setHasPhoneError(true);
+          }
           setIsExpanded(hasTextAlertsPreference);
           if (hasTextAlertsPreference) {
             updateOrderWithTextAlerts(customerProfileMobilePhone);
@@ -221,7 +240,7 @@ export const TextUpdates = React.memo(
           ? (values.phone || "").replace(/\D/g, "")
           : "";
 
-         if (values.boxChecked) {
+        if (values.boxChecked) {
           // Normalize customerProfileMobilePhone for comparison
           const normalizedCustomerPhone = customerProfileMobilePhone.replace(/\D/g, "");
           if (
@@ -309,8 +328,12 @@ export const TextUpdates = React.memo(
             const errors: FormikErrors<FormValues> = {};
             const normalized = values.phone.replace(/\D/g, "");
             if (values.boxChecked) {
-              if (!normalized || normalized.length !== 10) {
+              if (normalized.length < 1) {
+                errors.phone = getString("mobilePhoneRequired");
+                setHasPhoneError(true)
+              } else if (!normalized || normalized.length !== 10) {
                 errors.phone = getString("phoneNumber10Digits");
+                setHasPhoneError(true)
               } else if (hasPhoneError) {
                 errors.phone = getString("invalidPhoneNumber");
               }
@@ -318,7 +341,7 @@ export const TextUpdates = React.memo(
             return errors;
           }}
           validateOnBlur={true}
-          validateOnChange={false}
+          validateOnChange={true}
           validateOnMount={false}
           onSubmit={handleSendOrderUpdates}
         >
@@ -327,6 +350,8 @@ export const TextUpdates = React.memo(
               {...formikProps}
               setHasPhoneError={setHasPhoneError}
               setMobileRequiredMessage={setMobileRequiredMessage}
+              setIsCheckboxChecked={setIsCheckboxChecked}
+              isAlertChecked={isAlertChecked}
               mobileRequiredMessage={mobileRequiredMessage}
               isExpanded={isExpanded}
               toggleAccordion={toggleAccordion}

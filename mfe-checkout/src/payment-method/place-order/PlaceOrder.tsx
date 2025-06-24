@@ -59,6 +59,7 @@ interface IPlaceOrder {
   setMobileRequiredMessage: React.Dispatch<SetStateAction<boolean>>;
   hasPhoneError: boolean;
   isAutoShipChecked: boolean;
+  isCheckboxChecked: boolean;
 }
 
 const PlaceOrder: React.FC<IPlaceOrder> = ({
@@ -77,6 +78,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   setMobileRequiredMessage,
   isAutoShipChecked,
   hasPhoneError,
+  isCheckboxChecked
 }) => {
   const trackingData = new Map<string, string>();
   const [siteData] = useAtom(siteApiData(siteId));
@@ -266,8 +268,8 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
 
   const handlePlaceOrder = async (paymentMethods: IPaymentOption[]) => {
     setIsLoading(true);
-
-    if (hasPhoneError) {
+   
+    if (hasPhoneError && isCheckboxChecked) {
       window.scrollTo({
         top: document.body.scrollHeight,
         behavior: "smooth",
@@ -754,7 +756,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                   ? getString("payWith") as string
                   : (getString("placeOrder") as string)
               }
-              disabled={isLoading}
+              disabled={isLoading || (isCheckboxChecked && hasPhoneError)}
               btnType={
                 paymentTypeId === SEZZLE.typeId
                   ? "sezzle"

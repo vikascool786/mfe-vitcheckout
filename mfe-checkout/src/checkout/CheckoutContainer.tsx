@@ -119,6 +119,8 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   const [hasPhoneError, setHasPhoneError] = useState<boolean>(false);
   const [mobileRequiredMessage, setMobileRequiredMessage] =
     useState<boolean>(false);
+    const [isCheckboxChecked, setIsCheckboxChecked] =
+    useState<boolean>(false);
   const isAddressSaved = useMemo(() => {
     const hasSavedAddress = addressList.length >= 1 && addressList.some(
         (address) => address.hasAddress === 1
@@ -450,6 +452,8 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                     setHasPhoneError={setHasPhoneError}
                     mobileRequiredMessage={mobileRequiredMessage}
                     setMobileRequiredMessage={setMobileRequiredMessage}
+                    setIsCheckboxChecked={setIsCheckboxChecked}
+                    isCheckboxChecked={isCheckboxChecked}
                  />
                  }
               </div>
@@ -484,6 +488,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                       setIsAutoShipChecked={setIsAutoShipChecked}
                       isAutoShipChecked={isAutoShipChecked}
                       hasPhoneError={hasPhoneError}
+                      isCheckboxChecked={isCheckboxChecked}
                       setMobileRequiredMessage={setMobileRequiredMessage}
                       shippingId={
                         defaultPaymentMethod?.addressId ??
