@@ -557,7 +557,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
         resolve(response);
       });
     } catch (error: any) {
-      console.error(`${getString("failedToFetchData")}:`, error);
+      console.error("Failed to fetch data:", error);
       const errorMessage =
           error?.response?.data?.message || error?.message || "Unknown error";
       throw new Error(errorMessage);

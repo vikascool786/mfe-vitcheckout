@@ -66,7 +66,7 @@ const FormContent = React.memo(
     }, [values.phone]);
 
     useEffect(() => {
-      if (mobileRequiredMessage) {
+      if (mobileRequiredMessage && values.boxChecked) {
         !errors.phone &&
           setFieldError("phone", getString("mobilePhoneRequired"));
       }
@@ -144,7 +144,7 @@ const FormContent = React.memo(
           <div className="text-updates-content">
             <div className="mobile-header">
               <span className="rates-text">
-                Message and data rates may apply.
+                {getString("dataRatesApply")}
               </span>
             </div>
             <FormField

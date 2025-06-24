@@ -444,12 +444,12 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                 )}
                 {isAddressSaved && 
                  <TextUpdates 
-                  pcid={pcid} 
-                  siteId={siteId} 
-                  hasPhoneError={hasPhoneError}
-                  setHasPhoneError={setHasPhoneError}
-                  mobileRequiredMessage={mobileRequiredMessage}
-                  setMobileRequiredMessage={setMobileRequiredMessage}
+                    pcid={pcid} 
+                    siteId={siteId} 
+                    hasPhoneError={hasPhoneError}
+                    setHasPhoneError={setHasPhoneError}
+                    mobileRequiredMessage={mobileRequiredMessage}
+                    setMobileRequiredMessage={setMobileRequiredMessage}
                  />
                  }
               </div>

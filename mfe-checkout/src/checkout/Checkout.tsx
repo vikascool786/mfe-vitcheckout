@@ -138,7 +138,7 @@ const Checkout: React.FC<ICheckout> = ({
         }));
         setStateDropdownList(stateList);
       } catch (error) {
-        console.error(`${getString("failedToFetchData")}:`, error);
+        console.error("Failed to fetch data", error);
       }
     };
 
