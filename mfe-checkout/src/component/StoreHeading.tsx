@@ -71,7 +71,8 @@ const StoreHeading: React.FC<IStoreHeadingProps> = ({ storeName, storeKey, isMAS
         let storeHeading = storeName;
         //condition when there is only one MA oos item to show ship date - AI-110731
         if(isMAStore && isOnlySingleMAOOSItemInStore(order, storeKey) && oosConsolidateData?.oosConsolidate !== OOS_CONSOLIDATE_SPLIT_CODE && !isOrderSummary){
-            const estimatedShipDate = getItemEstimatedShipDate(getStoreDataFromKey(order, storeKey)?.items[0] || null);
+            const itemOOS = getStoreDataFromKey(order, storeKey)?.items.find(item => hasEstimatedShipDate(item));
+            const estimatedShipDate = itemOOS ? getItemEstimatedShipDate(itemOOS) : "";
             storeHeading = `${getString("shippingOn")} ${estimatedShipDate}`;
         }
         // condition when there are multiple MA oos items to show ship date - AI-111386
