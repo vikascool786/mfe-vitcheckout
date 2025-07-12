@@ -300,7 +300,8 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
         const saveCardResponse = await handleSaveCard(
           creditCardFormData,
           shopperId,
-          { order }
+          { order },
+          getString
         );
         if (saveCardResponse?.error) {
           updateOrderErrorMessage(saveCardResponse.error);

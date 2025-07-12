@@ -5,19 +5,18 @@ import { generateChangeStoreResponse } from "./GenerateChangeStoreResponse";
 import { buildOrder } from "../../api/service/Order";
 import { CreditCardFormData } from "../../component/Form/CreditCardFormContext";
 import { Order } from "../../interfaces/Order";
-import { useContentStrings } from "../../hooks/useContentStrings";
 
 export const handleSaveCard = async (
     creditCardFormData: CreditCardFormData,
     shopperId: string,
     dependencies: {
         order: Order | undefined;
-    }
+    },
+    getString:(key: string, replacements?: string[]) => string | undefined
 ) => {
     const {
         order,
     } = dependencies;
-    const { getString } = useContentStrings();
     const typeId = getTypeIdByAltName(getCardType(creditCardFormData.cardInfo.number).toLowerCase()) || 9;
     const acceptablePaymentMethods = order?.paymentMethods
         .filter((pm: { typeID: number | undefined; }) => pm.typeID === typeId)

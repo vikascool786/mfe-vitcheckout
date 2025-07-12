@@ -36,8 +36,8 @@ export const CreditCardValidationWatcher: React.FC<ICreditCardValidationWatcher>
                     : (shipAddress as Address);
 
                 let ccFormData: CreditCardFormData = {cardInfo: {accountName: values.cardInfo.accountName,
-                        number: values.cardInfo.number, expMonth: values.cardInfo.expMonth.toString(),
-                        expYear: values.cardInfo.expYear.toString(), cvv: values.cardInfo.cvv}, saveForLater: saveForLater}
+                        number: values.cardInfo.number, expMonth: values?.cardInfo?.expMonth?.toString(),
+                        expYear: values?.cardInfo?.expYear?.toString(), cvv: values.cardInfo.cvv}, saveForLater: saveForLater}
 
                 if(isShipSameAsBill && shipAddress?.id){
                     ccFormData.addressId = shipAddress.id;
