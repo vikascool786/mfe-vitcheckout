@@ -584,6 +584,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                     storeKey={store?.key}
                     isMAStore={store?.store?.store?.isMA === 1}
                     order={order}
+                    multipleStores={storesTotals.length > 1}
                     isOrderSummary={true}
                   />
 

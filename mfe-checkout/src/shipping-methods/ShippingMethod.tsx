@@ -378,6 +378,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
                       storeName={getCatalogName(store) || ""}
                       storeKey={key}
                       isMAStore={store.store?.isMA === 1}
+                      multipleStores={getSortedStores(orders).length > 1}
                       order={orders}
                       isOrderSummary={false}
                     />
