@@ -55,9 +55,6 @@ const StoreHeading: React.FC<IStoreHeadingProps> = ({ storeName, storeKey, isMAS
         // if there is only one MA OOS item in store, show the shipment heading
         if ((isOnlySingleMAOOSItemInStore(order, storeKey) && !isOrderSummary) || !orderIsMAOnly(order) || consolidateData.oosConsolidate === OOS_CONSOLIDATE_SPLIT_CODE || orderHasGiftCards(order)) {
         setShowStoreShipmentHeading((isOnlySingleMAOOSItemInStore(order, storeKey) && !isOrderSummary) || !orderIsMAOnly(order) || consolidateData.oosConsolidate === OOS_CONSOLIDATE_SPLIT_CODE || orderHasGiftCards(order));
-        } else {
-        // if there are multiple MA OOS items in store, show the shipment heading as per the condition
-        setShowStoreShipmentHeading((multipleMAOOSItemInStore(order, storeKey) && !isOrderSummary) || !orderIsMAOnly(order) || consolidateData.oosConsolidate === OOS_CONSOLIDATE_SPLIT_CODE || orderHasGiftCards(order));
         }
     }, [order, storeKey]);
 
@@ -77,7 +74,7 @@ const StoreHeading: React.FC<IStoreHeadingProps> = ({ storeName, storeKey, isMAS
         }
         // condition when there are multiple MA oos items to show ship date - AI-111386
         else if(isMAStore && multipleMAOOSItemInStore(order, storeKey) && oosConsolidateData?.oosConsolidate !== OOS_CONSOLIDATE_SPLIT_CODE && !isOrderSummary){
-            storeHeading = `${getString("shippingOn")} ${oosConsolidateData.availabilityDate}`;
+            storeHeading = "";
         
         } else if(oosConsolidateData?.oosConsolidate === OOS_CONSOLIDATE_SPLIT_CODE && isMAStore && !isGiftCardForStoreKey(order, storeKey)){
             let shipmentNumber = getShipmentNumber(order, storeKey);
