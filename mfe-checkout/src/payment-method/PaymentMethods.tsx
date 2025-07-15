@@ -48,6 +48,7 @@ import {
   isSelectedPaymentInAllowedOrderPayments, returnPaymentOptionsWithDefaultSelection,
   updatedPaymentOptionsWithSelectedType
 } from "../utils/types/PaymentOptionUtils";
+import { Spinner } from "../component/Spinner/Spinner";
 
 interface IPaymentMethod {
   shopperId: string;
@@ -744,7 +745,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   };
   return (
     <FormikProvider value={formik}>
-      <div className="pm-main-container">
+      {!isPaymentsFetched ? <Spinner /> : <div className="pm-main-container">
         <div className="pm-container" id="pm-main">
           <div className="pm-title-container">
             <FormHeading title={getString("paymentMethod") as string} />
@@ -847,7 +848,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
             )}
           </div>
         </div>
-      </div>
+      </div>}
     </FormikProvider>
   );
 };
