@@ -112,6 +112,12 @@ const { getString } = useContentStrings();
           zip: Yup.string()
             .required(getString("hpPortalAdmin-errPostalReq"))
             .max(10, getString("zipCodeMaxLength")),
+          phone: Yup.string()
+            .required(getString("mobilePhoneRequired"))
+            .matches(
+              /^\+?[0-9\s()-]{7,15}$/,
+              getString("invalidPhoneNumber")
+            ),
         }
       : {}),
   });
@@ -134,6 +140,7 @@ const { getString } = useContentStrings();
     city: address?.city || "",
     state: address?.state || "",
     zip: address?.zip || "",
+    phone: address?.phone || "",
   };
 
   const processCardUpdate = async (
@@ -380,6 +387,7 @@ const { getString } = useContentStrings();
                 city: values.city,
                 state: values.state,
                 zip: values.zip,
+                phone: values.phone,
               }
               : (shippingAddress as Address);
           updateCardInformation(
@@ -520,6 +528,17 @@ const { getString } = useContentStrings();
                             errorMessage={touched.zip && errors.zip}
                             errorRefs={errorRefs}
                         />
+                      <FormField
+                            label={getString("phone")}
+                            required
+                            name="phone"
+                            value={values.phone}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            errorMessage={touched.phone && errors.phone}
+                            errorRefs={errorRefs}
+                        />
+                      </div>
                         <div className="save-for-later">
                           <input
                               className="checkbox"
@@ -531,7 +550,6 @@ const { getString } = useContentStrings();
                          {getString("thisAddressIsAPOBox")}
                         </span>
                         </div>
-                      </div>
                     </form>
                 ) : (
                     <div className="address-saved-text">
