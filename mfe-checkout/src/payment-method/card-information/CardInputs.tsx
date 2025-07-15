@@ -10,6 +10,7 @@ interface ICardInputProps {
   handleChange: any;
   values: any;
   handleBlur: any;
+  onSubmit?: () => void; 
   isEditingExistingCard: boolean;
   saveCardToWallet?: boolean;
   setSaveCardToWallet?: any;
@@ -26,6 +27,7 @@ export const CardInputs: React.FC<ICardInputProps> = ({
   handleChange,
   values,
   handleBlur,
+  onSubmit,
   isEditingExistingCard,
   saveCardToWallet,
   setSaveCardToWallet,
@@ -62,6 +64,14 @@ export const CardInputs: React.FC<ICardInputProps> = ({
 
     return months;
   };
+
+  const handleCVVKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      onSubmit?.();
+    }
+  };
+
 
   return (
     <>
@@ -146,6 +156,7 @@ export const CardInputs: React.FC<ICardInputProps> = ({
             maxLength={4}
             onChange={handleChange}
             onBlur={handleBlur}
+            onKeyDown={handleCVVKeyDown}
             errorMessage={touched.cardInfo?.cvv && errors.cardInfo?.cvv}
             errorRefs={errorRefs}
           />{" "}

@@ -383,13 +383,22 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                             (pm) =>
                               pm.paymentMethod.id === paymentMethod.id
                                 ? {
-                                  ...pm,
-                                  isPaymentValidated: false,
-                                }
+                                    ...pm,
+                                    isPaymentValidated: false,
+                                  }
                                 : pm
                           );
 
                           onAddNewCards(updatedPaymentMethods);
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          const sanitizedValue = formik.values.cvv?.replace(/\D/g, "");
+                          if (sanitizedValue?.length === maxLength) {
+                            onValidCVV(sanitizedValue);
+                          }
                         }
                       }}
                       onBlur={formik.handleBlur}

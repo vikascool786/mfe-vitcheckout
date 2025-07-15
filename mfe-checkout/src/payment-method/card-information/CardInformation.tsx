@@ -426,6 +426,7 @@ const { getString } = useContentStrings();
                     handleChange={handleChange}
                     touched={touched}
                     errors={errors}
+                    onSubmit={submitForm}
                     handleBlur={handleBlur}
                     values={values}
                     isEditing={isEditing}
