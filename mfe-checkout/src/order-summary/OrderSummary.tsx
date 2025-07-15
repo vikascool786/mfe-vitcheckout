@@ -677,7 +677,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               : ``
           } `}
         >
-          <div className="order-summary__total-d">{getString("totalDue")}</div>
+          <div className="order-summary__total-d">{getString("total")}</div>
           <div className="order-summary__total-m">{getString("total")}</div>
           <div className={"qa-total"}>{order?.totals?.priceStr}</div>
         </div>
