@@ -717,15 +717,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       setShowNewCard(false);
       setIsExpanded(false);
     }, 300);
-
-    if (isMobileDevice()) {
-      setTimeout(() => {
-        window.scrollTo({
-          top: document.body.scrollHeight,
-          behavior: "smooth",
-        });
-      }, 100); // delay to wait for re-render
-    }
   };
 
   const setCVVFieldValue = (cvv: string) => {
