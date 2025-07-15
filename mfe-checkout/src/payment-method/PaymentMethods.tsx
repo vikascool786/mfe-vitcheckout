@@ -723,11 +723,16 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     formik.setFieldValue("cvv", cvv);
   };
 
+  const validCreditCardTypeIds = order?.paymentMethods.map(
+    (pm) => pm.typeID
+  );
+
   const getSavedCreditCardsFromWallet = paymentMethods.filter(
     (pm) =>
       pm.paymentMethod.id > 0 &&
-      creditCardTypeIds.includes(pm.paymentMethod.typeID)
+      validCreditCardTypeIds?.includes(pm.paymentMethod.typeID)
   );
+
 
   const showShouldToggleAccordian = getSavedCreditCardsFromWallet.length > 1;
 
