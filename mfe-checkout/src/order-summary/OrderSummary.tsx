@@ -462,7 +462,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
             {!loading &&
               !error &&
               eWalletData &&
-              parseFloat(eWalletData.totalCoaCBAvail) > 0 && (
+              parseInt(eWalletData.totalCoaCBAvail) > 0 && (
                 <ApplyCashback cashbackData={eWalletData} siteId={siteId} />
               )}
           </>

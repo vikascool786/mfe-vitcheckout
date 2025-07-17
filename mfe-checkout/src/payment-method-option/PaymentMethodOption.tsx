@@ -383,9 +383,9 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                             (pm) =>
                               pm.paymentMethod.id === paymentMethod.id
                                 ? {
-                                    ...pm,
-                                    isPaymentValidated: false,
-                                  }
+                                  ...pm,
+                                  isPaymentValidated: false,
+                                }
                                 : pm
                           );
 

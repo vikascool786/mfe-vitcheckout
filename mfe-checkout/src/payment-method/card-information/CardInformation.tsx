@@ -117,7 +117,7 @@ const { getString } = useContentStrings();
             .matches(
               /^\+?[0-9\s()-]{7,15}$/,
               getString("invalidPhoneNumber")
-            ),
+          ),
         }
       : {}),
   });
@@ -529,7 +529,7 @@ const { getString } = useContentStrings();
                             errorMessage={touched.zip && errors.zip}
                             errorRefs={errorRefs}
                         />
-                      <FormField
+                        <FormField
                             label={getString("phone")}
                             required
                             name="phone"

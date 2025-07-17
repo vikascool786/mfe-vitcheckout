@@ -65,13 +65,12 @@ export const CardInputs: React.FC<ICardInputProps> = ({
     return months;
   };
 
-  const handleCVVKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+   const handleCVVKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
       onSubmit?.();
     }
   };
-
 
   return (
     <>
