@@ -299,6 +299,21 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     }
   }, [shopperId, addresses]);
 
+  useEffect(() => {
+  if (isPaymentsFetched && paymentMethods.length > 0) {
+    const hasSelected = getSavedCreditCardsFromWallet.some((pm) => pm.isSelected);
+
+    if (!hasSelected) {
+      const updated = paymentMethods.map((pm, index) => ({
+        ...pm,
+        isSelected: index === 0,
+      }));
+
+      setPaymentMethods(updated);
+    }
+  }
+}, [isPaymentsFetched, paymentMethods]);
+
   const handleThirdPartyPaymentVisibility = (paymentOptions : IPaymentOption[]) : IPaymentOption[] => {
     const shouldShowPaypal = order?.paymentMethods.some(
         (method) => method.type.toLowerCase() === PAYPAL.name.toLowerCase()
@@ -742,6 +757,8 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       validCreditCardTypeIds?.includes(pm.paymentMethod.typeID)
   );
 
+  console.log("getSavedCreditCardsFromWallet", getSavedCreditCardsFromWallet)
+
 
   const showShouldToggleAccordian = getSavedCreditCardsFromWallet.length > 1;
 
@@ -764,7 +781,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
             )}
           </div>
           <div className="pm-sub-container">
-            {paymentMethods
+            {getSavedCreditCardsFromWallet
               .filter((method) => method.isVisible)
               .map((paymentOption, index) => {
                 // Only render credit cards first
