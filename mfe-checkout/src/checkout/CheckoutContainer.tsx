@@ -435,6 +435,8 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                       shopperId={shopperId}
                       siteId={siteId}
                       pcid={pcid}
+                      isVisible={orderHasAutoshipItems(orderData) ||
+                        orderData.totals.price > 0}
                       payments={paymentMethods}
                       updatePaymentTypeId={setPaymentTypeId}
                       updateOrderErrorMessage={handleUpdateOrderErrorMessage}
