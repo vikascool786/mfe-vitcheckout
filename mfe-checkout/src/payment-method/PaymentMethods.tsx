@@ -73,12 +73,8 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
 }) => {
   // initial payment methods
   const [paymentMethods, setPaymentMethods] = useAtom(paymentMethodsAtom);
-  const [isLoadingPayments, setIsLoadingPayments] = useState(isVisible);
   const { getString } = useContentStrings();
   const [isExpanded, setIsExpanded] = useState(false);
-
-  console.log("Is Loading ", isLoadingPayments)
-
   // addresses for user wallet
   const { addresses } = useShopperEWalletAddresses(shopperId || "");
 
@@ -151,6 +147,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       Object.keys(addresses).map((id) =>
         addressMap.set(id, addresses[parseInt(id)] as Address)
       );
+
 
       try {
         let staticMethods = paymentMethods;
@@ -304,8 +301,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
           setPaymentMethods(handleThirdPartyPaymentVisibility(updatedPaymentOptions));
           setIsPaymentsFetched(true);
         }
-      } finally {
-        setIsLoadingPayments(false)
       }
     };
 
@@ -493,13 +488,10 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
           setPaymentMethods(handleThirdPartyPaymentVisibility(updatedPaymentOptions));
           setIsPaymentsFetched(true);
         }
-      } finally {
-        setIsLoadingPayments(false)
       }
     };
 
     if (isVisible && addresses && !isPaymentsFetched) {
-      setIsLoadingPayments(true);
       fetchShoppersSavedPayments(shopperId, addresses);
     }
   }, [isVisible, addresses, isPaymentsFetched]);
@@ -954,7 +946,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   };
   return (
     <FormikProvider value={formik}>
-      {isLoadingPayments ? <Spinner/> :<div className="pm-main-container">
+      {!isPaymentsFetched ? <Spinner/> :<div className="pm-main-container">
         <div className="pm-container" id="pm-main">
           <div className="pm-title-container">
             <FormHeading title={getString("paymentMethod") as string} />
