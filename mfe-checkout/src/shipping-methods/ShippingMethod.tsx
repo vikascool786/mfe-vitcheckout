@@ -300,7 +300,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
 
   return (
     <div className="shipping-container">
-      <FormHeading title="Shipping Methods" />
+      <FormHeading title={getString("shippingMethods")as string} />
       {isAddressSaved && orderConsolidateData?.showOrderConsolidate && (
         <div className="shipping-options-container">
           <div

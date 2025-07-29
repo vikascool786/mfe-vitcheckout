@@ -135,7 +135,7 @@ export const CardInputs: React.FC<ICardInputProps> = ({
         />
       </div>
       {isEditing ? (
-        <p className="billing-address-styles">Billing Addess</p>
+        <p className="billing-address-styles">{getString("billingAddress")}</p>
       ) : null}
       {!isEditing && (
         <div className="form-field-container">

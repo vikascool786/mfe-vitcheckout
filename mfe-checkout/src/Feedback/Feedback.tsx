@@ -16,7 +16,7 @@ const Feedback: React.FC<IFeedback> = ({ pcId, sessionId, siteId }) => {
           className="feedback-button"
           onClick={() => setFromDisplayed(true)}
         >
-          Give Feedback
+          {getString("giveFeedback")}
         </button>
       </div>
       {isFormDisplayed && (

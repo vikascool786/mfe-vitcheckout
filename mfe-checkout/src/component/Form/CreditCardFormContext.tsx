@@ -15,6 +15,7 @@ export interface CreditCardFormData {
     city?: string;
     state?: string;
     zip?: string;
+    phone?: string
     saveForLater: boolean;
     addressId?: number;
 }
@@ -42,6 +43,7 @@ export const CreditCardFormProvider = ({ children }: { children: ReactNode }) =>
         city: "",
         state: "",
         zip: "",
+        phone: "",
         saveForLater: true
     });
 

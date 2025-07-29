@@ -422,7 +422,7 @@ const Checkout: React.FC<ICheckout> = ({
       .required(getString("pleaseEnterPhoneNumber"))
       .test(
         "valid-phone-format",
-        "Phone number must contain exactly 10 digits",
+        getString("phoneNumber10Digits") as string,
         function (value) {
           const normalized = (value || "").replace(/\D/g, ""); // Remove non-digit characters
           return /^\d{10}$/.test(normalized);
@@ -453,7 +453,7 @@ const Checkout: React.FC<ICheckout> = ({
           }`}
         >
           <div className="form-header">
-            <FormHeading title="Shipping Address" />
+            <FormHeading title={getString("shippingAddress") as string} />
             {shopperAddressBook.length > 0 && (
               <Back
                 className={`qa-expand mfe-accordion ${

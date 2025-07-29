@@ -32,6 +32,7 @@ export const CreditCardValidationWatcher: React.FC<ICreditCardValidationWatcher>
                         city: values.city,
                         state: values.state,
                         zip: values.zip,
+                        phone: values.phone,
                     }
                     : (shipAddress as Address);
 
@@ -49,6 +50,7 @@ export const CreditCardValidationWatcher: React.FC<ICreditCardValidationWatcher>
                     ccFormData.city = address?.city;
                     ccFormData.state = address?.state;
                     ccFormData.zip = address?.zip;
+                    ccFormData.phone = address?.phone;
                 }
 
                 setCreditCardFormData(ccFormData);

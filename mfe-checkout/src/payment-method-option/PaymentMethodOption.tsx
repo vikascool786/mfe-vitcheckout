@@ -412,7 +412,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                       </span>
                     )}
                     </div>
-                    <div className="cvv-text">{maxLength} digits</div>
+                    <div className="cvv-text">{maxLength} {getString("digits")}</div>
                     {errorMessage ||
                       (formik.errors.cvv && (
                         <span className="error-message">

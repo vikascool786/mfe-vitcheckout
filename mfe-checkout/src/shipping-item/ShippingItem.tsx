@@ -345,7 +345,7 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
             <section className="price-section">
               {!isGiftCard && (
                 <div className="quantity-selector">
-                  <p className="item-quantity">Quantity</p>
+                  <p className="item-quantity">{getString("quantity")}</p>
                   <div className="quantity-dropdown-container">
                     <CustomDropdownField
                       key={`${item.product_hash}-${pendingQuantity}`}
@@ -368,12 +368,12 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
               item.hasAutoShipDiscount ? (
                 <div className="item-autoship">
                   <AutoshipIcon />
-                  {getString("saving")} {portalData.autoShipDiscount}% {getString("withAutoShip")}
+                  {getString("subscribeAndSaveProgram")} {portalData.autoShipDiscount}%
                 </div>
               ) : (
                 <div className="item-autoship">
                   <AutoshipIcon />
-                  {getString("repeatingWithAutoship")}
+                  {getString("subscribe")}
                 </div>
               ))}
             {item.autoshipFreq > 0 && (

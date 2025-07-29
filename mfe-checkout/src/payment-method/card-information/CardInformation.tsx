@@ -113,7 +113,7 @@ const { getString } = useContentStrings();
             .required(getString("hpPortalAdmin-errPostalReq"))
             .max(10, getString("zipCodeMaxLength")),
           phone: Yup.string()
-            .required(getString("mobilePhoneRequired"))
+            .required(getString("pleaseEnterPhoneNumber"))
             .matches(
               /^\+?[0-9\s()-]{7,15}$/,
               getString("invalidPhoneNumber")

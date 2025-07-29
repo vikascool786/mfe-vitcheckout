@@ -296,8 +296,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     } else {
       const errorMessage =
         error?.data?.response?.errors?.message || "Unknown error";
-      const errorCode = error?.data?.response?.errors?.code || "N/A";
-      setOrderErrorMessage(getString("errorDetailMessage",[errorMessage,errorCode]) as string);
+      setOrderErrorMessage(getString("errorDetailMessage",[errorMessage]) as string);
     }
     setIsPlacingOrderWithThirdParty(false);
     setIsLoading(false);

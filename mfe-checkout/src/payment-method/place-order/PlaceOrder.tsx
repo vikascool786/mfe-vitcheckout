@@ -487,7 +487,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     } catch (error: any) {
       setIsLoading(false);
       const errorMessage =
-          error?.response?.data?.message || error?.message || "We're sorry, there was an error placing your order";
+          error?.response?.data?.message || error?.message || getString("errorPlacingOrder") as string;
       updateOrderErrorMessage(errorMessage);
     }
   };
@@ -703,7 +703,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
 
                 <Checkbox
                   name="autoshipTerms"
-                  title="I agree to the Autoship Terms & Conditions"
+                  title={getString("agreeAutoShipTerms") as string}
                   checked={isAutoShipChecked}
                   onChange={() => {
                     setIsAutoShipChecked(!values.autoshipTerms);
@@ -714,7 +714,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
               </div>
             )}
             <div className="checkout-place-order-text-terms-policy">
-              {getString("agreeToTerms")}{" "}
+              {getString("agreeToSubscribeTerms")}{" "}
               <a
                 href="/info/terms-of-use"
                 target="_blank"
@@ -722,7 +722,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
               >
                 {getString("termsOfUse")}
               </a>{" "}
-              and{" "}
+              {getString("and")}{" "}
               <a
                 href="/info/privacy-policy"
                 target="_blank"

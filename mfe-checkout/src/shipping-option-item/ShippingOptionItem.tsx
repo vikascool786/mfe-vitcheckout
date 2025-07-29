@@ -70,7 +70,7 @@ export const ShippingOptionItem: React.FC<IShippingOptionItem> = ({
           }`}
         >
           <AutoshipIcon />
-          {getString("recurringAutoshipStandardShipping")}
+          {getString("recurringSubscribeAndSaveShipping")}
         </div>
       )}
 

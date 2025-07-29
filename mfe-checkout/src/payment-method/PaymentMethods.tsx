@@ -26,8 +26,7 @@ import {
   CLICK2PAY,
   creditCardTypeIds,
   isThirdPartyPayment,
-  PAYPAL,
-  PAYPAL_RECURRING,
+  PAYPAL, PAYPAL_RECURRING,
   SEZZLE,
   thirdPartyPaymentFlagList,
 } from "./PaymentType";
@@ -45,11 +44,9 @@ import {
   convertPaymentMethodsToPaymentOptions,
   createNewCardOption,
   getSelectedPaymentOption,
-  isNewCardInPaymentOptions,
-  isPaymentMethodExistingInPaymentOption,
-  isSelectedPaymentInAllowedOrderPayments,
-  returnPaymentOptionsWithDefaultSelection,
-  updatedPaymentOptionsWithSelectedType,
+  isNewCardInPaymentOptions, isPaymentMethodExistingInPaymentOption,
+  isSelectedPaymentInAllowedOrderPayments, returnPaymentOptionsWithDefaultSelection,
+  updatedPaymentOptionsWithSelectedType
 } from "../utils/types/PaymentOptionUtils";
 import { Spinner } from "../component/Spinner/Spinner";
 
@@ -96,8 +93,8 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   >([]);
   const [isClick2PayCardSelected, setIsClick2PayCardSelected] =
     useState<boolean>(false);
-
-  // To check mobile width
+  
+  // To check mobile width 
   const isMobileDevice = () => window.innerWidth <= 768;
 
   useEffect(() => {
@@ -159,9 +156,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
 
           if (showPayPalSelected) {
             staticMethods = paymentMethods.map((method) => {
-              const paypalPaymentType = isPaypalRecurringCallBack
-                ? PAYPAL_RECURRING
-                : PAYPAL;
+              const paypalPaymentType = isPaypalRecurringCallBack ? PAYPAL_RECURRING : PAYPAL;
               if (method.paymentMethod.typeID === paypalPaymentType.typeId) {
                 updatePaymentTypeId(method.paymentMethod.typeID);
                 return { ...method, isSelected: true };
@@ -169,10 +164,10 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
               return { ...method, isSelected: false };
             });
           } else {
-            const isNewCardAlreadyPresent =
-              isNewCardInPaymentOptions(paymentMethods);
-
+            const isNewCardAlreadyPresent = isNewCardInPaymentOptions(paymentMethods);
+        
             if (!isNewCardAlreadyPresent) {
+        
               staticMethods = [
                 createNewCardOption(),
                 ...paymentMethods.map((method) => ({
@@ -183,9 +178,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
             } else {
               staticMethods = paymentMethods.map((method) => ({
                 ...method,
-                isSelected:
-                  method.paymentMethod.typeID === 9 &&
-                  method.paymentMethod.id === 0,
+                isSelected: method.paymentMethod.typeID === 9 && method.paymentMethod.id === 0,
               }));
             }
           }
@@ -250,18 +243,14 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
             setTimeout(() => {
               window.scrollTo({
                 top: document.body.scrollHeight,
-                behavior: "smooth",
+                behavior: 'smooth',
               });
             }, 100); // delay to wait for re-render
           }
-
+          
           updatedPaymentOptions = updatedPaymentOptions.map((paymentOption) => {
-            const paypalPaymentType = isPaypalRecurringCallBack
-              ? PAYPAL_RECURRING
-              : PAYPAL;
-            if (
-              paymentOption.paymentMethod.typeID === paypalPaymentType.typeId
-            ) {
+            const paypalPaymentType = isPaypalRecurringCallBack ? PAYPAL_RECURRING : PAYPAL;
+            if (paymentOption.paymentMethod.typeID === paypalPaymentType.typeId) {
               updatePaymentTypeId(paymentOption.paymentMethod.typeID);
               // set paypal true
               return {
@@ -282,9 +271,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         }
 
         setTimeout(() => {
-          setPaymentMethods(
-            handleThirdPartyPaymentVisibility(updatedPaymentOptions)
-          );
+          setPaymentMethods(handleThirdPartyPaymentVisibility(updatedPaymentOptions));
           setIsPaymentsFetched(true);
         }, 300);
       } catch (error) {
@@ -309,9 +296,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
             }
           });
 
-          setPaymentMethods(
-            handleThirdPartyPaymentVisibility(updatedPaymentOptions)
-          );
+          setPaymentMethods(handleThirdPartyPaymentVisibility(updatedPaymentOptions));
           setIsPaymentsFetched(true);
         }
       }
@@ -322,36 +307,34 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     }
   }, [shopperId, addresses]);
 
-  const handleThirdPartyPaymentVisibility = (
-    paymentOptions: IPaymentOption[]
-  ): IPaymentOption[] => {
+  const handleThirdPartyPaymentVisibility = (paymentOptions : IPaymentOption[]) : IPaymentOption[] => {
     const shouldShowPaypal = order?.paymentMethods.some(
-      (method) => method.type.toLowerCase() === PAYPAL.name.toLowerCase()
+        (method) => method.type.toLowerCase() === PAYPAL.name.toLowerCase()
     );
 
     const showPaypalRecurring = order?.paymentMethods.some(
-      (method) => method.typeID === PAYPAL_RECURRING.typeId
+        (method) => method.typeID === PAYPAL_RECURRING.typeId
     );
 
     if (!isSezzleAllowed()) {
       paymentOptions = paymentOptions.filter(
-        (method) => method.paymentMethod.typeID !== SEZZLE.typeId
+          (method) => method.paymentMethod.typeID !== SEZZLE.typeId
       );
     }
 
     if (!shouldShowPaypal) {
       paymentOptions = paymentOptions.filter(
-        (method) => method.paymentMethod.typeID !== PAYPAL.typeId
+          (method) => method.paymentMethod.typeID !== PAYPAL.typeId
       );
     }
 
     if (!showPaypalRecurring) {
       paymentOptions = paymentOptions.filter(
-        (method) => method.paymentMethod.typeID !== PAYPAL_RECURRING.typeId
+          (method) => method.paymentMethod.typeID !== PAYPAL_RECURRING.typeId
       );
     }
     return paymentOptions;
-  };
+  }
 
   useEffect(() => {
     let updatedPMs = paymentMethods;
@@ -373,26 +356,18 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       }
     }
 
-    if (isSezzleSelectedPayment(location.search)) {
-      updatedPMs = updatedPaymentOptionsWithSelectedType(
-        updatedPMs,
-        SEZZLE.typeId
-      );
+    if(isSezzleSelectedPayment(location.search)){
+      updatedPMs = updatedPaymentOptionsWithSelectedType(updatedPMs, SEZZLE.typeId);
       updatePaymentTypeId(SEZZLE.typeId);
     }
 
-    if (order) {
-      if (
-        !isSelectedPaymentInAllowedOrderPayments(
-          updatedPMs,
-          order.paymentMethods
-        )
-      ) {
+    if(order){
+      if(!isSelectedPaymentInAllowedOrderPayments(updatedPMs, order.paymentMethods)){
         updatedPMs = returnPaymentOptionsWithDefaultSelection(updatedPMs);
         const selectedPaymentTypeId = getSelectedPaymentOption(updatedPMs);
-        if (selectedPaymentTypeId) {
+        if(selectedPaymentTypeId){
           updatePaymentTypeId(selectedPaymentTypeId.paymentMethod.typeID);
-        } else if (isPaymentsFetched && !selectedPaymentTypeId) {
+        } else if (isPaymentsFetched && !selectedPaymentTypeId){
           const newCartPM = createNewCardOption();
           updatedPMs.push(newCartPM);
           updatePaymentTypeId(newCartPM.paymentMethod.typeID);
@@ -454,30 +429,19 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       filteredPaymentMethods = paymentMethods.filter(
         (payment) => payment.paymentMethod.id !== 0
       );
-      filteredPaymentMethods = handleThirdPartyPaymentVisibility(
-        filteredPaymentMethods
-      );
+      filteredPaymentMethods = handleThirdPartyPaymentVisibility(filteredPaymentMethods);
 
       const hasSavedPayments = payments && payments.length > 0;
-      if (
-        hasSavedPayments &&
-        !isPaymentMethodExistingInPaymentOption(
-          payments,
-          filteredPaymentMethods
-        )
-      ) {
+      if(hasSavedPayments && !isPaymentMethodExistingInPaymentOption(payments, filteredPaymentMethods)){
         //add shopper saved pms if they are missing
-        filteredPaymentMethods = [
-          ...convertPaymentMethodsToPaymentOptions(payments),
-          ...filteredPaymentMethods,
-        ];
+        filteredPaymentMethods = [...convertPaymentMethodsToPaymentOptions(payments), ...filteredPaymentMethods];
       }
 
       setPaymentMethods(
-        filteredPaymentMethods.map((item) => ({
-          ...item,
-          isSelected: false, //deselect all PMs
-        }))
+          filteredPaymentMethods.map((item) => ({
+            ...item,
+            isSelected: false, //deselect all PMs
+          }))
       );
       updatePaymentTypeId(CLICK2PAY.typeId);
       setIsClick2PayCardSelected(true);
@@ -565,7 +529,10 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       isEditing: false,
     }));
 
-    setPaymentMethods([...updatedPaymentOptions, createNewCardOption()]);
+    setPaymentMethods([
+      ...updatedPaymentOptions,
+      createNewCardOption(),
+    ]);
   };
 
   useEffect(() => {
@@ -773,7 +740,9 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     formik.setFieldValue("cvv", cvv);
   };
 
-  const validCreditCardTypeIds = order?.paymentMethods.map((pm) => pm.typeID);
+  const validCreditCardTypeIds = order?.paymentMethods.map(
+    (pm) => pm.typeID
+  );
 
   const getSavedCreditCardsFromWallet = paymentMethods.filter(
     (pm) =>
@@ -788,120 +757,110 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   };
   return (
     <FormikProvider value={formik}>
-      {!isPaymentsFetched ? (
-        <Spinner />
-      ) : (
-        <div className="pm-main-container">
-          <div className="pm-container" id="pm-main">
-            <div className="pm-title-container">
-              <FormHeading title={getString("paymentMethod") as string} />
-              {showShouldToggleAccordian && (
-                <div className="pm-show-card" onClick={toggleAccordion}>
-                  <div>
-                    {isExpanded
-                      ? getString("hideOtherCards")
-                      : getString("seeOtherCards")}
-                  </div>
-                  <Back
-                    className={`mfe-accordion ${isExpanded ? "open" : "close"}`}
-                  />
+      {!isPaymentsFetched ? <Spinner /> : <div className="pm-main-container">
+        <div className="pm-container" id="pm-main">
+          <div className="pm-title-container">
+            <FormHeading title={getString("paymentMethod") as string} />
+            {showShouldToggleAccordian && (
+              <div className="pm-show-card" onClick={toggleAccordion}>
+                <div>{isExpanded ? getString('hideOtherCards') : getString('seeOtherCards')}</div>
+                <Back
+                  className={`mfe-accordion ${isExpanded ? "open" : "close"}`}
+                />
+              </div>
+            )}
+          </div>
+          <div className="pm-sub-container">
+            {paymentMethods
+              .filter((method) => method.isVisible)
+              .map((paymentOption, index) => {
+                // Only render credit cards first
+                if (
+                  creditCardTypeIds.includes(paymentOption.paymentMethod.typeID)
+                ) {
+                  return (
+                    <PaymentOption
+                      key={paymentOption.paymentMethod.id}
+                      paymentOption={paymentOption}
+                      index={index}
+                      shopperId={shopperId}
+                      onCardEdit={onCardEdit}
+                      handleCancelNewCard={handleCancelNewCard}
+                      onAddNewCards={onAddNewCards}
+                      updatePaymentTypeId={updatePaymentTypeId}
+                      onCollapse={onCollapse}
+                      formik={formik}
+                      updateCvvError={updateCvvError}
+                      setCVVFieldValue={setCVVFieldValue}
+                      updateOrderErrorMessage={updateOrderErrorMessage}
+                      siteId={siteId}
+                    />
+                  );
+                }
+                return null;
+              })}
+
+            {/* Add New Card section */}
+            {!showNewCard && (
+              <div className="checkout-add-card" onClick={onAddNewCard}>
+                <div className="checkout-add-card-text">
+                  <RadioButton id={"39812031823"} />
+                  <div>{getString("addNewCard")}</div>
                 </div>
-              )}
-            </div>
-            <div className="pm-sub-container">
-              {paymentMethods
-                .filter((method) => method.isVisible)
-                .map((paymentOption, index) => {
-                  // Only render credit cards first
-                  if (
-                    creditCardTypeIds.includes(
-                      paymentOption.paymentMethod.typeID
-                    )
-                  ) {
-                    return (
-                      <PaymentOption
-                        key={paymentOption.paymentMethod.id}
-                        paymentOption={paymentOption}
-                        index={index}
-                        shopperId={shopperId}
-                        onCardEdit={onCardEdit}
-                        handleCancelNewCard={handleCancelNewCard}
-                        onAddNewCards={onAddNewCards}
-                        updatePaymentTypeId={updatePaymentTypeId}
-                        onCollapse={onCollapse}
-                        formik={formik}
-                        updateCvvError={updateCvvError}
-                        setCVVFieldValue={setCVVFieldValue}
-                        updateOrderErrorMessage={updateOrderErrorMessage}
-                        siteId={siteId}
-                      />
-                    );
-                  }
-                  return null;
-                })}
-
-              {/* Add New Card section */}
-              {!showNewCard && (
-                <div className="checkout-add-card" onClick={onAddNewCard}>
-                  <div className="checkout-add-card-text">
-                    <RadioButton id={"39812031823"} />
-                    <div>{getString("addNewCard")}</div>
-                  </div>
-                  <div className="checkout-add-new-card-image">
-                    {order?.paymentMethods
-                      ?.filter((pm) => pm.visible)
-                      ?.map(
-                        (pm) =>
-                          pm.imageTag && (
-                            <img
-                              key={pm.typeID}
-                              className="checkout-add-new-card "
-                              src={getVisibleCardOptionsImages(pm.imageTag)}
-                            />
-                          )
-                      )}
-                  </div>
+                <div className="checkout-add-new-card-image">
+                  {order?.paymentMethods
+                    ?.filter((pm) => pm.visible)
+                    ?.map(
+                      (pm) =>
+                        pm.imageTag && (
+                          <img
+                            key={pm.typeID}
+                            className="checkout-add-new-card "
+                            src={getVisibleCardOptionsImages(pm.imageTag)}
+                          />
+                        )
+                    )}
                 </div>
-              )}
+              </div>
+            )}
 
-              {/* Render non-credit card payment methods (PayPal, Sezzle, etc.) */}
-              {paymentMethods
-                .filter((method) => method.isVisible)
-                .map((paymentOption, index) => {
-                  if (
-                    !creditCardTypeIds.includes(
-                      paymentOption.paymentMethod.typeID
-                    )
-                  ) {
-                    return (
-                      <PaymentOption
-                        key={paymentOption.paymentMethod.id}
-                        paymentOption={paymentOption}
-                        index={index}
-                        shopperId={shopperId}
-                        onCardEdit={onCardEdit}
-                        handleCancelNewCard={handleCancelNewCard}
-                        onAddNewCards={onAddNewCards}
-                        updatePaymentTypeId={updatePaymentTypeId}
-                        onCollapse={onCollapse}
-                        formik={formik}
-                        updateCvvError={updateCvvError}
-                        setCVVFieldValue={setCVVFieldValue}
-                        updateOrderErrorMessage={updateOrderErrorMessage}
-                        siteId={siteId}
-                      />
-                    );
-                  }
-                  return null;
-                })}
+            {/* Render non-credit card payment methods (PayPal, Sezzle, etc.) */}
+            {paymentMethods
+              .filter((method) => method.isVisible)
+              .map((paymentOption, index) => {
+                if (
+                  !creditCardTypeIds.includes(
+                    paymentOption.paymentMethod.typeID
+                  )
+                ) {
+                  return (
+                    <PaymentOption
+                      key={paymentOption.paymentMethod.id}
+                      paymentOption={paymentOption}
+                      index={index}
+                      shopperId={shopperId}
+                      onCardEdit={onCardEdit}
+                      handleCancelNewCard={handleCancelNewCard}
+                      onAddNewCards={onAddNewCards}
+                      updatePaymentTypeId={updatePaymentTypeId}
+                      onCollapse={onCollapse}
+                      formik={formik}
+                      updateCvvError={updateCvvError}
+                      setCVVFieldValue={setCVVFieldValue}
+                      updateOrderErrorMessage={updateOrderErrorMessage}
+                      siteId={siteId}
+                    />
+                  );
+                }
+                return null;
+              })}
 
-              {showClick2Pay && (
-                <PaymentOptionClick2Pay pcid={pcid} order={order} />
-              )}
-            </div>
+            {showClick2Pay && (
+              <PaymentOptionClick2Pay pcid={pcid} order={order} />
+            )}
           </div>
         </div>
-      )}
+      </div>}
     </FormikProvider>
   );
 };

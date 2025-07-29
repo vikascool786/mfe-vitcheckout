@@ -53,6 +53,7 @@ export const handleSaveCard = async (
             payload.city = creditCardFormData.city;
             payload.state = creditCardFormData.state;
             payload.zip = creditCardFormData.zip;
+            payload.phone = creditCardFormData.phone?.replace(/\D/g, "");
         }
 
         let newPaymentInfo;

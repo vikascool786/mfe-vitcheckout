@@ -505,7 +505,7 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({
                       onClick={closeAddCardOverlay}
                     />
                     <Button
-                      label="Save"
+                      label={getString("save") as string}
                       btnType="primary"
                       onClick={submitForm}
                     />

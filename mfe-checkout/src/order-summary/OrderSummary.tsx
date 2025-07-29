@@ -161,7 +161,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
     const isApplyingGiftCard = !isGCApplied;
   
     if (isApplyingGiftCard && order.totals.price === 0) {
-      const msg = "Your order balance is already $0.00. You cannot apply gift card to your order";
+      const msg = getString("zeroOrderGiftCardBalance") as string;
   
       if (!notificationMessages?.includes(msg)) {
         setOrderNotifications([
@@ -217,7 +217,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
     if (!gcState.gcNum?.trim()) {
       setgcState((prevState) => ({
         ...prevState,
-        gcError: "Please enter number",
+        gcError: getString("pleaseEnterNumber") as string,
       }));
       return;
     }
@@ -249,7 +249,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
       if (notifications && notifications.length > 0) {
         setgcState((prevState) => ({
           ...prevState,
-          gcError: notifications[0]?.reason || "Gift card error",
+          gcError: notifications[0]?.reason || getString("giftCardError") as string,
           gcVisible: true,
           gcApplied: false,
         }));
@@ -334,7 +334,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         setIsLoading(false);
         setCoupon({
           coupon: "",
-          couponError: "Please enter coupon",
+          couponError: getString("pleaseEnterCoupon") as string,
         });
       }
     } catch (error) {
@@ -462,7 +462,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
             {!loading &&
               !error &&
               eWalletData &&
-              parseInt(eWalletData.totalCoaCBAvail) > 0 && (
+              parseFloat(eWalletData.totalCoaCBAvail) > 0 && (
                 <ApplyCashback cashbackData={eWalletData} siteId={siteId} />
               )}
           </>
@@ -503,7 +503,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           <div className="qa-order-gift gift-card-wrapper">
             <div className="gift-card-wrapper-fields">
               <div className="gift-card-wrapper-field-1">
-                <div className="order-redeem-coupon-text">Gift Card Number</div>
+                <div className="order-redeem-coupon-text">{getString("giftCardNumber")?.split(":")[0]}</div>
                 <FormField
                   qaTag={"qa-card-number"}
                   value={gcState.gcNum}
@@ -589,7 +589,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                   />
 
                   <div className="order-summary-row">
-                    <div>Items</div>
+                    <div>{getString("itemsSubtotal")}</div>
                     <div className={"qa-subtotal"}>
                       {store?.store?.totals?.priceStr}
                     </div>
@@ -620,7 +620,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                     </div>
                   )}
                   <div className="order-summary-row">
-                    <div>Tax</div>
+                    <div>{getString("tax")}</div>
                     <div className={"qa-tax"}>
                       {store?.store?.totals?.taxStr}
                     </div>
@@ -642,7 +642,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
             })}
         {order?.totals?.priceActualStr !== order?.totals.priceStr && (
           <div className="order-summary-row">
-            <div className="order-summary-row">Subtotal</div>
+            <div className="order-summary-row">{getString("subTotal")}</div>
             <div className={"qa-sub-totaltotal"}>
               {order?.totals?.priceActualStr}
             </div>
@@ -653,7 +653,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           <div className="order-summary-row">
             <div className="order-summary-row-bold">
               VIFT
-              <span className="order-summary-row-green checked">{` Cashback`}</span>
+              <span className="order-summary-row-green checked">{`${' '}`}{getString("cashBack")}</span>
             </div>
             <div className={order?.userOptions.applyEWallet ? "checked" : ""}>
               {order.totals?.walletAppliedStr}
