@@ -664,6 +664,8 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   //   return <Spinner />;
   // }
 
+  console.log(orderHasAutoshipItems(order || null))
+
   return (
     <div className="checkout-place-order margin-5">
       <Formik
@@ -714,7 +716,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
               </div>
             )}
             <div className="checkout-place-order-text-terms-policy">
-              {getString("agreeToSubscribeTerms")}{" "}
+              {getString("termsOfUse")}{" "}
               <a
                 href="/info/terms-of-use"
                 target="_blank"
