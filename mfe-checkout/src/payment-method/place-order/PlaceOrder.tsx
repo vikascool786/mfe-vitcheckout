@@ -664,8 +664,6 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   //   return <Spinner />;
   // }
 
-  console.log(orderHasAutoshipItems(order || null))
-
   return (
     <div className="checkout-place-order margin-5">
       <Formik
@@ -705,7 +703,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
 
                 <Checkbox
                   name="autoshipTerms"
-                  title={getString("agreeAutoShipTerms") as string}
+                  title={getString("agreeToSubscribeTerms") as string}
                   checked={isAutoShipChecked}
                   onChange={() => {
                     setIsAutoShipChecked(!values.autoshipTerms);
@@ -716,7 +714,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
               </div>
             )}
             <div className="checkout-place-order-text-terms-policy">
-              {getString("termsOfUse")}{" "}
+              {getString("agreeToTerms")}{" "}
               <a
                 href="/info/terms-of-use"
                 target="_blank"

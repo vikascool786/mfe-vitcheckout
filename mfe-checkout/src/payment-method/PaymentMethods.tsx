@@ -75,6 +75,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   const [paymentMethods, setPaymentMethods] = useAtom(paymentMethodsAtom);
   const { getString } = useContentStrings();
   const [isExpanded, setIsExpanded] = useState(false);
+
   // addresses for user wallet
   const { addresses } = useShopperEWalletAddresses(shopperId || "");
 
@@ -147,7 +148,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       Object.keys(addresses).map((id) =>
         addressMap.set(id, addresses[parseInt(id)] as Address)
       );
-
 
       try {
         let staticMethods = paymentMethods;
@@ -245,7 +245,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
             setTimeout(() => {
               window.scrollTo({
                 top: document.body.scrollHeight,
-                behavior: 'smooth',
+                behavior: "smooth",
               });
             }, 100); // delay to wait for re-render
           }
@@ -309,7 +309,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     }
   }, [shopperId, addresses]);
 
-  useEffect(() => {
+    useEffect(() => {
     const fetchShoppersSavedPayments = async (
       shopperId: string,
       addresses: Address[]
@@ -523,7 +523,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       );
     }
     return paymentOptions;
-  }
+  };
 
   useEffect(() => {
     let updatedPMs = paymentMethods;

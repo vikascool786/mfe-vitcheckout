@@ -14,7 +14,6 @@ import "./OrderSummary.scss";
 import { formattedNumber } from "../utils/OrderUtils";
 import { Spinner } from "../component/Spinner/Spinner";
 import { VIFT } from "../assets/svgs/VIFT";
-import { fetchShopperAttributes } from "../api/service/ShopperDetail";
 import { ShopperAttribute } from "../interfaces/ShopperAttribute";
 import { getOrderValidatePromoCode } from "../api/service/PromoCodeAPI";
 import { portalApiData } from "../checkout/portalAtom";
@@ -25,6 +24,8 @@ import { GiftCard } from "./GiftCard";
 import { IPaymentMethod } from "../interfaces/ShopperCart";
 import { useContentStrings } from "../hooks/useContentStrings";
 import AppliedCoupons from "./AppliedCoupons";
+import { useAtomValue } from "jotai/index";
+import { shopperAttributesAtomFamily } from "../checkout/shopperAttributesAtom";
 
 interface IOrderSummary {
   pcid: string;
@@ -82,6 +83,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
   const [gcLoading, setGCLoading] = useState(false);
   const [portalData] = useAtom(portalApiData(shopperId));
   const apiMode = GET_API_MODE();
+  const shopperAttributes = useAtomValue(shopperAttributesAtomFamily(shopperId));
 
   // Handle input text change for coupon
   const handleCouponTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -354,61 +356,55 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
     }));
 
   useEffect(() => {
-    fetchShopperAttributes(shopperId)
-      .then((response: ShopperAttribute[]) => {
-        const COUPON_CODE_SURVEY10 = "SURVEY10";
-        const hasTakenHealthSurvey = response.some(
-          (entry) => entry.typeId === 609 && entry.value === 1
-        );
-        if (hasTakenHealthSurvey) {
-          //check if coupon has been redeemed
-          getOrderValidatePromoCode(
-            cartId,
-            COUPON_CODE_SURVEY10,
-            order?.totals?.price || 0
-          )
-            .then((response) => {
-              const canRedeem =
-                response &&
-                response?.isCouponValid === "1" &&
-                (response?.svrMessage?.length ?? 0) <= 0;
-              if (canRedeem) {
-                //apply coupon to order
-                if (
-                  order &&
-                  !order?.userOptions?.coupons?.includes(COUPON_CODE_SURVEY10)
-                ) {
-                  const updatedCoupons = [
-                    ...(order?.userOptions?.coupons ?? []),
-                    COUPON_CODE_SURVEY10,
-                  ];
-                  const updatedOrder = buildOrder(
-                    generateChangeStoreResponse({
-                      ...order,
-                      userOptions: {
-                        ...order.userOptions,
-                        coupons: updatedCoupons,
-                      },
-                    })
-                  );
-                  updatedOrder
-                    .then((response) => {
-                      setOrder(response.response?.success?.data);
-                    })
-                    .catch((error) => {
-                      console.error("Error updating order with coupon ", error);
-                    });
-                }
+      const COUPON_CODE_SURVEY10 = "SURVEY10";
+      const hasTakenHealthSurvey = shopperAttributes.some(
+        (entry: ShopperAttribute) => entry.typeId === 609 && entry.value === 1
+      );
+      if (hasTakenHealthSurvey) {
+        //check if coupon has been redeemed
+        getOrderValidatePromoCode(
+          cartId,
+          COUPON_CODE_SURVEY10,
+          order?.totals?.price || 0
+        )
+          .then((response) => {
+            const canRedeem =
+              response &&
+              response?.isCouponValid === "1" &&
+              (response?.svrMessage?.length ?? 0) <= 0;
+            if (canRedeem) {
+              //apply coupon to order
+              if (
+                order &&
+                !order?.userOptions?.coupons?.includes(COUPON_CODE_SURVEY10)
+              ) {
+                const updatedCoupons = [
+                  ...(order?.userOptions?.coupons ?? []),
+                  COUPON_CODE_SURVEY10,
+                ];
+                const updatedOrder = buildOrder(
+                  generateChangeStoreResponse({
+                    ...order,
+                    userOptions: {
+                      ...order.userOptions,
+                      coupons: updatedCoupons,
+                    },
+                  })
+                );
+                updatedOrder
+                  .then((response) => {
+                    setOrder(response.response?.success?.data);
+                  })
+                  .catch((error) => {
+                    console.error("Error updating order with coupon ", error);
+                  });
               }
-            })
-            .catch((error) => {
-              console.error("Error with getOrderValidatePromoCode", error);
-            });
-        }
-      })
-      .catch((error) => {
-        console.error("Error getting shopper attribute fetch", error);
-      });
+            }
+          })
+          .catch((error) => {
+            console.error("Error with getOrderValidatePromoCode", error);
+          });
+      }
   }, []);
 
   useEffect(() => {

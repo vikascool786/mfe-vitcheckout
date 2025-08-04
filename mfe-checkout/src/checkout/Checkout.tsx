@@ -36,7 +36,7 @@ import { getOrderNotifications } from "../utils/OrderUtils";
 import { AddressAutocomplete } from "../component/AddressForm/AddressAutoComplete";
 import {
   getFilteredShippingAddresses,
-  getShippingAddressFromFilteredList,
+  getShippingAddressFromFilteredList, isAddressDefaultMAAddress, setAddressAsShipInAddressList,
 } from "../utils/AddressUtils";
 import { useContentStrings } from "../hooks/useContentStrings";
 import ScrollToError from "../component/Form/ScrollToError/ScrollToError";
@@ -120,7 +120,13 @@ const Checkout: React.FC<ICheckout> = ({
   const [loading, setLoading] = useAtom(loadingAtom);
 
   useEffect(() => {
-    setShopperAddressBook(buildShoppersAddressBookFromResponse(addresses));
+    const filteredAddresses = getFilteredShippingAddresses(addresses, siteData.siteCountryCode);
+    if(order && order.shippingAddress && !isAddressDefaultMAAddress(order.shippingAddress)){
+      setShippingAddress(order.shippingAddress);
+      setShopperAddressBook(setAddressAsShipInAddressList(filteredAddresses, order.shippingAddress));
+    } else {
+      setShopperAddressBook(buildShoppersAddressBookFromResponse(filteredAddresses));
+    }
   }, []);
 
   // Function to toggle accordion state

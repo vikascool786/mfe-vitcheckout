@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import "./ShippingItem.scss";
 import { Cashback } from "../assets/svgs/Cashback";
 import { Item, StoreDetail } from "../interfaces/ShippingMethod";
@@ -34,6 +34,9 @@ import { isGiftCardStoreDetail } from "../utils/StoreUtils";
 import { Spinner } from "../component/Spinner/Spinner";
 import { useContentStrings } from "../hooks/useContentStrings";
 import { isCustomCocktailProdContainerId } from "../utils/ItemUtils";
+import { shopperAttributesAtomFamily } from "../checkout/shopperAttributesAtom";
+import { getAutoshipDiscount, isAutoshipSelectedForItem, showAutoshipDiscountForItem } from "../utils/AutoshipUtils";
+
 interface IProduct {
   imageUrl: string;
   name: string;
@@ -53,6 +56,7 @@ interface IShippingItemProps {
   cartId: string;
   storeKey: string;
   isAddressSaved: boolean;
+  shopperId: string;
 }
 
 function createOptionMap(
@@ -90,6 +94,7 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
   cartId,
   storeKey,
   isAddressSaved,
+  shopperId,
 }) => {
   const [selectedQuantity, setSelectedQuantity] = useState(
     item.quantity.toString()
@@ -102,6 +107,7 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
   const [itemError, setItemError] = useState<string | null>(null);
   const [order, setOrder] = useAtom(orderAtom);
   const [paymentMethods, setPaymentMethods] = useAtom(paymentMethodsAtom);
+  const shopperAttributes = useAtomValue(shopperAttributesAtomFamily(shopperId));
   const { getString } = useContentStrings();
   useEffect(() => {
     setSelectedQuantity(item.quantity.toString());
@@ -362,13 +368,11 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
                 </div>
               )}
             </section>
-            {(item.autoshipFreq > 0 || item.autoShipId) &&
-              (portalData?.autoShipDiscount > 0 &&
-              isMaProduct &&
-              item.hasAutoShipDiscount ? (
+            {isAutoshipSelectedForItem(item) && (
+                showAutoshipDiscountForItem(shopperAttributes, portalData, item, isMaProduct) ? (
                 <div className="item-autoship">
                   <AutoshipIcon />
-                  {getString("subscribeAndSaveProgram")} {portalData.autoShipDiscount}%
+                  {getString("subscribeAndSaveProgram")} {getAutoshipDiscount(shopperAttributes, portalData)}%
                 </div>
               ) : (
                 <div className="item-autoship">

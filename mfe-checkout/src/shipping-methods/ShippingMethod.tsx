@@ -404,6 +404,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
                             isMaProduct={store?.store?.isMA === 1}
                             cartId={orders.id}
                             isAddressSaved={isAddressSaved}
+                            shopperId={shopperID}
                           />
                         </div>
                       ))}

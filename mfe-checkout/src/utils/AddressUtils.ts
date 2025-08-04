@@ -10,7 +10,12 @@ const DEFAULT_MA_ADDRESS: Address = {
 }
 
 export const getFilteredShippingAddresses = (addressList: Address[], countryCode: string): Address[] => {
-    return addressList?.filter((ad) => ad.hasAddress !== 0 && ad.isBill !== 1 && ad.isPrimary !== 1 && ad.isoalpha3Code === countryCode);
+    return addressList?.filter((ad) =>
+        ad.hasAddress !== 0 &&
+        ad.isoalpha3Code === countryCode &&
+        !(ad.isBill === 1 && ad.isShip !== 1) &&
+        !(ad.isPrimary === 1 && ad.isShip !== 1)
+    );
 };
 
 export const getShippingAddressFromAddressList = (addressList: Address[], countryCode: string): Address | undefined => {
@@ -38,3 +43,10 @@ export const isAddressDefaultMAAddress = (address: Address): boolean => {
         DEFAULT_MA_ADDRESS.zip === address.zip)
     );
 };
+
+export const setAddressAsShipInAddressList = (addressList: Address[], shipAddress: Address): Address[] => {
+    return addressList.map(address => ({
+        ...address,
+        isShip: address.id === shipAddress.id ? 1 : 0,
+    }));
+}
