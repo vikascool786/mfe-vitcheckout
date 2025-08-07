@@ -42,6 +42,8 @@ export interface IPaymentOptionProps {
   updateCvvError: (error: string) => void;
   updateOrderErrorMessage: (newMessage: string) => void;
   siteId: string;
+  pcid: string;
+  isGuest: boolean;
 }
 
 export const PaymentOption: React.FC<IPaymentOptionProps> = ({
@@ -57,6 +59,8 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   updateCvvError,
   updateOrderErrorMessage,
   siteId,
+  pcid,
+  isGuest,
 }) => {
   const [isCardEdit, setIsCardEdit] = useState<boolean>(false);
   const [order, setOrder] = useAtom(orderAtom);
@@ -211,7 +215,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
             ...paymentAddress,
             id: paymentAddress?.id as number,
           },
-        });
+        }, pcid);
 
         const orderResponse = await buildOrder(updatedOrder);
         setOrder({
@@ -463,6 +467,8 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
             setCVVFieldValue={setCVVFieldValue}
             isEditing={isCardEdit}
             siteId={siteId}
+            pcid={pcid}
+            isGuest={isGuest}
           />
         </>
       )}

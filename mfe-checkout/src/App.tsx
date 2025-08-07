@@ -39,12 +39,24 @@ const App: React.FC<AppProps> = () => {
 
         {/* for old custoemr  */}
         <CheckoutContainer
-          cartId="cart_6565841_W_USA_USA_ENG"
-          shopperId="ZpXYpYwzzXVYUzhkZhzYpYmzYxpUmjmejWpqzjqzz"
-          pcid="6565841"
+          cartId="cart_1316760835_W_USA_USA_ENG"
+          shopperId="mkYxXjppzhzmjzhxWzzpkYjzmYXZVzYWkeZjzwjhx"
+          pcid="1316760835"
           siteId="66"
-          sessionId="3055480047"
+          sessionId="3055317105"
+          portalId="TESTMA44.COM"
+          isGuest={false}
         />
+          {/* Guest shopper  */}
+          {/*<CheckoutContainer
+              cartId="cart_2651de27-2934-4856-8842-d210b170ebce_W_USA_USA_ENG"
+              shopperId=""
+              pcid=""
+              siteId="66"
+              sessionId="3055317105"
+              portalId="TESTMA44.COM"
+              isGuest={true}
+          />*/}
 
         {/* vift cashback account  */}
         {/* <CheckoutContainer

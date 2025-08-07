@@ -57,14 +57,14 @@ export const GET_API_ENDPOINT_BASE_URL = (
 export const GET_API_ENDPOINT_BASE_URL_FOR_TRANSLATIONS = (mode: APIMODE) => {
   switch (mode) {
     case "localhost":
-      return `https://devapi2.shop.com{{path}}?api_key=0cf27ca394e94667ad6729d427b700d4`;
+      return `https://devapi2.shop.com{{path}}?api_key=cf39b2e3855c4c95a23a007e254b6e08`;
     case "dev":
-      return `https://devapi2.shop.com{{path}}?api_key=0cf27ca394e94667ad6729d427b700d4`;
+      return `https://devapi2.shop.com{{path}}?api_key=cf39b2e3855c4c95a23a007e254b6e08`;
     case "staging":
-      return `https://stagingapi2.shop.com{{path}}?api_key=0cf27ca394e94667ad6729d427b700d4`;
+      return `https://stagingapi2.shop.com{{path}}?api_key=c6002c7143b548078242c682a79e8a55`;
     case "prod":
     default:
-      return `https://api2.shop.com{{path}}?api_key=0cf27ca394e94667ad6729d427b700d4`;
+      return `https://api2.shop.com{{path}}?api_key=f5a6d749fb6848648f5dc3454de8ac38`;
   }
 };
 export const GET_API_ENDPOINT_BASE_URL_ONLY = () => {

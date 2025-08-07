@@ -24,6 +24,7 @@ import { customerApiData } from "../checkout/customerAtom";
 interface IClick2PayProps {
   pcid: string;
   order?: Order;
+  isGuest: boolean;
 }
 
 const c2pCustomerData: Click2PayData = {
@@ -50,6 +51,7 @@ const c2pCustomerData: Click2PayData = {
 export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({
   pcid,
   order,
+  isGuest,
 }) => {
   const [errorMessage, setErrorMessage] = useState("");
   const [hasSavedCards, setHasSavedCards] = useState(false);
@@ -496,6 +498,7 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({
                       isEditingExistingCard={false}
                       isEditing={false}
                       isFromClick2Pay={true}
+                      isGuest={isGuest}
                     />
                   </div>
                   <div className="form-footer form-footer__dual-button">

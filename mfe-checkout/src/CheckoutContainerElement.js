@@ -20,6 +20,8 @@ class CheckoutContainerElement extends HTMLElement {
       pcid: this.getAttribute("pcid") || "",
       siteId: this.getAttribute("siteid") || "",
       sessionId: this.getAttribute("sessionid") || "",
+      portalId: this.getAttribute("portalid") || "",
+      isGuest: this.getAttribute("isguest") === "true" || false,
     };
 
     this.root = createRoot(this.mountPoint);

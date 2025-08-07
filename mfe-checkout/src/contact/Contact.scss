@@ -1,0 +1,28 @@
+.checkout-contact {
+  .form-header {
+    margin-bottom: 0;
+  }
+
+  &__link {
+    display: flex;
+    justify-content: right;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  &__checkbox {
+    .field-item-container {
+      flex-direction: row-reverse;
+      align-items: center;
+      justify-content: flex-end;
+    }
+    .input-wrapper {
+      width: auto;
+      .checkbox{
+        margin-bottom: 7px;
+      }
+    }
+  }
+
+}
+

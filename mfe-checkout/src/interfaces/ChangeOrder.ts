@@ -25,14 +25,37 @@ export interface Billing {
   state?: string;
   zip?: string;
   country?: string;
+  phone?: string;
 }
 
 export interface Shipping {
-  id: number;
+  id?: number;
+  first?: string;
+  last?: string;
+  address1?: string;
+  address2?: string;
+  address3?: string;
+  address4?: string;
+  address5?: string;
+  address6?: string;
+  address7?: string;
+  city?: string;
+  state?: string;
+  zip?: string;
+  country?: string;
+  isPoBox?: boolean;
+  phone?: string;
 }
 
 export interface PaymentMethod {
-  id: number;
+  id?: number;
+  number?: string;
+  typeID?: number;
+  cvv?: string;
+  token?: string;
+  accountName?: string;
+  expMonth?: number;
+  expYear?: number;
 }
 
 export interface Store {

@@ -22,10 +22,6 @@ import {
   OrderResponse,
   updateProductQty,
 } from "../api/service/Order";
-import {
-  GET_API_ENDPOINT_BASE_URL_ONLY,
-  GET_API_KEY,
-} from "../utils/urlResolver";
 import { IOrderNotification } from "../utils/types/types";
 import { CustomDropdownField } from "../component/Form/Field/CustomDropdownField";
 import { getOptionStringValue } from "../utils/helpers/GetOptionStringValue";
@@ -37,6 +33,9 @@ import { isCustomCocktailProdContainerId } from "../utils/ItemUtils";
 import { shopperAttributesAtomFamily } from "../checkout/shopperAttributesAtom";
 import { getAutoshipDiscount, isAutoshipSelectedForItem, showAutoshipDiscountForItem } from "../utils/AutoshipUtils";
 
+import { isCartOrder, mapCartToOrder } from "../utils/OrderUtils";
+import { getShoppingCart } from "../api/ajaxaction/ShoppingCart";
+import { ShoppingCart } from "../interfaces/ShoppingCart";
 interface IProduct {
   imageUrl: string;
   name: string;
@@ -57,6 +56,9 @@ interface IShippingItemProps {
   storeKey: string;
   isAddressSaved: boolean;
   shopperId: string;
+  pcid: string;
+  cartData: ShoppingCart,
+  setCartData: any;
 }
 
 function createOptionMap(
@@ -95,6 +97,9 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
   storeKey,
   isAddressSaved,
   shopperId,
+  pcid,
+  cartData,
+  setCartData,
 }) => {
   const [selectedQuantity, setSelectedQuantity] = useState(
     item.quantity.toString()
@@ -213,64 +218,73 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
         setPendingQuantity(value);
 
         if (order) {
-          const updatedOrder = await buildOrder(
-            generateChangeStoreResponse(order)
-          );
-          setItemError(null);
-          const orderData = updatedOrder.response.success.data;
-          setOrder(updatedOrder.response.success.data);
-
-          // add paypal back if it exists in the payment methods
-          const shouldShowPaypal =
-              orderData?.paymentMethods.some(
-                  (method) =>
-                      isPaypalPayment(method.typeID)
-              ) &&
-              paymentMethods.some(
-                  (method) =>
-                      isPaypalPayment(method.paymentMethod.typeID)
-              );
-
-          if (shouldShowPaypal) {
-            // add paypal back if it exists in the payment methods on the 2nd last position if sezzle is present
-            const sezzleIndex = orderData?.paymentMethods.findIndex(
-              (method) => method.type.toLowerCase() === "sezzle"
-            );
-
-            const isPaypalRecurring = orderData?.paymentMethods.some(
-                (method) =>
-                    method.typeID === PAYPAL_RECURRING.typeId
-            );
-
-            const paypalPayment =
-              initialPaymentMethods.find(
-                (method) => method.paymentMethod.typeID === (isPaypalRecurring ? PAYPAL_RECURRING.typeId : PAYPAL.typeId)
-              ) || null;
-
-            if (sezzleIndex > -1) {
-              // Clone the array to avoid mutating state directly
-              const updatedPaymentMethods = [...paymentMethods];
-
-              // Ensure we don't insert at a negative index
-              const insertIndex = Math.max(sezzleIndex - 1, 0);
-
-              // Check if the PayPal account is already in the updatedPaymentMethods array
-              const isPaypalAlreadyAdded = updatedPaymentMethods.some(
-                (method) => isPaypalPayment(method.paymentMethod.typeID)
-              );
-
-              if (!isPaypalAlreadyAdded && paypalPayment) {
-                updatedPaymentMethods.splice(insertIndex, 0, paypalPayment);
+          if(isCartOrder(order)){
+            //get updated cart
+            getShoppingCart().then(response => {
+                setOrder(mapCartToOrder(response));
+                setCartData(response);
               }
+            )
+          } else{
+            const updatedOrder = await buildOrder(
+                generateChangeStoreResponse(order, pcid)
+            );
+            setItemError(null);
+            const orderData = updatedOrder.response.success.data;
+            setOrder(updatedOrder.response.success.data);
 
-              setPaymentMethods(updatedPaymentMethods);
-            } else {
-              const isPaypalAlreadyAdded = paymentMethods.some(
-                (method) => isPaypalPayment(method.paymentMethod.typeID)
+            // add paypal back if it exists in the payment methods
+            const shouldShowPaypal =
+                orderData?.paymentMethods.some(
+                    (method) =>
+                        isPaypalPayment(method.typeID)
+                ) &&
+                paymentMethods.some(
+                    (method) =>
+                        isPaypalPayment(method.paymentMethod.typeID)
+                );
+
+            if (shouldShowPaypal) {
+              // add paypal back if it exists in the payment methods on the 2nd last position if sezzle is present
+              const sezzleIndex = orderData?.paymentMethods.findIndex(
+                  (method) => method.type.toLowerCase() === "sezzle"
               );
-              if (isPaypalAlreadyAdded) return;
-              if (paypalPayment) {
-                setPaymentMethods([...paymentMethods, paypalPayment]);
+
+              const isPaypalRecurring = orderData?.paymentMethods.some(
+                  (method) =>
+                      method.typeID === PAYPAL_RECURRING.typeId
+              );
+
+              const paypalPayment =
+                  initialPaymentMethods.find(
+                      (method) => method.paymentMethod.typeID === (isPaypalRecurring ? PAYPAL_RECURRING.typeId : PAYPAL.typeId)
+                  ) || null;
+
+              if (sezzleIndex > -1) {
+                // Clone the array to avoid mutating state directly
+                const updatedPaymentMethods = [...paymentMethods];
+
+                // Ensure we don't insert at a negative index
+                const insertIndex = Math.max(sezzleIndex - 1, 0);
+
+                // Check if the PayPal account is already in the updatedPaymentMethods array
+                const isPaypalAlreadyAdded = updatedPaymentMethods.some(
+                    (method) => isPaypalPayment(method.paymentMethod.typeID)
+                );
+
+                if (!isPaypalAlreadyAdded && paypalPayment) {
+                  updatedPaymentMethods.splice(insertIndex, 0, paypalPayment);
+                }
+
+                setPaymentMethods(updatedPaymentMethods);
+              } else {
+                const isPaypalAlreadyAdded = paymentMethods.some(
+                    (method) => isPaypalPayment(method.paymentMethod.typeID)
+                );
+                if (isPaypalAlreadyAdded) return;
+                if (paypalPayment) {
+                  setPaymentMethods([...paymentMethods, paypalPayment]);
+                }
               }
             }
           }

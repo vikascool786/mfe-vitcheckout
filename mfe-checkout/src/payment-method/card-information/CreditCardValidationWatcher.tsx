@@ -8,9 +8,10 @@ interface ICreditCardValidationWatcher {
     isShipSameAsBill: boolean;
     shipAddress: any;
     saveForLater: boolean;
+    country: string;
 }
 
-export const CreditCardValidationWatcher: React.FC<ICreditCardValidationWatcher> = ({ isValid, values, isShipSameAsBill, shipAddress, saveForLater }) => {
+export const CreditCardValidationWatcher: React.FC<ICreditCardValidationWatcher> = ({ isValid, values, isShipSameAsBill, shipAddress, saveForLater, country }) => {
 
     const { setCreditCardFormData } = useCreditCardFormContext();
 
@@ -33,6 +34,7 @@ export const CreditCardValidationWatcher: React.FC<ICreditCardValidationWatcher>
                         state: values.state,
                         zip: values.zip,
                         phone: values.phone,
+                        country: country,
                     }
                     : (shipAddress as Address);
 
@@ -51,6 +53,7 @@ export const CreditCardValidationWatcher: React.FC<ICreditCardValidationWatcher>
                     ccFormData.state = address?.state;
                     ccFormData.zip = address?.zip;
                     ccFormData.phone = address?.phone;
+                    ccFormData.country = country;
                 }
 
                 setCreditCardFormData(ccFormData);

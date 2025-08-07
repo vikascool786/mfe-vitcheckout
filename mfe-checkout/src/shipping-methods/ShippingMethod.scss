@@ -136,4 +136,10 @@
     align-items: center;
     justify-content: space-between;
   }
+
+  &__message {
+    border: none;
+    box-shadow: none;
+    background-color: #EAEAEA;
+  }
 }

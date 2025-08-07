@@ -20,24 +20,24 @@ export interface ITotal {
   cashBack: number;
   bv: number;
   ibv: number;
-  cashBackApplied: number;
-  walletApplied: number;
+  cashBackApplied?: number;
+  walletApplied?: number;
   price: number;
-  shipping: number;
-  tax: number;
+  shipping?: number;
+  tax?: number;
   priceStr: string;
-  gcBalance: string;
+  gcBalance?: string;
   cashBackStr: string;
-  couponCode: string;
-  couponTerms: any[];
-  taxStr: string;
-  shippingStr: string;
-  cashBackAppliedStr: string;
-  walletAppliedStr: string;
-  couponsStr: string;
+  couponCode?: string;
+  couponTerms?: any[];
+  taxStr?: string;
+  shippingStr?: string;
+  cashBackAppliedStr?: string;
+  walletAppliedStr?: string;
+  couponsStr?: string;
   gcApplied?: number;
   gcAppliedStr?: string;
-  extraCashBack: number;
+  extraCashBack?: number;
   gcDispAppliedStr?: string[]
   gcBalanceStr?: string[];
   priceActualStr: string;
@@ -120,13 +120,18 @@ export interface IStore {
 }
 
 export interface IPaymentMethod {
-  id: number;
-  typeID: number;
-  type: string;
-  categoryID: number;
-  visible: boolean;
+  id?: number;
+  typeID?: number;
+  type?: string;
+  categoryID?: number;
+  visible?: boolean;
   supportedForAutoship?: boolean;
-  imageTag: string;
+  imageTag?: string;
+  number?: string;
+  token?: string;
+  accountName?: string;
+  expMonth?: number;
+  expYear?: number;
 }
 
 export interface IShopperChangeCart {

@@ -1,4 +1,4 @@
-import { ChangeOrder } from "../../interfaces/ChangeOrder";
+import { ChangeOrder, Shipping } from "../../interfaces/ChangeOrder";
 import { Order } from "../../interfaces/Order";
 import { ApiResponse } from "../../interfaces/ShippingMethod";
 import {
@@ -6,7 +6,7 @@ import {
   GET_API_ENDPOINT_BASE_URL_ONLY,
 } from "../../utils/urlResolver";
 import axiosInstance from "../axios";
-import axios, { Axios, AxiosError } from "axios";
+import { getInitialBuildOrderData } from "../../checkout/CheckoutContainer";
 
 export interface OrderResponse {
   response: Response;
@@ -83,6 +83,39 @@ export const buildOrder = async (
   }
 };
 
+export const buildInitialGuestOrder = async (
+    cartId: string,
+    portalId: string,
+    pcid: string,
+    shipAddress: Shipping | undefined | null,
+): Promise<OrderResponse> => {
+  let buildOrderPayload = getInitialBuildOrderData(
+      cartId,
+      portalId,
+      pcid
+  );
+  if(shipAddress){
+    buildOrderPayload.shipping = {
+      first: shipAddress.first,
+      last: shipAddress.last,
+      address1: shipAddress.address1,
+      address2: shipAddress.address2,
+      address3: shipAddress.address3,
+      address4: shipAddress.address4,
+      address5: shipAddress.address5,
+      address6: shipAddress.address6,
+      address7: shipAddress.address7,
+      city: shipAddress.city,
+      state: shipAddress.state,
+      zip: shipAddress.zip,
+      phone: shipAddress.phone,
+      isPoBox: shipAddress.isPoBox,
+      country: shipAddress.country
+    }
+  }
+  return buildOrder(buildOrderPayload);
+};
+
 export const changeOrder = async (
   changeStorePayload: ChangeOrder,
   cartId: string
@@ -107,6 +140,15 @@ export const commitOrder = async (cartId: string): Promise<any> => {
     return response;
   } catch (error) {
     return error;
+  }
+};
+
+export const deleteUniversalOrder = async (cartId: string): Promise<any> => {
+  try {
+    await axiosInstance(shopperOrderAPIEndpoint(cartId)).delete("");
+  } catch (error) {
+    console.error(`Error deleting universal order`, error);
+    throw error;
   }
 };
 

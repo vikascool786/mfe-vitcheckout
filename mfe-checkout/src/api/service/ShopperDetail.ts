@@ -17,6 +17,9 @@ export const fetchShopperDetail = async (
 export const fetchShopperAttributes = async (
     shopperId: string
 ): Promise<any> => {
+    if (!shopperId) {
+        return [];
+    }
     try {
         const shopperAttributesEndpoint = `${GET_API_ENDPOINT_BASE_URL_ONLY()}/shopper-attributes/v1/Attribute/${shopperId}?api_key=${GET_API_KEY()}`;
         const customerResponse = await axiosInstance(shopperAttributesEndpoint).get("");

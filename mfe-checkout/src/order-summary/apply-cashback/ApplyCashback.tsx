@@ -15,11 +15,13 @@ import { useContentStrings } from "../../hooks/useContentStrings";
 interface IApplyCashbackContainer {
   cashbackData: EWallet;
   siteId: string;
+  pcid: string;
 }
 
 export const ApplyCashback: React.FC<IApplyCashbackContainer> = ({
   cashbackData,
   siteId,
+  pcid
 }) => {
   const [order, setOrder] = useAtom(orderAtom);
   const [loading, setLoading] = useAtom(loadingAtom);
@@ -70,7 +72,7 @@ export const ApplyCashback: React.FC<IApplyCashbackContainer> = ({
           ...order.userOptions,
           applyEWallet: isApplyingCashback,
         },
-      }),
+      }, pcid),
       order.id
     ).then((response) => {
       if (response) {

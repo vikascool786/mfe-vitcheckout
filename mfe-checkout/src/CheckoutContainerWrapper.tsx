@@ -10,6 +10,8 @@ const CheckoutContainerWrapper = (appConfig: {
   siteId: string;
   pcid: string;
   sessionId: string;
+  portalId: string;
+  isGuest: boolean;
 }) => {
   return (
     <div className="checkout-container-wrapper">
@@ -20,6 +22,8 @@ const CheckoutContainerWrapper = (appConfig: {
           siteId={appConfig.siteId}
           pcid={appConfig.pcid}
           sessionId={appConfig.sessionId}
+          portalId={appConfig.portalId}
+          isGuest={appConfig.isGuest}
         />
       </Provider>
     </div>

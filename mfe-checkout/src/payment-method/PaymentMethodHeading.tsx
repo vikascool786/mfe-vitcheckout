@@ -8,7 +8,7 @@ const PaymentMethodHeading: React.FC = () => {
   const { getString } = useContentStrings();
   return (
     <div className="pm-main-container">
-      <div className="pm-container" id="pm-main">
+      <div className="pm-container pm-container--disabled" id="pm-main">
         <div className="pm-title-container">
           <FormHeading title={getString('paymentMethod') as string} />
         </div>

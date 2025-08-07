@@ -25,7 +25,7 @@ import {
   paymentMethodsAtom,
 } from "../store";
 import {
-  getOrderNotifications,
+  getOrderNotifications, isCartOrder, isUniversalOrderBuilt,
   orderHasAutoshipItems, orderHasDefaultMAShipAddress,
 } from "../utils/OrderUtils";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
@@ -50,20 +50,26 @@ import {CreditCardFormProvider} from "../component/Form/CreditCardFormContext";
 import {siteApiData} from "./siteAtom";
 import { useContentStrings } from "../hooks/useContentStrings";
 import { isSuccessfulPaypalCallback } from "../utils/helpers/PaypalHelper";
-import ShippingMethodHeading from "../shipping-methods/ShippingMethodHeading";
 import { getUserAgent } from "../utils/helpers/UserSessionDataHelper";
 import { TotalAmount } from "./TotalAmount";
 import { initiateCheckoutEventListeners } from "./CheckoutEventListeners";
+import { Contact } from "../contact/Contact";
+import { CartOrderSummary } from "../order-summary/CartOrderSummary";
+import { DEFAULT_CART_DATA, ShoppingCart } from "../interfaces/ShoppingCart";
+import { getShoppingCart } from "../api/ajaxaction/ShoppingCart";
+import { customerApiData } from "./customerAtom";
+import { setGuestEmailForSession } from "../api/ajaxaction/FamosSession";
 
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
 
-const getInitialBuildOrderData = (
+export const getInitialBuildOrderData = (
   cartId: string,
-  portalId: string
+  portalId: string,
+  pcid: string
 ): ChangeOrder => ({
   id: cartId,
-  customer_id: "",
+  customer_id: pcid || "",
   ufo_id: "",
   shipping_country: "USA",
   product_country: "USA",
@@ -89,6 +95,8 @@ interface ICheckoutContainer {
   pcid: string;
   siteId: string;
   sessionId: string;
+  portalId: string;
+  isGuest: boolean;
 }
 
 const CheckoutContainer: React.FC<ICheckoutContainer> = ({
@@ -97,6 +105,8 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   pcid,
   siteId,
   sessionId,
+  portalId,
+  isGuest
 }) => {
   const [orderData, setOrderData] = useAtom(orderAtom);
   const { getContent,getString } = useContentStrings();
@@ -109,11 +119,13 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     orderNotificationsAtom
   );
   const apiMode = GET_API_MODE();
+  const [customerId, setCustomerId] = useState(pcid);
 
   const [isAutoShipChecked, setIsAutoShipChecked] = useState<boolean>(false);
   const addressList = useAtomValue(addressAtom);
   const paymentMethodOptions = useAtomValue(paymentMethodsAtom);
-  const [portalData] = useAtom(portalApiData(shopperId));
+  const portalKey = useMemo(() => JSON.stringify({ shopperId, portalId }), [shopperId, portalId]);
+  const [portalData] = useAtom(portalApiData(portalKey));
   const memorizedSiteId = useMemo(() => siteId, [siteId]);
   const [siteData] = useAtom(siteApiData(memorizedSiteId));
   const [hasPhoneError, setHasPhoneError] = useState<boolean>(false);
@@ -131,6 +143,13 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
 
   const [isPlacingOrderWithThirdParty, setIsPlacingOrderWithThirdParty] = useState<boolean>(false);
 
+  const customerDataAtom = useMemo(() => customerApiData(customerId), [customerId]);
+  const [customerData] = useAtom(customerDataAtom);
+  const [showSkeleton, setShowSkeleton] = useState<boolean>(true);
+  const [cartData, setCartData] = useState<ShoppingCart>(DEFAULT_CART_DATA);
+  const [useCartSummary, setUseCartSummary] = useState<boolean>(isGuest);
+  const [shopperEmail, setShopperEmail] = useState<string>("");
+
   const addressUrl = `${apiDomain}/shopper-addressbooks/v1/${shopperId}/AddressBook?siteId=${siteId}&api_key=${apiKey}`;
   const paymentUrl = `${apiDomain}/shopper-wallets/v1/Shopper/${shopperId}/Wallet?api_key=${apiKey}`;
   const checkoutUrl = `${apiDomain}/checkout-universal/v1/checkouts?api_key=${apiKey}`;
@@ -138,6 +157,9 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
 
   useEffect(() => {
     if(isSezzleSelectedPayment(location.search)){
+      if(isGuest && !customerId) {
+        return;
+      }
       const isSuccessfulSezzleCallback = isSezzleSuccessful(location.search);
       setIsPlacingOrderWithThirdParty(isSuccessfulSezzleCallback);
       setIsLoading(isSuccessfulSezzleCallback);
@@ -148,13 +170,15 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
           generateChangeStoreResponse,
           setIsLoading,
           confirmOrder,
-          cartId
+          cartId,
+          customerId,
+          isGuest,
       );
     } else if(isSuccessfulPaypalCallback(location.search)){
       setIsPlacingOrderWithThirdParty(true);
       setIsLoading(true);
     }
-  }, [location.search]);
+  }, [location.search, customerId]);
 
   useEffect(() => {
     getContent(siteData);
@@ -166,13 +190,13 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     data: addresses = [],
     isLoading: loadingAddresses,
     error: addressError,
-  } = useApi<Address[] | null>(addressUrl, "GET");
+  } = useApi<Address[] | null>(addressUrl, "GET", null, undefined, !isGuest);
 
   const {
     data: paymentMethods = [],
     isLoading: loadingPaymentMethods,
     error: paymentError,
-  } = useApi<IPaymentMethod[] | null>(paymentUrl, "GET");
+  } = useApi<IPaymentMethod[] | null>(paymentUrl, "GET", null, undefined, !isGuest);
 
   const {
     data: order,
@@ -180,7 +204,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     postData,
     error: orderError,
     isComplete: isFetchOrderComplete,
-  } = useApi<OrderResponse>(fetchOrderUrl, "GET");
+  } = useApi<OrderResponse>(fetchOrderUrl, "GET", null, undefined, true);
 
   const [width, setWidth] = useState<number>(window.innerWidth);
 
@@ -205,7 +229,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
         ...orderData,
         billingAddress: { ...orderData.billingAddress, id: billingId },
         shippingAddress: { ...orderData.shippingAddress, id: shippingId },
-      })
+      }, customerId)
     );
     setOrderData(orderResponse?.response.success?.data || null);
     setOrderNotifications(
@@ -258,34 +282,45 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     processedOrders.push(cartId);
     setProcessedOrders(processedOrders);
 
-    commitOrder(cartId)
-      .then((response: any) => {
-        const isSuccessful = response?.data?.response?.success;
-        if (isSuccessful) {
-          const orderId = response?.data?.response?.success?.data.orderId;
-
-          // Remove cartId from tracking since order is successful
-          processedOrders = getProcessedOrders().filter((id) => id !== cartId);
-          setProcessedOrders(processedOrders);
-
-          if (orderHasNewAutoship()) {
-            createAutoshipUrl(shopperId, orderId)
-              .then(() => redirectToOrderConfirmation(orderId))
-              .catch((error) => {
-                console.error(`Error creating autoship from order: ${error}`);
-                redirectToOrderConfirmation(orderId);
-              });
-          } else {
-            redirectToOrderConfirmation(orderId);
-          }
-        } else {
-          handleOrderError(response);
-        }
+    if(isGuest){
+      const orderEmail = shopperEmail.length < 1 && orderData ? orderData.email : shopperEmail;
+      setGuestEmailForSession(orderEmail).finally(() => {
+            commitFinalOrder(processedOrders);
       })
-      .catch((error) => {
-        handleOrderError(error);
-      });
+    } else{
+      commitFinalOrder(processedOrders);
+    }
   };
+
+  const commitFinalOrder = (processedOrders: string[]) => {
+    commitOrder(cartId)
+        .then((response: any) => {
+          const isSuccessful = response?.data?.response?.success;
+          if (isSuccessful) {
+            const orderId = response?.data?.response?.success?.data.orderId;
+
+            // Remove cartId from tracking since order is successful
+            processedOrders = getProcessedOrders().filter((id) => id !== cartId);
+            setProcessedOrders(processedOrders);
+
+            if (orderHasNewAutoship()) {
+              createAutoshipUrl(shopperId, orderId)
+                  .then(() => redirectToOrderConfirmation(orderId))
+                  .catch((error) => {
+                    console.error(`Error creating autoship from order: ${error}`);
+                    redirectToOrderConfirmation(orderId);
+                  });
+            } else {
+              redirectToOrderConfirmation(orderId);
+            }
+          } else {
+            handleOrderError(response);
+          }
+        })
+        .catch((error) => {
+          handleOrderError(error);
+        });
+  }
 
   const handleOrderError = (error: any) => {
     let processedOrders = getProcessedOrders().filter((id) => id !== cartId);
@@ -303,7 +338,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   };
 
   const redirectToOrderConfirmation = (orderId: string | number): void => {
-    const url = `/nbts/orderconfirmation-${orderId}`;
+    const orderConfirmationUrl = isGuest ? `/nbts/guestcheckout/orderconfirmation?guestOrderId=${orderId}` : `/nbts/orderconfirmation-${orderId}`;
 
     const handleNavigation = () => {
       document.removeEventListener("visibilitychange", handleNavigation);
@@ -315,7 +350,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
 
     document.addEventListener("visibilitychange", handleNavigation);
 
-    window.location.href = url;
+    window.location.href = orderConfirmationUrl;
 
     // setTimeout(() => {
     //   setIsLoading(false);
@@ -325,9 +360,13 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   useEffect(() => {
     if (isFetchOrderComplete && !loadingAddresses && !loadingPaymentMethods) {
       if (!order) {
+        if(isGuest && customerId.length < 1){ //do not build the order until we have a pcid/customerId
+          return;
+        }
         let buildOrderPayload = getInitialBuildOrderData(
           cartId,
-          portalData?.portalId
+          portalData?.portalId,
+          customerId
         );
         if (defaultAddress?.id) {
           buildOrderPayload.shipping = buildOrderPayload.shipping ?? { id: 0 };
@@ -357,6 +396,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
           setOrderNotifications(
             getOrderNotifications(response?.response.success)
           );
+          handleSetSkeleton((loadingAddresses || loadingPaymentMethods || loadingOrder), response?.response.success?.data);
         });
       } else {
         if (!order.response.success.data) return;
@@ -371,9 +411,14 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
 
         setOrderData(orderResponse);
         setOrderNotifications(getOrderNotifications(order.response.success));
+        handleSetSkeleton((loadingAddresses || loadingPaymentMethods || loadingOrder), orderResponse);
       }
     }
   }, [isFetchOrderComplete, loadingAddresses, loadingPaymentMethods, defaultAddress, defaultPaymentMethod]);
+
+  function handleSetSkeleton(isLoading: boolean, orderResponse: Order) {
+    setShowSkeleton(isLoading || !orderResponse);
+  }
 
   useEffect(() => {
     const currentOrderData = order ? order.response.success.data : orderData;
@@ -390,11 +435,29 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     }
   }, [defaultAddress, defaultPaymentMethod]);
 
+  useEffect(() => {
+    if(isGuest){
+      setShowSkeleton(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if(orderData){
+      setUseCartSummary(isCartOrder(orderData));
+    } else if (isGuest) { //only need the cartData for rendering guest view on initial load of checkout
+      getShoppingCart().then(response => {
+            setCartData(response);
+          }
+      )
+    }
+
+  }, [orderData]);
+
   const handleUpdateOrderErrorMessage = (message: string) => {
     setOrderErrorMessage(message);
   };
 
-  if (loadingAddresses || loadingPaymentMethods || loadingOrder || !orderData)
+  if (showSkeleton)
     return <Skeleton />;
 
   if (addressError || paymentError) return <div>{getString("failedToLoadData")}</div>;
@@ -402,7 +465,8 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   return (
     <div>
       {(isLoading || isPlacingOrderWithThirdParty) && <Spinner />}
-      {orderData && (
+
+      {(orderData || isGuest) && (
         <>
           <div className="qa-checkout container">
             <CreditCardFormProvider>
@@ -412,43 +476,56 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                   notificationMessages={orderNotifications || []}
                 />
                 <TotalAmount />
+                {isGuest && (
+                    <Contact portalId={portalId} cartId={cartId} setCustomerId={setCustomerId}
+                             setOrderData={setOrderData} setUseCartSummary={setUseCartSummary}
+                             customerData={customerData} setShopperEmail={setShopperEmail} addressList={addressList}
+                             order={orderData}/>
+                )}
                 <Checkout
                   shopperId={shopperId}
                   siteId={siteId}
                   addresses={addresses || []}
-                  pcid={pcid}
+                  pcid={customerId}
+                  isGuest={isGuest}
+                  customerData={customerData}
+                  isUniversalOrderBuilt={isUniversalOrderBuilt(orderData)}
                 />
 
-              {isAddressSaved ? (
                 <ShippingMethod
                   shopperID={shopperId}
                   isAddressSaved={isAddressSaved}
-                />) : (
-                  <ShippingMethodHeading />
-              )}
+                  portalId={portalId}
+                  pcid={customerId}
+                  isGuest={isGuest}
+                  cartData={cartData}
+                  setCartData={setCartData}
+                />
 
-              {isAddressSaved ? (
+              {(isAddressSaved && customerId.length > 0) ? (
                   (orderHasAutoshipItems(orderData) ||
                     orderData.totals.price > 0) && (
                     <PaymentMethod
                       cartId={cartId}
                       shopperId={shopperId}
                       siteId={siteId}
-                      pcid={pcid}
+                      pcid={customerId}
                       isVisible={orderHasAutoshipItems(orderData) ||
-                        orderData.totals.price > 0}
+                          orderData.totals.price > 0}
                       payments={paymentMethods}
                       updatePaymentTypeId={setPaymentTypeId}
                       updateOrderErrorMessage={handleUpdateOrderErrorMessage}
+                      portalId={portalId}
+                      isGuest={isGuest}
                     />
                   )
                 ) : (
                   <PaymentMethodHeading />
                 )}
-                {isAddressSaved && 
+                {(isAddressSaved && customerId.length > 0) &&
                  <TextUpdates 
-                    pcid={pcid} 
-                    siteId={siteId} 
+                    pcid={customerId}
+                    siteId={siteId}
                     hasPhoneError={hasPhoneError}
                     setHasPhoneError={setHasPhoneError}
                     mobileRequiredMessage={mobileRequiredMessage}
@@ -463,16 +540,22 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                   apiMode === "localhost" ? "top-1" : "top-475"
                 }`}
               >
-                <OrderSummary
-                  pcid={pcid}
-                  shopperId={shopperId}
-                  cartId={cartId}
-                  siteId={siteId}
-                  isAddressSaved={isAddressSaved}
-                />
+                { useCartSummary ? (
+                    <CartOrderSummary cartData={cartData}/>
+                ) : (
+                    <OrderSummary
+                        pcid={customerId}
+                        shopperId={shopperId}
+                        cartId={cartId}
+                        siteId={siteId}
+                        isAddressSaved={isAddressSaved}
+                        portalId={portalId}
+                        isGuest={isGuest}
+                    />
+                )}
 
                 <div className="place-order">
-                  {isAddressSaved && paymentMethodOptions && (
+                  {(isAddressSaved && customerId.length > 0 && paymentMethodOptions) && (
                     <PlaceOrder
                       confirmOrder={confirmOrder}
                       isLoading={isLoading}
@@ -496,6 +579,9 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                         defaultAddress?.id ??
                         0
                       }
+                      pcid={customerId}
+                      isGuest={isGuest}
+                      cartId={cartId}
                     />
                   )}
                 </div>
@@ -504,7 +590,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
             </CreditCardFormProvider>
 
             <div className="place-order">
-              <Feedback siteId={siteId} pcId={pcid} sessionId={sessionId} />
+              <Feedback siteId={siteId} pcId={customerId} sessionId={sessionId} />
             </div>
             <HeadHelmet />
             <SessionTimeout />

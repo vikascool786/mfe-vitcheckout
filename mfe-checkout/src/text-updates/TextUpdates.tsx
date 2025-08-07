@@ -304,7 +304,7 @@ export const TextUpdates = React.memo(
               smsPhone: phone,
               smsMessageType: phone.length ? "order-shipped" : "",
             },
-          })
+          }, pcid)
         );
         if (!response.response.errors) {
           setOrder(response.response.success.data);

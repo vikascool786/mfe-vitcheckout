@@ -67,9 +67,9 @@ export interface StoreDetail {
   catalogId: number;
   catalogName: string;
   isMA: number;
-  marketFacilitator: number;
-  vendorShipTax: number;
-  vendorShipTaxPct: number;
+  marketFacilitator?: number;
+  vendorShipTax?: number;
+  vendorShipTaxPct?: number;
 }
 
 export interface Store {

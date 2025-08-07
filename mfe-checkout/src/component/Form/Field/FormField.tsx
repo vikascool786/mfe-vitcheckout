@@ -1,6 +1,11 @@
 import React, { ReactNode } from "react";
 import "./FormField.scss";
 
+type IconProps = {
+  url: string;
+  alt: string;
+};
+
 interface IFormFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string | React.ReactNode;
   renderCheckBox?: ReactNode;
@@ -14,8 +19,13 @@ interface IFormFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   qaTag?: string;
   disablePasswordManager?: boolean;
   formName?: string;
+  icon?: IconProps;
 }
 const sanitizeInput = (value: string, fieldName: string) => {
+  const DO_NOT_SANITIZE_FIELD_NAMES: string[] = ["email"];
+  if(DO_NOT_SANITIZE_FIELD_NAMES.includes(fieldName)){
+    return value;
+  }
   // Allow hyphens only for the "phone" field
   if (fieldName === "phone") {
     return value.replace(/[^0-9-]/g, ""); // only digits and hyphens
@@ -34,6 +44,7 @@ export const FormField: React.FC<IFormFieldProps> = ({
   maxLength,
   qaTag = "",
   formName,
+  icon,
   className,
   type,
   ...props
@@ -52,37 +63,38 @@ export const FormField: React.FC<IFormFieldProps> = ({
     .join(" ");
 
   return (
-    <div className="field-item-container">
-      {label && (
-        <label htmlFor={formName} className={required ? "required-field" : ""}>
-          {label}
-        </label>
-      )}
-      <div className="input-wrapper">
-        <input
-          className={baseClasses}
-          type={type}
-          ref={(el: HTMLInputElement | null) =>
-            el && errorRefs && errorRefs.current
-              ? (errorRefs.current[name!] = el)
-              : null
-          }
-          {...props}
-          name={name}
-          maxLength={maxLength}
-          onChange={(e) => {
-            const sanitizedValue = sanitizeInput(e.target.value, name!); // pass field name
-            e.target.value = sanitizedValue;
-            props.onChange?.(e);
-          }}
-        />
-        {errorMessage && (
-          <span className="material-symbols-outlined error-icon">error</span>
+      <div className="field-item-container">
+        {label && (
+            <label htmlFor={formName} className={required ? "required-field" : ""}>
+              {label}
+            </label>
         )}
+        <div className="input-wrapper">
+          <input
+              className={baseClasses}
+              type={type}
+              ref={(el: HTMLInputElement | null) =>
+                  el && errorRefs && errorRefs.current
+                      ? (errorRefs.current[name!] = el)
+                      : null
+              }
+              {...props}
+              name={name}
+              maxLength={maxLength}
+              onChange={(e) => {
+                const sanitizedValue = sanitizeInput(e.target.value, name!); // pass field name
+                e.target.value = sanitizedValue;
+                props.onChange?.(e);
+              }}
+          />
+          {icon && <span className={errorMessage ? "input-icon input-icon--error" : "input-icon"}><img src={icon.url} alt={icon.alt} /></span>}
+          {errorMessage && (
+              <span className="material-symbols-outlined error-icon">error</span>
+          )}
+        </div>
+        {errorMessage && <div className="error-message">{errorMessage}</div>}
+        {extraLabel && <div className="field-extra-label">{extraLabel}</div>}
+        {renderCheckBox}
       </div>
-      {errorMessage && <div className="error-message">{errorMessage}</div>}
-      {extraLabel && <div className="field-extra-label">{extraLabel}</div>}
-      {renderCheckBox}
-    </div>
   );
 };

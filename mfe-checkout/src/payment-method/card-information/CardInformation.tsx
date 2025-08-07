@@ -49,6 +49,8 @@ interface ICardInformationProps {
   isEditing: boolean;
   isTempPaymentMethod?: boolean;
   siteId: string;
+  pcid: string;
+  isGuest: boolean;
 }
 
 export const CardInformation: React.FC<ICardInformationProps> = ({
@@ -61,7 +63,9 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   onCancel,
   isTempPaymentMethod,
   isEditing = false,
-  siteId
+  siteId,
+  pcid,
+  isGuest,
 }) => {
   const setLoading = useSetAtom(loadingAtom);
 const { getString } = useContentStrings();
@@ -179,7 +183,7 @@ const { getString } = useContentStrings();
             typeID,
             id: values.id,
           },
-        });
+        }, pcid);
         const orderResponse = await buildOrder(updatedOrder);
 
         if (orderResponse?.response?.errors?.message) {
@@ -419,7 +423,7 @@ const { getString } = useContentStrings();
           return (
             <form>
               <CreditCardValidationWatcher isValid={isValid} values={values} isShipSameAsBill={sameShippingAddress}
-                                           shipAddress={shippingAddress} saveForLater={saveCardToWallet}/>
+                                           shipAddress={shippingAddress} saveForLater={saveCardToWallet} country={siteData.siteCountryCode}/>
               <ScrollToError errorRefs={errorRefs} />
               <div className="card-information-container">
                 <CardInputs
@@ -434,6 +438,7 @@ const { getString } = useContentStrings();
                     saveCardToWallet={saveCardToWallet}
                     setSaveCardToWallet={setSaveCardToWallet}
                     errorRefs={errorRefs}
+                    isGuest={isGuest}
                 />
 
                 {addressList.length > 0 && paymentMethod.id < 1 && (

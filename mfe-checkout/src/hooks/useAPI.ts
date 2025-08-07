@@ -8,7 +8,8 @@ export const useApi = <T>(
   url: string,
   method: IAPIMethod,
   body?: any,
-  options?: AxiosRequestConfig
+  options?: AxiosRequestConfig,
+  enabled: boolean = true
 ) => {
   const [data, setData] = useState<T | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -53,6 +54,11 @@ export const useApi = <T>(
   };
 
   useEffect(() => {
+    if (!enabled) {
+      setIsComplete(true);
+      return;
+    }
+
     switch (method) {
       case "GET":
         fetchData();
@@ -65,7 +71,7 @@ export const useApi = <T>(
         fetchData();
         break;
     }
-  }, []);
+  }, [enabled]);
 
   return { data, isLoading, error, fetchData, postData, isComplete };
 };

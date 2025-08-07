@@ -16,6 +16,7 @@ interface IShippingOptions {
   storeKey: string;
   onSplitPickUpChange: (isSplitOrderPickUpSelected: boolean) => void;
   isSplitOrderPickUpSelected: boolean;
+  pcid: string;
 }
 
 export const ShippingOptions: React.FC<IShippingOptions> = ({
@@ -23,6 +24,7 @@ export const ShippingOptions: React.FC<IShippingOptions> = ({
   storeKey,
   onSplitPickUpChange,
   isSplitOrderPickUpSelected,
+  pcid,
 }) => {
   const { shippingSelections, shippingMethod } = store;
   const [order, setOrder] = useAtom(orderAtom); // Access both getter and setter for the atom
@@ -107,7 +109,7 @@ export const ShippingOptions: React.FC<IShippingOptions> = ({
         generateChangeStoreResponse({
           ...order, // Spread other stores
           stores: handleStoreShippingSelections(method, id),
-        }),
+        }, pcid),
         order.id
       )
         .then((data) => {

@@ -204,6 +204,9 @@
   padding-top: 10px;
   width: 100%;
   align-items: center;
+  &--padding-btm {
+    padding-bottom: 10px;
+  }
 }
 
 .order-input-container > .field-item-container {
@@ -689,4 +692,17 @@ div.order-charges-table {
   font-size: 16px;
   line-height: 18.75px;
   letter-spacing: 0%;
+}
+
+.order-summary-cart-container {
+  &__shipping {
+    align-items: center;
+    .order-summary-row {
+      align-items: center;
+    }
+    &--light {
+      font-weight: 300;
+      color: #666666;
+    }
+  }
 }

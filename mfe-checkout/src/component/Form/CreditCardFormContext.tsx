@@ -18,6 +18,7 @@ export interface CreditCardFormData {
     phone?: string
     saveForLater: boolean;
     addressId?: number;
+    country?: string;
 }
 
 interface FormContextType {

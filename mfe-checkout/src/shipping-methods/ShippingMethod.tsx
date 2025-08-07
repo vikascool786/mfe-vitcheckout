@@ -1,5 +1,5 @@
-import { useAtom, useSetAtom } from "jotai";
-import React, { useEffect, useState } from "react";
+import { useAtom } from "jotai";
+import React, {useEffect, useMemo, useState} from "react";
 import {
   buildOrder,
   OrderResponse,
@@ -30,14 +30,12 @@ import {
 } from "../utils/helpers/GetCatalog";
 import {
   getOrderConsolidateData,
-  getOrderNotifications,
+  getOrderNotifications, isCartOrder, mapCartToOrder,
 } from "../utils/OrderUtils";
 import { GET_SHOP_CART_URL } from "../utils/urlResolver";
 import "./ShippingMethod.scss";
-import { decodeHtmlEntities } from "../utils/helpers/DecodeHtml";
 import { Warning } from "../assets/svgs/Warning";
 import { setDataObjectProperty } from "../utils/helpers/SetDataObjectProperty";
-import { Spinner } from "../component/Spinner/Spinner";
 import { FreeShipMessage } from "./FreeShipMessage";
 import StoreHeading from "../component/StoreHeading";
 import { OrderStore } from "../interfaces/Order";
@@ -48,25 +46,35 @@ import {
   storeHasOOSItems
 } from "../utils/StoreUtils";
 import {isPaypalPayment, PAYPAL, PAYPAL_RECURRING} from "../payment-method/PaymentType";
-import { createPaymentMethod } from "../utils/helpers/GeneratePaymentMethod";
-import { Address } from "../interfaces/Address";
-import PaypalIcon from "../assets/images/PayPal.png";
-import SezzleIcon from "../assets/images/Sezzle.png";
 import { useContentStrings } from "../hooks/useContentStrings";
 import { getFreeShipMessagesForOrder } from "../utils/FreeShipMessageUtil";
+import { ShoppingCart } from "../interfaces/ShoppingCart";
+import { FormSubTitle } from "../component/Form/SubTitle/FormSubTitle";
+import { getShoppingCart } from "../api/ajaxaction/ShoppingCart";
 
 interface IShippingMethodProps {
   shopperID: string;
   isAddressSaved: boolean;
+  portalId: string;
+  pcid: string;
+  isGuest: boolean;
+  cartData: ShoppingCart;
+  setCartData: any;
 }
 
 const ShippingMethod: React.FC<IShippingMethodProps> = ({
   shopperID,
   isAddressSaved,
+  portalId,
+  pcid,
+  isGuest,
+  cartData,
+  setCartData,
 }) => {
   const [orders, setOrder] = useAtom(orderAtom);
   const [loading, setLoading] = useAtom(loadingAtom);
-  const [portalData] = useAtom(portalApiData(shopperID));
+  const portalKey = useMemo(() => JSON.stringify({ shopperId: shopperID, portalId }), [shopperID, portalId]);
+  const [portalData] = useAtom(portalApiData(portalKey));
   const [orderConsolidateData, setOrderConsolidateData] =
     useState<OrderConsolidationData>({
       showOrderConsolidate: false,
@@ -83,7 +91,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
 
   const { getString } = useContentStrings();
 
-  if (!orders) {
+  if (!orders && !isGuest) {
     return <p>{`${getString("loading")} ${getString("shippingMethods")?.toLocaleLowerCase()}...`}</p>;
   }
 
@@ -91,20 +99,23 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
     const prodContainerId: string[] = [];
     const mybuysCartItems: Array<{ sku: string; qty: string; price: string }> =
       [];
-    const [items] = Object.entries(orders?.stores).map(
-      ([key, store]) => store.items
-    );
+    if(orders){
+      const [items] = Object.entries(orders?.stores).map(
+          ([key, store]) => store.items
+      );
 
-    for (const [key, store] of Object.entries(orders?.stores)) {
-      store.items.forEach((item) => {
-        mybuysCartItems.push({
-          sku: `${item.prodId}-${item.catalogSku}`,
-          qty: item.quantity.toString(),
-          price: item.totals.price.toString(),
+      for (const [key, store] of Object.entries(orders?.stores)) {
+        store.items.forEach((item) => {
+          mybuysCartItems.push({
+            sku: `${item.prodId}-${item.catalogSku}`,
+            qty: item.quantity.toString(),
+            price: item.totals.price.toString(),
+          });
+          prodContainerId.push(item.prodContainerId);
         });
-        prodContainerId.push(item.prodContainerId);
-      });
+      }
     }
+
     setDataObjectProperty("prodContainerId", prodContainerId.join(","));
     setDataObjectProperty("mybuysCartItems", mybuysCartItems);
   };
@@ -127,106 +138,122 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
         return;
       }
 
-      updatedStores[storeKey].items = updatedStores[storeKey].items.filter(
-        (item) => item.product_hash !== itemKey
-      );
-
-      if (updatedStores[storeKey].items.length === 0) {
-        delete updatedStores[storeKey];
-      }
-
-      const updatedOrder = {
-        ...orders,
-        stores: updatedStores,
-      };
-
-      await removeProductFromCart(orders.id, itemKey);
-
-      const orderConsolidateData = getOrderConsolidateData(orders,getString);
-      // send oosConsolidate when current oosConsolidate is split and showOrderConsolidate is true
-      const isOOSConsolidateSplit =
-        orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_SPLIT_CODE &&
-        orderConsolidateData.showOrderConsolidate;
-
-      const response = await buildOrder(
-        generateChangeStoreResponse({
-          ...updatedOrder,
-          userOptions: {
-            ...updatedOrder.userOptions,
-            oosConsolidate: isOOSConsolidateSplit
-              ? OOS_CONSOLIDATE_SPLIT_CODE
-              : OOS_CONSOLIDATE_CODE,
-          },
-        })
-      );
-
-      if (response.response.errors) {
-        window.location.href = GET_SHOP_CART_URL();
-        return;
-      }
-
-      const orderData = response.response.success.data;
-      // add paypal back if it exists in the payment methods
-
-      const shouldShowPaypal = orderData?.paymentMethods.some(
-        (method) => isPaypalPayment(method.typeID)
-      );
-
-      if (shouldShowPaypal) {
-        const isPaypalRecurring = orderData?.paymentMethods.some(
-            (method) =>
-                method.typeID === PAYPAL_RECURRING.typeId
+      if(orders && isCartOrder(orders) && cartData?.shoppingCartData?.cartId){
+        //remove item from cart
+        await removeProductFromCart(cartData.shoppingCartData.cartId, itemKey);
+        //get updated cart
+        getShoppingCart().then(response => {
+              const updatedOrder = mapCartToOrder(response);
+              setOrder(updatedOrder);
+              setCartData(response);
+              if(response.shoppingCartData.totalItems < 1){
+                window.location.href = GET_SHOP_CART_URL();
+                return;
+              }
+            }
+        )
+      } else {
+        updatedStores[storeKey].items = updatedStores[storeKey].items.filter(
+            (item) => item.product_hash !== itemKey
         );
 
-        const paypalPayment =
-            initialPaymentMethods.find(
-                (method) => method.paymentMethod.typeID === (isPaypalRecurring ? PAYPAL_RECURRING.typeId : PAYPAL.typeId)
-            ) || null;
-
-        const sezzleIndex = paymentMethods.findIndex(
-          (method) =>
-            method.paymentMethod.accountName.toLowerCase() === "sezzle"
-        );
-
-        const updatedPaymentMethods = [...paymentMethods];
-
-        // Remove existing PayPal if present
-        const existingPayPalIndex = updatedPaymentMethods.findIndex(
-          (method) =>
-            isPaypalPayment(method.paymentMethod.typeID)
-        );
-
-        if (existingPayPalIndex > -1) {
-          updatedPaymentMethods.splice(existingPayPalIndex, 1);
+        if (updatedStores[storeKey].items.length === 0) {
+          delete updatedStores[storeKey];
         }
 
-        if (sezzleIndex > -1) {
-          // Find new Sezzle index after PayPal removal
-          const newSezzleIndex = updatedPaymentMethods.findIndex(
-            (method) =>
-              method.paymentMethod.accountName.toLowerCase() === "sezzle"
+        const updatedOrder = {
+          ...orders,
+          stores: updatedStores,
+        };
+
+        await removeProductFromCart(orders.id, itemKey);
+
+        const orderConsolidateData = getOrderConsolidateData(orders,getString);
+        // send oosConsolidate when current oosConsolidate is split and showOrderConsolidate is true
+        const isOOSConsolidateSplit =
+            orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_SPLIT_CODE &&
+            orderConsolidateData.showOrderConsolidate;
+
+        const response = await buildOrder(
+            generateChangeStoreResponse({
+              ...updatedOrder,
+              userOptions: {
+                ...updatedOrder.userOptions,
+                oosConsolidate: isOOSConsolidateSplit
+                    ? OOS_CONSOLIDATE_SPLIT_CODE
+                    : OOS_CONSOLIDATE_CODE,
+              },
+            }, pcid)
+        );
+
+        if (response.response.errors) {
+          window.location.href = GET_SHOP_CART_URL();
+          return;
+        }
+
+        const orderData = response.response.success.data;
+        // add paypal back if it exists in the payment methods
+
+        const shouldShowPaypal = orderData?.paymentMethods.some(
+            (method) => isPaypalPayment(method.typeID)
+        );
+
+        if (shouldShowPaypal) {
+          const isPaypalRecurring = orderData?.paymentMethods.some(
+              (method) =>
+                  method.typeID === PAYPAL_RECURRING.typeId
           );
 
-          // Determine the index for inserting PayPal
-          const insertIndex =
-            updatedPaymentMethods.length > 1
-              ? Math.max(newSezzleIndex - 1, updatedPaymentMethods.length - 1)
-              : 1;
+          const paypalPayment =
+              initialPaymentMethods.find(
+                  (method) => method.paymentMethod.typeID === (isPaypalRecurring ? PAYPAL_RECURRING.typeId : PAYPAL.typeId)
+              ) || null;
 
-          if(paypalPayment){
-            updatedPaymentMethods.splice(insertIndex, 0, paypalPayment);
+          const sezzleIndex = paymentMethods.findIndex(
+              (method) =>
+                  method.paymentMethod.accountName.toLowerCase() === "sezzle"
+          );
+
+          const updatedPaymentMethods = [...paymentMethods];
+
+          // Remove existing PayPal if present
+          const existingPayPalIndex = updatedPaymentMethods.findIndex(
+              (method) =>
+                  isPaypalPayment(method.paymentMethod.typeID)
+          );
+
+          if (existingPayPalIndex > -1) {
+            updatedPaymentMethods.splice(existingPayPalIndex, 1);
           }
-        } else {
-          if(paypalPayment){
-            updatedPaymentMethods.push(paypalPayment);
+
+          if (sezzleIndex > -1) {
+            // Find new Sezzle index after PayPal removal
+            const newSezzleIndex = updatedPaymentMethods.findIndex(
+                (method) =>
+                    method.paymentMethod.accountName.toLowerCase() === "sezzle"
+            );
+
+            // Determine the index for inserting PayPal
+            const insertIndex =
+                updatedPaymentMethods.length > 1
+                    ? Math.max(newSezzleIndex - 1, updatedPaymentMethods.length - 1)
+                    : 1;
+
+            if(paypalPayment){
+              updatedPaymentMethods.splice(insertIndex, 0, paypalPayment);
+            }
+          } else {
+            if(paypalPayment){
+              updatedPaymentMethods.push(paypalPayment);
+            }
           }
+
+          setPaymentMethods(updatedPaymentMethods);
         }
+        setOrder(response.response.success.data);
 
-        setPaymentMethods(updatedPaymentMethods);
+        setOrderNotifications(getOrderNotifications(response.response.success));
       }
-      setOrder(response.response.success.data);
-
-      setOrderNotifications(getOrderNotifications(response.response.success));
     } catch (error) {
       console.error("Error removing product:", error);
     } finally {
@@ -286,7 +313,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
             ...orders.userOptions,
             oosConsolidate: oosConsolidate,
           },
-        })
+        }, pcid)
       );
       newOrder
         .then((orderResponse: OrderResponse) => {
@@ -298,10 +325,17 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
     }
   };
 
+  useEffect(() => {
+    if(isGuest && cartData && (!orders?.stores || Object.keys(orders.stores).length === 0)){
+      const cartOrder = mapCartToOrder(cartData);
+      setOrder(cartOrder);
+    }
+  }, [cartData]);
+
   return (
     <div className="shipping-container">
       <FormHeading title={getString("shippingMethods")as string} />
-      {isAddressSaved && orderConsolidateData?.showOrderConsolidate && (
+      {(isAddressSaved && pcid.length > 0 && orderConsolidateData?.showOrderConsolidate) && (
         <div className="shipping-options-container">
           <div
             className={`shipping-option-container start ${
@@ -318,7 +352,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
                 <RadioButton
                   id={"2"}
                   onChange={(e) =>
-                    handleChangeOOSConsolidate(OOS_CONSOLIDATE_SPLIT_CODE, e)
+                    handleChangeOOSConsolidate(OOS_CONSOLIDATE_SPLIT_CODE)
                   }
                   checked={
                     orderConsolidateData.oosConsolidate ===
@@ -346,7 +380,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
                 <RadioButton
                   id={"3"}
                   onChange={(e) =>
-                    handleChangeOOSConsolidate(OOS_CONSOLIDATE_CODE, e)
+                    handleChangeOOSConsolidate(OOS_CONSOLIDATE_CODE)
                   }
                   checked={
                     orderConsolidateData.oosConsolidate === OOS_CONSOLIDATE_CODE
@@ -405,6 +439,9 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
                             cartId={orders.id}
                             isAddressSaved={isAddressSaved}
                             shopperId={shopperID}
+                            pcid={pcid}
+                            cartData={cartData}
+                            setCartData={setCartData}
                           />
                         </div>
                       ))}
@@ -421,16 +458,24 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
                         />
                       </div>
                     )}
-                    {isAddressSaved && showShippingOptions(store) && (
-                      <ShippingOptions store={store} storeKey={key}
+                    {(isAddressSaved && pcid.length > 0 && showShippingOptions(store)) && (
+                        <ShippingOptions store={store} storeKey={key}
                                        onSplitPickUpChange={setIsSplitOrderPickUpSelected}
-                                       isSplitOrderPickUpSelected={isSplitOrderPickUpSelected} />
+                                       isSplitOrderPickUpSelected={isSplitOrderPickUpSelected}
+                                        pcid={pcid}/>
                     )}
                   </div>
                 )
               );
             })}
         </div>
+      )}
+      { (!isAddressSaved || pcid.length < 1) && (
+          <div className="sm-container sm-container__message" id="pm-main">
+            <div className="sm-title-container">
+              <FormSubTitle title={`${getString("enterShippingForShipping") as string}.`}/>
+            </div>
+          </div>
       )}
     </div>
   );

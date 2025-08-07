@@ -60,6 +60,9 @@ interface IPlaceOrder {
   hasPhoneError: boolean;
   isAutoShipChecked: boolean;
   isCheckboxChecked: boolean;
+  pcid: string;
+  isGuest: boolean;
+  cartId: string;
 }
 
 const PlaceOrder: React.FC<IPlaceOrder> = ({
@@ -78,7 +81,10 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   setMobileRequiredMessage,
   isAutoShipChecked,
   hasPhoneError,
-  isCheckboxChecked
+  isCheckboxChecked,
+  pcid,
+  isGuest,
+  cartId,
 }) => {
   const trackingData = new Map<string, string>();
   const [siteData] = useAtom(siteApiData(siteId));
@@ -107,7 +113,8 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   useEffect(() => {
     if(isPaypalPayment(paymentTypeId) && order){
       const isRecurring = PAYPAL_RECURRING.typeId === paymentTypeId;
-      const tokenResponse = getPaypalToken(shopperId, isRecurring, order?.totals.price)
+      const ppShopperId = isGuest ? cartId : shopperId;
+      const tokenResponse = getPaypalToken(ppShopperId, isRecurring, order?.totals.price, isGuest)
       tokenResponse
           .then((response) => {
             if(isRecurring){
@@ -149,16 +156,17 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
 
       if (isPaypalCallback || isRecurringPaypalCallback) {
         const transactionToken = isRecurringPaypalCallback ? baToken : token || "";
+        const ppShopperId = isGuest ? cartId : shopperId;
         try {
           const response = await generatePayPalTransactionDetails(
-            shopperId,
+              ppShopperId,
               transactionToken,
             true,
             isRecurring
           );
 
           if (order) {
-            const changeOrderDetails = generateChangeStoreResponse(order);
+            const changeOrderDetails = generateChangeStoreResponse(order, pcid);
 
             delete response.paymentMethod["id"];
 
@@ -300,7 +308,9 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
         const saveCardResponse = await handleSaveCard(
           creditCardFormData,
           shopperId,
+          pcid,
           { order },
+          isGuest,
           getString
         );
         if (saveCardResponse?.error) {
@@ -544,7 +554,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             ...order.userOptions,
             trackingID: generateOrderTrackingId(trackingData),
           },
-        })
+        }, pcid)
       );
     }
   };
@@ -629,7 +639,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                   ...order.userOptions,
                   trackingID: generateOrderTrackingId(trackingData),
                 },
-              })
+              }, pcid)
             );
           }
         })
@@ -647,7 +657,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   const handleSezzleOrder = async () => {
     const total = order ? order.totals.price.toString() : "0";
     const tempOrderId = order ? order.userOptions?.tempOrderID : "0";
-    const sezzleResponse = await fetchSezzleUrl(total, tempOrderId);
+    const sezzleResponse = await fetchSezzleUrl(total, tempOrderId, isGuest);
     if (typeof sezzleResponse.url != "undefined") {
       window.location = sezzleResponse.url;
     } else {

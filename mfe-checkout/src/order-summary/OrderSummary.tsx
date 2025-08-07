@@ -1,5 +1,5 @@
 import { useAtom } from "jotai";
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import { buildOrder, changeOrder } from "../api/service/Order";
 import { useShopperEWallet } from "../api/service/ShopperEWallet";
 import { Cashback } from "../assets/svgs/Cashback";
@@ -30,10 +30,11 @@ import { shopperAttributesAtomFamily } from "../checkout/shopperAttributesAtom";
 interface IOrderSummary {
   pcid: string;
   shopperId: string;
-  hideCashback?: boolean;
   cartId: string;
   siteId: string;
   isAddressSaved: boolean;
+  portalId: string;
+  isGuest: boolean;
 }
 
 interface ICouponState {
@@ -51,11 +52,12 @@ interface IGCState {
 
 export const OrderSummary: React.FC<IOrderSummary> = ({
   pcid,
-  hideCashback,
   shopperId,
   cartId,
   siteId,
   isAddressSaved,
+  portalId,
+  isGuest,
 }) => {
   const [order, setOrder] = useAtom(orderAtom);
   const { eWalletData, loading, error } = useShopperEWallet(pcid);
@@ -81,9 +83,21 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
   });
 
   const [gcLoading, setGCLoading] = useState(false);
-  const [portalData] = useAtom(portalApiData(shopperId));
+  const portalKey = useMemo(() => JSON.stringify({ shopperId, portalId }), [shopperId, portalId]);
+  const [portalData] = useAtom(portalApiData(portalKey));
   const apiMode = GET_API_MODE();
   const shopperAttributes = useAtomValue(shopperAttributesAtomFamily(shopperId));
+
+  function getShippingText(): string | undefined {
+    let shippingLabel = getString("shipping");
+    let shippingTotal = order?.totals.shipping || 0;
+    if(!isAddressSaved){
+      shippingLabel = `${shippingLabel} (Estimated)`
+    } else if(shippingTotal === 0){
+      shippingLabel = "Free Shipping";
+    }
+    return shippingLabel;
+  }
 
   // Handle input text change for coupon
   const handleCouponTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -144,7 +158,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               gcNum: [], // Reset gift card number
               gcPin: [], // Reset gift card pin
             },
-          })
+          }, pcid)
         );
 
         setOrder(updatedOrder.response?.success?.data);
@@ -195,7 +209,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               gcNum: [...order.userOptions.gcNum.filter((_, i) => i !== index)],
               gcPin: [...order.userOptions.gcPin.filter((_, i) => i !== index)],
             },
-          })
+          }, pcid)
         );
   
         setgcState((prevState) => ({
@@ -243,7 +257,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
             gcNum: [...(order.userOptions.gcNum || []), gcState.gcNum],
             gcPin: [...(order.userOptions.gcPin || []), gcState.gcPin],
           },
-        })
+        }, pcid)
       );
   
       const notifications = updatedOrder.response.success.notifications;
@@ -264,7 +278,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               gcNum: [],
               gcPin: [],
             },
-          })
+          }, pcid)
         );
   
         return;
@@ -310,7 +324,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                   ...order.userOptions,
                   coupons: updatedCoupons,
                 },
-              }),
+              }, pcid),
               order.id
             );
 
@@ -365,7 +379,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         getOrderValidatePromoCode(
           cartId,
           COUPON_CODE_SURVEY10,
-          order?.totals?.price || 0
+          order?.totals?.price || 0,
+            pcid,
         )
           .then((response) => {
             const canRedeem =
@@ -389,7 +404,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                       ...order.userOptions,
                       coupons: updatedCoupons,
                     },
-                  })
+                  }, pcid)
                 );
                 updatedOrder
                   .then((response) => {
@@ -430,7 +445,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
             generateChangeStoreResponse({
               ...order,
               paymentMethod: pmId  as IPaymentMethod,
-            })
+            }, pcid)
           );
           setOrder(updatedOrder.response?.success?.data);
         } catch (error) {
@@ -453,13 +468,13 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
       {gcLoading || (isLoading && <Spinner />)}
       <>
         <FormHeading title={getString("orderSummary") as string} />
-        {!hideCashback && (
+        {!isGuest && (
           <>
             {!loading &&
               !error &&
               eWalletData &&
               parseFloat(eWalletData.totalCoaCBAvail) > 0 && (
-                <ApplyCashback cashbackData={eWalletData} siteId={siteId} />
+                <ApplyCashback cashbackData={eWalletData} siteId={siteId} pcid={pcid} />
               )}
           </>
         )}
@@ -467,7 +482,9 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         <div className="order-redeem-coupon-text">
           {getString("redeemCoupon")}
         </div>
-        <div className="qa-order-coupon order-summary-coupon-container">
+        <div className={`qa-order-coupon order-summary-coupon-container ${
+            isGuest ? "order-summary-coupon-container--padding-btm" : ""
+        }`}>
           <div className="order-input-container">
             <FormField
               qaTag={"qa-input"}
@@ -546,7 +563,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           <div className="error-message">{gcState.gcError}</div>
         )}
 
-        {order?.totals.walletAppliedStr !== order?.totals.priceActualStr && (
+        {(order?.totals.walletAppliedStr !== order?.totals.priceActualStr && !isGuest) && (
           <div
             className="qa-link order-sub-text underlined"
             onClick={handleApplyGiftCard}
@@ -625,9 +642,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                   <div className="order-summary-row">
                     <div>
                       {" "}
-                      {order.totals.shipping == 0
-                        ? "Free Shipping"
-                        : getString("shipping")}{" "}
+                      {getShippingText()}{" "}
                     </div>
                     <div className={"qa-shipping"}>
                       {store?.store?.totals?.shippingStr}

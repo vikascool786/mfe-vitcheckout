@@ -9,9 +9,11 @@ import { Order } from "../../interfaces/Order";
 export const handleSaveCard = async (
     creditCardFormData: CreditCardFormData,
     shopperId: string,
+    pcid: string,
     dependencies: {
         order: Order | undefined;
     },
+    isGuest: boolean,
     getString:(key: string, replacements?: string[]) => string | undefined
 ) => {
     const {
@@ -54,36 +56,62 @@ export const handleSaveCard = async (
             payload.state = creditCardFormData.state;
             payload.zip = creditCardFormData.zip;
             payload.phone = creditCardFormData.phone?.replace(/\D/g, "");
+            payload.country = creditCardFormData.country;
         }
 
         let newPaymentInfo;
 
-        if(creditCardFormData.saveForLater){ //save to shopper wallet
-            const response = await addShoppersPaymentMethod(shopperId, {
-                ...payload
-            })
-            newPaymentInfo = response.at(-1); // wallet response returns all shopper payments, last one in list will be the newest
+        if(!isGuest){
+            if(creditCardFormData.saveForLater){ //save to shopper wallet
+                const response = await addShoppersPaymentMethod(shopperId, {
+                    ...payload
+                })
+                newPaymentInfo = response.at(-1); // wallet response returns all shopper payments, last one in list will be the newest
 
-        } else{ //save as temp payment
-            const response = await addTempPaymentMethod(shopperId, {
-                ...payload
-            })
-            newPaymentInfo = response;
+            } else{ //save as temp payment
+                const response = await addTempPaymentMethod(shopperId, {
+                    ...payload
+                })
+                newPaymentInfo = response;
+            }
         }
 
         //update order with new payment id
-        if(order && newPaymentInfo){
+        if(order && (newPaymentInfo || isGuest)){
+            let orderPaymentMethod = isGuest ? {
+                number: number,
+                token: token,
+                typeID: typeId,
+                cvv: payload.cvv,
+                accountName: creditCardFormData.cardInfo.accountName,
+                expMonth: parseInt(creditCardFormData.cardInfo.expMonth),
+                expYear: parseInt(creditCardFormData.cardInfo.expYear),
+            } : {
+                ...order.paymentMethod,
+                id: newPaymentInfo?.id as number,
+            }
+
+            let orderBillingAddress = isGuest ? {
+                first: payload.first,
+                last: payload.last,
+                address1: payload.address1,
+                address2: payload.address2,
+                city: payload.city,
+                state: payload.state,
+                zip: payload.zip,
+                phone: payload.phone,
+                isPoBox: false,
+                country: payload.country,
+            } : {
+                ...order.billingAddress,
+                id: newPaymentInfo?.addressId as number,
+            }
+
             const updatedOrder = generateChangeStoreResponse({
                 ...order,
-                billingAddress: {
-                    ...order.billingAddress,
-                    id: newPaymentInfo?.addressId as number,
-                },
-                paymentMethod: {
-                    ...order.paymentMethod,
-                    id: newPaymentInfo?.id as number,
-                },
-            });
+                billingAddress: orderBillingAddress,
+                paymentMethod: orderPaymentMethod,
+            }, pcid);
 
             const orderResponse = await buildOrder(updatedOrder);
             if(orderResponse){

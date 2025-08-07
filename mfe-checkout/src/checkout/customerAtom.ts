@@ -6,6 +6,9 @@ import {fetchShopperDetail} from "../api/service/ShopperDetail";
 
 export const customerApiData = atomFamily((pcid: string) =>
     atom<Promise<CustomerProfile | null>>(async () => {
+        if (!pcid) {
+            return null;
+        }
         try {
             const data: CustomerProfile = await fetchCustomerProfileData(pcid);
             return data;

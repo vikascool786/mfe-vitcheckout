@@ -3,6 +3,7 @@ import { StoreDetail } from "./ShippingMethod";
 import { IPaymentMethod, IStores, ITotal } from "./ShopperCart";
 
 export interface Order {
+  applicationType?: string;
   orderId: number;
   email: string;
   shippingAddress: Address;
@@ -27,7 +28,7 @@ export interface OrderStore {
   items: Item[];
   store: StoreDetail;
   shippingSelections: ShippingSelection[];
-  shippingMethod: string;
+  shippingMethod?: string;
   canConsolidate: boolean;
 }
 
@@ -38,7 +39,7 @@ export interface Item {
   product_hash: string;
   catalogSku: string;
   catalogName: string;
-  specialFormula: string;
+  specialFormula?: string;
   quantity: number;
   option: any[];
   autoshipFreq: number;

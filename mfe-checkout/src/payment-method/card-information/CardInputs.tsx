@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect} from "react";
 import { DropdownField } from "../../component/Form/Field/DropdownField";
 import { FormField } from "../../component/Form/Field/FormField";
 import "./CardInformation.scss";
@@ -19,6 +19,7 @@ interface ICardInputProps {
     [key: string]: HTMLInputElement | null;
   }> | null;
   isFromClick2Pay?: boolean;
+  isGuest?: boolean;
 }
 
 export const CardInputs: React.FC<ICardInputProps> = ({
@@ -34,6 +35,7 @@ export const CardInputs: React.FC<ICardInputProps> = ({
   isEditing = false,
   errorRefs = null,
   isFromClick2Pay = false,
+  isGuest,
 }) => {
   const { getString } = useContentStrings();
  
@@ -72,6 +74,13 @@ export const CardInputs: React.FC<ICardInputProps> = ({
     }
   };
 
+  useEffect(() => {
+    const ccNameInput = document.querySelector(".js-card-input-name") as HTMLInputElement;
+    if(ccNameInput && isGuest){
+      ccNameInput.focus();
+    }
+  }, []);
+
   return (
     <>
       {!isEditing && (
@@ -87,6 +96,7 @@ export const CardInputs: React.FC<ICardInputProps> = ({
             touched.cardInfo?.accountName && errors.cardInfo?.accountName
           }
           errorRefs={errorRefs}
+          className={!isFromClick2Pay && !isEditingExistingCard ? `js-card-input-name` : ``}
         />
       )}
       {!isEditing && (
@@ -100,6 +110,7 @@ export const CardInputs: React.FC<ICardInputProps> = ({
           onBlur={handleBlur}
           errorMessage={touched.cardInfo?.number && errors.cardInfo?.number}
           errorRefs={errorRefs}
+          icon={{url: "https://img.shop.com/Image/resources/checkout/lock-icon.png", alt: "lock icon"}}
         />
       )}
       <div className="form-field-container">
@@ -159,7 +170,7 @@ export const CardInputs: React.FC<ICardInputProps> = ({
             errorMessage={touched.cardInfo?.cvv && errors.cardInfo?.cvv}
             errorRefs={errorRefs}
           />{" "}
-          {!isEditingExistingCard && !isFromClick2Pay && (
+          {(!isEditingExistingCard && !isFromClick2Pay && !isGuest) && (
             <div className="save-for-later">
               <input
                 type="checkbox"

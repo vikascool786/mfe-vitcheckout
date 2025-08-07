@@ -1,5 +1,5 @@
 import { Form, Formik } from "formik";
-import { useAtom, useSetAtom } from "jotai";
+import { useAtom } from "jotai";
 import "parsleyjs";
 import React, { useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
@@ -18,7 +18,6 @@ import { Checkbox } from "../component/Form/Checkbox/Checkbox";
 import { DropdownField } from "../component/Form/Field/DropdownField";
 import { FormField } from "../component/Form/Field/FormField";
 import { FormHeading } from "../component/Form/Heading/FormHeading";
-import withLoader from "../hoc/withLoader";
 import { Address } from "../interfaces/Address";
 import { AddressHandler } from "../interfaces/AddressHandler";
 import { DropdownOption } from "../interfaces/DropdownOption";
@@ -31,15 +30,20 @@ import {
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import "./Checkout.scss";
 import { siteApiData } from "./siteAtom";
-import { customerApiData } from "./customerAtom";
-import { getOrderNotifications } from "../utils/OrderUtils";
+import { getOrderNotifications, orderHasDefaultMAShipAddress } from "../utils/OrderUtils";
 import { AddressAutocomplete } from "../component/AddressForm/AddressAutoComplete";
 import {
   getFilteredShippingAddresses,
-  getShippingAddressFromFilteredList, isAddressDefaultMAAddress, setAddressAsShipInAddressList,
+  getShippingAddressFromFilteredList,
+  isAddressDefaultMAAddress,
+  setAddressAsShipInAddressList,
+  isAddressEqual,
+  isEmptyAddress, isAddressInAddressList,
 } from "../utils/AddressUtils";
 import { useContentStrings } from "../hooks/useContentStrings";
 import ScrollToError from "../component/Form/ScrollToError/ScrollToError";
+import { CustomerProfile, isEZRegShopper } from "../interfaces/CustomerProfile";
+import { isThirdPartyCallback } from "../utils/helpers/ThirdPartyPaymentHelper";
 
 const defaultAddress: Address = {
   id: 0,
@@ -59,6 +63,9 @@ interface ICheckout {
   siteId: string;
   addresses: any;
   pcid: string;
+  isGuest: boolean;
+  customerData: CustomerProfile | null;
+  isUniversalOrderBuilt: boolean;
 }
 
 const Checkout: React.FC<ICheckout> = ({
@@ -66,6 +73,9 @@ const Checkout: React.FC<ICheckout> = ({
   siteId,
   addresses,
   pcid,
+  isGuest,
+  customerData,
+  isUniversalOrderBuilt,
 }) => {
   // State to manage whether the form is expanded or collapsed
   const { getString } = useContentStrings();
@@ -91,10 +101,14 @@ const Checkout: React.FC<ICheckout> = ({
   const [orderNotifications, setOrderNotifications] = useAtom(
     orderNotificationsAtom
   );
-  const [customerData] = useAtom(customerApiData(pcid));
   const [siteData] = useAtom(siteApiData(siteId));
   const [enableAddressSuggestions, setEnableAddressSuggestions] =
     useState(false);
+
+  const [isThirdPartyCallBack, setIsThirdPartyCallBack] = useState(false);
+
+  const hasAddress = shopperAddressBook.some((s) => s.hasAddress);
+  const enableAutoSaveShipAddress = isGuest || (!isEditAddressClicked && (!hasAddress || orderHasDefaultMAShipAddress(order || null)));
 
   const errorRefs = useRef<{
     [key: string]: HTMLInputElement | null;
@@ -114,20 +128,40 @@ const Checkout: React.FC<ICheckout> = ({
     return filteredAddresses;
   };
 
-  const shipFormRef = useRef<HTMLFormElement>(null);
   const childRef = useRef<AddressHandler>(null);
 
   const [loading, setLoading] = useAtom(loadingAtom);
 
   useEffect(() => {
+    setIsThirdPartyCallBack(isThirdPartyCallback(location.search));
+  }, [location.search]);
+
+  useEffect(() => {
+    initializeShipAddressForm();
+  }, []);
+
+  useEffect(() => { //handle shipping address when it is a callback/page reload (ie third party checkout)
+    if(isGuest && isUniversalOrderBuilt){
+      initializeShipAddressForm();
+    }
+  }, [isUniversalOrderBuilt]);
+
+  const initializeShipAddressForm = () => {
     const filteredAddresses = getFilteredShippingAddresses(addresses, siteData.siteCountryCode);
-    if(order && order.shippingAddress && !isAddressDefaultMAAddress(order.shippingAddress)){
+    if(order && order.shippingAddress && !isAddressDefaultMAAddress(order.shippingAddress) && isThirdPartyCallBack){
       setShippingAddress(order.shippingAddress);
-      setShopperAddressBook(setAddressAsShipInAddressList(filteredAddresses, order.shippingAddress));
+      if(isAddressInAddressList(filteredAddresses, order.shippingAddress)){
+        setShopperAddressBook(setAddressAsShipInAddressList(filteredAddresses, order.shippingAddress));
+      }else{
+        setShopperAddressBook([{ ...order.shippingAddress, hasAddress: 1, isoalpha3Code: order.shippingAddress.country }]);
+      }
+    } else if(orderHasDefaultMAShipAddress(order || null)){ //order may have already been built without ship address (ie: guest)
+      setShippingAddress(defaultAddress);
+      setShowShipAddressForm(true);
     } else {
       setShopperAddressBook(buildShoppersAddressBookFromResponse(filteredAddresses));
     }
-  }, []);
+  };
 
   // Function to toggle accordion state
   const toggleAccordion = () => {
@@ -162,13 +196,7 @@ const Checkout: React.FC<ICheckout> = ({
     phone: string;
     isPoBox: boolean;
   }) => {
-    const addressEntered = {
-      ...defaultAddress,
-      ...address,
-      phone: address.phone.replace(/\D/g, ""),
-      id: shippingAddress.id || 0,
-      country: "USA",
-    };
+    const addressEntered = buildAddressFromAddressForm(address);
 
     scrollTo(0, 0);
     setLoading(true);
@@ -179,7 +207,7 @@ const Checkout: React.FC<ICheckout> = ({
           ...addressEntered,
         });
 
-        const validatedAddress = { ...addressEntered, hashCode: hashCode, defaultaddr: true };
+        const validatedAddress = { ...addressEntered, hashCode: hashCode, defaultaddr: true, hasAddress: 1, isoalpha3Code: addressEntered.country };
 
         const updatedAddresses = [
           { ...validatedAddress, isShip: 1 }, // Set the validated address as primary
@@ -191,7 +219,7 @@ const Checkout: React.FC<ICheckout> = ({
         setShippingAddress(validatedAddress);
         if (isValidAddress) {
           setValidAddressEntered(isValidAddress);
-          setShowShipAddressForm(false);
+          setShowShipAddressForm(isGuest); //shipping form stays open for guest
           setShowAVS(false);
         } else {
           setShowAVS(true);
@@ -202,6 +230,26 @@ const Checkout: React.FC<ICheckout> = ({
         setErrorMessage("");
       }
     }
+  };
+
+  const buildAddressFromAddressForm = (address: {
+    first: string;
+    last: string;
+    address1: string;
+    address2: string;
+    city: string;
+    state: string;
+    zip: string;
+    phone: string;
+    isPoBox: boolean;
+  }): Address => {
+    return {
+      ...defaultAddress,
+      ...address,
+      phone: address.phone.replace(/\D/g, ""),
+      id: shippingAddress.id || 0,
+      country: siteData.siteCountryCode,
+    };
   };
 
   useEffect(() => {
@@ -234,77 +282,118 @@ const Checkout: React.FC<ICheckout> = ({
         Object.entries(shippingAddress as Address)
       ).toString();
 
-      if (shippingAddress?.id && shippingAddress.id > 0) {
-        // Use PUT request for existing address (update)
-        const updatedAddresses = await updateShopperAddressBookEntry(
-          shopperId,
-          shippingAddress.id,
-          addressParams
-        );
-
-        if (order) {
+      if(isGuest){ //just update the order, do not try to do any addressbook updates
+        const hasPcid = pcid && pcid.length > 0;
+        if(!hasPcid){
+          //Make shopper put in an email address so we have a PCID to build the order
+          setLoading(false);
+          return;
+        }
+        if (order && hasPcid) {
           const newOrder = await buildOrder(
-            generateChangeStoreResponse({
-              ...order,
-              shippingAddress: {
-                ...order.shippingAddress,
-                id: shippingAddress.id,
-              },
-            })
+              generateChangeStoreResponse({
+                ...order,
+                shippingAddress: {
+                  first: shippingAddress.first,
+                  last: shippingAddress.last,
+                  address1: shippingAddress.address1,
+                  address2: shippingAddress.address2,
+                  address3: shippingAddress.address3,
+                  address4: shippingAddress.address4,
+                  address5: shippingAddress.address5,
+                  address6: shippingAddress.address6,
+                  address7: shippingAddress.address7,
+                  city: shippingAddress.city,
+                  state: shippingAddress.state,
+                  zip: shippingAddress.zip,
+                  phone: shippingAddress.phone,
+                  isPoBox: shippingAddress.isPoBox,
+                  country: shippingAddress.country
+                },
+              }, pcid)
           );
 
           setOrder(newOrder.response.success.data);
           setOrderNotifications(
-            getOrderNotifications(newOrder.response.success)
+              getOrderNotifications(newOrder.response.success)
           );
-
-          setShopperAddressBook(
-            getFilteredShippingAddresses(
-              updatedAddresses,
-              siteData.siteCountryCode
-            )
-          );
-          setShowShipAddressForm(false);
+          setShowShipAddressForm(true);
           setErrorMessage("");
         }
-      } else {
-        // Use POST request for new address (create)
-        const updatedAddressList: Address[] =
-          await createShopperAddressBookEntry(shopperId, addressParams);
-        //update address atom with new addresslist
-        setShopperAddressBook(
-          getFilteredShippingAddresses(
-            updatedAddressList,
-            siteData.siteCountryCode
-          )
-        );
-        const newAddedAddress = updatedAddressList.find(
-          (address) => address.isShip
-        );
-
-        if (newAddedAddress && order) {
-          const newOrder = await buildOrder(
-            generateChangeStoreResponse({
-              ...order,
-              shippingAddress: {
-                ...newAddedAddress,
-                id: newAddedAddress.id,
-              },
-              billingAddress: {
-                ...order?.billingAddress,
-                id: newAddedAddress.id,
-              },
-            })
+      } else{
+        //update shoppers addressbook and update the order with the address
+        if (shippingAddress?.id && shippingAddress.id > 0) {
+          // Use PUT request for existing address (update)
+          const updatedAddresses = await updateShopperAddressBookEntry(
+              shopperId,
+              shippingAddress.id,
+              addressParams
           );
 
-          setOrder(newOrder.response.success.data);
-          setOrderNotifications(
-            getOrderNotifications(newOrder.response.success)
+          if (order) {
+            const newOrder = await buildOrder(
+                generateChangeStoreResponse({
+                  ...order,
+                  shippingAddress: {
+                    ...order.shippingAddress,
+                    id: shippingAddress.id,
+                  },
+                }, pcid)
+            );
+
+            setOrder(newOrder.response.success.data);
+            setOrderNotifications(
+                getOrderNotifications(newOrder.response.success)
+            );
+
+            setShopperAddressBook(
+                getFilteredShippingAddresses(
+                    updatedAddresses,
+                    siteData.siteCountryCode
+                )
+            );
+            setShowShipAddressForm(false);
+            setErrorMessage("");
+          }
+        } else {
+          // Use POST request for new address (create)
+          const updatedAddressList: Address[] =
+              await createShopperAddressBookEntry(shopperId, addressParams);
+          //update address atom with new addresslist
+          setShopperAddressBook(
+              getFilteredShippingAddresses(
+                  updatedAddressList,
+                  siteData.siteCountryCode
+              )
           );
-          setShippingAddress(newAddedAddress);
-          setShowShipAddressForm(false);
-          setIsExpanded(false);
-          setErrorMessage("");
+          const newAddedAddress = updatedAddressList.find(
+              (address) => address.isShip
+          );
+
+          if (newAddedAddress && order) {
+            const newOrder = await buildOrder(
+                generateChangeStoreResponse({
+                  ...order,
+                  shippingAddress: {
+                    ...newAddedAddress,
+                    id: newAddedAddress.id,
+                  },
+                  billingAddress: {
+                    ...order?.billingAddress,
+                    id: newAddedAddress.id,
+                  },
+                }, pcid)
+            );
+
+            setOrder(newOrder.response.success.data);
+            setOrderNotifications(
+                getOrderNotifications(newOrder.response.success)
+            );
+            setShippingAddress(newAddedAddress);
+            setShowShipAddressForm(false);
+            setIsExpanded(false);
+            setErrorMessage("");
+          }
         }
       }
       setIsExpanded(false);
@@ -378,7 +467,7 @@ const Checkout: React.FC<ICheckout> = ({
           ...order?.billingAddress,
           id: id,
         },
-      })
+      }, pcid)
     );
 
     if (
@@ -395,17 +484,20 @@ const Checkout: React.FC<ICheckout> = ({
     setIsExpanded(false);
   };
 
-  const initialValues = {
-    first: shippingAddress.first || customerData?.first_name || "",
-    last: shippingAddress.last || customerData?.last_name || "",
-    address1: shippingAddress.address1 || "",
-    address2: shippingAddress.address2 || "",
-    city: shippingAddress.city || "",
-    state: shippingAddress.state || "",
-    zip: shippingAddress.zip || "",
-    phone: shippingAddress.phone || "",
-    isPoBox: shippingAddress.isPoBox || false,
-  };
+  function getInitialAddressValues(): any {
+    return {
+      first: shippingAddress.first || (!isEZRegShopper(customerData) && !isGuest ? customerData?.first_name : "") ||
+          "",
+      last: shippingAddress.last || (!isEZRegShopper(customerData) && !isGuest ? customerData?.last_name : "") || "",
+      address1: shippingAddress.address1 || "",
+      address2: shippingAddress.address2 || "",
+      city: shippingAddress.city || "",
+      state: shippingAddress.state || "",
+      zip: shippingAddress.zip || "",
+      phone: shippingAddress.phone || "",
+      isPoBox: shippingAddress.isPoBox || false,
+    };
+  }
 
   const validationSchema = Yup.object().shape({
     first: Yup.string()
@@ -447,6 +539,17 @@ const Checkout: React.FC<ICheckout> = ({
     }
     setFieldValue(name, value);
   };
+
+  function hasOrderShipAddress(): boolean {
+    return !!(order?.shippingAddress && !isEmptyAddress(order?.shippingAddress) && !orderHasDefaultMAShipAddress(order || null));
+  }
+
+  function getPrefillAddressValues(): any {
+    if(hasOrderShipAddress() && isThirdPartyCallBack){
+      return order?.shippingAddress;
+    }
+    return getInitialAddressValues();
+  }
 
   return (
     <div>
@@ -501,11 +604,13 @@ const Checkout: React.FC<ICheckout> = ({
           {showShipAddressForm && (
             /* Some countries display family name before first name (TWN/HKG/SGP) */
             <Formik
-              initialValues={initialValues}
+              initialValues={getPrefillAddressValues()}
               validationSchema={validationSchema}
               onSubmit={(values) => {
                 handleSaveAddress(values);
               }}
+              validateOnMount={true}
+              enableReinitialize={true}
             >
               {({
                 values,
@@ -515,7 +620,47 @@ const Checkout: React.FC<ICheckout> = ({
                 touched,
                 handleBlur,
                 submitForm,
-              }) => (
+                isValid,
+                dirty
+              }) => {
+
+                const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+                const lastSavedAddressRef = useRef<Address | null>(null);
+
+                useEffect(() => { //detect when to save ship address (removal of save and continue button)
+                  if(!enableAutoSaveShipAddress) {
+                    return;
+                  }
+
+                  const currentAddress = buildAddressFromAddressForm(values);
+
+                  const hasChangedSinceLastSave =
+                      !lastSavedAddressRef.current || !isAddressEqual(lastSavedAddressRef.current, currentAddress);
+
+                  const shouldSave = isValid && dirty && hasChangedSinceLastSave;
+
+                  if (shouldSave) {
+                    // Clear previous timeout to debounce
+                    if (saveTimeoutRef.current) {
+                      clearTimeout(saveTimeoutRef.current);
+                    }
+
+                    // Set a new timeout to delay save until user stops typing
+                    saveTimeoutRef.current = setTimeout(() => {
+                      handleSaveAddress(values);
+                      lastSavedAddressRef.current = currentAddress;
+                    }, 1000); // 1000ms after user stops typing
+                  }
+
+                  return () => {
+                    if (saveTimeoutRef.current) {
+                      clearTimeout(saveTimeoutRef.current);
+                    }
+                  };
+                }, [values, isValid, dirty]);
+
+
+                return (
                 <Form>
                   <ScrollToError errorRefs={errorRefs} />
                   <AddressAutocomplete
@@ -664,8 +809,7 @@ const Checkout: React.FC<ICheckout> = ({
                     />
                   </div>
 
-                  {isEditAddressClicked ||
-                  shopperAddressBook.filter((s) => s.hasAddress)?.length > 0 ? (
+                  { !enableAutoSaveShipAddress && (
                     <div className="form-footer form-footer__dual-button">
                       <Button
                         qaTag="qa-cancel"
@@ -682,21 +826,9 @@ const Checkout: React.FC<ICheckout> = ({
                         onClick={submitForm}
                       />
                     </div>
-                  ) : (
-                    <div className="form-footer">
-                      <Button
-                        qaTag="qa-submit"
-                        disabled={loading}
-                        label={
-                          getString("saveShippingAddressAndContinue") as string
-                        }
-                        btnType="primary"
-                        onClick={submitForm}
-                      />
-                    </div>
                   )}
                 </Form>
-              )}
+              )}}
             </Formik>
           )}
         </div>

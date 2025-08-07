@@ -1,13 +1,18 @@
 import { ChangeOrder } from "../interfaces/ChangeOrder";
-import { Order } from "../interfaces/Order";
+import { IUserOptions, Order } from "../interfaces/Order";
 import {
     OOS_CONSOLIDATE_CODE,
     OOS_CONSOLIDATE_SPLIT_CODE,
     OrderConsolidationData
 } from "../interfaces/OrderConsolidationData";
 import { Success } from "../api/service/Order";
-import {GIFT_CARD_STORE_CATALOGS, GIFT_CARD_STORE_VOLUMES, isGiftCardStore} from "./StoreUtils";
+import { GIFT_CARD_STORE_CATALOGS, GIFT_CARD_STORE_VOLUMES, isGiftCardStore } from "./StoreUtils";
 import { isAddressDefaultMAAddress } from "./AddressUtils";
+import { Options, ShoppingCart } from "../interfaces/ShoppingCart";
+import { Address } from "../interfaces/Address";
+import { IPaymentMethod, ITotal } from "../interfaces/ShopperCart";
+
+const ORDER_APPLICATION_TYPE_CART = "CART";
 
 export function updatePaymentMethod(
     order: ChangeOrder,
@@ -125,4 +130,103 @@ export const orderHasGiftCards = (order: Order | null): boolean => {
 
 export const orderHasShippingAddress = (order: Order | undefined): boolean => {
     return !!order?.shippingAddress?.address1?.length;
+};
+
+export const mapCartToOrder = (cart: ShoppingCart): Order => {
+    const cartData = cart.shoppingCartData;
+    const stores = cartData.storeData;
+
+    const cartOrder = {
+        applicationType: ORDER_APPLICATION_TYPE_CART,
+        orderId: -1,
+        id: cart.shoppingCartData.cartId || "",
+        email: "",
+        shippingAddress: {} as Address,
+        billingAddress: {} as Address,
+        paymentMethod: {} as IPaymentMethod,
+        stores: {} as Order["stores"],
+        totals: {} as ITotal,
+        paymentMethods: [],
+        userOptions: {} as IUserOptions,
+    }
+
+    if(stores){
+        const mappedStores: Record<string, Order["stores"][string]> = {};
+
+        for (const storeData of stores) {
+            const storeId = storeData.storeVolumeId.toString();
+
+            mappedStores[storeId] = {
+                store: {
+                    isMA: storeData.shippingData.maCatalog ? 1 : 0,
+                    catalogName: storeData.storeName,
+                    catalogId: parseInt(storeData.catalogId),
+                },
+                totals: {
+                    price: storeData.totals.prices.priceValue,
+                    cashBack: storeData.totals.rewards.cashbackValue,
+                    bv: storeData.totals.rewards.bvValue,
+                    ibv: storeData.totals.rewards.ibvValue,
+                    priceStr: storeData.totals.prices.priceDisplay,
+                    priceActual: storeData.totals.prices.priceValue.toString(),
+                    priceActualStr: storeData.totals.prices.priceValue.toString(),
+                    cashBackStr: storeData.totals.rewards.cashbackDisplay
+                },
+                shippingSelections: [],
+                canConsolidate: false,
+                items: storeData.items.map(item => ({
+                    prodId: item.prodId.toString(),
+                    catalogSku: item.catalogSku,
+                    image: { url: item.imagePath },
+                    caption: item.title,
+                    specialFormula: item.special_formula,
+                    quantity: item.quantity,
+                    option: buildItemOptions(item.options),
+                    product_hash: item.shoppingCartItemId,
+                    available: "0",
+                    autoshipFreq: item.userOptions.autoShipFrequency,
+                    totals: {
+                        price: item.totals.prices.priceValue,
+                        cashBack: item.totals.rewards.cashbackValue,
+                        bv: item.totals.rewards.bvValue,
+                        ibv: item.totals.rewards.ibvValue,
+                        actualPrice: item.totals.prices.priceValue,
+                        priceStr: item.totals.prices.priceDisplay,
+                        priceActualStr: item.totals.prices.priceValue.toString(),
+                        cashBackStr: item.totals.rewards.cashbackDisplay
+                    },
+                    catalogName: storeData.storeName,
+                    storeMaVendorId: storeId,
+                    prodContainerId: item.prodcontainerId.toString(),
+                    volumeId: storeData.storeVolumeId.toString()
+                })),
+            };
+        }
+
+        cartOrder.stores = mappedStores;
+    }
+    return cartOrder;
+};
+
+const buildItemOptions = (options: Options[]): any[] => {
+    let optionList = [];
+    optionList = options.map(option => ({
+        name: option.promptDisplay,
+        optionStringValue: option.value,
+    }));
+    return optionList;
+};
+
+//Check if the order has been built from cart data and not been built by universal checkout
+export const isCartOrder = (order: Order): boolean => {
+    const hasShipAddress = (order?.shippingAddress && Object.keys(order.shippingAddress).length > 0);
+    const isCartApplicationType = order?.applicationType?.toUpperCase() === ORDER_APPLICATION_TYPE_CART;
+    return !hasShipAddress && isCartApplicationType;
+};
+
+export const isUniversalOrderBuilt = (order: Order | undefined): boolean => {
+    if (!order) return false;
+    const hasShipAddress = (order?.shippingAddress && Object.keys(order.shippingAddress).length > 0);
+    const isCartApplicationType = order?.applicationType?.toUpperCase() === ORDER_APPLICATION_TYPE_CART;
+    return hasShipAddress && !isCartApplicationType;
 };

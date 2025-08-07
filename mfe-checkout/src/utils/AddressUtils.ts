@@ -50,3 +50,37 @@ export const setAddressAsShipInAddressList = (addressList: Address[], shipAddres
         isShip: address.id === shipAddress.id ? 1 : 0,
     }));
 }
+
+export const isAddressInAddressList = (addressList: Address[], shipAddress: Address): boolean => {
+    return addressList.some(address => address.id === shipAddress.id);
+}
+
+export const isAddressEqual = (a: Address, b: Address): boolean => {
+    return (
+        a.first === b.first &&
+        a.last === b.last &&
+        a.address1 === b.address1 &&
+        a.address2 === b.address2 &&
+        a.city === b.city &&
+        a.state === b.state &&
+        a.zip === b.zip &&
+        a.phone === b.phone &&
+        a.country === b.country
+    );
+}
+
+export const isEmptyAddress = (address: Address): boolean => {
+    if (!address) return true;
+
+    if (Object.keys(address).length === 0) return true;
+
+    return (
+        address?.id === 0 ||
+        ("" === address.first &&
+            "" === address.last &&
+            "" === address.address1 &&
+            "" === address.city &&
+            "" === address.state &&
+            "" === address.zip)
+    );
+};
