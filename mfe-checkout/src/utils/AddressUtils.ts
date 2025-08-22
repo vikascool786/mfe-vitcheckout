@@ -9,13 +9,32 @@ const DEFAULT_MA_ADDRESS: Address = {
     zip: "27409"
 }
 
-export const getFilteredShippingAddresses = (addressList: Address[], countryCode: string): Address[] => {
-    return addressList?.filter((ad) =>
-        ad.hasAddress !== 0 &&
-        ad.isoalpha3Code === countryCode &&
-        !(ad.isBill === 1 && ad.isShip !== 1) &&
-        !(ad.isPrimary === 1 && ad.isShip !== 1)
-    );
+export const getFilteredShippingAddresses = (
+  addressList: Address[],
+  countryCode: string
+): Address[] => {
+  if (
+    addressList.length === 1 &&
+    addressList.at(0)?.hasAddress !== 0 &&
+    addressList.at(0)?.isoalpha3Code === countryCode &&
+    addressList.at(0)?.isShip == 0 &&
+    addressList.at(0)?.isBill == 0
+  ) {
+    return addressList.map((address) => {
+      return {
+        ...address,
+        isBill: 1,
+        isShip: 1,
+      };
+    });
+  }
+  return addressList?.filter(
+    (ad) =>
+      ad.hasAddress !== 0 &&
+      ad.isoalpha3Code === countryCode &&
+      !(ad.isBill === 1 && ad.isShip !== 1) &&
+      !(ad.isPrimary === 1 && ad.isShip !== 1)
+  );
 };
 
 export const getShippingAddressFromAddressList = (addressList: Address[], countryCode: string): Address | undefined => {
