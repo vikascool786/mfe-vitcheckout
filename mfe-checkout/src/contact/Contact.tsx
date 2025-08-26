@@ -48,7 +48,6 @@ export const Contact: React.FC<IContactProps> = ({
     const [isOptInChecked, setIsOptInChecked] = useState(false);
     const [emailErrorMessage, setEmailErrorMessage] = useState("");
     const [emailTouched, setEmailTouched] = useState(false);
-    const [buildGuestOrder, setBuildGuestOrder] = useState(false);
 
     useEffect(() => {
         const emailInput = document.querySelector(".js-email-input") as HTMLInputElement;
@@ -61,7 +60,6 @@ export const Contact: React.FC<IContactProps> = ({
         if(order){
             setEmail(order.email);
         }
-        setBuildGuestOrder((!order || isCartOrder(order)));
     }, [order]);
 
     useEffect(() => {
@@ -102,14 +100,12 @@ export const Contact: React.FC<IContactProps> = ({
                             .then(response => {
                                 setCustomerId(response.pcid);
                                 const shippingAddress = addressList && addressList.length > 0 ? addressList[0] : null;
-                                if(buildGuestOrder){
                                     const orderResponse = buildInitialGuestOrder(cartId, portalId, response.pcid, shippingAddress);
                                     orderResponse.then((res) => {
                                         setOrderData(res?.response.success?.data || null);
                                         setUseCartSummary(false);
                                         setShopperEmail(email);
                                     });
-                                }
                             })
                     } else {
                         postEZReg(email, portalId, REG_TYPE_GUEST_CHECKOUT, (isOptInChecked && showOptInCheckbox))
@@ -117,14 +113,12 @@ export const Contact: React.FC<IContactProps> = ({
                                 const ezPcid = response?.shopper?.pcid;
                                 setCustomerId(ezPcid);
                                 const shippingAddress = addressList && addressList.length > 0 ? addressList[0] : null;
-                                if(buildGuestOrder){
                                     const orderResponse = buildInitialGuestOrder(cartId, portalId, ezPcid, shippingAddress);
                                     orderResponse.then((res) => {
                                         setOrderData(res?.response.success?.data || null);
                                         setUseCartSummary(false);
                                         setShopperEmail(email);
                                     });
-                                }
                             }).catch((error: any) => {
                                 console.error("EZ reg error: ", error);
                                 const errorMessage =
