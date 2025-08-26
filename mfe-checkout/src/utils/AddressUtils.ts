@@ -13,21 +13,6 @@ export const getFilteredShippingAddresses = (
   addressList: Address[],
   countryCode: string
 ): Address[] => {
-  if (
-    addressList.length === 1 &&
-    addressList.at(0)?.hasAddress !== 0 &&
-    addressList.at(0)?.isoalpha3Code === countryCode &&
-    addressList.at(0)?.isShip == 0 &&
-    addressList.at(0)?.isBill == 0
-  ) {
-    return addressList.map((address) => {
-      return {
-        ...address,
-        isBill: 1,
-        isShip: 1,
-      };
-    });
-  }
   return addressList?.filter(
     (ad) =>
       ad.hasAddress !== 0 &&

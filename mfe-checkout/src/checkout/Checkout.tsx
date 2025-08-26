@@ -147,7 +147,7 @@ const Checkout: React.FC<ICheckout> = ({
       if(isAddressInAddressList(filteredAddresses, order.shippingAddress)){
         setShopperAddressBook(setAddressAsShipInAddressList(filteredAddresses, order.shippingAddress));
       }else{
-        setShopperAddressBook([{ ...order.shippingAddress, hasAddress: 1, isShip: 1, isoalpha3Code: order.shippingAddress.country }]);
+        setShopperAddressBook([{ ...order.shippingAddress, hasAddress: 1, isoalpha3Code: order.shippingAddress.country }]);
       }
     } else if(orderHasDefaultMAShipAddress(order || null)){ //order may have already been built without ship address (ie: guest)
       setShippingAddress(defaultAddress);
