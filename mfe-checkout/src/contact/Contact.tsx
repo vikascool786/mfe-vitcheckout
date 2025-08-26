@@ -22,6 +22,7 @@ interface IContactProps {
     setShopperEmail: any;
     addressList: Address[];
     order: Order | undefined;
+    setCurrentPortalId: any;
 }
 
 export const Contact: React.FC<IContactProps> = ({
@@ -34,6 +35,7 @@ export const Contact: React.FC<IContactProps> = ({
     setShopperEmail,
     addressList,
     order,
+    setCurrentPortalId,
 }) => {
 
     function getSignInRegisterUrl(){
@@ -48,6 +50,7 @@ export const Contact: React.FC<IContactProps> = ({
     const [isOptInChecked, setIsOptInChecked] = useState(false);
     const [emailErrorMessage, setEmailErrorMessage] = useState("");
     const [emailTouched, setEmailTouched] = useState(false);
+    // const [buildGuestOrder, setBuildGuestOrder] = useState(false); //AI-111735
 
     useEffect(() => {
         const emailInput = document.querySelector(".js-email-input") as HTMLInputElement;
@@ -60,6 +63,7 @@ export const Contact: React.FC<IContactProps> = ({
         if(order){
             setEmail(order.email);
         }
+        // setBuildGuestOrder((!order || isCartOrder(order)));
     }, [order]);
 
     useEffect(() => {
@@ -99,13 +103,16 @@ export const Contact: React.FC<IContactProps> = ({
                         fetchShopperDetail(response.shopperID)
                             .then(response => {
                                 setCustomerId(response.pcid);
+                                setCurrentPortalId(response.portal?.portalId);
                                 const shippingAddress = addressList && addressList.length > 0 ? addressList[0] : null;
+                                // if(buildGuestOrder){
                                     const orderResponse = buildInitialGuestOrder(cartId, portalId, response.pcid, shippingAddress);
                                     orderResponse.then((res) => {
                                         setOrderData(res?.response.success?.data || null);
                                         setUseCartSummary(false);
                                         setShopperEmail(email);
                                     });
+                                // }
                             })
                     } else {
                         postEZReg(email, portalId, REG_TYPE_GUEST_CHECKOUT, (isOptInChecked && showOptInCheckbox))
@@ -113,12 +120,14 @@ export const Contact: React.FC<IContactProps> = ({
                                 const ezPcid = response?.shopper?.pcid;
                                 setCustomerId(ezPcid);
                                 const shippingAddress = addressList && addressList.length > 0 ? addressList[0] : null;
+                                // if(buildGuestOrder){
                                     const orderResponse = buildInitialGuestOrder(cartId, portalId, ezPcid, shippingAddress);
                                     orderResponse.then((res) => {
                                         setOrderData(res?.response.success?.data || null);
                                         setUseCartSummary(false);
                                         setShopperEmail(email);
                                     });
+                                // }
                             }).catch((error: any) => {
                                 console.error("EZ reg error: ", error);
                                 const errorMessage =

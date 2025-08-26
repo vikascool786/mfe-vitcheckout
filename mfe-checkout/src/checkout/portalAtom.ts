@@ -1,7 +1,7 @@
 import { atom } from "jotai";
-import {atomFamily} from "jotai/utils";
-import {Portal} from "../interfaces/Portal";
-import {fetchPortalData} from "../api/service/Portal";
+import { atomFamily } from "jotai/utils";
+import { EMPTY_PORTAL, Portal } from "../interfaces/Portal";
+import { fetchPortalData } from "../api/service/Portal";
 
 type PortalApiKey = {
     shopperId: string;
@@ -11,6 +11,9 @@ type PortalApiKey = {
 export const portalApiData = atomFamily((key: string) =>
     atom<Promise<Portal>>(async () => {
         const { shopperId, portalId }: PortalApiKey = JSON.parse(key);
+        if(!portalId){
+            return EMPTY_PORTAL;
+        }
         try {
             const data: Portal = await fetchPortalData(shopperId, portalId);
             return data;

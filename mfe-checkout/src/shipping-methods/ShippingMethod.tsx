@@ -41,16 +41,15 @@ import StoreHeading from "../component/StoreHeading";
 import { OrderStore } from "../interfaces/Order";
 import {
   getSortedStores,
-  isGiftCardStore,
-  storeHasCustomCocktail,
-  storeHasOOSItems
+  isGiftCardStore, storeHasOOSItems
 } from "../utils/StoreUtils";
 import {isPaypalPayment, PAYPAL, PAYPAL_RECURRING} from "../payment-method/PaymentType";
 import { useContentStrings } from "../hooks/useContentStrings";
-import { getFreeShipMessagesForOrder } from "../utils/FreeShipMessageUtil";
+import { getFreeShipInfoFromOrder } from "../utils/FreeShipMessageUtil";
 import { ShoppingCart } from "../interfaces/ShoppingCart";
 import { FormSubTitle } from "../component/Form/SubTitle/FormSubTitle";
 import { getShoppingCart } from "../api/ajaxaction/ShoppingCart";
+import { Site } from "../interfaces/Site";
 
 interface IShippingMethodProps {
   shopperID: string;
@@ -60,6 +59,7 @@ interface IShippingMethodProps {
   isGuest: boolean;
   cartData: ShoppingCart;
   setCartData: any;
+  siteData: Site;
 }
 
 const ShippingMethod: React.FC<IShippingMethodProps> = ({
@@ -70,6 +70,7 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
   isGuest,
   cartData,
   setCartData,
+  siteData,
 }) => {
   const [orders, setOrder] = useAtom(orderAtom);
   const [loading, setLoading] = useAtom(loadingAtom);
@@ -271,29 +272,16 @@ const ShippingMethod: React.FC<IShippingMethodProps> = ({
   }, [orders]);
 
   useEffect(() => {
-    const fetchFreeShipMessages = async () => {
-      if (!orders) return;
-
-      try {
-        const messages = await getFreeShipMessagesForOrder(orders, portalData,getString);
-        setFreeShipMessageMap(messages);
-      } catch (error) {
-        console.error("Failed to fetch free shipping messages", error);
-      }
-    };
-
-    fetchFreeShipMessages();
+    if (!orders) return;
+    setFreeShipMessageMap(getFreeShipInfoFromOrder(orders, portalData, siteData.locale.currencySymbol, getString));
   }, [orders]);
 
   const getShipFreeMessageForStore = (
       store: OrderStore,
       storeKey: string,
   )=> {
-    //shipping calc does not work with OOS prods or custom cocktail
-    if(storeHasOOSItems(store) || storeHasCustomCocktail(store)){
-      return "";
-    }
-    return freeShipMessageMap.get(store?.store?.catalogId.toString()) || ""
+    const freeShipStoreKey = storeHasOOSItems(store) ? storeKey : store?.store?.catalogId.toString();
+    return freeShipMessageMap.get(freeShipStoreKey) || ""
   }
 
   const handleChangeOOSConsolidate = (

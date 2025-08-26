@@ -1,66 +1,44 @@
 import { Order } from "../interfaces/Order";
 import { Portal } from "../interfaces/Portal";
 import { FreeShipData } from "../interfaces/FreeShipData";
-import { doShippingCalc } from "../api/service/ShippingCalc";
-import { isGiftCardStore, storeHasCustomCocktail, storeHasOOSItems } from "./StoreUtils";
-import { formattedNumber } from "./OrderUtils";
+import { isGiftCardStore, storeHasOOSItems } from "./StoreUtils";
+import { formattedNumber, isCartOrder } from "./OrderUtils";
 
-
-export const getFreeShipMessagesForOrder = async (order: Order | undefined, portalData: Portal,getString:any): Promise<Map<string, string>> => {
+export const getFreeShipInfoFromOrder = (order: Order | null, portalData: Portal, currencySymbol: string, getString:any): Map<string, string> => {
     let freeShipMessageStoreMap = new Map<string, string>();
-    if (!order) return freeShipMessageStoreMap;
+    if (order && !isCartOrder(order)) {
+        Object.entries(order.stores).forEach(([storeId, store]) => {
+            const catalogId = store?.store.catalogId.toString();
+            let isMAFreeShip = portalData?.hasFreeShipping && Boolean(store?.store.isMA);
 
-    const itemList = Object.values(order.stores)
-        .flatMap((store) => store.items);
+            const freeShipData: FreeShipData = {
+                hasFreeShipping: isMAFreeShip,
+                isFreeShipMet: false,
+                freeShipDifference: "",
+                isMA: Boolean(store?.store?.isMA),
+                storeName: store?.store?.catalogName,
+            };
 
-    try {
-        const response = await doShippingCalc(portalData.portalId, itemList);
+            if ((isMAFreeShip || !store?.store?.isMA) && !isGiftCardStore(store)) {
+                if (!store.store?.isMA) {
+                    freeShipData.hasFreeShipping = (store?.store?.freeShipThreshold ?? 0) > 0;
+                }
 
-        if (response) {
-            Object.entries(order.stores).forEach(([storeId, store]) => {
-                const catalogId = store?.store.catalogId.toString();
-                let isMAFreeShip = portalData?.hasFreeShipping && Boolean(store?.store.isMA);
+                if (freeShipData.hasFreeShipping) {
+                    const currency = currencySymbol;
+                    let freeShipDiff = store?.store?.freeShipDiff ?? 0;
 
-                const freeShipData: FreeShipData = {
-                    hasFreeShipping: isMAFreeShip,
-                    isFreeShipMet: false,
-                    freeShipDifference: "",
-                    isMA: Boolean(store?.store?.isMA),
-                    storeName: store?.store?.catalogName,
-                };
+                    freeShipData.freeShipDifference = `${currency}${formattedNumber(freeShipDiff)}`;
+                    freeShipData.isFreeShipMet = (store?.store?.freeShipMet ?? 0) > 0;
 
-                if ((isMAFreeShip || !store?.store?.isMA) && !isGiftCardStore(store)) {
-                    if (!store.store?.isMA) {
-                        freeShipData.hasFreeShipping = response.quotes[catalogId]?.[0]?.hasFreeShipping ?? false;
-                    }
-
-                    if (freeShipData.hasFreeShipping) {
-                        const currency = response.quotes[catalogId]?.[0]?.currency;
-                        let freeShipDiff = freeShipData?.isMA
-                            ? response.quotes[catalogId]?.[0]?.freeShipDiff
-                            : response.quotes[catalogId]?.[0]?.freeShippingThreshold?.freeShipDiff;
-
-                        freeShipData.freeShipDifference = `${currency}${formattedNumber(freeShipDiff)}`;
-                        freeShipData.isFreeShipMet = freeShipData?.isMA
-                            ? response.quotes[catalogId]?.[0]?.freeShipMet || freeShipDiff <= 0
-                            : freeShipDiff <= 0;
-
-                        if (freeShipData.hasFreeShipping) {
-                            //TODO: will need to revisit this - OOS and custom cocktail do not calculate correctly
-                            // with shipping calc
-                            // hiding the free ship message if threshold is not met and there are oos or cc items
-                            if (!freeShipData.isFreeShipMet && !storeHasOOSItems(store) && !storeHasCustomCocktail(store)) {
-                                const message = getString("addForFreeShip",[freeShipData.freeShipDifference,freeShipData.storeName]);
-                                freeShipMessageStoreMap.set(catalogId, message);
-                            }
-                        }
+                    if (freeShipData.hasFreeShipping && !freeShipData.isFreeShipMet) {
+                            const message = getString("addForFreeShip",[freeShipData.freeShipDifference,freeShipData.storeName]);
+                            const freeShipStoreKey = storeHasOOSItems(store) ? storeId : catalogId; //catalogId will be the same for split shipments, need to distinguish different with store key
+                            freeShipMessageStoreMap.set(freeShipStoreKey, message);
                     }
                 }
-            });
-        }
-    } catch (error) {
-        console.error("Error with shipping calc", error);
+            }
+        });
     }
-
     return freeShipMessageStoreMap;
 };

@@ -43,7 +43,6 @@ import {
 import { useContentStrings } from "../hooks/useContentStrings";
 import ScrollToError from "../component/Form/ScrollToError/ScrollToError";
 import { CustomerProfile, isEZRegShopper } from "../interfaces/CustomerProfile";
-import { isThirdPartyCallback } from "../utils/helpers/ThirdPartyPaymentHelper";
 
 const defaultAddress: Address = {
   id: 0,
@@ -88,6 +87,7 @@ const Checkout: React.FC<ICheckout> = ({
   const [validAddressEntered, setValidAddressEntered] =
     useState<boolean>(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isAddNewShipAddress, setIsAddNewShipAddress] = useState(false);
   const [showShipAddressForm, setShowShipAddressForm] = useState(false);
   const [shopperAddressBook, setShopperAddressBook] = useAtom(addressAtom);
   const [showAVS, setShowAVS] = useState(false);
@@ -104,8 +104,6 @@ const Checkout: React.FC<ICheckout> = ({
   const [siteData] = useAtom(siteApiData(siteId));
   const [enableAddressSuggestions, setEnableAddressSuggestions] =
     useState(false);
-
-  const [isThirdPartyCallBack, setIsThirdPartyCallBack] = useState(false);
 
   const hasAddress = shopperAddressBook.some((s) => s.hasAddress);
   const enableAutoSaveShipAddress = isGuest || (!isEditAddressClicked && (!hasAddress || orderHasDefaultMAShipAddress(order || null)));
@@ -133,10 +131,6 @@ const Checkout: React.FC<ICheckout> = ({
   const [loading, setLoading] = useAtom(loadingAtom);
 
   useEffect(() => {
-    setIsThirdPartyCallBack(isThirdPartyCallback(location.search));
-  }, [location.search]);
-
-  useEffect(() => {
     initializeShipAddressForm();
   }, []);
 
@@ -148,12 +142,12 @@ const Checkout: React.FC<ICheckout> = ({
 
   const initializeShipAddressForm = () => {
     const filteredAddresses = getFilteredShippingAddresses(addresses, siteData.siteCountryCode);
-    if(order && order.shippingAddress && !isAddressDefaultMAAddress(order.shippingAddress) && isThirdPartyCallBack){
+    if(order && order.shippingAddress && !isAddressDefaultMAAddress(order.shippingAddress)){
       setShippingAddress(order.shippingAddress);
       if(isAddressInAddressList(filteredAddresses, order.shippingAddress)){
         setShopperAddressBook(setAddressAsShipInAddressList(filteredAddresses, order.shippingAddress));
       }else{
-        setShopperAddressBook([{ ...order.shippingAddress, hasAddress: 1, isoalpha3Code: order.shippingAddress.country }]);
+        setShopperAddressBook([{ ...order.shippingAddress, hasAddress: 1, isShip: 1, isoalpha3Code: order.shippingAddress.country }]);
       }
     } else if(orderHasDefaultMAShipAddress(order || null)){ //order may have already been built without ship address (ie: guest)
       setShippingAddress(defaultAddress);
@@ -228,6 +222,7 @@ const Checkout: React.FC<ICheckout> = ({
         setLoading(false);
       } finally {
         setErrorMessage("");
+        setIsAddNewShipAddress(false);
       }
     }
   };
@@ -267,6 +262,7 @@ const Checkout: React.FC<ICheckout> = ({
     window.scrollTo(0, 0);
     setShippingAddress(defaultAddress);
     setShowShipAddressForm(!showShipAddressForm);
+    setIsAddNewShipAddress(true);
   };
 
   const handleEditAddressClick = (address: Address) => {
@@ -286,6 +282,8 @@ const Checkout: React.FC<ICheckout> = ({
         const hasPcid = pcid && pcid.length > 0;
         if(!hasPcid){
           //Make shopper put in an email address so we have a PCID to build the order
+          setShopperAddressBook([{ ...shippingAddress, hasAddress: 1, isoalpha3Code: shippingAddress.country }]); // maintain the address entered so it doesn't get wiped out
+          setShowAVS(false);
           setLoading(false);
           return;
         }
@@ -418,6 +416,7 @@ const Checkout: React.FC<ICheckout> = ({
         shippingAddress
     );
     setIsExpanded(!isExpanded);
+    setIsAddNewShipAddress(false);
   };
 
   const handleAddressSelectChange = async (id: number) => {
@@ -545,7 +544,7 @@ const Checkout: React.FC<ICheckout> = ({
   }
 
   function getPrefillAddressValues(): any {
-    if(hasOrderShipAddress() && isThirdPartyCallBack){
+    if(hasOrderShipAddress() && !isAddNewShipAddress){
       return order?.shippingAddress;
     }
     return getInitialAddressValues();
@@ -649,7 +648,7 @@ const Checkout: React.FC<ICheckout> = ({
                     saveTimeoutRef.current = setTimeout(() => {
                       handleSaveAddress(values);
                       lastSavedAddressRef.current = currentAddress;
-                    }, 1000); // 1000ms after user stops typing
+                    }, 1500); // 1500ms after user stops typing
                   }
 
                   return () => {

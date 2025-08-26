@@ -124,7 +124,8 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   const [isAutoShipChecked, setIsAutoShipChecked] = useState<boolean>(false);
   const addressList = useAtomValue(addressAtom);
   const paymentMethodOptions = useAtomValue(paymentMethodsAtom);
-  const portalKey = useMemo(() => JSON.stringify({ shopperId, portalId }), [shopperId, portalId]);
+  const [currentPortalId, setCurrentPortalId] = useState(portalId);
+  const portalKey = useMemo(() => JSON.stringify({ shopperId, currentPortalId }), [shopperId, currentPortalId]);
   const [portalData] = useAtom(portalApiData(portalKey));
   const memorizedSiteId = useMemo(() => siteId, [siteId]);
   const [siteData] = useAtom(siteApiData(memorizedSiteId));
@@ -477,10 +478,10 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                 />
                 <TotalAmount />
                 {isGuest && (
-                    <Contact portalId={portalId} cartId={cartId} setCustomerId={setCustomerId}
+                    <Contact portalId={currentPortalId} cartId={cartId} setCustomerId={setCustomerId}
                              setOrderData={setOrderData} setUseCartSummary={setUseCartSummary}
                              customerData={customerData} setShopperEmail={setShopperEmail} addressList={addressList}
-                             order={orderData}/>
+                             order={orderData} setCurrentPortalId={setCurrentPortalId}/>
                 )}
                 <Checkout
                   shopperId={shopperId}
@@ -495,11 +496,12 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                 <ShippingMethod
                   shopperID={shopperId}
                   isAddressSaved={isAddressSaved}
-                  portalId={portalId}
+                  portalId={currentPortalId}
                   pcid={customerId}
                   isGuest={isGuest}
                   cartData={cartData}
                   setCartData={setCartData}
+                  siteData={siteData}
                 />
 
               {(isAddressSaved && customerId.length > 0) ? (
@@ -515,7 +517,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                       payments={paymentMethods}
                       updatePaymentTypeId={setPaymentTypeId}
                       updateOrderErrorMessage={handleUpdateOrderErrorMessage}
-                      portalId={portalId}
+                      portalId={currentPortalId}
                       isGuest={isGuest}
                     />
                   )
@@ -549,11 +551,13 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                         cartId={cartId}
                         siteId={siteId}
                         isAddressSaved={isAddressSaved}
-                        portalId={portalId}
+                        portalId={currentPortalId}
                         isGuest={isGuest}
                     />
                 )}
-
+                <div className="notifications-mobile">
+                  <Notifications notificationMessages={orderNotifications || []} />
+                </div>  
                 <div className="place-order">
                   {(isAddressSaved && customerId.length > 0 && paymentMethodOptions) && (
                     <PlaceOrder

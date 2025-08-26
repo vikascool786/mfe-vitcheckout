@@ -5,3 +5,11 @@ export interface Portal {
     hasItransact: boolean;
     distId: string;
 }
+
+export const EMPTY_PORTAL: Portal = {
+    portalId: "",
+    autoShipDiscount: 0,
+    hasFreeShipping: false,
+    hasItransact: false,
+    distId: "",
+};

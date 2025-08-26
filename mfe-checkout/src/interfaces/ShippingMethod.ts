@@ -70,6 +70,9 @@ export interface StoreDetail {
   marketFacilitator?: number;
   vendorShipTax?: number;
   vendorShipTaxPct?: number;
+  freeShipDiff?: number;
+  freeShipMet?: number;
+  freeShipThreshold?: number;
 }
 
 export interface Store {

@@ -1037,6 +1037,8 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
                       setCVVFieldValue={setCVVFieldValue}
                       updateOrderErrorMessage={updateOrderErrorMessage}
                       siteId={siteId}
+                      pcid={pcid}
+                      isGuest={isGuest}
                     />
                   );
                 }

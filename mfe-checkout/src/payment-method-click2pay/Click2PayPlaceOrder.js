@@ -58,10 +58,11 @@ const Click2PayPlaceOrder = (function () {
 
     function checkoutWithCardFailedHandler(error){
         const errorMessage = error.message;
-        Click2PayLogger.logInfo("checkoutWithNewCard failed message: " + errorMessage);
-        //checkoutClick2payUtil.displayErrorMessage(stringReplacer.getMessage("checkout.click_to_pay.place_order.error"));
-        //checkoutClick2payUtil.closeiFrame();
+        Click2PayLogger.logInfo("checkoutWithCard failed message: " + errorMessage);
         closeIFrame();
+        return new Promise((resolve) => {
+            resolve(errorMessage);
+        })
     }
 
     function openIframe(){

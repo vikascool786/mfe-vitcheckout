@@ -40,6 +40,7 @@ import { useCreditCardFormContext } from "../../component/Form/CreditCardFormCon
 import { handleSaveCard } from "../../utils/helpers/CreditCardHelper";
 import { useContentStrings } from "../../hooks/useContentStrings";
 import { getPaypalToken } from "../../api/service/PaypalCheckout";
+import { isIOSSafari } from "../../utils/helpers/UserAgentHelper";
 
 interface IPlaceOrder {
   confirmOrder: () => void;
@@ -172,19 +173,25 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
 
             trackingData.set("paypal", response.callID);
 
-            await changeOrder(
-              {
-                ...changeOrderDetails,
-                paymentMethod: {
-                  ...response.paymentMethod,
-                },
-                userOptions: {
-                  ...changeOrderDetails.userOptions,
-                  trackingID: generateOrderTrackingId(trackingData),
-                },
+            const changeOrderPayload = {
+              ...changeOrderDetails,
+              paymentMethod: {
+                ...response.paymentMethod,
               },
-              order?.id
-            );
+              userOptions: {
+                ...changeOrderDetails.userOptions,
+                trackingID: generateOrderTrackingId(trackingData),
+              },
+            };
+
+            const orderBillingAddress = response.billing ?? order?.shippingAddress; //use billing from token response, otherwise fall back to shipping
+            if (orderBillingAddress) {
+              changeOrderPayload.billing = {
+                ...orderBillingAddress,
+              };
+            }
+
+            await changeOrder(changeOrderPayload, order?.id);
 
             confirmOrder();
           }
@@ -507,9 +514,14 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     const siteFlags = await fetchSiteFlagData(siteId, "393");
     const data = JSON.parse(siteFlags[0].auxDataText);
 
+    let ppClientId = GET_PAYPAL_CLIENT_ID();
+    if(isIOSSafari()){ // add cache-busting parameter
+      ppClientId += `&t=${Date.now()}`;
+    }
+
     // loading paypal sdk
     loadScript({
-      clientId: GET_PAYPAL_CLIENT_ID(), // Your PayPal Client ID
+      clientId: ppClientId, // Your PayPal Client ID
       merchantId: data.merchantId, // Optional: Specify merchant ID
       environment: data.environment, // Use "sandbox" or "production"
       currency: "USD", // Set your currency
@@ -605,7 +617,9 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
 
             return getClickToPayTransactionData(flowId, transId, total);
           } else {
-            throw new Error("Click2pay checkoutActionCode not Complete");
+            console.error(`click2pay place order failed: ` + response ? response : `Click2pay checkoutActionCode not Complete`);
+            const C2P_UNAVAILABLE_TRY_DIFFERENT_PAYMENT = `We're sorry, we have encountered an error with click2pay. Please try another payment method`
+            throw new Error(C2P_UNAVAILABLE_TRY_DIFFERENT_PAYMENT);
           }
         })
         .then((response: any) => {
@@ -622,24 +636,38 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
           c2pBillingAddress = response.data.billing;
           c2pBillingAddress.country = siteData.siteCountryCode;
 
-          return addTempPaymentMethod(shopperId, walletData);
+          return isGuest ? walletData : addTempPaymentMethod(shopperId, walletData);
         })
         .then((response: any) => {
-          const paymentId = response.id;
+
           if (order) {
+            const updatedOrder = {
+              ...order,
+              billingAddress: c2pBillingAddress,
+              userOptions: {
+                ...order.userOptions,
+                trackingID: generateOrderTrackingId(trackingData),
+              },
+            };
+
+            if(isGuest){
+              updatedOrder.paymentMethod = {
+                ...order.paymentMethod,
+                accountName: response.name,
+                number: response.number,
+                token: response.token,
+                typeID: response.type,
+                expMonth: response.month,
+                expYear: response.year,
+              };
+            } else{
+              updatedOrder.paymentMethod = {
+                ...order.paymentMethod,
+                id: response.id,
+              };
+            }
             return buildOrder(
-              generateChangeStoreResponse({
-                ...order,
-                paymentMethod: {
-                  ...order.paymentMethod,
-                  id: paymentId,
-                },
-                billingAddress: c2pBillingAddress,
-                userOptions: {
-                  ...order.userOptions,
-                  trackingID: generateOrderTrackingId(trackingData),
-                },
-              }, pcid)
+                generateChangeStoreResponse(updatedOrder, pcid)
             );
           }
         })

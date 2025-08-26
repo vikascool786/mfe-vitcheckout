@@ -106,6 +106,17 @@ export const updateShopperDetails = async (
   return response;
 };
 
+export const saveCvv = async (
+    shopperId: string,
+    id: number,
+    cvv: string
+) => {
+  const walletData = {
+    cvv: cvv
+  }
+  return updateShopperDetails(shopperId, id, walletData);
+};
+
 export const generateCardToken = async (ccNumber: string) => {
   const data = `ccNumber=${ccNumber}`;
   try {

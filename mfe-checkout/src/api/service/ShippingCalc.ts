@@ -6,6 +6,13 @@ import {isCustomCocktail, isInStockItem} from "../../utils/ItemUtils";
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
 
+/**
+ * This service was used to calculate free ship messages and get ship promos by store
+ * Intended for outside of checkout - should no longer need to use this service, free ship details should now come from universal order
+ * see AI-111313 and AI-111322
+ * @param portalId
+ * @param items
+ */
 export const doShippingCalc = async (
     portalId: string,
     items: Item[],

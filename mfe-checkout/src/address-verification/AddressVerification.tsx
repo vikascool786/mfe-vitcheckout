@@ -30,6 +30,12 @@ export const AddressVerification: React.FC<AppProps> = ({
   React.useState<boolean>(false);
   const { getString } = useContentStrings();
 
+  const primaryButtonRef = React.useRef<HTMLButtonElement>(null);
+
+  React.useEffect(() => { //set focus on the primary button
+    primaryButtonRef.current?.focus();
+  }, []);
+
   const onChangeVericationAddress = (address: Address) => {
     // set is new selected address to false if address does not exist on the addressList
     if (address?.addressHash == 0) {
@@ -63,6 +69,7 @@ export const AddressVerification: React.FC<AppProps> = ({
               onClick={handleEditClick}
             />
             <Button
+              ref={primaryButtonRef}
               label={getString("useEnteredAddress")as string}
               btnType="primary"
               onClick={handleUseSelectedAddress}
@@ -90,6 +97,7 @@ export const AddressVerification: React.FC<AppProps> = ({
               onClick={handleEditClick}
             />
             <Button
+              ref={primaryButtonRef}
               label={getString("useSelectedAddress") as string}
               btnType="primary"
               onClick={handleUseSelectedAddress}

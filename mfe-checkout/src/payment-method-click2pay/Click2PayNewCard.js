@@ -134,9 +134,11 @@ const Click2PayNewCard = (function () {
 
   function refreshCardList(c2pInstance) {
     Click2PayUtil.showSpinner(true);
+    Click2PayLogger.logInfo("initiating getUserCards()");
     const cardsPromise = Click2PayCards.getUserCards(c2pInstance);
     cardsPromise
       .then((cardsResponse) => {
+        Click2PayLogger.logResponse("getUserCards", cardsResponse, c2pInstance);
         Click2PayCardLoader.loadSRCCardsOnPage(
           cardsResponse,
           window.c2pInstance,

@@ -99,6 +99,14 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
     return shippingLabel;
   }
 
+  function getTaxLabel(): string | undefined {
+    let taxLabel = getString("tax");
+    if(!isAddressSaved){
+      taxLabel = `${taxLabel} (Estimated)`
+    }
+    return taxLabel;
+  }
+
   // Handle input text change for coupon
   const handleCouponTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
@@ -633,7 +641,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                     </div>
                   )}
                   <div className="order-summary-row">
-                    <div>{getString("tax")}</div>
+                    <div>{getTaxLabel()}</div>
                     <div className={"qa-tax"}>
                       {store?.store?.totals?.taxStr}
                     </div>

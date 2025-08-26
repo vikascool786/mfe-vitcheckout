@@ -1,4 +1,4 @@
-import React from "react";
+import React, { forwardRef } from "react";
 import "./Button.scss";
 
 interface IButtonProps
@@ -13,18 +13,19 @@ interface IButtonProps
   disabled?: boolean;
 }
 
-export const Button: React.FC<IButtonProps> = ({
-  label,
-  btnType,
-  logo,
-  qaTag = "",
-  disabled,
-  ...props
-}) => {
-  return (
-    <button className={`${qaTag} custom-button ${btnType}`} type="button" {...props} disabled={disabled}>
-      {label}
-      {logo && <img src={logo} alt={label} />}
-    </button>
-  );
-};
+export const Button = forwardRef<HTMLButtonElement, IButtonProps>(
+    ({ label, btnType, logo, qaTag = "", disabled, ...props }, ref) => {
+      return (
+          <button
+              ref={ref}
+              className={`${qaTag} custom-button ${btnType}`}
+              type="button"
+              disabled={disabled}
+              {...props}
+          >
+            {label}
+            {logo && <img src={logo} alt={label} />}
+          </button>
+      );
+    }
+);

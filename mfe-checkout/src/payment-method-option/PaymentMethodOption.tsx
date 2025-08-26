@@ -3,6 +3,7 @@ import { useAtom, useSetAtom } from "jotai";
 import React, { ChangeEvent, useEffect, useState } from "react";
 import { buildOrder } from "../api/service/Order";
 import {
+  saveCvv,
   updateShopperDetails,
   updateTempPaymentMethod,
 } from "../api/service/ShoppersPaymentMethods";
@@ -185,13 +186,9 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
       return;
     }
 
-    const requestData = {
-      ...paymentMethod,
-      preferred: true,
-      cvv,
-    };
-
     try {
+
+      await saveCvv(shopperId, paymentMethod.id, cvv);
 
       // Prevent re-validating if already validated
       if (isPaymentValidated) {

@@ -14,4 +14,5 @@ export interface Locale {
   id: string;
   familyNameFirst: boolean;
   maLanguageCode: string;
+  currencySymbol: string;
 }
