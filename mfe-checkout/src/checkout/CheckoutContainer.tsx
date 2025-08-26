@@ -476,7 +476,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                 <Notifications
                   notificationMessages={orderNotifications || []}
                 />
-                <TotalAmount />
+                <TotalAmount cartData={useCartSummary ? cartData : [] as any}/>
                 {isGuest && (
                     <Contact portalId={currentPortalId} cartId={cartId} setCustomerId={setCustomerId}
                              setOrderData={setOrderData} setUseCartSummary={setUseCartSummary}

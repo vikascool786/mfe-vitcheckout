@@ -207,7 +207,7 @@ export const GET_AJAX_ENDPOINT_BASE_URL = () => {
   const mode = GET_API_MODE();
   switch (mode) {
     case "localhost":
-      return "https://localhostapi.shop.com{{path}}";
+      return "https://dev.shop.com{{path}}";
     case "dev":
     case "staging":
     case "prod":
