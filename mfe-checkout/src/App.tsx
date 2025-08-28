@@ -30,22 +30,24 @@ const App: React.FC<AppProps> = () => {
 
         {/* for old custoemr  */}
         {/* <CheckoutContainer
-          cartId="cart_1762863970_W_USA_USA_ENG"
-          shopperId="qYmmqpWZzVjeZzhZqpzpVYwzkmqWjqkhZVqjzxqjqp"
-          pcid="1459068382"
+          cartId="cart_1449792547_W_USA_USA_ENG"
+          shopperId="zVWmVXejzqVXxzhWUjzpkmXzZYwmxwXpjUYUzwzwjk"
+          pcid="1449792547"
+          isGuest={false}
+          portalId="7052764.COM"
           siteId="66"
           sessionId="3055290977"
         /> */}
 
         {/* for old custoemr  */}
         <CheckoutContainer
-          cartId="cart_6565841_W_USA_USA_ENG"
-          shopperId="ZpXYpYwzzXVYUzhkZhzYpYmzYxpUmjmejWpqzjqzz"
-          pcid="6565841"
+          cartId="cart_a4ee32b5-8279-4f34-a006-3f8952f46dc6_W_USA_USA_ENG"
+          shopperId=""
+          pcid=""
           siteId="66"
-          sessionId="3055598204"
-          portalId="TESTMA44.COM"
-          isGuest={false}
+          sessionId="3055607593"
+          portalId="7052764.COM"
+          isGuest={true}
         />
           {/* Guest shopper  */}
           {/*<CheckoutContainer
