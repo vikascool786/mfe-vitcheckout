@@ -6,11 +6,12 @@ import { fetchShopperDirectory } from "../api/service/ShopperDirectory";
 import { isEZRegShopper, isFullRegShopper, ShopperDirectory } from "../interfaces/ShopperDirectory";
 import { fetchShopperDetail } from "../api/service/ShopperDetail";
 import { postEZReg, REG_TYPE_GUEST_CHECKOUT } from "../api/service/ShopperEZReg";
-import { buildInitialGuestOrder, deleteUniversalOrder } from "../api/service/Order";
+import { buildInitialGuestOrder, changeOrder, deleteUniversalOrder } from "../api/service/Order";
 import { CustomerProfile } from "../interfaces/CustomerProfile";
 import { Address } from "../interfaces/Address";
 import { Order } from "../interfaces/Order";
 import { isCartOrder } from "../utils/OrderUtils";
+import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 
 interface IContactProps {
     portalId: string;
@@ -91,6 +92,12 @@ export const Contact: React.FC<IContactProps> = ({
     useEffect(() => {
         if(isValidEmail){
             setEmailErrorMessage("");
+
+            // get token and payerId if returning customer
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+            const payerId = urlParams.get('PayerID');
+            // if(token && payerId){
             //do directory call or EZ reg shopper
             fetchShopperDirectory(email)
                 .then((response: ShopperDirectory) => {
@@ -104,15 +111,22 @@ export const Contact: React.FC<IContactProps> = ({
                             .then(response => {
                                 setCustomerId(response.pcid);
                                 setCurrentPortalId(response.portal?.portalId);
-                                const shippingAddress = addressList && addressList.length > 0 ? addressList[0] : null;
-                                // if(buildGuestOrder){
+                                if(order && token && !payerId){
+                                    const orderResponse = changeOrder(generateChangeStoreResponse(order,response.pcid ), cartId);
+                                    orderResponse.then((res) => {
+                                        setOrderData(res?.response.success?.data || null);
+                                        setUseCartSummary(false);
+                                        setShopperEmail(email);
+                                    });
+                                } else {
+                                    const shippingAddress = addressList && addressList.length > 0 ? addressList[0] : null;
                                     const orderResponse = buildInitialGuestOrder(cartId, portalId, response.pcid, shippingAddress);
                                     orderResponse.then((res) => {
                                         setOrderData(res?.response.success?.data || null);
                                         setUseCartSummary(false);
                                         setShopperEmail(email);
                                     });
-                                // }
+                                }
                             })
                     } else {
                         postEZReg(email, portalId, REG_TYPE_GUEST_CHECKOUT, (isOptInChecked && showOptInCheckbox))
