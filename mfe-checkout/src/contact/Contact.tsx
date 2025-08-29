@@ -97,7 +97,6 @@ export const Contact: React.FC<IContactProps> = ({
             const urlParams = new URLSearchParams(window.location.search);
             const token = urlParams.get('token');
             const payerId = urlParams.get('PayerID');
-            // if(token && payerId){
             //do directory call or EZ reg shopper
             fetchShopperDirectory(email)
                 .then((response: ShopperDirectory) => {
