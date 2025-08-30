@@ -94,7 +94,6 @@ export const buildInitialGuestOrder = async (
       portalId,
       pcid
   );
-
   if(shipAddress){
     buildOrderPayload.shipping = {
       first: shipAddress.first,

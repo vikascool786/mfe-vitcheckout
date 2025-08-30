@@ -10,7 +10,6 @@ import { buildInitialGuestOrder, changeOrder, deleteUniversalOrder } from "../ap
 import { CustomerProfile } from "../interfaces/CustomerProfile";
 import { Address } from "../interfaces/Address";
 import { Order } from "../interfaces/Order";
-import { isCartOrder } from "../utils/OrderUtils";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 
 interface IContactProps {
@@ -39,7 +38,7 @@ export const Contact: React.FC<IContactProps> = ({
     setCurrentPortalId,
 }) => {
 
-    function getSignInRegisterUrl(){
+    function getSignInRegisterUrl() {
         return `/nbts/login-myaccount.xhtml?ischeckout=true&returnurl=/nbts/checkout/v2`;
     }
 
@@ -51,24 +50,22 @@ export const Contact: React.FC<IContactProps> = ({
     const [isOptInChecked, setIsOptInChecked] = useState(false);
     const [emailErrorMessage, setEmailErrorMessage] = useState("");
     const [emailTouched, setEmailTouched] = useState(false);
-    // const [buildGuestOrder, setBuildGuestOrder] = useState(false); //AI-111735
 
     useEffect(() => {
         const emailInput = document.querySelector(".js-email-input") as HTMLInputElement;
-        if(emailInput){
+        if (emailInput) {
             emailInput.focus();
         }
     }, []);
 
     useEffect(() => {
-        if(order){
+        if (order) {
             setEmail(order.email);
         }
-        // setBuildGuestOrder((!order || isCartOrder(order)));
     }, [order]);
 
     useEffect(() => {
-        if(customerData){
+        if (customerData) {
             setEmail(customerData?.email_address);
             setShopperEmail(customerData?.email_address);
         }
@@ -90,9 +87,8 @@ export const Contact: React.FC<IContactProps> = ({
     }, [debouncedEmail]);
 
     useEffect(() => {
-        if(isValidEmail){
+        if (isValidEmail) {
             setEmailErrorMessage("");
-
             // get token and payerId if returning customer
             const urlParams = new URLSearchParams(window.location.search);
             const token = urlParams.get('token');
@@ -100,9 +96,9 @@ export const Contact: React.FC<IContactProps> = ({
             //do directory call or EZ reg shopper
             fetchShopperDirectory(email)
                 .then((response: ShopperDirectory) => {
-                    if(response?.foreign){
+                    if (response?.foreign) {
                         setEmailErrorMessage("The email address entered is for an account on a another SHOP.COM site, please use a valid email");
-                    } else if(isFullRegShopper(response) || isEZRegShopper(response)) {
+                    } else if (isFullRegShopper(response) || isEZRegShopper(response)) {
                         //commenting out sign in alert since they chose to come in as guest. Keeping in case we decide otherwise
                         //setIsFullRegEmail(isFullRegShopper(response)); //show sign in alert in UI
                         setShowOptInCheckbox(false);
@@ -110,8 +106,8 @@ export const Contact: React.FC<IContactProps> = ({
                             .then(response => {
                                 setCustomerId(response.pcid);
                                 setCurrentPortalId(response.portal?.portalId);
-                                if(order && token && !payerId){
-                                    const orderResponse = changeOrder(generateChangeStoreResponse(order,response.pcid ), cartId);
+                                if (order && token && !payerId) {
+                                    const orderResponse = changeOrder(generateChangeStoreResponse(order, response.pcid), cartId);
                                     orderResponse.then((res) => {
                                         setOrderData(res?.response.success?.data || null);
                                         setUseCartSummary(false);
@@ -133,14 +129,12 @@ export const Contact: React.FC<IContactProps> = ({
                                 const ezPcid = response?.shopper?.pcid;
                                 setCustomerId(ezPcid);
                                 const shippingAddress = addressList && addressList.length > 0 ? addressList[0] : null;
-                                // if(buildGuestOrder){
-                                    const orderResponse = buildInitialGuestOrder(cartId, portalId, ezPcid, shippingAddress);
-                                    orderResponse.then((res) => {
-                                        setOrderData(res?.response.success?.data || null);
-                                        setUseCartSummary(false);
-                                        setShopperEmail(email);
-                                    });
-                                // }
+                                const orderResponse = buildInitialGuestOrder(cartId, portalId, ezPcid, shippingAddress);
+                                orderResponse.then((res) => {
+                                    setOrderData(res?.response.success?.data || null);
+                                    setUseCartSummary(false);
+                                    setShopperEmail(email);
+                                });
                             }).catch((error: any) => {
                                 console.error("EZ reg error: ", error);
                                 const errorMessage =
@@ -151,11 +145,11 @@ export const Contact: React.FC<IContactProps> = ({
                             });
                     }
                 });
-        }else{
+        } else {
             setShowOptInCheckbox(true);
-            if(email.length > 1){
+            if (email.length > 1) {
                 setEmailErrorMessage("Please enter a valid email address");
-            } else{
+            } else {
                 setEmailErrorMessage("");
             }
         }
@@ -178,7 +172,7 @@ export const Contact: React.FC<IContactProps> = ({
             <form className="qa-contact-section">
                 <div className="checkout-form-container">
                     <div className="form-header">
-                        <FormHeading title="Contact"/>
+                        <FormHeading title="Contact" />
                         <div className="checkout-contact__link"><a href="#" onClick={handleSignInLink}>Sign In or Create Account</a>
                         </div>
                     </div>
@@ -199,7 +193,7 @@ export const Contact: React.FC<IContactProps> = ({
                             className="js-email-input"
                         />
                     </div>
-                    { showOptInCheckbox && (
+                    {showOptInCheckbox && (
                         <div className="checkout-contact__checkbox">
                             <FormField
                                 type="checkbox"
