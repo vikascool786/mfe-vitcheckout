@@ -709,7 +709,16 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
         validationSchema={placeOrderSchema(getString)}
         onSubmit={() => handlePlaceOrder(paymentMethods)}
       >
-        {({ touched, errors, setFieldValue, submitForm, values }) => (
+        {({ touched, errors, setFieldValue, submitForm, values, setErrors, setTouched }) => {
+          // useEffect to reset autoshipTerms if autoship products are removed
+          React.useEffect(() => {
+            if (!orderHasAutoshipItems(order || null)) {
+              setFieldValue("autoshipTerms", true);
+              setErrors({autoshipTerms: undefined });
+              setTouched(({ autoshipTerms: false }));
+            }
+          }, [order]);
+          return (
           <form>
             {orderHasAutoshipItems(order || null) && (
               <div className="checkout-place-order-autoship checkout-place-order-text">
@@ -815,7 +824,8 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
               }
             />
           </form>
-        )}
+        );
+        }}
       </Formik>
     </div>
   );
