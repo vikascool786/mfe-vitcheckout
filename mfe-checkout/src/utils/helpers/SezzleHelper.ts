@@ -22,7 +22,6 @@ export const handleSezzleCheckout = async (
 ) => {
     const trackingData = new Map<string, string>();
     const createSezzleOrder = async () => {
-        console.log("createSezzleOrder");
         let sezzleResponse;
         try {
             sezzleResponse = await checkoutSezzle(isGuest);

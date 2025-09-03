@@ -442,8 +442,6 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
   // not to send payment method id if Gift card covers whole order 
   useEffect(() => {
     if (order?.totals?.price == 0) {
-      console.log(order?.totals?.price == 0, "order?.totals?.price");
-
       const handlePaymentOnGCCover = async () => {
         try {
 

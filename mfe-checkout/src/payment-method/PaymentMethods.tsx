@@ -132,6 +132,14 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       shopperId: string,
       addresses: Address[]
     ) => {
+      console.debug("[PM][fetchShoppersSavedPayments - addresses] start", {
+        shopperId,
+        paymentsPresent: !!payments,
+        paymentsLength: payments?.length ?? 0,
+        paymentMethodsCount: paymentMethods.length,
+        isPaymentsFetched,
+      });
+
       const getQueryParams = () => {
         const params = new URLSearchParams(window.location.search);
         return {
@@ -191,6 +199,9 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
           }
 
           setPaymentMethods(handleThirdPartyPaymentVisibility(staticMethods));
+          console.debug("[PM] setPaymentMethods called (no payments) ->", {
+            newCount: staticMethods.length,
+          });
           setIsPaymentsFetched(true);
           return;
         }
@@ -279,6 +290,10 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
 
         setTimeout(() => {
           setPaymentMethods(handleThirdPartyPaymentVisibility(updatedPaymentOptions));
+          console.debug("[PM] setPaymentMethods called (merged payments) ->", {
+            mergedCount: updatedPaymentOptions.length,
+            paymentsLength: payments?.length ?? 0,
+          });
           setIsPaymentsFetched(true);
         }, 300);
       } catch (error) {
@@ -310,19 +325,40 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       }
     };
 
+    console.debug("[PM] decision: isGuest, addresses && paymentMethods.length < 3 ->", {
+      isGuest,
+      addressesPresent: !!addresses,
+      paymentMethodsLength: paymentMethods.length,
+    });
+
     if(isGuest){
       setPaymentMethods(handleThirdPartyPaymentVisibility(paymentMethods));
       setIsPaymentsFetched(true);
-    }else if (addresses && paymentMethods.length < 3) {
+    }else if (addresses && (paymentMethods.length < 3 || (payments && payments.length > 0))) {
       fetchShoppersSavedPayments(shopperId, addresses);
     }
-  }, [shopperId, addresses]);
+  }, [shopperId, addresses, payments]);
 
     useEffect(() => {
+    console.debug("[PM][effect isVisible] triggered", {
+      isVisible,
+      addressesLength: addresses ? Object.keys(addresses).length : 0,
+      isPaymentsFetched,
+      paymentsLength: payments?.length ?? 0,
+      paymentMethodsCount: paymentMethods.length,
+    });
+      
     const fetchShoppersSavedPayments = async (
       shopperId: string,
       addresses: Address[]
     ) => {
+      console.debug("[PM][fetchShoppersSavedPayments - isVisible] start", {
+        shopperId,
+        isVisible,
+        paymentsPresent: !!payments,
+        paymentsLength: payments?.length ?? 0,
+      });
+
       const getQueryParams = () => {
         const params = new URLSearchParams(window.location.search);
         return {
@@ -468,12 +504,17 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
           });
         }
 
+        console.log("Updated Payment Options: ", updatedPaymentOptions);
         setTimeout(() => {
           setPaymentMethods(handleThirdPartyPaymentVisibility(updatedPaymentOptions));
+          console.debug("[PM] setPaymentMethods called (isVisible merged) ->", {
+            mergedCount: updatedPaymentOptions,
+          });
           setIsPaymentsFetched(true);
         }, 300);
       } catch (error) {
         console.log("Error fetching payment methods", error);
+        console.error("[PM] Error fetching payment methods (isVisible)", error);
         // in case fetching payment api fails and user has a successful paypal transaction
         // let user proceed with paypal
         if (isPaypalOrderSuccess) {
@@ -500,10 +541,19 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       }
     };
 
-    if (isVisible && addresses && !isPaymentsFetched) {
+    if (isVisible && addresses && (!isPaymentsFetched || (payments && payments.length > 0))) {
+      console.debug("[PM] calling fetchShoppersSavedPayments from isVisible effect");
       fetchShoppersSavedPayments(shopperId, addresses);
     }
-  }, [isVisible, addresses, isPaymentsFetched]);
+  }, [isVisible, addresses, isPaymentsFetched, payments]);
+
+   useEffect(() => {
+    console.debug("[PM] paymentMethods state changed", {
+      count: paymentMethods.length,
+      ids: paymentMethods.map((pm) => pm.paymentMethod?.id ?? null),
+      ts: Date.now(),
+    });
+  }, [paymentMethods, payments]);
 
   const handleThirdPartyPaymentVisibility = (paymentOptions : IPaymentOption[]) : IPaymentOption[] => {
     const shouldShowPaypal = order?.paymentMethods.some(
@@ -856,7 +906,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   };
 
   const onAddNewCards = (payments: IPaymentOption[]) => {
-    console.log("payments", payments);
     setTimeout(() => {
       setPaymentMethods(payments);
       setShowNewCard(false);

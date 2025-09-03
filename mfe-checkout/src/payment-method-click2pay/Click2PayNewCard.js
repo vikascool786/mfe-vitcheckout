@@ -120,7 +120,6 @@ const Click2PayNewCard = (function () {
 
   function checkoutWithNewCardSuccessHandler(response, c2pInstance) {
     Click2PayLogger.logResponse("checkoutWithNewCard", response, c2pInstance);
-    console.log("checkout with new card success: " + JSON.stringify(response));
     if (response.checkoutActionCode === "COMPLETE") {
       Click2PayPlaceOrder.closeIFrame();
       refreshCardList(c2pInstance);

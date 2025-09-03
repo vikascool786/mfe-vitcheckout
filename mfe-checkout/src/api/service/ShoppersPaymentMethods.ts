@@ -52,8 +52,6 @@ export const addShoppersPaymentMethod = async (
       "Content-Type": "application/x-www-form-urlencoded",
     },
   });
-
-  // console.log("Card added successfully:", response.data);
   return response.data;
 };
 
