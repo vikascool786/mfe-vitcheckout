@@ -204,6 +204,7 @@ export const TextUpdates = React.memo(
     );
     const [isAlertChecked, setIsAlertChecked] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
+    const [phoneErrorType, setPhoneErrorType] = useState<"invalid" | "countryMismatch" | null>(null);
 
     useEffect(() => {
       fetchCustomerPreferenceData(pcid, siteData).then((response) => {
@@ -256,6 +257,7 @@ export const TextUpdates = React.memo(
                 ) {
                   setFieldError("phone", getString("notAMobilePhoneNumber"));
                   setHasPhoneError(true);
+                  setPhoneErrorType(null);
                   isValidMobilePhone = false;
                   return;
                 } else if (response.response?.isMatch < 1) {
@@ -270,6 +272,7 @@ export const TextUpdates = React.memo(
                       getString
                     )
                   );
+                  setPhoneErrorType("countryMismatch");
                   isValidMobilePhone = false;
                   setHasPhoneError(true);
                   return;
@@ -277,10 +280,12 @@ export const TextUpdates = React.memo(
                 if (isValidMobilePhone) {
                   updateOrderWithTextAlerts(phoneNumber);
                   setHasPhoneError(false);
+                  setPhoneErrorType(null);
                 }
               } else {
                 setFieldError("phone", getString("invalidPhoneNumber"));
                 setHasPhoneError(true);
+                setPhoneErrorType("invalid");
                 isValidMobilePhone = false;
                 return;
               }
@@ -334,7 +339,7 @@ export const TextUpdates = React.memo(
               } else if (!normalized || normalized.length !== 10) {
                 errors.phone = getString("phoneNumber10Digits");
                 setHasPhoneError(true)
-              } else if (hasPhoneError) {
+              } else if (hasPhoneError && !errors.phone) {
                 errors.phone = getString("invalidPhoneNumber");
               }
             }
