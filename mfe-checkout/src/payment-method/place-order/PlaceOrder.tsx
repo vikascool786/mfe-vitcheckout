@@ -55,10 +55,8 @@ interface IPlaceOrder {
   isLoading: boolean;
   setIsLoading: any;
   updateOrderErrorMessage: (newMessage: string) => void;
-  setIsAutoShipChecked: React.Dispatch<SetStateAction<boolean>>;
   setMobileRequiredMessage: React.Dispatch<SetStateAction<boolean>>;
   hasPhoneError: boolean;
-  isAutoShipChecked: boolean;
   isCheckboxChecked: boolean;
   pcid: string;
   isGuest: boolean;
@@ -77,9 +75,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   isLoading,
   setIsLoading,
   updateOrderErrorMessage,
-  setIsAutoShipChecked,
   setMobileRequiredMessage,
-  isAutoShipChecked,
   hasPhoneError,
   isCheckboxChecked,
   pcid,
@@ -704,19 +700,11 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   return (
     <div className="checkout-place-order margin-5">
       <Formik
-        initialValues={{ autoshipTerms: !orderHasAutoshipItems(order || null) }}
-        validationSchema={placeOrderSchema(getString)}
+        initialValues={{}}
         onSubmit={() => handlePlaceOrder(paymentMethods)}
       >
-        {({ touched, errors, setFieldValue, submitForm, values, setErrors, setTouched }) => {
-          // useEffect to reset autoshipTerms if autoship products are removed
-          React.useEffect(() => {
-            if (!orderHasAutoshipItems(order || null)) {
-              setFieldValue("autoshipTerms", true);
-              setErrors({autoshipTerms: undefined });
-              setTouched(({ autoshipTerms: false }));
-            }
-          }, [order]);
+        {({submitForm }) => {
+
           return (
           <form>
             {orderHasAutoshipItems(order || null) && (
@@ -733,17 +721,6 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                    {getString("shipTaxAdjustAtTimeOfPulling")}
                   </div>
                 </div>
-
-                <Checkbox
-                  name="autoshipTerms"
-                  title={getString("agreeToSubscribeTerms") as string}
-                  checked={isAutoShipChecked}
-                  onChange={() => {
-                    setIsAutoShipChecked(!values.autoshipTerms);
-                    setFieldValue("autoshipTerms", !values.autoshipTerms);
-                  }}
-                  errorMessage={touched.autoshipTerms && errors.autoshipTerms}
-                />
               </div>
             )}
             {/* <div className="checkout-place-order-text-terms-policy">
