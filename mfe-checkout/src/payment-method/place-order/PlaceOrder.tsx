@@ -17,7 +17,6 @@ import { Address } from "../../interfaces/Address";
 import { Order } from "../../interfaces/Order";
 import { OrderConsolidationData } from "../../interfaces/OrderConsolidationData";
 import Click2PayPlaceOrder from "../../payment-method-click2pay/Click2PayPlaceOrder";
-import { Back } from "../../assets/svgs/Back";
 import {
   // cvvValidAtom,
   IPaymentOption,
@@ -723,22 +722,9 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             {orderHasAutoshipItems(order || null) && (
               <div className="checkout-place-order-autoship checkout-place-order-text">
                 <div className="checkout-place-order-text__flex">
-                  <div className="checkout-place-order-text__heading">
-                    {getString("autoShipTermsAndConditions")}
-                  </div>
-                  <Back
-                    className={`qa-expand mfe-accordion ${
-                      isExpanded ? "open" : "close"
-                    }`}
-                    onClick={onToggleAccordion}
-                  />
                 </div>
                 <div
-                  className={`checkout-place-order-text__box ${
-                    isExpanded
-                      ? "checkout-place-order-text__open"
-                      : "checkout-place-order-text__close"
-                  }`}
+                  className={`checkout-place-order-text__box`}
                 >
                   <div className="checkout-place-order-text">
                     {getString("autoShipAgreement")}
@@ -760,7 +746,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                 />
               </div>
             )}
-            <div className="checkout-place-order-text-terms-policy">
+            {/* <div className="checkout-place-order-text-terms-policy">
               {getString("agreeToTerms")}{" "}
               <a
                 href="/info/terms-of-use"
@@ -778,7 +764,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                 {getString("privacyPolicy")}
               </a>
               .
-            </div>
+            </div> */}
             {errorMessage.length > 0 && (
               <div className="error-message-order">
                 {/* <div className="error-message-order--bold">
