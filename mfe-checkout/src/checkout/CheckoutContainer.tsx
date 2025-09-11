@@ -9,6 +9,7 @@ import { Spinner } from "../component/Spinner/Spinner";
 import HeadHelmet from "../head-helmet/HeadHelmet";
 import { withErrorBoundary } from "../hoc/withErrorBoundary";
 import { useApi } from "../hooks/useAPI";
+import { useSiteFlags } from "../hooks/useSiteFlags";
 import { Address } from "../interfaces/Address";
 import { ChangeOrder } from "../interfaces/ChangeOrder";
 import { Order } from "../interfaces/Order";
@@ -23,18 +24,18 @@ import {
   orderAtom,
   orderNotificationsAtom,
   paymentMethodsAtom,
+  siteFlagData,
 } from "../store";
 import {
-  getOrderNotifications, isCartOrder, isUniversalOrderBuilt,
-  orderHasAutoshipItems, orderHasDefaultMAShipAddress,
+  getOrderNotifications,
+  isCartOrder,
+  isUniversalOrderBuilt,
+  orderHasAutoshipItems,
+  orderHasDefaultMAShipAddress,
 } from "../utils/OrderUtils";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
-import {handleSezzleCheckout, isSezzleSelectedPayment, isSezzleSuccessful} from "../utils/helpers/SezzleHelper";
-import {
-  GET_API_ENDPOINT_BASE_URL_ONLY,
-  GET_API_KEY,
-  GET_SHOP_CART_URL,
-} from "../utils/urlResolver";
+import { handleSezzleCheckout, isSezzleSelectedPayment, isSezzleSuccessful } from "../utils/helpers/SezzleHelper";
+import { GET_API_ENDPOINT_BASE_URL_ONLY, GET_API_KEY, GET_SHOP_CART_URL } from "../utils/urlResolver";
 import Feedback from "./../Feedback/Feedback";
 import Checkout from "./Checkout";
 import { Notifications } from "./Notifications";
@@ -46,8 +47,8 @@ import PaymentMethodHeading from "../payment-method/PaymentMethodHeading";
 import { TextUpdates } from "../text-updates/TextUpdates";
 import { GET_API_MODE } from "../utils/helpers/urlResolvers";
 import { getShippingAddressFromAddressList } from "../utils/AddressUtils";
-import {CreditCardFormProvider} from "../component/Form/CreditCardFormContext";
-import {siteApiData} from "./siteAtom";
+import { CreditCardFormProvider } from "../component/Form/CreditCardFormContext";
+import { siteApiData } from "./siteAtom";
 import { useContentStrings } from "../hooks/useContentStrings";
 import { isSuccessfulPaypalCallback } from "../utils/helpers/PaypalHelper";
 import { getUserAgent } from "../utils/helpers/UserSessionDataHelper";
@@ -110,6 +111,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
 }) => {
   const [orderData, setOrderData] = useAtom(orderAtom);
   const { getContent,getString } = useContentStrings();
+  const { siteFlags, fetchSiteFlagInfo } = useSiteFlags();
   const [showEmptyOrder, setShowEmptyOrder] = useState(false);
   const [isLoading, setIsLoading] = useAtom(loadingAtom);
   const [orderErrorMessage, setOrderErrorMessage] = useState("");
@@ -155,6 +157,10 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   const paymentUrl = `${apiDomain}/shopper-wallets/v1/Shopper/${shopperId}/Wallet?api_key=${apiKey}`;
   const checkoutUrl = `${apiDomain}/checkout-universal/v1/checkouts?api_key=${apiKey}`;
   const fetchOrderUrl = `${apiDomain}/checkout-universal/v1/checkouts/id/${cartId}?api_key=${apiKey}`;
+
+  useEffect(() => {
+    fetchSiteFlagInfo(siteId);
+  }, []);
 
   useEffect(() => {
     if(isSezzleSelectedPayment(location.search)){
@@ -254,6 +260,10 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     [paymentMethods]
   );
 
+  const checkOrderConfirmationFlag = (siteFlagData: siteFlagData[]) => {
+    return siteFlagData.find(flag => (flag.flagID === 646 && flag.active == true)) ?? false;
+  };
+
   const orderHasNewAutoship = (): boolean => {
     if (orderData) {
       const newAutoshipItems = Object.values(orderData.stores)
@@ -339,7 +349,8 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   };
 
   const redirectToOrderConfirmation = (orderId: string | number): void => {
-    const orderConfirmationUrl = isGuest ? `/nbts/guestcheckout/orderconfirmation?guestOrderId=${orderId}` : `/nbts/orderconfirmation-${orderId}`;
+    const defaultSlug = `/nbts${checkOrderConfirmationFlag(siteFlags) ? '/v2' : ''}/orderconfirmation-${orderId}`;
+    const orderConfirmationUrl = isGuest ? `/nbts/guestcheckout/orderconfirmation?guestOrderId=${orderId}` : defaultSlug;
 
     const handleNavigation = () => {
       document.removeEventListener("visibilitychange", handleNavigation);

@@ -9,7 +9,6 @@ import {
   addTempPaymentMethod,
   generatePayPalTransactionDetails,
 } from "../../api/service/ShoppersPaymentMethods";
-import { fetchSiteFlagData } from "../../api/service/SiteFlags";
 import { siteApiData } from "../../checkout/siteAtom";
 import { Button } from "../../component/Button/Button";
 import { Checkbox } from "../../component/Form/Checkbox/Checkbox";
@@ -17,6 +16,7 @@ import { Address } from "../../interfaces/Address";
 import { Order } from "../../interfaces/Order";
 import { OrderConsolidationData } from "../../interfaces/OrderConsolidationData";
 import Click2PayPlaceOrder from "../../payment-method-click2pay/Click2PayPlaceOrder";
+import { Back } from "../../assets/svgs/Back";
 import {
   // cvvValidAtom,
   IPaymentOption,
@@ -38,6 +38,7 @@ import "./PlaceOrder.scss";
 import { useCreditCardFormContext } from "../../component/Form/CreditCardFormContext";
 import { handleSaveCard } from "../../utils/helpers/CreditCardHelper";
 import { useContentStrings } from "../../hooks/useContentStrings";
+import { useSiteFlags } from "../../hooks/useSiteFlags";
 import { getPaypalToken } from "../../api/service/PaypalCheckout";
 import { isIOSSafari } from "../../utils/helpers/UserAgentHelper";
 
@@ -89,40 +90,41 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   );
   const selectedPaymentMethod = paymentMethods.find((pm) => pm.isSelected);
   const { getString } = useContentStrings();
+  const { siteFlags } = useSiteFlags();
   const [orderConsolidateData, setOrderConsolidateData] =
-    useState<OrderConsolidationData>(getOrderConsolidateData(order || null,getString));
+    useState<OrderConsolidationData>(getOrderConsolidateData(order || null, getString));
 
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
   const { creditCardFormData } = useCreditCardFormContext();
 
-  const [paypalTokenId, setPaypalTokenId ] = useState<String>("");
-  const [paypalRecurringUrl, setPaypalRecurringUrl ] = useState<String>("");
+  const [paypalTokenId, setPaypalTokenId] = useState<String>("");
+  const [paypalRecurringUrl, setPaypalRecurringUrl] = useState<String>("");
 
   useEffect(() => {
     updateOrderErrorMessage("");
     if (order) {
-      setOrderConsolidateData(getOrderConsolidateData(order,getString));
+      setOrderConsolidateData(getOrderConsolidateData(order, getString));
     }
   }, [order]);
 
   useEffect(() => {
-    if(isPaypalPayment(paymentTypeId) && order){
+    if (isPaypalPayment(paymentTypeId) && order) {
       const isRecurring = PAYPAL_RECURRING.typeId === paymentTypeId;
       const ppShopperId = isGuest ? cartId : shopperId;
       const tokenResponse = getPaypalToken(ppShopperId, isRecurring, order?.totals.price, isGuest)
       tokenResponse
-          .then((response) => {
-            if(isRecurring){
-              setPaypalTokenId(response.data.token_id);
-              const approvalUrl = response.data.links.find((link: { rel: string; href: string }) =>
-                  link.rel === "approval_url"
-              )?.href || "";
-              setPaypalRecurringUrl(approvalUrl);
-            }else{
-              setPaypalTokenId(response.tokenId);
-            }
-          })
+        .then((response) => {
+          if (isRecurring) {
+            setPaypalTokenId(response.data.token_id);
+            const approvalUrl = response.data.links.find((link: { rel: string; href: string }) =>
+              link.rel === "approval_url"
+            )?.href || "";
+            setPaypalRecurringUrl(approvalUrl);
+          } else {
+            setPaypalTokenId(response.tokenId);
+          }
+        })
     } else {
       setPaypalTokenId("");
       setPaypalRecurringUrl("");
@@ -155,8 +157,8 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
         const ppShopperId = isGuest ? cartId : shopperId;
         try {
           const response = await generatePayPalTransactionDetails(
-              ppShopperId,
-              transactionToken,
+            ppShopperId,
+            transactionToken,
             true,
             isRecurring
           );
@@ -278,7 +280,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
 
   const handlePlaceOrder = async (paymentMethods: IPaymentOption[]) => {
     setIsLoading(true);
-   
+
     if (hasPhoneError && isCheckboxChecked) {
       window.scrollTo({
         top: document.body.scrollHeight,
@@ -483,7 +485,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                 ...order,
                 shouldShowInvalidCVVMessage:
                   order?.shouldShowInvalidCVVMessage ===
-                  `${getString("creditCardExpired")}.`
+                    `${getString("creditCardExpired")}.`
                     ? order.shouldShowInvalidCVVMessage
                     : getString("checkCvv"),
               });
@@ -499,18 +501,17 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     } catch (error: any) {
       setIsLoading(false);
       const errorMessage =
-          error?.response?.data?.message || error?.message || getString("errorPlacingOrder") as string;
+        error?.response?.data?.message || error?.message || getString("errorPlacingOrder") as string;
       updateOrderErrorMessage(errorMessage);
     }
   };
 
   const handlePaypalOrderRedirect = async (isRecurring: boolean) => {
-    // fetch paypal site flags
-    const siteFlags = await fetchSiteFlagData(siteId, "393");
+    // @ts-ignore
     const data = JSON.parse(siteFlags[0].auxDataText);
 
     let ppClientId = GET_PAYPAL_CLIENT_ID();
-    if(isIOSSafari()){ // add cache-busting parameter
+    if (isIOSSafari()) { // add cache-busting parameter
       ppClientId += `&t=${Date.now()}`;
     }
 
@@ -523,16 +524,16 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
       intent: "capture", // "capture" for immediate payment
       components: "buttons",
     })
-        .then((paypal) => {
-          if (!paypal) {
-            console.error("PayPal SDK failed to load correctly");
-            return;
-          }
-          // console.log("PayPal SDK loaded:", paypal);
-        })
-        .catch((error) =>
-            console.error("PayPal SDK failed to load", error)
-        );
+      .then((paypal) => {
+        if (!paypal) {
+          console.error("PayPal SDK failed to load correctly");
+          return;
+        }
+        // console.log("PayPal SDK loaded:", paypal);
+      })
+      .catch((error) =>
+        console.error("PayPal SDK failed to load", error)
+      );
 
     if (paypalTokenId.length < 1) {
       alert("Failed to fetch PayPal token, check console for message");
@@ -544,9 +545,8 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   }
 
   const getPaypalUrl = (isRecurring: boolean) => {
-    const paypalRedirectUrl = isRecurring ? paypalRecurringUrl : `${GET_PAYPAL_CHECKOUT_URL()}?token=${
-        paypalTokenId
-    }`;
+    const paypalRedirectUrl = isRecurring ? paypalRecurringUrl : `${GET_PAYPAL_CHECKOUT_URL()}?token=${paypalTokenId
+      }`;
 
     return `${paypalRedirectUrl}&useraction=commit`;
   }
@@ -579,7 +579,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     } catch (error: any) {
       console.error("Failed to fetch data:", error);
       const errorMessage =
-          error?.response?.data?.message || error?.message || "Unknown error";
+        error?.response?.data?.message || error?.message || "Unknown error";
       throw new Error(errorMessage);
     }
   };
@@ -645,7 +645,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
               },
             };
 
-            if(isGuest){
+            if (isGuest) {
               updatedOrder.paymentMethod = {
                 ...order.paymentMethod,
                 accountName: response.name,
@@ -655,14 +655,14 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                 expMonth: response.month,
                 expYear: response.year,
               };
-            } else{
+            } else {
               updatedOrder.paymentMethod = {
                 ...order.paymentMethod,
                 id: response.id,
               };
             }
             return buildOrder(
-                generateChangeStoreResponse(updatedOrder, pcid)
+              generateChangeStoreResponse(updatedOrder, pcid)
             );
           }
         })
@@ -703,27 +703,28 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
         initialValues={{}}
         onSubmit={() => handlePlaceOrder(paymentMethods)}
       >
-        {({submitForm }) => {
+        {({ submitForm }) => {
 
           return (
-          <form>
-            {orderHasAutoshipItems(order || null) && (
-              <div className="checkout-place-order-autoship checkout-place-order-text">
-                <div className="checkout-place-order-text__flex">
-                </div>
-                <div
-                  className={`checkout-place-order-text__box`}
-                >
-                  <div className="checkout-place-order-text">
-                    {getString("autoShipAgreement")}
+            <form>
+              {orderHasAutoshipItems(order || null) && (
+                <div className="checkout-place-order-autoship checkout-place-order-text">
+                  <div className="checkout-place-order-text__flex">
                   </div>
-                  <div className="checkout-place-order-text__note">
-                   {getString("shipTaxAdjustAtTimeOfPulling")}
+                  <div
+                    className={`checkout-place-order-text__box`}
+                  >
+                    <div className="checkout-place-order-text">
+                      {getString("autoShipAgreement")}
+                    </div>
+                    <div className="checkout-place-order-text__note">
+                      {getString("shipTaxAdjustAtTimeOfPulling")}
+                    </div>
                   </div>
+                  <div>{getString("agreeToSubscribeTerms") as string}</div>
                 </div>
-              </div>
-            )}
-            {/* <div className="checkout-place-order-text-terms-policy">
+              )}
+              {/* <div className="checkout-place-order-text-terms-policy">
               {getString("agreeToTerms")}{" "}
               <a
                 href="/info/terms-of-use"
@@ -742,52 +743,52 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
               </a>
               .
             </div> */}
-            {errorMessage.length > 0 && (
-              <div className="error-message-order">
-                {/* <div className="error-message-order--bold">
+              {errorMessage.length > 0 && (
+                <div className="error-message-order">
+                  {/* <div className="error-message-order--bold">
                   Please complete your payment information
                 </div> */}
-                <div className="error-message-order--bold">{errorMessage}</div>
-              </div>
-            )}
-            {orderConsolidateData.oosConsolidate === 2 && (
-              <div className="alert-message">
-                {getString("chargedWhenShipped")}
-              </div>
-            )}
-            <Button
-              id="mfe-place-order-btn"
-              qaTag={"qa-order"}
-              label={
-                isLoading
-                  ? `${getString("loading")}...`
-                  : paymentTypeId === SEZZLE.typeId ||
-                    isPaypalPayment(paymentTypeId) ||
-                    paymentTypeId === CLICK2PAY.typeId
-                  ? getString("payWith") as string
-                  : (getString("placeOrder") as string)
-              }
-              disabled={isLoading || (isCheckboxChecked && hasPhoneError)}
-              btnType={
-                paymentTypeId === SEZZLE.typeId
-                  ? "sezzle"
-                  : isPaypalPayment(paymentTypeId)
-                  ? "paypal"
-                  : "primary"
-              }
-              onClick={submitForm}
-              logo={
-                paymentTypeId === SEZZLE.typeId
-                  ? "https://img.shop.com/Image/resources/checkout/Sezzle-Color-White-Logo.svg"
-                  : isPaypalPayment(paymentTypeId)
-                  ? "https://img.shop.com/Image/resources/checkout/PayPal-White-Logo.svg"
-                  : paymentTypeId === CLICK2PAY.typeId
-                  ? "https://img.shop.com/Image/resources/checkout/click-to-pay-white.svg"
-                  : ""
-              }
-            />
-          </form>
-        );
+                  <div className="error-message-order--bold">{errorMessage}</div>
+                </div>
+              )}
+              {orderConsolidateData.oosConsolidate === 2 && (
+                <div className="alert-message">
+                  {getString("chargedWhenShipped")}
+                </div>
+              )}
+              <Button
+                id="mfe-place-order-btn"
+                qaTag={"qa-order"}
+                label={
+                  isLoading
+                    ? `${getString("loading")}...`
+                    : paymentTypeId === SEZZLE.typeId ||
+                      isPaypalPayment(paymentTypeId) ||
+                      paymentTypeId === CLICK2PAY.typeId
+                      ? getString("payWith") as string
+                      : (getString("placeOrder") as string)
+                }
+                disabled={isLoading || (isCheckboxChecked && hasPhoneError)}
+                btnType={
+                  paymentTypeId === SEZZLE.typeId
+                    ? "sezzle"
+                    : isPaypalPayment(paymentTypeId)
+                      ? "paypal"
+                      : "primary"
+                }
+                onClick={submitForm}
+                logo={
+                  paymentTypeId === SEZZLE.typeId
+                    ? "https://img.shop.com/Image/resources/checkout/Sezzle-Color-White-Logo.svg"
+                    : isPaypalPayment(paymentTypeId)
+                      ? "https://img.shop.com/Image/resources/checkout/PayPal-White-Logo.svg"
+                      : paymentTypeId === CLICK2PAY.typeId
+                        ? "https://img.shop.com/Image/resources/checkout/click-to-pay-white.svg"
+                        : ""
+                }
+              />
+            </form>
+          );
         }}
       </Formik>
     </div>

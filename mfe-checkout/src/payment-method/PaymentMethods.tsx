@@ -49,6 +49,7 @@ import {
   updatedPaymentOptionsWithSelectedType
 } from "../utils/types/PaymentOptionUtils";
 import { Spinner } from "../component/Spinner/Spinner";
+import { useSiteFlags } from "../hooks/useSiteFlags";
 
 interface IPaymentMethod {
   shopperId: string;
@@ -78,6 +79,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   // initial payment methods
   const [paymentMethods, setPaymentMethods] = useAtom(paymentMethodsAtom);
   const { getString } = useContentStrings();
+  const { siteFlags } = useSiteFlags();
   const [isExpanded, setIsExpanded] = useState(false);
 
   // addresses for user wallet
@@ -105,26 +107,12 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   const isMobileDevice = () => window.innerWidth <= 768;
 
   useEffect(() => {
-    const paymentSiteFlagList = thirdPartyPaymentFlagList().join(",");
-    const fetchSiteFlagInfo = async () => {
-      try {
-        const response: SiteFlags[] = await fetchSiteFlagData(
-          siteId,
-          paymentSiteFlagList
-        );
-        setThirdPartySiteFlagData(response);
-        paymentMethods.map((method) => {
-          const c2pSiteflag = response.find(
-            (item: any) => item.flagID === CLICK2PAY.siteflagTypeId
-          );
-          setShowClick2Pay(c2pSiteflag ? c2pSiteflag.active : false);
-        });
-      } catch (error) {
-        console.error("Failed to fetch siteflag data:", error);
-      }
-    };
-
-    fetchSiteFlagInfo();
+    paymentMethods.map((method) => {
+      const c2pSiteflag = siteFlags.find(
+        (item: any) => item.flagID === CLICK2PAY.siteflagTypeId
+      );
+      setShowClick2Pay(c2pSiteflag ? c2pSiteflag.active : false);
+    });
   }, []);
 
   useEffect(() => {

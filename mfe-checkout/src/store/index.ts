@@ -17,6 +17,13 @@ export interface IPaymentOption {
   isSelected: boolean;
 }
 
+export interface siteFlagData {
+  siteId : number | undefined | null,
+  auxData: number | string | undefined | null,
+  flagID: number | undefined | null,
+  active: boolean | undefined | null
+}
+
 export const initialPaymentMethods: IPaymentOption[] = [
   {
     paymentMethod: createPaymentMethod({
@@ -61,6 +68,8 @@ export const orderAtom = atom<Order>();
 export const addressAtom = atom<Address[]>([]);
 
 export const paymentMethodsAtom = atom<IPaymentOption[]>(initialPaymentMethods);
+
+export const siteFlagsAtom = atom<siteFlagData[]>([]);
 
 export const OrderStore = createStore();
 

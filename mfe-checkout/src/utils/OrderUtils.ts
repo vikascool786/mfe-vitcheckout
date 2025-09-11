@@ -29,7 +29,7 @@ export function updatePaymentMethod(
 
 export const formattedNumber = (num: any) => Number(num).toFixed(2);
 
-export const orderHasAutoshipItems = (order: Order | null): boolean => {
+export const orderHasAutoshipItems = (order: Order | null | undefined): boolean => {
     if (!order) return false;
 
     return Object.values(order.stores)
