@@ -43,8 +43,8 @@ const App: React.FC<AppProps> = () => {
           shopperId="ZpXYpYwzzXVYUzhkZhzYpYmzYxpUmjmejWpqzjqzz"
           pcid="6565841"
           siteId="66"
-          sessionId="3055634738"
-          portalId="010687168.COM"
+          sessionId="3055598204"
+          portalId="TESTMA44.COM"
           isGuest={false}
         />
           {/* Guest shopper  */}
