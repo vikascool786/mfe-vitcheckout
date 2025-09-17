@@ -3,12 +3,15 @@
   display: flex;
   align-items: center;
   width: 100%;
-  margin-top: 5px;
+  margin-top: 10px;
 
   form {
     gap: 5px;
     display: flex;
     flex-direction: column;
+    button.custom-button.primary {
+      padding: 12px 24px;
+    }
   }
 }
 

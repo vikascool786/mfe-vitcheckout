@@ -612,6 +612,7 @@ const Checkout: React.FC<ICheckout> = ({
               enableReinitialize={true}
             >
               {({
+                setFieldTouched,
                 values,
                 handleChange,
                 setFieldValue,
@@ -676,6 +677,7 @@ const Checkout: React.FC<ICheckout> = ({
                         value={values.last}
                         onChange={handleChange}
                         onBlur={handleBlur}
+                        onInput={() => setFieldTouched("last", true, false)}
                         errorMessage={touched.last && errors.last}
                         errorRefs={errorRefs}
                       />
@@ -687,6 +689,7 @@ const Checkout: React.FC<ICheckout> = ({
                         value={values.first}
                         onChange={handleChange}
                         onBlur={handleBlur}
+                        onInput={() => setFieldTouched("first", true, false)}
                         errorMessage={touched.first && errors.first}
                         errorRefs={errorRefs}
                       />
@@ -701,6 +704,7 @@ const Checkout: React.FC<ICheckout> = ({
                         value={values.first}
                         onChange={handleChange}
                         onBlur={handleBlur}
+                        onInput={() => setFieldTouched("first", true, false)}
                         errorMessage={touched.first && errors.first}
                         errorRefs={errorRefs}
                       />
@@ -712,6 +716,7 @@ const Checkout: React.FC<ICheckout> = ({
                         value={values.last}
                         onChange={handleChange}
                         onBlur={handleBlur}
+                        onInput={() => setFieldTouched("last", true, false)}
                         errorMessage={touched.last && errors.last}
                         errorRefs={errorRefs}
                       />
@@ -729,6 +734,7 @@ const Checkout: React.FC<ICheckout> = ({
                         handleAddress1Change("address1", setFieldValue, e)
                       }
                       onBlur={handleBlur}
+                      onInput={() => setFieldTouched("address1", true, false)}
                       errorMessage={touched.address1 && errors.address1}
                       errorRefs={errorRefs}
                     />
@@ -742,6 +748,7 @@ const Checkout: React.FC<ICheckout> = ({
                       value={values.address2}
                       onChange={handleChange}
                       onBlur={handleBlur}
+                      onInput={() => setFieldTouched("address2", true, false)}
                       errorMessage={touched.address2 && errors.address2}
                       errorRefs={errorRefs}
                     />
@@ -756,6 +763,7 @@ const Checkout: React.FC<ICheckout> = ({
                       value={values.city}
                       onChange={handleChange}
                       onBlur={handleBlur}
+                      onInput={() => setFieldTouched("city", true, false)}
                       errorMessage={touched.city && errors.city}
                       errorRefs={errorRefs}
                     />
@@ -766,7 +774,10 @@ const Checkout: React.FC<ICheckout> = ({
                       required
                       selectedValue={values.state}
                       formName="state"
-                      onChange={(value) => setFieldValue("state", value)}
+                      onChange={(value) => {
+                        setFieldValue("state", value);
+                        setFieldTouched("state", true, false);
+                      }}
                       errorMessage={touched.state && errors.state}
                     />
                   </div>
@@ -780,6 +791,7 @@ const Checkout: React.FC<ICheckout> = ({
                       value={values.zip}
                       onChange={handleChange}
                       onBlur={handleBlur}
+                      onInput={() => setFieldTouched("zip", true, false)}
                       renderCheckBox={
                         <Checkbox
                           qaTag="qa-po-box"
@@ -803,6 +815,7 @@ const Checkout: React.FC<ICheckout> = ({
                       value={values.phone}
                       onChange={handleChange}
                       onBlur={handleBlur}
+                      onInput={() => setFieldTouched("phone", true, false)}
                       errorMessage={touched.phone && errors.phone}
                       errorRefs={errorRefs}
                     />
