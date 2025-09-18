@@ -98,15 +98,16 @@ export const Contact: React.FC<IContactProps> = ({
                 .then((response: ShopperDirectory) => {
                     if (response?.foreign) {
                         setEmailErrorMessage("The email address entered is for an account on a another SHOP.COM site, please use a valid email");
-                    }
-                    else if (response?.shopperAccountDisabled == 1) {
-                        setEmailErrorMessage("The email address entered is invalid, please use a different email");
                     } else if (isFullRegShopper(response) || isEZRegShopper(response)) {
                         //commenting out sign in alert since they chose to come in as guest. Keeping in case we decide otherwise
                         //setIsFullRegEmail(isFullRegShopper(response)); //show sign in alert in UI
                         setShowOptInCheckbox(false);
                         fetchShopperDetail(response.shopperID)
                             .then(response => {
+                                if (response.shopperAccountDisabled == 1) {
+                                    setEmailErrorMessage("The is an issue with the email address");
+                                    return;
+                                }
                                 setCustomerId(response.pcid);
                                 setCurrentPortalId(response.portal?.portalId);
                                 if (order && token && !payerId) {
