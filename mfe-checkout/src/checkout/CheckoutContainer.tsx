@@ -349,8 +349,9 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   };
 
   const redirectToOrderConfirmation = (orderId: string | number): void => {
-    const defaultSlug = `/nbts${checkOrderConfirmationFlag(siteFlags) ? '/v2' : ''}/orderconfirmation-${orderId}`;
-    const orderConfirmationUrl = isGuest ? `/nbts/guestcheckout/orderconfirmation?guestOrderId=${orderId}` : defaultSlug;
+    const v2Slug = `/v2/orderconfirmation-${orderId}`;
+    const v1Slug = isGuest ? `/guestcheckout/orderconfirmation?guestOrderId=${orderId}` : `/orderconfirmation-${orderId}`;
+    const orderConfirmationUrl = `/nbts${checkOrderConfirmationFlag(siteFlags) ? v2Slug : v1Slug }`;
 
     const handleNavigation = () => {
       document.removeEventListener("visibilitychange", handleNavigation);

@@ -97,9 +97,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   const [showNewCard, setShowNewCard] = useState<boolean>(false);
   const portalKey = useMemo(() => JSON.stringify({ shopperId, portalId }), [shopperId, portalId]);
   const [portalData] = useAtom(portalApiData(portalKey));
-  const [thirdPartySiteFlagData, setThirdPartySiteFlagData] = useState<
-    SiteFlags[]
-  >([]);
   const [isClick2PayCardSelected, setIsClick2PayCardSelected] =
     useState<boolean>(false);
   
@@ -609,7 +606,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     }
 
     setPaymentMethods(updatedPMs);
-  }, [order, isPaymentsFetched, thirdPartySiteFlagData]);
+  }, [order, isPaymentsFetched, siteFlags]);
 
   const isSezzleAllowed = (): boolean => {
     //sezzle rules dependent on site
@@ -647,8 +644,8 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   };
 
   const getSiteFlagDataForType = (siteflagTypeId: number) => {
-    if (thirdPartySiteFlagData) {
-      return thirdPartySiteFlagData.find(
+    if (siteFlags) {
+      return siteFlags.find(
         (item: any) => item.flagID === siteflagTypeId
       );
     }

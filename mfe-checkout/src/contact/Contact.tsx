@@ -105,7 +105,7 @@ export const Contact: React.FC<IContactProps> = ({
                         fetchShopperDetail(response.shopperID)
                             .then(response => {
                                 if (response.shopperAccountDisabled == 1) {
-                                    setEmailErrorMessage("The is an issue with the email address");
+                                    setEmailErrorMessage("There is an issue with this email address and shouldnt let the user proceed to next steps.");
                                     return;
                                 }
                                 setCustomerId(response.pcid);

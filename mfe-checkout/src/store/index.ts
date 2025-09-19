@@ -18,6 +18,7 @@ export interface IPaymentOption {
 }
 
 export interface siteFlagData {
+  auxDataText: boolean | number | string | undefined | null,
   siteId : number | undefined | null,
   auxData: number | string | undefined | null,
   flagID: number | undefined | null,
