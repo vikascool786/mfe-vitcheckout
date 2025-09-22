@@ -110,7 +110,7 @@ export const Contact: React.FC<IContactProps> = ({
                                 }
                                 setCustomerId(response.pcid);
                                 setCurrentPortalId(response.portal?.portalId);
-                                if (order && token && !payerId) {
+                                if (order && ((order.userOptions.coupons.length > 0) || (token && !payerId))) {
                                     const orderResponse = changeOrder(generateChangeStoreResponse(order, response.pcid), cartId);
                                     orderResponse.then((res) => {
                                         setOrderData(res?.response.success?.data || null);
