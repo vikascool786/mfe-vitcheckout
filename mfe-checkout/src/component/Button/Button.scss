@@ -53,3 +53,8 @@
   opacity: 0.6; // Slightly faded to show it's disabled
   pointer-events: none; // Prevents any interaction
 }
+
+.custom-button.disabled img,
+.custom-button:disabled img{
+  filter: invert(1);
+}
