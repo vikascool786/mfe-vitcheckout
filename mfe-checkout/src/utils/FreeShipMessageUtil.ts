@@ -8,7 +8,7 @@ export const getFreeShipInfoFromOrder = (order: Order | null, portalData: Portal
     let freeShipMessageStoreMap = new Map<string, string>();
     if (order && !isCartOrder(order)) {
         Object.entries(order.stores).forEach(([storeId, store]) => {
-            const catalogId = store?.store.catalogId.toString();
+            const catalogId = store?.store?.catalogId?.toString();
             let isMAFreeShip = portalData?.hasFreeShipping && Boolean(store?.store.isMA);
 
             const freeShipData: FreeShipData = {
