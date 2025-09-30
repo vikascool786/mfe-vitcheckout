@@ -719,11 +719,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                     <div className="checkout-place-order-text">
                       {getString("autoShipAgreement")}
                     </div>
-                    <div className="checkout-place-order-text__note">
-                      {getString("shipTaxAdjustAtTimeOfPulling")}
-                    </div>
                   </div>
-                  <div>{getString("agreeToSubscribeTerms") as string}</div>
                 </div>
               )}
               {/* <div className="checkout-place-order-text-terms-policy">
