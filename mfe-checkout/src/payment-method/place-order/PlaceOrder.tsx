@@ -297,10 +297,10 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
       (creditCardFormData?.cardInfo?.number ?? "").length > 0;
 
     const isOrderCoveredUnderVIFT =
-      order?.userOptions.applyEWallet && order.totals.price === 0;
+      order?.userOptions.applyEWallet && order?.totals.price === 0;
 
     const isOrderCoveredByGiftCard =
-      order?.userOptions?.gcNum && order.totals.price === 0;
+      order?.userOptions?.gcNum && order?.totals.price === 0;
 
     const isCreditCardRequired =
       !isOrderCoveredUnderVIFT && !isOrderCoveredByGiftCard;
@@ -608,7 +608,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
           if (response.checkoutActionCode === "COMPLETE") {
             const transId = response.headers["merchant-transaction-id"];
             const flowId = response.headers["x-src-cx-flow-id"];
-            const total = order ? order.totals.price.toString() : "0";
+            const total = order ? order?.totals.price.toString() : "0";
             trackingData.set("transactionId", transId);
             trackingData.set("flowId", flowId);
 
@@ -680,7 +680,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   };
 
   const handleSezzleOrder = async () => {
-    const total = order ? order.totals.price.toString() : "0";
+    const total = order ? order?.totals.price.toString() : "0";
     const tempOrderId = order ? order.userOptions?.tempOrderID : "0";
     const sezzleResponse = await fetchSezzleUrl(total, tempOrderId, isGuest);
     if (typeof sezzleResponse.url != "undefined") {

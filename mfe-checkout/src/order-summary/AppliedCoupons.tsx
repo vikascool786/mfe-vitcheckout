@@ -27,7 +27,7 @@ const AppliedCoupons: React.FC<AppliedCouponsProps> = ({ stores, handleRemoveCou
     <>
       {Object.entries(stores)
         .filter(([_, invoiceData]) => {
-          const couponCode = invoiceData.totals?.couponCode;
+          const couponCode = invoiceData?.totals?.couponCode;
           if (!couponCode || seenCoupons.has(couponCode)) {
             return false;
           }
@@ -35,7 +35,7 @@ const AppliedCoupons: React.FC<AppliedCouponsProps> = ({ stores, handleRemoveCou
           return true;
         })
         .map(([invoiceKey, invoiceData]) => {
-          const couponCode = invoiceData.totals?.couponCode;
+          const couponCode = invoiceData?.totals?.couponCode;
           return (
           <li key={invoiceKey} className="qa-cancel order-applied-coupon">
             <div className="order-applied-coupons__box">
@@ -54,7 +54,7 @@ const AppliedCoupons: React.FC<AppliedCouponsProps> = ({ stores, handleRemoveCou
                     term.includes("href")
                   ) ? (
                     (() => {
-                      const linkTerm = invoiceData.totals?.couponTerms?.find(
+                      const linkTerm = invoiceData?.totals?.couponTerms?.find(
                         (term: string) => term.includes("href")
                       );
                       const hrefMatch = linkTerm?.match(/href="([^"]+)"/);
@@ -77,12 +77,12 @@ const AppliedCoupons: React.FC<AppliedCouponsProps> = ({ stores, handleRemoveCou
                   )}
                 </p>
               </div>
-              <Close onClick={() => handleRemoveCoupon(invoiceData.totals?.couponCode)} />
+              <Close onClick={() => handleRemoveCoupon(invoiceData?.totals?.couponCode)} />
             </div>
 
             {openTerms[invoiceKey] && (
                <div className="order-applied-coupons__term-text">
-               {invoiceData.totals?.couponTerms?.map(
+               {invoiceData?.totals?.couponTerms?.map(
                  (term: any, index: number) => (
                    <p key={index}>{term}</p>
                  )

@@ -61,7 +61,7 @@ export const ShippingOptionItem: React.FC<IShippingOptionItem> = ({
           </div>
         </div>
 
-        <div>{shippingOption.totalStr}</div>
+        <div>{shippingOption?.totalStr}</div>
       </div>
       {hasAutoship && shippingOption.isSelected && (
         <div

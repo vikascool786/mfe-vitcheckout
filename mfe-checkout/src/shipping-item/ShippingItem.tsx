@@ -121,7 +121,7 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
 
   const { image, caption, catalogName, totals, quantity } = item;
   const { catalogId, isMA } = storeDetail || {};
-  const { bv, ibv } = item.totals;
+  const { bv, ibv } = item?.totals;
 
   const isGiftCard = isGiftCardStoreDetail(storeDetail);
 

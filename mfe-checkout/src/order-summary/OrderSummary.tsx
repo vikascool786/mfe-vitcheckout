@@ -184,7 +184,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
   
     const isApplyingGiftCard = !isGCApplied;
   
-    if (isApplyingGiftCard && order.totals.price === 0) {
+    if (isApplyingGiftCard && order?.totals.price === 0) {
       const msg = getString("zeroOrderGiftCardBalance") as string;
   
       if (!notificationMessages?.includes(msg)) {
@@ -555,7 +555,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
 
         {order?.totals.gcDispAppliedStr &&
           order?.totals?.gcBalanceStr &&
-          order.totals.gcDispAppliedStr.map((gcDispApplied, index) => (
+          order?.totals.gcDispAppliedStr.map((gcDispApplied, index) => (
             <GiftCard
               key={gcDispApplied}
               gcDispApplied={gcDispApplied}
@@ -673,7 +673,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               <span className="order-summary-row-green checked">{`${' '}`}{getString("cashBack")}</span>
             </div>
             <div className={order?.userOptions.applyEWallet ? "checked" : ""}>
-              {order.totals?.walletAppliedStr}
+              {order?.totals?.walletAppliedStr}
             </div>
           </div>
         )}
@@ -722,7 +722,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                 </span>
               </div>
               <div className={"qa-cashback"}>{`$${formattedNumber(
-                order.totals.extraCashBack
+                order?.totals.extraCashBack
               )}`}</div>
             </div>
           </>
@@ -754,7 +754,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                 <div className="order-cashback">
                   {getString("bvEarnedInOrder")}
                 </div>
-                <div>{formattedNumber(order.totals.bv)}</div>
+                <div>{formattedNumber(order?.totals.bv)}</div>
               </div>
             </div>
           )}
@@ -766,7 +766,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                 <div className="order-cashback">
                   {getString("ibvEarnedInOrder")}
                 </div>
-                <div>{formattedNumber(order.totals.ibv)}</div>
+                <div>{formattedNumber(order?.totals.ibv)}</div>
               </div>
             </div>
           )}

@@ -92,7 +92,7 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({
       setC2pData((prevData) => ({
         ...prevData,
         cardBrands: acceptedCardNameList,
-        transactionAmount: order ? order.totals.price : 0,
+        transactionAmount: order ? order?.totals.price : 0,
       }));
     }
   }, [order]);

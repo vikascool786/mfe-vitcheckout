@@ -123,7 +123,6 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   const apiMode = GET_API_MODE();
   const [customerId, setCustomerId] = useState(pcid);
 
-
   const [isAutoShipChecked, setIsAutoShipChecked] = useState<boolean>(false);
   const addressList = useAtomValue(addressAtom);
   const paymentMethodOptions = useAtomValue(paymentMethodsAtom);
@@ -520,14 +519,14 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
 
               {(isAddressSaved && customerId.length > 0) ? (
                   (orderHasAutoshipItems(orderData) ||
-                    orderData.totals.price > 0) && (
+                    orderData?.totals.price > 0) && (
                     <PaymentMethod
                       cartId={cartId}
                       shopperId={shopperId}
                       siteId={siteId}
                       pcid={customerId}
                       isVisible={orderHasAutoshipItems(orderData) ||
-                          orderData.totals.price > 0}
+                          orderData?.totals.price > 0}
                       payments={paymentMethods}
                       updatePaymentTypeId={setPaymentTypeId}
                       updateOrderErrorMessage={handleUpdateOrderErrorMessage}

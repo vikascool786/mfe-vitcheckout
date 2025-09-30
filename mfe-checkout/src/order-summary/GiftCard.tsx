@@ -21,7 +21,7 @@ export const GiftCard: React.FC<GiftCardProps> = ({
       <div className="gcLeft-cont">
         <p className="cardName">{`Card: ${order.userOptions.gcNum[index]}`}</p>
         <p className="balanceCard">{`${
-          order.totals.gcBalanceStr[index]
+          order?.totals.gcBalanceStr[index]
         } ${getString("balance")}`}</p>
       </div>
       <div className="gcRight-cont">
