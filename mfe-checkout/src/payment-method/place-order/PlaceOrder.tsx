@@ -554,7 +554,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   }
 
   const handleFinalPlaceOrderUpdate = () => {
-    if (!order) return;
+    if (!order || isGuest) return;
     if (order) {
       return buildOrder(
         generateChangeStoreResponse({
