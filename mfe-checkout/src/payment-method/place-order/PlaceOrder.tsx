@@ -61,6 +61,7 @@ interface IPlaceOrder {
   isCheckboxChecked: boolean;
   pcid: string;
   isGuest: boolean;
+  isGuestEmailValid: boolean;
   cartId: string;
 }
 
@@ -82,6 +83,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   pcid,
   isGuest,
   cartId,
+  isGuestEmailValid,
 }) => {
   const trackingData = new Map<string, string>();
   const [siteData] = useAtom(siteApiData(siteId));
@@ -768,7 +770,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                       ? getString("payWith") as string
                       : (getString("placeOrder") as string)
                 }
-                disabled={isLoading || (isCheckboxChecked && hasPhoneError)}
+                disabled={isLoading || isGuestEmailValid || (isCheckboxChecked && hasPhoneError)}
                 btnType={
                   paymentTypeId === SEZZLE.typeId
                     ? "sezzle"

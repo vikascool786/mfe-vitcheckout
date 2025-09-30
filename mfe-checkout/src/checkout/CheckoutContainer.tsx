@@ -588,6 +588,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                       billingId={defaultAddress?.id || 0}
                       setOrderData={setOrderData}
                       setIsAutoShipChecked={setIsAutoShipChecked}
+                      isGuestEmailValid={isGuestEmailInvalid}
                       isAutoShipChecked={isAutoShipChecked}
                       hasPhoneError={hasPhoneError}
                       isGuestInvalid={isGuestEmailInvalid}
