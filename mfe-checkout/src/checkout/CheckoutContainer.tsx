@@ -123,6 +123,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   const apiMode = GET_API_MODE();
   const [customerId, setCustomerId] = useState(pcid);
 
+
   const [isAutoShipChecked, setIsAutoShipChecked] = useState<boolean>(false);
   const addressList = useAtomValue(addressAtom);
   const paymentMethodOptions = useAtomValue(paymentMethodsAtom);
@@ -132,6 +133,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   const memorizedSiteId = useMemo(() => siteId, [siteId]);
   const [siteData] = useAtom(siteApiData(memorizedSiteId));
   const [hasPhoneError, setHasPhoneError] = useState<boolean>(false);
+  const [isGuestEmailInvalid, setIsGuestEmailInvalid] = useState<boolean>(false);
   const [mobileRequiredMessage, setMobileRequiredMessage] =
     useState<boolean>(false);
     const [isCheckboxChecked, setIsCheckboxChecked] =
@@ -493,7 +495,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                     <Contact portalId={currentPortalId} cartId={cartId} setCustomerId={setCustomerId}
                              setOrderData={setOrderData} setUseCartSummary={setUseCartSummary}
                              customerData={customerData} setShopperEmail={setShopperEmail} addressList={addressList}
-                             order={orderData} setCurrentPortalId={setCurrentPortalId}/>
+                             order={orderData} setCurrentPortalId={setCurrentPortalId} setIsGuestEmailInvalid={setIsGuestEmailInvalid}/>
                 )}
                 <Checkout
                   shopperId={shopperId}
@@ -588,6 +590,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                       setIsAutoShipChecked={setIsAutoShipChecked}
                       isAutoShipChecked={isAutoShipChecked}
                       hasPhoneError={hasPhoneError}
+                      isGuestInvalid={isGuestEmailInvalid}
                       isCheckboxChecked={isCheckboxChecked}
                       setMobileRequiredMessage={setMobileRequiredMessage}
                       shippingId={

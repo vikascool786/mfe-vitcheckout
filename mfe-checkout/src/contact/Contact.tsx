@@ -23,6 +23,7 @@ interface IContactProps {
     addressList: Address[];
     order: Order | undefined;
     setCurrentPortalId: any;
+    setIsGuestEmailInvalid: (isValid: boolean) => void;
 }
 
 export const Contact: React.FC<IContactProps> = ({
@@ -36,6 +37,7 @@ export const Contact: React.FC<IContactProps> = ({
     addressList,
     order,
     setCurrentPortalId,
+    setIsGuestEmailInvalid,
 }) => {
 
     function getSignInRegisterUrl() {
@@ -66,8 +68,8 @@ export const Contact: React.FC<IContactProps> = ({
 
     useEffect(() => {
         if (customerData) {
-            setEmail(customerData?.email_address);
-            setShopperEmail(customerData?.email_address);
+            setEmail(customerData?.email);
+            setShopperEmail(customerData?.email);
         }
     }, [customerData]);
 
@@ -105,10 +107,12 @@ export const Contact: React.FC<IContactProps> = ({
                         fetchShopperDetail(response.shopperID)
                             .then(response => {
                                 if (response.shopperAccountDisabled == 1) {
+                                    setIsGuestEmailInvalid(response.shopperAccountDisabled == 1);
                                     setEmailErrorMessage("There is an issue with this email address and shouldnt let the user proceed to next steps.");
                                     return;
                                 }
                                 setCustomerId(response.pcid);
+                                setIsGuestEmailInvalid(response.shopperAccountDisabled == 1);
                                 setCurrentPortalId(response.portal?.portalId);
                                 if (order && ((order?.userOptions?.coupons?.length > 0) || (token && !payerId))) {
                                     const orderResponse = changeOrder(generateChangeStoreResponse(order, response.pcid), cartId);
@@ -122,6 +126,7 @@ export const Contact: React.FC<IContactProps> = ({
                                     const orderResponse = buildInitialGuestOrder(cartId, portalId, response.pcid, shippingAddress);
                                     orderResponse.then((res) => {
                                         setOrderData(res?.response.success?.data || null);
+                                        setIsGuestEmailInvalid(response.shopperAccountDisabled == 1);
                                         setUseCartSummary(false);
                                         setShopperEmail(email);
                                     });
