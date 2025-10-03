@@ -11,6 +11,7 @@ import { CustomerProfile } from "../interfaces/CustomerProfile";
 import { Address } from "../interfaces/Address";
 import { Order } from "../interfaces/Order";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
+import { useContentStrings } from "../hooks/useContentStrings";
 
 interface IContactProps {
     portalId: string;
@@ -52,6 +53,7 @@ export const Contact: React.FC<IContactProps> = ({
     const [isOptInChecked, setIsOptInChecked] = useState(false);
     const [emailErrorMessage, setEmailErrorMessage] = useState("");
     const [emailTouched, setEmailTouched] = useState(false);
+      const { getString } = useContentStrings();
 
     useEffect(() => {
         const emailInput = document.querySelector(".js-email-input") as HTMLInputElement;
@@ -108,7 +110,9 @@ export const Contact: React.FC<IContactProps> = ({
                             .then(response => {
                                 if (response.shopperAccountDisabled == 1) {
                                     setIsGuestEmailInvalid(true);
-                                    setEmailErrorMessage("There is an issue with this email address and shouldnt let the user proceed to next steps.");
+                                    setEmailErrorMessage(
+                                    getString("emailAddressError", ['1-866-420-1709']) as string
+                                    );
                                     return;
                                 }
                                 setCustomerId(response.pcid);
