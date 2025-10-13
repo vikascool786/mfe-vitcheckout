@@ -302,9 +302,12 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     const isOrderCoveredByGiftCard =
       order?.userOptions?.gcNum && order?.totals.price === 0;
 
-    const isCreditCardRequired =
+    let isCreditCardRequired =
       !isOrderCoveredUnderVIFT && !isOrderCoveredByGiftCard;
 
+    if(isOrderCoveredUnderVIFT){
+        isCreditCardRequired = false;
+    }
     if (isCreditCardRequired && selectedPaymentMethod?.paymentMethod.id === 0) {
       if (!hasNewCreditCardDataToSave) {
         updateOrderErrorMessage(getString("completePaymentInfo") as string);
@@ -435,10 +438,14 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             (pm) => pm.isSelected
           );
 
-          const isCardExpiredFlag = isCardExpired(
+          let isCardExpiredFlag = isCardExpired(
             selectedPaymentMethod?.paymentMethod.expMonth || 0,
             selectedPaymentMethod?.paymentMethod.expYear || 0
           );
+
+          if(isOrderCoveredUnderVIFT && isCardExpiredFlag){
+            isCardExpiredFlag = false;
+          }
 
           if (isCardExpiredFlag && !isThirdPartyPayment(paymentTypeId)) {
             order &&

@@ -53,7 +53,7 @@ export const Contact: React.FC<IContactProps> = ({
     const [isOptInChecked, setIsOptInChecked] = useState(false);
     const [emailErrorMessage, setEmailErrorMessage] = useState("");
     const [emailTouched, setEmailTouched] = useState(false);
-      const { getString } = useContentStrings();
+    const { getString } = useContentStrings();
 
     useEffect(() => {
         const emailInput = document.querySelector(".js-email-input") as HTMLInputElement;
@@ -111,7 +111,7 @@ export const Contact: React.FC<IContactProps> = ({
                                 if (response.shopperAccountDisabled == 1) {
                                     setIsGuestEmailInvalid(true);
                                     setEmailErrorMessage(
-                                    getString("emailAddressError", ['1-866-420-1709']) as string
+                                        getString("emailAddressError", ['1-866-420-1709']) as string
                                     );
                                     return;
                                 }

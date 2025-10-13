@@ -176,7 +176,9 @@ export const CardInputs: React.FC<ICardInputProps> = ({
                 type="checkbox"
                 className="qa-save checkbox"
                 checked={saveCardToWallet}
-                onChange={(e) => setSaveCardToWallet(!saveCardToWallet)}
+                onChange={(e) => {
+                  setSaveCardToWallet(e.target.checked);
+                }}
               />
               <span>{getString("saveCardForLater")}</span>
             </div>

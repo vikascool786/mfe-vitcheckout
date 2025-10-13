@@ -1080,7 +1080,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
               })}
 
             {showClick2Pay && (
-              <PaymentOptionClick2Pay pcid={pcid} order={order} isGuest={isGuest} />
+              <PaymentOptionClick2Pay pcid={pcid} order={order} isGuest={isGuest} updateOrderErrorMessage={updateOrderErrorMessage} />
             )}
           </div>
         </div>

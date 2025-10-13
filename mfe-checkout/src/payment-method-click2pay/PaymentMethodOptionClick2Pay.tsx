@@ -25,6 +25,7 @@ interface IClick2PayProps {
   pcid: string;
   order?: Order;
   isGuest: boolean;
+  updateOrderErrorMessage: (newMessage: string) => void;
 }
 
 const c2pCustomerData: Click2PayData = {
@@ -52,6 +53,7 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({
   pcid,
   order,
   isGuest,
+  updateOrderErrorMessage
 }) => {
   const [errorMessage, setErrorMessage] = useState("");
   const [hasSavedCards, setHasSavedCards] = useState(false);
@@ -232,6 +234,7 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({
   };
 
   const addNewClick2PayCard = () => {
+    updateOrderErrorMessage("");
     Click2PayNewCard.openAddCardOverlay();
   };
 
@@ -273,7 +276,7 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({
                 <button
                   className="checkout-method-click-to-pay-text checkout-method-click-to-pay-text--black click-to-pay__btn"
                   type="button"
-                  onClick={() => initiateOTPValidation()}
+                  onClick={() => {initiateOTPValidation(); updateOrderErrorMessage("")}}
                 >
                   {getString("clickToAccessCards")}
                 </button>
