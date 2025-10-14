@@ -554,7 +554,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     }
   };
 
-  const applePayButtonRef = React.useRef<HTMLDivElement>(null);
+  const applePayButtonRef = React.useRef<HTMLElement | null>(null);
 
   const handleApplePayClick = async () => {
     if (!window.ApplePaySession) {
@@ -567,7 +567,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
       currencyCode: "USD",
       supportedNetworks: ["visa", "masterCard", "amex", "discover"],
       merchantCapabilities: ["supports3DS"],
-      total: { label: "Shop.com", amount: order.total.toFixed(2) },
+      total: { label: "Shop.com", amount: '100' },
     };
 
     const session = new window.ApplePaySession(3, request);
@@ -593,19 +593,22 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     session.begin();
   };
 
-  useEffect(() => {
-    if (applePayButtonRef.current) {
-      applePayButtonRef.current.addEventListener("click", handleApplePayClick);
-    }
-    return () => {
-      if (applePayButtonRef.current) {
-        applePayButtonRef.current.removeEventListener(
-          "click",
-          handleApplePayClick
-        );
-      }
+useEffect(() => {
+  const button = applePayButtonRef.current;
+  if (button) {
+    const listener = (event: Event) => {
+      event.preventDefault();
+      handleApplePayClick();
     };
-  }, []);
+    button.addEventListener("click", listener);
+    console.log("✅ Apple Pay listener attached");
+
+    return () => {
+      button.removeEventListener("click", listener);
+      console.log("🧹 Apple Pay listener removed");
+    };
+  }
+}, [applePayButtonRef.current]);
 
   const handlePaypalOrderRedirect = async (isRecurring: boolean) => {
     // @ts-ignore

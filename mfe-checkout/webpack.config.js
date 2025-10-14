@@ -40,6 +40,8 @@ module.exports = (env, argv) => {
         key: fs.readFileSync("./localhost-key.pem"),
         cert: fs.readFileSync("./localhost.pem"),
       },
+      allowedHosts: "all",
+      host: "0.0.0.0",
       port: 3011,
       historyApiFallback: true,
       headers: {

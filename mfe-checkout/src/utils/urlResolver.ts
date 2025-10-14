@@ -22,7 +22,7 @@ export const GET_API_ENDPOINT_BASE_URL = (
         return `https://stagingapi2.shop.com{{path}}?api_key=759ef1fc9e4c4e8bbf900db5f4b7caba`;
       case "prod":
       default:
-        return `https://api2.shop.com{{path}}?api_key=93ccfc2eb6624b028341f00fed1db9a1`;
+        return `https://devapi2.shop.com{{path}}?api_key=6f598d0a7639480eae2d266a1e87c15c`;
     }
   }
   switch (mode) {
@@ -46,10 +46,10 @@ export const GET_API_ENDPOINT_BASE_URL = (
       }`;
     case "prod":
     default:
-      return `https://api2.shop.com{{path}}?api_key=${
+      return `https://devapi2.shop.com{{path}}?api_key=${
         isModuleRanker
           ? "a1f1ee59f2074026bcca990180af26d7"
-          : "93ccfc2eb6624b028341f00fed1db9a1"
+          : "6f598d0a7639480eae2d266a1e87c15c"
       }`;
   }
 };
@@ -64,7 +64,7 @@ export const GET_API_ENDPOINT_BASE_URL_FOR_TRANSLATIONS = (mode: APIMODE) => {
       return `https://stagingapi2.shop.com{{path}}?api_key=c6002c7143b548078242c682a79e8a55`;
     case "prod":
     default:
-      return `https://api2.shop.com{{path}}?api_key=f5a6d749fb6848648f5dc3454de8ac38`;
+      return `https://devapi2.shop.com{{path}}?api_key=cf39b2e3855c4c95a23a007e254b6e08`;
   }
 };
 export const GET_API_ENDPOINT_BASE_URL_ONLY = () => {
@@ -78,7 +78,7 @@ export const GET_API_ENDPOINT_BASE_URL_ONLY = () => {
       return "https://stagingapi2.shop.com";
     case "prod":
     default:
-      return "https://api2.shop.com";
+      return "https://devapi2.shop.com";
   }
 };
 
@@ -145,7 +145,7 @@ export const GET_API_KEY = () => {
     case "staging":
       return "759ef1fc9e4c4e8bbf900db5f4b7caba";
     case "prod":
-      return "93ccfc2eb6624b028341f00fed1db9a1";
+      return "6f598d0a7639480eae2d266a1e87c15c";
     default:
       return "";
   }
