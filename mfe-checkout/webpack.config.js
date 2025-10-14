@@ -2,18 +2,19 @@ const HtmlWebPackPlugin = require("html-webpack-plugin");
 const ModuleFederationPlugin = require("webpack/lib/container/ModuleFederationPlugin");
 const Dotenv = require("dotenv-webpack");
 const { ProvidePlugin } = require("webpack");
+const fs = require("fs");
 const deps = require("./package.json").dependencies;
 
 module.exports = (env, argv) => {
-  const mode = argv.mode || 'development';
-  const isDev = mode === 'development';
-  const isProduction = mode === 'production';
-  const isStaging = process.env.NODE_ENV === 'staging' || mode === 'staging';
+  const mode = argv.mode || "development";
+  const isDev = mode === "development";
+  const isProduction = mode === "production";
+  const isStaging = process.env.NODE_ENV === "staging" || mode === "staging";
   const dotenvFilename = isProduction
-    ? '.env.production'
+    ? ".env.production"
     : isStaging
-      ? '.env.staging'
-      : '.env.development';
+    ? ".env.staging"
+    : ".env.development";
   const isLocal = env.local ?? false;
   const domainEndpoint = () => {
     if (env.development) return "d29q5zo2af0lw0.cloudfront.net";
@@ -22,11 +23,11 @@ module.exports = (env, argv) => {
   };
 
   return {
-    mode: isStaging ? 'development' : mode, // Use 'development' mode for staging
+    mode: isStaging ? "development" : mode, // Use 'development' mode for staging
 
     output: {
       publicPath: isDev
-        ? "http://localhost:3011/"
+        ? "https://localhost:3011/"
         : `https://${domainEndpoint()}/CheckoutContainer/`,
     },
     devtool: isDev ? "source-map" : false,
@@ -35,12 +36,18 @@ module.exports = (env, argv) => {
     },
 
     devServer: {
+      https: {
+        key: fs.readFileSync("./localhost-key.pem"),
+        cert: fs.readFileSync("./localhost.pem"),
+      },
       port: 3011,
       historyApiFallback: true,
       headers: {
         "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
-        "Access-Control-Allow-Headers": "X-Requested-With, content-type, Authorization",
+        "Access-Control-Allow-Methods":
+          "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+        "Access-Control-Allow-Headers":
+          "X-Requested-With, content-type, Authorization",
       },
     },
 
@@ -67,29 +74,32 @@ module.exports = (env, argv) => {
       ],
     },
 
-  plugins: [
+    plugins: [
       new ModuleFederationPlugin({
-          name: "mfeCheckoutContainer",
-          filename: "remoteEntry.js",
-          remotes: {
-              mfeStore: isLocal
-                  ? "mfeStore@http://localhost:3000/remoteEntry.js"
-                  : `mfeStore@${domainEndpoint()}/Store/remoteEntry.js`,
+        name: "mfeCheckoutContainer",
+        filename: "remoteEntry.js",
+        remotes: {
+          mfeStore: isLocal
+            ? "mfeStore@https://localhost:3000/remoteEntry.js"
+            : `mfeStore@${domainEndpoint()}/Store/remoteEntry.js`,
+        },
+        exposes: {
+          "./CheckoutSkeleton": "./src/CheckoutContainerWrapper",
+          "./React": "react",
+          "./ReactDOM": "react-dom",
+          "./ReactDOMClient": "react-dom/client",
+          "./CheckoutContainerElement": "./src/CheckoutContainerElement",
+        },
+        shared: {
+          ...deps,
+          react: { singleton: true, requiredVersion: deps.react },
+          "react-dom": { singleton: true, requiredVersion: deps["react-dom"] },
+          "react-dom/client": {
+            singleton: true,
+            requiredVersion: deps["react-dom"],
           },
-          exposes: {
-              "./CheckoutSkeleton": "./src/CheckoutContainerWrapper",
-              "./React": "react",
-              "./ReactDOM": "react-dom",
-              "./ReactDOMClient": "react-dom/client",
-              './CheckoutContainerElement': './src/CheckoutContainerElement',
-          },
-          shared: {
-              ...deps,
-              react: { singleton: true, requiredVersion: deps.react },
-              "react-dom": { singleton: true, requiredVersion: deps["react-dom"] },
-              "react-dom/client": { singleton: true, requiredVersion: deps["react-dom"] },
-              "@fontsource/roboto": { singleton: true },
-          },
+          "@fontsource/roboto": { singleton: true },
+        },
       }),
 
       new HtmlWebPackPlugin({ template: "./src/index.html" }),
