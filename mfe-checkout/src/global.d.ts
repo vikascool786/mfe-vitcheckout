@@ -4,11 +4,7 @@ declare global {
     FS: {
       getCurrentSessionURL: () => string;
     };
-    ApplePaySession: {
-      canMakePayments(): boolean;
-      new (version: number, request: ApplePayPaymentRequest): ApplePaySession;
-      STATUS_SUCCESS: number | undefined
-    };
+    ApplePaySession?: ApplePaySession;
   }
 
   namespace JSX {
@@ -26,28 +22,61 @@ declare global {
 }
 
 // Apple Pay types
+interface ApplePayLineItem {
+  label: string;
+  amount: string;
+}
+
 interface ApplePayPaymentRequest {
   countryCode: string;
   currencyCode: string;
-  total: { label: string; amount: string };
+  total: ApplePayLineItem;
   supportedNetworks?: string[];
   merchantCapabilities?: string[];
-  lineItems?: { label: string; amount: string }[];
+  lineItems?: ApplePayLineItem[];
+  requiredBillingContactFields?: string[];
+  requiredShippingContactFields?: string[];
+  shippingType?: "shipping" | "delivery" | "store" | "service";
+}
+
+interface ApplePayPaymentMethod {
+  displayName: string;
+  network: string;
+  type: string;
+}
+
+interface ApplePayPaymentToken {
+  paymentData: Record<string, unknown>;
+  paymentMethod: ApplePayPaymentMethod;
+  transactionIdentifier: string;
 }
 
 interface ApplePayPayment {
-  token: any;
-  billingContact?: any;
-  shippingContact?: any;
+  token: ApplePayPaymentToken;
+  billingContact?: Record<string, unknown>;
+  shippingContact?: Record<string, unknown>;
+}
+
+interface ApplePayValidateMerchantEvent {
+  validationURL: string;
+}
+
+interface ApplePayPaymentAuthorizedEvent {
+  payment: ApplePayPayment;
 }
 
 interface ApplePaySession {
+  canMakePayments(): unknown;
   new (version: number, request: ApplePayPaymentRequest): ApplePaySession;
   begin(): void;
+  abort(): void;
   completeMerchantValidation(merchantSession: any): void;
   completePayment(status: number): void;
-  onvalidatemerchant: (event: { validationURL: string }) => void;
-  onpaymentauthorized: (event: { payment: ApplePayPayment }) => void;
+  onvalidatemerchant: (event: ApplePayValidateMerchantEvent) => void;
+  onpaymentauthorized: (event: ApplePayPaymentAuthorizedEvent) => void;
+  oncancel?: () => void;
+  STATUS_SUCCESS: number;
+  STATUS_FAILURE: number;
 }
 
 export {};

@@ -5,25 +5,29 @@ import React, { memo, SetStateAction, useEffect, useState } from "react";
 import { fetchSezzleUrl } from "../../api/ajaxaction/Sezzle";
 import { getTransactionData } from "../../api/service/Click2PayTransaction";
 import { buildOrder, changeOrder } from "../../api/service/Order";
+import { getPaypalToken } from "../../api/service/PaypalCheckout";
 import {
   addTempPaymentMethod,
   generatePayPalTransactionDetails,
 } from "../../api/service/ShoppersPaymentMethods";
 import { siteApiData } from "../../checkout/siteAtom";
 import { Button } from "../../component/Button/Button";
-import { Checkbox } from "../../component/Form/Checkbox/Checkbox";
+import { useCreditCardFormContext } from "../../component/Form/CreditCardFormContext";
+import { useContentStrings } from "../../hooks/useContentStrings";
+import { useSiteFlags } from "../../hooks/useSiteFlags";
 import { Address } from "../../interfaces/Address";
 import { Order } from "../../interfaces/Order";
 import { OrderConsolidationData } from "../../interfaces/OrderConsolidationData";
 import Click2PayPlaceOrder from "../../payment-method-click2pay/Click2PayPlaceOrder";
-import { Back } from "../../assets/svgs/Back";
 import {
   // cvvValidAtom,
   IPaymentOption,
   orderNotificationsAtom,
 } from "../../store";
+import { handleSaveCard } from "../../utils/helpers/CreditCardHelper";
 import { generateChangeStoreResponse } from "../../utils/helpers/GenerateChangeStoreResponse";
 import { generateOrderTrackingId } from "../../utils/helpers/GenerateOrderTrackingId";
+import { isIOSSafari } from "../../utils/helpers/UserAgentHelper";
 import {
   getOrderConsolidateData,
   orderHasAutoshipItems,
@@ -33,8 +37,9 @@ import {
   GET_PAYPAL_CHECKOUT_URL,
   GET_PAYPAL_CLIENT_ID,
 } from "../../utils/urlResolver";
-import { placeOrderSchema } from "../../validation/placeOrderSchema";
+import ApplePayButton from "../apple-pay/ApplePayButton";
 import {
+  APPLE_PAY,
   CLICK2PAY,
   isPaypalPayment,
   isThirdPartyPayment,
@@ -43,12 +48,6 @@ import {
   SEZZLE,
 } from "../PaymentType";
 import "./PlaceOrder.scss";
-import { useCreditCardFormContext } from "../../component/Form/CreditCardFormContext";
-import { handleSaveCard } from "../../utils/helpers/CreditCardHelper";
-import { useContentStrings } from "../../hooks/useContentStrings";
-import { useSiteFlags } from "../../hooks/useSiteFlags";
-import { getPaypalToken } from "../../api/service/PaypalCheckout";
-import { isIOSSafari } from "../../utils/helpers/UserAgentHelper";
 
 interface IPlaceOrder {
   confirmOrder: () => void;
@@ -112,19 +111,6 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
 
   const [paypalTokenId, setPaypalTokenId] = useState<String>("");
   const [paypalRecurringUrl, setPaypalRecurringUrl] = useState<String>("");
-  const [isApplePayAvailable, setIsApplePayAvailable] = useState(false);
-
-  useEffect(() => {
-    try {
-      if (window.ApplePaySession && window.ApplePaySession.canMakePayments()) {
-        console.log("✅ Apple Pay is available on this device.");
-        setIsApplePayAvailable(true);
-      }
-    } catch (error) {
-      console.log("Apple Pay is not available:", error);
-      setIsApplePayAvailable(false);
-    }
-  }, []);
 
   useEffect(() => {
     updateOrderErrorMessage("");
@@ -223,7 +209,6 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             }
 
             await changeOrder(changeOrderPayload, order?.id);
-
             confirmOrder();
           }
         } catch (error) {
@@ -554,61 +539,6 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     }
   };
 
-  const applePayButtonRef = React.useRef<HTMLElement | null>(null);
-
-  const handleApplePayClick = async () => {
-    if (!window.ApplePaySession) {
-      alert("Apple Pay is not supported on this browser.");
-      return;
-    }
-
-    const request = {
-      countryCode: "US",
-      currencyCode: "USD",
-      supportedNetworks: ["visa", "masterCard", "amex", "discover"],
-      merchantCapabilities: ["supports3DS"],
-      total: { label: "Shop.com", amount: '100' },
-    };
-
-    const session = new window.ApplePaySession(3, request);
-
-    // 🔐 Merchant validation
-    session.onvalidatemerchant = async (event) => {
-      const response = await fetch("/api/validate-merchant", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ validationURL: event.validationURL }),
-      });
-      const merchantSession = await response.json();
-      session.completeMerchantValidation(merchantSession);
-    };
-
-    // 💳 Payment authorization
-    session.onpaymentauthorized = async (event) => {
-      // send token to your backend PSP (Stripe, Braintree, etc.)
-      console.log("Payment authorized:", event.payment);
-      session.completePayment(window.ApplePaySession.STATUS_SUCCESS);
-    };
-
-    session.begin();
-  };
-
-useEffect(() => {
-  const button = applePayButtonRef.current;
-  if (button) {
-    const listener = (event: Event) => {
-      event.preventDefault();
-      handleApplePayClick();
-    };
-    button.addEventListener("click", listener);
-    console.log("✅ Apple Pay listener attached");
-
-    return () => {
-      button.removeEventListener("click", listener);
-      console.log("🧹 Apple Pay listener removed");
-    };
-  }
-}, [applePayButtonRef.current]);
 
   const handlePaypalOrderRedirect = async (isRecurring: boolean) => {
     // @ts-ignore
@@ -860,14 +790,18 @@ useEffect(() => {
                   {getString("chargedWhenShipped")}
                 </div>
               )}
-              {isApplePayAvailable ? (
-                <apple-pay-button
-                  ref={applePayButtonRef as any}
-                  buttonstyle="black"
-                  type="order"
-                  locale="en-US"
-                ></apple-pay-button>
-              ) : (
+              {paymentTypeId === APPLE_PAY.typeId ? (
+              <ApplePayButton
+                amount={order?.totals?.price?.toString() || "0.00"}
+                label="Shop.com"
+                onPaymentSuccess={(payment) => {
+                  confirmOrder();
+                }}
+                onPaymentFailure={(err) => {
+                  updateOrderErrorMessage("Apple Pay transaction failed. Please try again.");
+                }}
+              />
+                ) : (
                 <Button
                   id="mfe-place-order-btn"
                   qaTag={"qa-order"}
