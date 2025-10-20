@@ -30,6 +30,10 @@ export const handleSaveCard = async (
 
     try {
         const cardTokenResponse = await generateCardToken(creditCardFormData.cardInfo.number);
+
+        if (cardTokenResponse.response.success === 'false' && cardTokenResponse.response?.error?.length > 0) {
+            return {error: "Invalid credit card details. Please verify and try again."};
+        }
         const token = cardTokenResponse?.token.id;
         const number = cardTokenResponse?.token.mask;
 
