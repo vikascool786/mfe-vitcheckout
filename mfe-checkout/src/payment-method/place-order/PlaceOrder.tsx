@@ -70,7 +70,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   setOrderData,
   paymentMethods,
   errorMessage,
-  paymentTypeId,
+  paymentTypeId: propPaymentTypeId,
   shopperId,
   siteId,
   order,
@@ -85,6 +85,13 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   cartId,
   isGuestEmailValid,
 }) => {
+  let paymentTypeId = propPaymentTypeId;
+  console.log(propPaymentTypeId, "propPaymentTypeId");
+  const storedPaymentTypeId =
+    typeof window !== "undefined" ? localStorage.getItem("selectedPaymentTypeId") : null;
+  if (storedPaymentTypeId && !paymentTypeId) {
+    paymentTypeId = parseInt(storedPaymentTypeId);
+  }
   const trackingData = new Map<string, string>();
   const [siteData] = useAtom(siteApiData(siteId));
   const [orderNotifications, setOrderNotifications] = useAtom(
@@ -102,6 +109,12 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
 
   const [paypalTokenId, setPaypalTokenId] = useState<String>("");
   const [paypalRecurringUrl, setPaypalRecurringUrl] = useState<String>("");
+
+  useEffect(() => {
+    if (paymentTypeId) {
+      localStorage.setItem("selectedPaymentTypeId", paymentTypeId.toString());
+    }
+  }, [paymentTypeId]);
 
   useEffect(() => {
     updateOrderErrorMessage("");
