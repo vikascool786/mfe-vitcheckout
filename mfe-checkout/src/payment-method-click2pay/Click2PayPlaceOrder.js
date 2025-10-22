@@ -23,7 +23,11 @@ const Click2PayPlaceOrder = (function () {
                 "threeDsPreference": "NONE",
                 "dpaBillingPreference": "FULL",
                 "consumerNameRequested": true,
-                "confirmPayment": false
+                "confirmPayment": false,
+                "transactionAmount": {
+                    transactionAmount: Click2PayUtil.getC2pData().transactionAmount.toFixed(2),
+                    transactionCurrencyCode: "USD",
+                },
             }
         }
         Click2PayLogger.logInfo("initiating checkoutWithCard()");
