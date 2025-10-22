@@ -583,8 +583,13 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     return paymentOptions;
   };
 
+
   useEffect(() => {
     let updatedPMs = handleThirdPartyPaymentVisibility(paymentMethods);
+
+    const storedPaymentType = localStorage.getItem("selectedPaymentTypeId") as string;
+
+    const isC2PSelected = parseInt(storedPaymentType) === CLICK2PAY.typeId;
 
     if(isSezzleSelectedPayment(location.search)){
       updatedPMs = updatedPaymentOptionsWithSelectedType(updatedPMs, SEZZLE.typeId);
@@ -597,7 +602,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         const selectedPaymentTypeId = getSelectedPaymentOption(updatedPMs);
         if(selectedPaymentTypeId){
           updatePaymentTypeId(selectedPaymentTypeId.paymentMethod.typeID);
-        } else if (isPaymentsFetched && !selectedPaymentTypeId){
+        } else if (isPaymentsFetched && !selectedPaymentTypeId && !isC2PSelected) {
           const newCartPM = createNewCardOption();
           updatedPMs.push(newCartPM);
           updatePaymentTypeId(newCartPM.paymentMethod.typeID);
@@ -607,7 +612,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
 
     setPaymentMethods(updatedPMs);
   }, [order, isPaymentsFetched, siteFlags]);
-
   const isSezzleAllowed = (): boolean => {
     //sezzle rules dependent on site
     const sezzleSiteFlag = getSiteFlagDataForType(SEZZLE.siteflagTypeId || 0);

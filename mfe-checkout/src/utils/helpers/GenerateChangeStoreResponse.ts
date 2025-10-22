@@ -87,7 +87,7 @@ export const generateChangeStoreResponse = (order: Order, customer_id: string): 
   } else if(order.paymentMethod && order.paymentMethod.typeID && order.paymentMethod.accountName){
     updatedPayload.paymentMethod = updatedPayload.paymentMethod ?? {};
     updatedPayload.paymentMethod.typeID = order.paymentMethod.typeID;
-    updatedPayload.paymentMethod.accountName = " vikas";
+    updatedPayload.paymentMethod.accountName = order.paymentMethod.accountName;
   }
 
   if(!order.userOptions?.userAgent) {
