@@ -55,7 +55,7 @@ const ApplePayButton: React.FC<ApplePayButtonProps> = ({
       session.onvalidatemerchant = async (event) => {
         try {
         // TODO: REPLACE THE API ENDPOINT WITH SHOP COM ENDPOINT
-          const response = await fetch("/api/validate-merchant", {
+          const response = await fetch("https://staging.shop.com/ajaxaction/apple-pay/session", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ validationURL: event.validationURL }),
