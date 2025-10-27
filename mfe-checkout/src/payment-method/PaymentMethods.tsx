@@ -596,6 +596,10 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       updatePaymentTypeId(SEZZLE.typeId);
     }
 
+    if (isC2PSelected && showClick2Pay) {
+      return;
+    }
+
     if(order){
       if(!isSelectedPaymentInAllowedOrderPayments(updatedPMs, order.paymentMethods)){
         updatedPMs = returnPaymentOptionsWithDefaultSelection(updatedPMs);
