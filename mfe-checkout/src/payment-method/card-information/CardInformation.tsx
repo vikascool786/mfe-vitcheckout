@@ -563,6 +563,7 @@ const { getString } = useContentStrings();
                       {shippingAddress?.address1},{" "}
                       {shippingAddress?.address2 ? `${shippingAddress.address2}, ` : ""}
                       {shippingAddress?.city},{" "}
+                      {shippingAddress?.state},{" "}
                       {shippingAddress?.zip}
                     </div>
                 )}

@@ -84,6 +84,7 @@ export const generateChangeStoreResponse = (order: Order, customer_id: string): 
     updatedPayload.paymentMethod.accountName = order.paymentMethod.accountName;
     updatedPayload.paymentMethod.expMonth = order.paymentMethod.expMonth;
     updatedPayload.paymentMethod.expYear = order.paymentMethod.expYear;
+    updatedPayload.paymentMethod.cvv = order.paymentMethod?.cvv;
   } else if(order.paymentMethod && order.paymentMethod.typeID && order.paymentMethod.accountName){
     updatedPayload.paymentMethod = updatedPayload.paymentMethod ?? {};
     updatedPayload.paymentMethod.typeID = order.paymentMethod.typeID;

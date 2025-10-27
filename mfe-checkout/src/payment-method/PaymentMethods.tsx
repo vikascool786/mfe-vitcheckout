@@ -583,7 +583,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     return paymentOptions;
   };
 
-
   useEffect(() => {
     let updatedPMs = handleThirdPartyPaymentVisibility(paymentMethods);
 
@@ -612,6 +611,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
 
     setPaymentMethods(updatedPMs);
   }, [order, isPaymentsFetched, siteFlags]);
+
   const isSezzleAllowed = (): boolean => {
     //sezzle rules dependent on site
     const sezzleSiteFlag = getSiteFlagDataForType(SEZZLE.siteflagTypeId || 0);

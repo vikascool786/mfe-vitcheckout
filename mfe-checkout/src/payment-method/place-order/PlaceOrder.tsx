@@ -86,7 +86,6 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   isGuestEmailValid,
 }) => {
   let paymentTypeId = propPaymentTypeId;
-  console.log(propPaymentTypeId, "propPaymentTypeId");
   const storedPaymentTypeId =
     typeof window !== "undefined" ? localStorage.getItem("selectedPaymentTypeId") : null;
   if (storedPaymentTypeId && !paymentTypeId) {
@@ -115,7 +114,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
       localStorage.setItem("selectedPaymentTypeId", paymentTypeId.toString());
     }
   }, [paymentTypeId]);
-
+  
   useEffect(() => {
     updateOrderErrorMessage("");
     if (order) {

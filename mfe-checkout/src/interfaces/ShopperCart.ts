@@ -132,6 +132,7 @@ export interface IPaymentMethod {
   accountName?: string;
   expMonth?: number;
   expYear?: number;
+  cvv?: string;
 }
 
 export interface IShopperChangeCart {
