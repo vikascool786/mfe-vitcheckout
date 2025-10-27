@@ -595,6 +595,11 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       updatePaymentTypeId(SEZZLE.typeId);
     }
 
+    //for making default selection to c2p on textupdates.
+    if (isC2PSelected && showClick2Pay) {
+      return;
+    }
+
     if(order){
       if(!isSelectedPaymentInAllowedOrderPayments(updatedPMs, order.paymentMethods)){
         updatedPMs = returnPaymentOptionsWithDefaultSelection(updatedPMs);
