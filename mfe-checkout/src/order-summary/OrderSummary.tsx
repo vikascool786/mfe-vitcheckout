@@ -35,6 +35,7 @@ interface IOrderSummary {
   isAddressSaved: boolean;
   portalId: string;
   isGuest: boolean;
+  setPaymentTypeId: (id: number) => void;
 }
 
 interface ICouponState {
@@ -58,6 +59,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
   isAddressSaved,
   portalId,
   isGuest,
+  setPaymentTypeId,
 }) => {
   const [order, setOrder] = useAtom(orderAtom);
   const { eWalletData, loading, error } = useShopperEWallet(pcid);
@@ -293,6 +295,10 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
       }
   
       setOrder(updatedOrder.response?.success?.data);
+      // same here when price is 0 after applying gift card
+      if (updatedOrder.response?.success?.data.totals.price === 0) {
+        setPaymentTypeId(6);
+      }
       setgcState((prevState) => ({
         ...prevState,
         gcNum: "",
@@ -480,7 +486,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               !error &&
               eWalletData &&
               parseFloat(eWalletData.totalCoaCBAvail) > 0 && (
-                <ApplyCashback cashbackData={eWalletData} siteId={siteId} pcid={pcid} />
+                <ApplyCashback cashbackData={eWalletData} siteId={siteId} pcid={pcid} setPaymentTypeId={setPaymentTypeId} />
               )}
           </>
         )}

@@ -569,6 +569,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                         isAddressSaved={isAddressSaved}
                         portalId={currentPortalId}
                         isGuest={isGuest}
+                        setPaymentTypeId={setPaymentTypeId}
                     />
                 )}
                 <div className="notifications-mobile">

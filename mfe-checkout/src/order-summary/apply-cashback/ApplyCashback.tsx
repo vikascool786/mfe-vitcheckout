@@ -16,12 +16,14 @@ interface IApplyCashbackContainer {
   cashbackData: EWallet;
   siteId: string;
   pcid: string;
+  setPaymentTypeId: (id: number) => void;
 }
 
 export const ApplyCashback: React.FC<IApplyCashbackContainer> = ({
   cashbackData,
   siteId,
-  pcid
+  pcid,
+  setPaymentTypeId,
 }) => {
   const [order, setOrder] = useAtom(orderAtom);
   const [loading, setLoading] = useAtom(loadingAtom);
@@ -78,6 +80,10 @@ export const ApplyCashback: React.FC<IApplyCashbackContainer> = ({
       if (response) {
         setOrder(response.response.success.data);
         setOrderNotifications(getOrderNotifications(response.response.success));
+        // if price is 0 after applying cashback, set payment type to VIFT
+        if (response.response.success.data.totals.price === 0) {
+           setPaymentTypeId(6);
+        }
         setLoading(false);
       }
     });
