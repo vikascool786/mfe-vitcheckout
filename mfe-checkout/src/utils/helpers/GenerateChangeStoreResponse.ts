@@ -2,7 +2,6 @@ import { ChangeOrder } from "../../interfaces/ChangeOrder";
 import { Order } from "../../interfaces/Order";
 import { getAmosUserSessionID, getUserAgent } from "./UserSessionDataHelper";
 import { isAddressDefaultMAAddress } from "../AddressUtils";
-import { CLICK2PAY } from "../../payment-method/PaymentType";
 
 export const generateChangeStoreResponse = (order: Order, customer_id: string): ChangeOrder => {
   const updatedPayload: ChangeOrder = {
