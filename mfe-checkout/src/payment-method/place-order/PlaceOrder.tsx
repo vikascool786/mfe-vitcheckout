@@ -70,7 +70,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   setOrderData,
   paymentMethods,
   errorMessage,
-  paymentTypeId: propPaymentTypeId,
+  paymentTypeId,
   shopperId,
   siteId,
   order,
@@ -85,12 +85,6 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   cartId,
   isGuestEmailValid,
 }) => {
-  let paymentTypeId = propPaymentTypeId;
-  const storedPaymentTypeId =
-    typeof window !== "undefined" ? localStorage.getItem("selectedPaymentTypeId") : null;
-  if (storedPaymentTypeId && !paymentTypeId) {
-    paymentTypeId = parseInt(storedPaymentTypeId);
-  }
   const trackingData = new Map<string, string>();
   const [siteData] = useAtom(siteApiData(siteId));
   const [orderNotifications, setOrderNotifications] = useAtom(
@@ -109,11 +103,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   const [paypalTokenId, setPaypalTokenId] = useState<String>("");
   const [paypalRecurringUrl, setPaypalRecurringUrl] = useState<String>("");
 
-  useEffect(() => {
-    if (paymentTypeId) {
-      localStorage.setItem("selectedPaymentTypeId", paymentTypeId.toString());
-    }
-  }, [paymentTypeId]);
+
   
   useEffect(() => {
     updateOrderErrorMessage("");
@@ -669,17 +659,27 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             if (isGuest) {
               updatedOrder.paymentMethod = {
                 ...order.paymentMethod,
-                accountName: response.name,
+                accountName: response.accountName,
                 number: response.number,
                 token: response.token,
-                typeID: response.type,
-                expMonth: response.month,
-                expYear: response.year,
+                typeID: response.typeID,
+                expMonth: response.expMonth,
+                expYear: response.expYear,
+                type: response.type,
+                categoryID: response.categoryID,
               };
             } else {
               updatedOrder.paymentMethod = {
                 ...order.paymentMethod,
                 id: response.id,
+                accountName: response.accountName,
+                number: response.number,
+                token: response.token,
+                typeID: response.typeID,
+                expMonth: response.expMonth,
+                expYear: response.expYear,
+                type: response.type,
+                categoryID: response.categoryID,
               };
             }
             return buildOrder(

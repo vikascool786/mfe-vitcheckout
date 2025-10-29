@@ -2,6 +2,7 @@ import { ChangeOrder } from "../../interfaces/ChangeOrder";
 import { Order } from "../../interfaces/Order";
 import { getAmosUserSessionID, getUserAgent } from "./UserSessionDataHelper";
 import { isAddressDefaultMAAddress } from "../AddressUtils";
+import { CLICK2PAY } from "../../payment-method/PaymentType";
 
 export const generateChangeStoreResponse = (order: Order, customer_id: string): ChangeOrder => {
   const updatedPayload: ChangeOrder = {
@@ -74,7 +75,9 @@ export const generateChangeStoreResponse = (order: Order, customer_id: string): 
     updatedPayload.shipping.phone = order.shippingAddress.phone;
   }
 
-  if (order.paymentMethod?.id) {
+  if (order.paymentMethod && order.paymentMethod.typeID?.toString() === '60') {
+    updatedPayload.paymentMethod = {...order.paymentMethod};
+  } else if (order.paymentMethod?.id) {
     updatedPayload.paymentMethod = { id: order.paymentMethod.id };
   }else if (order.paymentMethod && order.paymentMethod.number && order.paymentMethod.token ) {
     updatedPayload.paymentMethod = updatedPayload.paymentMethod ?? {};
@@ -90,7 +93,6 @@ export const generateChangeStoreResponse = (order: Order, customer_id: string): 
     updatedPayload.paymentMethod.typeID = order.paymentMethod.typeID;
     updatedPayload.paymentMethod.accountName = order.paymentMethod.accountName;
   }
-
   if(!order.userOptions?.userAgent) {
     updatedPayload.userOptions.userAgent = getUserAgent();
   }
