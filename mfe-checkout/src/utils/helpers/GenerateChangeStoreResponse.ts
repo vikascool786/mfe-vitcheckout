@@ -92,6 +92,7 @@ export const generateChangeStoreResponse = (order: Order, customer_id: string): 
     updatedPayload.paymentMethod.typeID = order.paymentMethod.typeID;
     updatedPayload.paymentMethod.accountName = order.paymentMethod.accountName;
   }
+
   if(!order.userOptions?.userAgent) {
     updatedPayload.userOptions.userAgent = getUserAgent();
   }

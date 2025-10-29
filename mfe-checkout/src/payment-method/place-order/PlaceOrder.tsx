@@ -103,7 +103,11 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   const [paypalTokenId, setPaypalTokenId] = useState<String>("");
   const [paypalRecurringUrl, setPaypalRecurringUrl] = useState<String>("");
 
-
+  useEffect(() => {
+    if (paymentTypeId) {
+      localStorage.setItem("selectedPaymentTypeId", paymentTypeId.toString());
+    }
+  }, [paymentTypeId]);   
   
   useEffect(() => {
     updateOrderErrorMessage("");
@@ -713,10 +717,6 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
       throw new Error(errMsg);
     }
   };
-
-  // if (isLoading) {
-  //   return <Spinner />;
-  // }
 
   return (
     <div className="checkout-place-order margin-5">
