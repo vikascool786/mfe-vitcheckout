@@ -338,7 +338,7 @@ export const ShippingItem: React.FC<IShippingItemProps> = ({
                   {decodeHtmlEntities(caption)}
                 </div>
 
-                {!isGiftCard && <div>{optionStringValue()}</div>}
+                {!isGiftCard && <div>{decodeHtmlEntities(optionStringValue() as string)}</div>}
 
                 { isCustomCocktailProdContainerId(item.prodContainerId) &&
                     <div>{item.special_formula}</div>
