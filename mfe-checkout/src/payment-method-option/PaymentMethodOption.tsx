@@ -28,6 +28,7 @@ import { ThirdPartyLinkOff } from "./ThirdPartyLinkOff";
 import CardOptions from "../assets/images/CardOptions.png";
 import { getVisibleCardOptionsImages } from "../utils/helpers/GetVisibleCardImages";
 import { useContentStrings } from "../hooks/useContentStrings";
+import { getOrderNotifications } from "../utils/OrderUtils";
 
 export interface IPaymentOptionProps {
   handleCancelNewCard: () => void;
@@ -215,12 +216,20 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
         }, pcid);
 
         const orderResponse = await buildOrder(updatedOrder);
+
+        if (getOrderNotifications(orderResponse.response.success).length > 0) {
+            setLoading(false);
+            setOrderNotifications(
+              getOrderNotifications(orderResponse.response.success)
+              );
+          setOrder({ ...orderResponse.response.success.data, isOrderValid: false, shouldShowInvalidCVVMessage: null, });
+          return;
+      }
         setOrder({
           ...orderResponse.response.success.data,
           isOrderValid: true,
           shouldShowInvalidCVVMessage: null,
         });
-      }
 
       // Reset all payment methods, only keep the validated one
       const updatedPaymentMethods = paymentMethods.map((method) => ({
@@ -231,6 +240,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
       }));
 
       onAddNewCards(updatedPaymentMethods);
+    }
 
       // Reset CVV input in formik
       formik.setFieldValue("cvvError", "");

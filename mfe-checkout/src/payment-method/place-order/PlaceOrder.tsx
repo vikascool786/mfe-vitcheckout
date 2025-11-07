@@ -625,6 +625,11 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     }
   };
 
+  useEffect(() => {
+    if (paymentTypeId !== CLICK2PAY.typeId) return;
+    handleClick2PayOrderUpdate();
+  }, [paymentTypeId])
+
   const handleClick2PayOrderUpdate = (): Promise<void> => {
     return new Promise((resolve, reject) => {
       let c2pBillingAddress: Address = {
@@ -717,7 +722,8 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             );
           }
         })
-        .then(() => {
+        .then((response: any) => {
+          setOrderData(response.response.success.data);
           console.log("Click2pay place order completed successfully");
           resolve(); // Fulfill the outer promise
         })

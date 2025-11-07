@@ -42,6 +42,8 @@ export interface ITotal {
   gcBalanceStr?: string[];
   priceActualStr: string;
   priceActual?:string;
+  rebateAmount?: number;
+  rebateAmountStr?: string;
 }
 
 export interface IItem {
