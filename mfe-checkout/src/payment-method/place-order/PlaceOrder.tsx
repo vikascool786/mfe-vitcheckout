@@ -425,7 +425,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
       paymentTypeId =
         selectedPaymentMethod?.paymentMethod.typeID || paymentTypeId;
 
-              // If order is fully covered under VIFT or gift card, skip sending payment method
+        // If order is fully covered under VIFT or gift card, skip sending payment method
       if (
         (isOrderCoveredUnderVIFT || isOrderCoveredByGiftCard)
       ) {
@@ -434,7 +434,6 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
         confirmOrder();
         return;
       }
-
 
       switch (paymentTypeId) {
         case CLICK2PAY.typeId:
@@ -593,7 +592,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   };
 
   const handleFinalPlaceOrderUpdateWithoutPaymentMethods = () => {
-        if (!order) return;
+    if (!order) return;
     if (order) {
       return buildOrder(
         generateChangeStoreResponse({
@@ -607,7 +606,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
       );
     }
   };
-
+  
   const getClickToPayTransactionData = async (
     flowId: string,
     transId: string,

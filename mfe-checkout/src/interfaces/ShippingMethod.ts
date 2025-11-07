@@ -37,6 +37,8 @@ export interface ShippingSelection {
   estShipDate: string;
   estShipDisplayDate: string;
   isSelected?: boolean;
+  shipDisc: number;
+  shipDiscStr: string;
   totalStr: string;
 }
 

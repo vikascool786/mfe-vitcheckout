@@ -95,3 +95,18 @@
   line-height: 18px;
   letter-spacing: 0%;
 }
+
+.shipping-option-shipDisc-wrapper {
+  display: flex;
+  flex-direction: column;
+  text-align: right;
+}
+.shipping-option-shipDisc-span {
+  font-size: 18px;
+  font-weight: 600;
+}
+.shipping-option-shipDisc-strikeout {
+  font-size: 16px;
+  text-decoration: line-through;
+  opacity: 0.6;
+}
