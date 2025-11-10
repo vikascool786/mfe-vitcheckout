@@ -77,7 +77,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     isEditing,
   } = paymentOption;
 
-   const { getString } = useContentStrings();
+  const { getString } = useContentStrings();
 
   const scrollToPMMain = () => {
     const element = document.getElementById("pm-main");
@@ -85,7 +85,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
       element.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
-  
+
   useEffect(() => {
     const selectedPayment = paymentMethods.find(
       (pm) => pm.isSelected
@@ -153,7 +153,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   const handlePaymentMethodEdit = () => {
     if (isSelected && paymentMethod) {
       onCardEdit(paymentMethod.id);
-      if(formik.values.cvv){ //clear out cvv if something was entered
+      if (formik.values.cvv) { //clear out cvv if something was entered
         setCVVFieldValue("");
       }
     }
@@ -201,7 +201,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
 
       // Update order with validated payment method -
       // AI-110718 only call this if the payment method has been updated, build order takes too long when only cvv is entered
-      if(!order?.paymentMethod?.id || hasPaymentChanged){
+      if (!order?.paymentMethod?.id || hasPaymentChanged) {
         const updatedOrder = generateChangeStoreResponse({
           ...order,
           paymentMethod: {
@@ -218,18 +218,18 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
         const orderResponse = await buildOrder(updatedOrder);
 
         if (getOrderNotifications(orderResponse.response.success).length > 0) {
-            setLoading(false);
-            setOrderNotifications(
-              getOrderNotifications(orderResponse.response.success)
-              );
+          setLoading(false);
+          setOrderNotifications(
+            getOrderNotifications(orderResponse.response.success)
+          );
           setOrder({ ...orderResponse.response.success.data });
-      }
+        }
         setOrder({
           ...orderResponse.response.success.data,
           isOrderValid: true,
           shouldShowInvalidCVVMessage: null,
         });
-    }
+      }
       // Reset all payment methods, only keep the validated one
       const updatedPaymentMethods = paymentMethods.map((method) => ({
         ...method,
@@ -246,7 +246,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     } catch (error) {
       console.log(error);
       setOrder({ ...order, isOrderValid: false });
-      setErrorMessage(getString("unexpectedErrorTryAgain") as string); 
+      setErrorMessage(getString("unexpectedErrorTryAgain") as string);
     }
 
     setLoading(false);
@@ -357,69 +357,68 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
                   </div>
                   <div>
                     <div className="cvv-input-wrapper">
-                    <input
-                      name="cvv"
-                      className={`qa-cvv payment-option-container__card-cvv-form ${
-                        errorMessage ||
-                        formik.errors.cvv ||
-                        (formik.values.cvvError && !formik.errors.cvv)
-                          ? "cvv-error"
-                          : ""
-                      }`}
-                      value={formik.values.cvv}
-                      type="text"
-                      pattern="\d*"
-                      aria-hidden="true"
-                      data-1p-ignore
-                      data-lpignore="true"
-                      data-protonpass-ignore="true"
-                      data-autocompletetype="off"
-                      maxLength={maxLength}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                        const sanitizedValue = e.target.value.replace(
-                          /\D/g,
-                          ""
-                        ); // Allow only numbers
-                        if (sanitizedValue.length <= maxLength) {
-                          formik.setFieldValue("cvv", sanitizedValue);
-                        }
-
-                        // Trigger validation when CVV length matches maxLength
-                        if (sanitizedValue.length === maxLength) {
-                          onValidCVV(sanitizedValue);
-                        } else {
-                          const updatedPaymentMethods = paymentMethods.map(
-                            (pm) =>
-                              pm.paymentMethod.id === paymentMethod.id
-                                ? {
-                                  ...pm,
-                                  isPaymentValidated: false,
-                                }
-                                : pm
-                          );
-
-                          onAddNewCards(updatedPaymentMethods);
-                        }
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          const sanitizedValue = formik.values.cvv?.replace(/\D/g, "");
-                          if (sanitizedValue?.length === maxLength) {
-                            onValidCVV(sanitizedValue);
+                      <input
+                        name="cvv"
+                        className={`qa-cvv payment-option-container__card-cvv-form ${errorMessage ||
+                            formik.errors.cvv ||
+                            (formik.values.cvvError && !formik.errors.cvv)
+                            ? "cvv-error"
+                            : ""
+                          }`}
+                        value={formik.values.cvv}
+                        type="text"
+                        pattern="\d*"
+                        aria-hidden="true"
+                        data-1p-ignore
+                        data-lpignore="true"
+                        data-protonpass-ignore="true"
+                        data-autocompletetype="off"
+                        maxLength={maxLength}
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                          const sanitizedValue = e.target.value.replace(
+                            /\D/g,
+                            ""
+                          ); // Allow only numbers
+                          if (sanitizedValue.length <= maxLength) {
+                            formik.setFieldValue("cvv", sanitizedValue);
                           }
-                        }
-                      }}
-                      onBlur={formik.handleBlur}
-                      required
-                    />
-                    {(errorMessage ||
-                      formik.errors.cvv ||
-                      (formik.values.cvvError && !formik.errors.cvv)) && (
-                      <span className="material-symbols-outlined cvv-error-icon">
-                        error
-                      </span>
-                    )}
+
+                          // Trigger validation when CVV length matches maxLength
+                          if (sanitizedValue.length === maxLength) {
+                            onValidCVV(sanitizedValue);
+                          } else {
+                            const updatedPaymentMethods = paymentMethods.map(
+                              (pm) =>
+                                pm.paymentMethod.id === paymentMethod.id
+                                  ? {
+                                    ...pm,
+                                    isPaymentValidated: false,
+                                  }
+                                  : pm
+                            );
+
+                            onAddNewCards(updatedPaymentMethods);
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            const sanitizedValue = formik.values.cvv?.replace(/\D/g, "");
+                            if (sanitizedValue?.length === maxLength) {
+                              onValidCVV(sanitizedValue);
+                            }
+                          }
+                        }}
+                        onBlur={formik.handleBlur}
+                        required
+                      />
+                      {(errorMessage ||
+                        formik.errors.cvv ||
+                        (formik.values.cvvError && !formik.errors.cvv)) && (
+                          <span className="material-symbols-outlined cvv-error-icon">
+                            error
+                          </span>
+                        )}
                     </div>
                     <div className="cvv-text">{maxLength} {getString("digits")}</div>
                     {errorMessage ||

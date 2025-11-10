@@ -41,7 +41,7 @@ export interface ITotal {
   gcDispAppliedStr?: string[]
   gcBalanceStr?: string[];
   priceActualStr: string;
-  priceActual?:string;
+  priceActual?: string;
   rebateAmount?: number;
   rebateAmountStr?: string;
 }

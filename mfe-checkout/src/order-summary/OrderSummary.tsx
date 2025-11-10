@@ -705,13 +705,12 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           <div className={"qa-total"}>{order?.totals?.priceStr}</div>         
         </div>
 
-          {order?.totals.rebateAmount && order.totals.rebateAmount > 0 ?
+        {order?.totals.rebateAmount && order.totals.rebateAmount > 0 ?
           <div className="order-summary-row">
-          <div className="order-summary__total-d">{getString("total")}</div>
-          <div className="order-summary__total-m">{getString("total")}</div>
-          <div className={"qa-total"}>{order?.totals?.rebateAmountStr}</div>
+            <div className="order-summary__total-d">{getString("total")}</div>
+            <div className="order-summary__total-m">{getString("total")}</div>
+            <div className={"qa-total"}>{order?.totals?.rebateAmountStr}</div>
           </div> : null}
-
 
         {Number(order?.totals?.cashBack) > 0 && (
           <>

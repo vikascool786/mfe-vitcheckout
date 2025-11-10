@@ -71,7 +71,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
 }) => {
   const setLoading = useSetAtom(loadingAtom);
   const setOrderNotifications = useSetAtom(orderNotificationsAtom);
-const { getString } = useContentStrings();
+  const { getString } = useContentStrings();
   const errorRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
 
   const [isCardSavedInWallet, setIsCardSavedInWallet] = useState(
@@ -197,7 +197,7 @@ const { getString } = useContentStrings();
         updatedPaymentAddress = orderResponse.response.success.data
           .billingAddress as unknown as string;
         setOrder(orderResponse.response.success.data);
-        if (orderResponse.response.success.notifications) {
+         if (orderResponse.response.success.notifications) {
           setOrderNotifications(
             getOrderNotifications(orderResponse.response.success)
           );
