@@ -222,15 +222,14 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
             setOrderNotifications(
               getOrderNotifications(orderResponse.response.success)
               );
-          setOrder({ ...orderResponse.response.success.data, isOrderValid: false, shouldShowInvalidCVVMessage: null, });
-          return;
+          setOrder({ ...orderResponse.response.success.data });
       }
         setOrder({
           ...orderResponse.response.success.data,
           isOrderValid: true,
           shouldShowInvalidCVVMessage: null,
         });
-
+    }
       // Reset all payment methods, only keep the validated one
       const updatedPaymentMethods = paymentMethods.map((method) => ({
         ...method,
@@ -240,7 +239,6 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
       }));
 
       onAddNewCards(updatedPaymentMethods);
-    }
 
       // Reset CVV input in formik
       formik.setFieldValue("cvvError", "");

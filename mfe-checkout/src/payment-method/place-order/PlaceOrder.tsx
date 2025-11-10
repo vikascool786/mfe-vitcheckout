@@ -26,6 +26,7 @@ import { generateChangeStoreResponse } from "../../utils/helpers/GenerateChangeS
 import { generateOrderTrackingId } from "../../utils/helpers/GenerateOrderTrackingId";
 import {
   getOrderConsolidateData,
+  getOrderNotifications,
   orderHasAutoshipItems, orderHasShippingAddress,
 } from "../../utils/OrderUtils";
 import {
@@ -724,6 +725,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
         })
         .then((response: any) => {
           setOrderData(response.response.success.data);
+          setOrderNotifications(getOrderNotifications(response.response.success));
           console.log("Click2pay place order completed successfully");
           resolve(); // Fulfill the outer promise
         })
