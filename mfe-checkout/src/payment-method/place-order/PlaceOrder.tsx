@@ -626,8 +626,40 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     }
   };
 
+  const handleClick2PayOrderRemove = (): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      if (order) {
+        buildOrder(
+          generateChangeStoreResponse(
+            {
+              ...order,
+              paymentMethod: {},
+            },
+            pcid
+          )
+        )
+          .then((response: any) => {
+            setOrderData(response.response.success.data);
+            setOrderNotifications(
+              getOrderNotifications(response.response.success)
+            );
+            console.log("Click2pay removed successfully");
+            resolve();
+          })
+          .catch((error: { message: string }) => {
+            console.error("c2p remove failed: " + error.message);
+            reject(error);
+          });
+      }
+    });
+  }
+
   useEffect(() => {
-    if (paymentTypeId !== CLICK2PAY.typeId) return;
+    if (paymentTypeId !== CLICK2PAY.typeId) {
+      // remove C2P if present from the Order
+      handleClick2PayOrderRemove();
+      return;
+    };
     handleClick2PayOrderUpdate();
   }, [paymentTypeId])
 

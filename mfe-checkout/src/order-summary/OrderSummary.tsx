@@ -663,6 +663,16 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                 </div>
               );
             })}
+
+            {order?.totals.rebateAmount && parseFloat(order.totals.rebateAmount.toString()) > 0 ?
+                    
+            <div className="order-summary-row">
+            <div className="order-summary-row">Click to Pay Rebate</div>
+                    <div className={"qa-sub-totaltotal"}>
+                      -{order.totals?.rebateAmountStr}
+                    </div>
+                  </div> : null}
+
         {order?.totals?.priceActualStr !== order?.totals.priceStr && (
           <div className="order-summary-row">
             <div className="order-summary-row">{getString("subTotal")}</div>
@@ -704,14 +714,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
           <div className="order-summary__total-m">{getString("total")}</div>
           <div className={"qa-total"}>{order?.totals?.priceStr}</div>         
         </div>
-
-        {order?.totals.rebateAmount && order.totals.rebateAmount > 0 ?
-          <div className="order-summary-row">
-            <div className="order-summary__total-d">{getString("total")}</div>
-            <div className="order-summary__total-m">{getString("total")}</div>
-            <div className={"qa-total"}>{order?.totals?.rebateAmountStr}</div>
-          </div> : null}
-
+        
         {Number(order?.totals?.cashBack) > 0 && (
           <>
             <div className="order-summary-cashback-container">
