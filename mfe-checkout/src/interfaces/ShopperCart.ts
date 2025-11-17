@@ -41,7 +41,9 @@ export interface ITotal {
   gcDispAppliedStr?: string[]
   gcBalanceStr?: string[];
   priceActualStr: string;
-  priceActual?:string;
+  priceActual?: string;
+  rebateAmount?: number;
+  rebateAmountStr?: string;
 }
 
 export interface IItem {
@@ -132,6 +134,7 @@ export interface IPaymentMethod {
   accountName?: string;
   expMonth?: number;
   expYear?: number;
+  cvv?: string;
 }
 
 export interface IShopperChangeCart {

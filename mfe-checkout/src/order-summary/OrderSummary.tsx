@@ -35,6 +35,7 @@ interface IOrderSummary {
   isAddressSaved: boolean;
   portalId: string;
   isGuest: boolean;
+  setPaymentTypeId: (id: number) => void;
 }
 
 interface ICouponState {
@@ -58,6 +59,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
   isAddressSaved,
   portalId,
   isGuest,
+  setPaymentTypeId,
 }) => {
   const [order, setOrder] = useAtom(orderAtom);
   const { eWalletData, loading, error } = useShopperEWallet(pcid);
@@ -293,6 +295,10 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
       }
   
       setOrder(updatedOrder.response?.success?.data);
+      // same here when price is 0 after applying gift card
+      if (updatedOrder.response?.success?.data.totals.price === 0) {
+        setPaymentTypeId(6);
+      }
       setgcState((prevState) => ({
         ...prevState,
         gcNum: "",
@@ -480,7 +486,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               !error &&
               eWalletData &&
               parseFloat(eWalletData.totalCoaCBAvail) > 0 && (
-                <ApplyCashback cashbackData={eWalletData} siteId={siteId} pcid={pcid} />
+                <ApplyCashback cashbackData={eWalletData} siteId={siteId} pcid={pcid} setPaymentTypeId={setPaymentTypeId} />
               )}
           </>
         )}
@@ -657,6 +663,16 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                 </div>
               );
             })}
+
+            {order?.totals.rebateAmount && parseFloat(order.totals.rebateAmount.toString()) > 0 ?
+                    
+            <div className="order-summary-row">
+            <div className="order-summary-row">Click to Pay Rebate</div>
+                    <div className={"qa-sub-totaltotal"}>
+                      -{order.totals?.rebateAmountStr}
+                    </div>
+                  </div> : null}
+
         {order?.totals?.priceActualStr !== order?.totals.priceStr && (
           <div className="order-summary-row">
             <div className="order-summary-row">{getString("subTotal")}</div>
@@ -696,8 +712,9 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
         >
           <div className="order-summary__total-d">{getString("total")}</div>
           <div className="order-summary__total-m">{getString("total")}</div>
-          <div className={"qa-total"}>{order?.totals?.priceStr}</div>
+          <div className={"qa-total"}>{order?.totals?.priceStr}</div>         
         </div>
+        
         {Number(order?.totals?.cashBack) > 0 && (
           <>
             <div className="order-summary-cashback-container">

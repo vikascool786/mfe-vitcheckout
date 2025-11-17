@@ -60,9 +60,12 @@ import { DEFAULT_CART_DATA, ShoppingCart } from "../interfaces/ShoppingCart";
 import { getShoppingCart } from "../api/ajaxaction/ShoppingCart";
 import { customerApiData } from "./customerAtom";
 import { setGuestEmailForSession } from "../api/ajaxaction/FamosSession";
+import { generateOrderTrackingId } from "../utils/helpers/GenerateOrderTrackingId";
 
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
+
+const trackingData = new Map<string, string>()
 
 export const getInitialBuildOrderData = (
   cartId: string,
@@ -80,7 +83,7 @@ export const getInitialBuildOrderData = (
   userOptions: {
     applyEWallet: false,
     isOfAge: false,
-    trackingID: "",
+    trackingID: generateOrderTrackingId(trackingData),
     deliveryDate: "",
     signatureRequired: false,
     oosConsolidate: 3,
@@ -566,6 +569,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                         isAddressSaved={isAddressSaved}
                         portalId={currentPortalId}
                         isGuest={isGuest}
+                        setPaymentTypeId={setPaymentTypeId}
                     />
                 )}
                 <div className="notifications-mobile">

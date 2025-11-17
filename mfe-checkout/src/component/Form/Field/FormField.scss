@@ -114,3 +114,9 @@
   font-weight: 400;
   src: url("../../../assets/fonts/password.woff");
 }
+
+@media (max-width: 414px) {
+  .tm-container .text-updates-content .mobile-header {
+    margin-bottom: 0 !important;
+  }
+}

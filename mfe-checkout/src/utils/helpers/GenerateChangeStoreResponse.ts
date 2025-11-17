@@ -74,7 +74,9 @@ export const generateChangeStoreResponse = (order: Order, customer_id: string): 
     updatedPayload.shipping.phone = order.shippingAddress.phone;
   }
 
-  if (order.paymentMethod?.id) {
+  if (order.paymentMethod && order.paymentMethod.typeID?.toString() === '60') {
+    updatedPayload.paymentMethod = {...order.paymentMethod};
+  } else if (order.paymentMethod?.id) {
     updatedPayload.paymentMethod = { id: order.paymentMethod.id };
   }else if (order.paymentMethod && order.paymentMethod.number && order.paymentMethod.token ) {
     updatedPayload.paymentMethod = updatedPayload.paymentMethod ?? {};
@@ -84,6 +86,7 @@ export const generateChangeStoreResponse = (order: Order, customer_id: string): 
     updatedPayload.paymentMethod.accountName = order.paymentMethod.accountName;
     updatedPayload.paymentMethod.expMonth = order.paymentMethod.expMonth;
     updatedPayload.paymentMethod.expYear = order.paymentMethod.expYear;
+    updatedPayload.paymentMethod.cvv = order.paymentMethod?.cvv;
   } else if(order.paymentMethod && order.paymentMethod.typeID && order.paymentMethod.accountName){
     updatedPayload.paymentMethod = updatedPayload.paymentMethod ?? {};
     updatedPayload.paymentMethod.typeID = order.paymentMethod.typeID;

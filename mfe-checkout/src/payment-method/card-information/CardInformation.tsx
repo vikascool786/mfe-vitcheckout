@@ -23,6 +23,7 @@ import {
   IPaymentOption,
   loadingAtom,
   orderAtom,
+  orderNotificationsAtom,
   paymentMethodsAtom,
 } from "../../store";
 import { generateChangeStoreResponse } from "../../utils/helpers/GenerateChangeStoreResponse";
@@ -36,6 +37,7 @@ import {getShippingAddressFromAddressList} from "../../utils/AddressUtils";
 import { CreditCardValidationWatcher } from "./CreditCardValidationWatcher";
 import {siteApiData} from "../../checkout/siteAtom";
 import { useContentStrings } from "../../hooks/useContentStrings";
+import { getOrderNotifications } from "../../utils/OrderUtils";
 
 interface ICardInformationProps {
   paymentMethod: IPaymentMethod;
@@ -68,7 +70,8 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
   isGuest,
 }) => {
   const setLoading = useSetAtom(loadingAtom);
-const { getString } = useContentStrings();
+  const setOrderNotifications = useSetAtom(orderNotificationsAtom);
+  const { getString } = useContentStrings();
   const errorRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
 
   const [isCardSavedInWallet, setIsCardSavedInWallet] = useState(
@@ -194,6 +197,11 @@ const { getString } = useContentStrings();
         updatedPaymentAddress = orderResponse.response.success.data
           .billingAddress as unknown as string;
         setOrder(orderResponse.response.success.data);
+         if (orderResponse.response.success.notifications) {
+          setOrderNotifications(
+            getOrderNotifications(orderResponse.response.success)
+          );
+        }
         // updatePaymentValidationStatus(values.id as number);
         onCancel();
       }
@@ -563,6 +571,7 @@ const { getString } = useContentStrings();
                       {shippingAddress?.address1},{" "}
                       {shippingAddress?.address2 ? `${shippingAddress.address2}, ` : ""}
                       {shippingAddress?.city},{" "}
+                      {shippingAddress?.state},{" "}
                       {shippingAddress?.zip}
                     </div>
                 )}

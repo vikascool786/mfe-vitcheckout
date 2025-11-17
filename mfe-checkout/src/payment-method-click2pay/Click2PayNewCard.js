@@ -106,10 +106,6 @@ const Click2PayNewCard = (function () {
         dpaBillingPreference: "FULL",
         consumerNameRequested: true,
         confirmPayment: false,
-        transactionAmount: {
-          transactionAmount: Click2PayUtil.getC2pData().transactionAmount.toFixed(2),
-          transactionCurrencyCode: "USD",
-        },
       },
     };
     /*if(checkoutC2PCards.hasMobilePhone()){

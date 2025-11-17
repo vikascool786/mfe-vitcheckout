@@ -14,6 +14,9 @@ export const generateOrderTrackingId = (trackingData: Map<string, string>) => {
             trackingString += '&';
         }
     });
+    if (window.location.href.includes('isguestcheckout=true')) {
+        trackingString += '&isguestcheckout=true';
+    }
     return trackingString;
 };
 

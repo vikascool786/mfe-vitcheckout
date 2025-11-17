@@ -583,7 +583,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     return paymentOptions;
   };
 
-
   useEffect(() => {
     let updatedPMs = handleThirdPartyPaymentVisibility(paymentMethods);
 
@@ -594,6 +593,11 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     if(isSezzleSelectedPayment(location.search)){
       updatedPMs = updatedPaymentOptionsWithSelectedType(updatedPMs, SEZZLE.typeId);
       updatePaymentTypeId(SEZZLE.typeId);
+    }
+
+    //for making default selection to c2p on textupdates.
+    if (isC2PSelected && showClick2Pay) {
+      return;
     }
 
     if(order){
@@ -612,6 +616,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
 
     setPaymentMethods(updatedPMs);
   }, [order, isPaymentsFetched, siteFlags]);
+
   const isSezzleAllowed = (): boolean => {
     //sezzle rules dependent on site
     const sezzleSiteFlag = getSiteFlagDataForType(SEZZLE.siteflagTypeId || 0);

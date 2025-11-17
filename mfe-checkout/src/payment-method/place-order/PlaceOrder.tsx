@@ -30,6 +30,7 @@ import { generateOrderTrackingId } from "../../utils/helpers/GenerateOrderTracki
 import { isIOSSafari } from "../../utils/helpers/UserAgentHelper";
 import {
   getOrderConsolidateData,
+  getOrderNotifications,
   orderHasAutoshipItems,
   orderHasShippingAddress,
 } from "../../utils/OrderUtils";
@@ -77,7 +78,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   setOrderData,
   paymentMethods,
   errorMessage,
-  paymentTypeId: propPaymentTypeId,
+  paymentTypeId,
   shopperId,
   siteId,
   order,
@@ -92,13 +93,6 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   cartId,
   isGuestEmailValid,
 }) => {
-  let paymentTypeId = propPaymentTypeId;
-  console.log(propPaymentTypeId, "propPaymentTypeId");
-  const storedPaymentTypeId =
-    typeof window !== "undefined" ? localStorage.getItem("selectedPaymentTypeId") : null;
-  if (storedPaymentTypeId && !paymentTypeId) {
-    paymentTypeId = parseInt(storedPaymentTypeId);
-  }
   const trackingData = new Map<string, string>();
   const [siteData] = useAtom(siteApiData(siteId));
   const [orderNotifications, setOrderNotifications] = useAtom(
@@ -123,8 +117,8 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     if (paymentTypeId) {
       localStorage.setItem("selectedPaymentTypeId", paymentTypeId.toString());
     }
-  }, [paymentTypeId]);
-
+  }, [paymentTypeId]);   
+  
   useEffect(() => {
     updateOrderErrorMessage("");
     if (order) {
@@ -452,6 +446,16 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
       paymentTypeId =
         selectedPaymentMethod?.paymentMethod.typeID || paymentTypeId;
 
+        // If order is fully covered under VIFT or gift card, skip sending payment method
+      if (
+        (isOrderCoveredUnderVIFT || isOrderCoveredByGiftCard)
+      ) {
+
+        await handleFinalPlaceOrderUpdateWithoutPaymentMethods();
+        confirmOrder();
+        return;
+      }
+
       switch (paymentTypeId) {
         case CLICK2PAY.typeId:
           await handleClick2PayOrderUpdate();
@@ -616,6 +620,22 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     }
   };
 
+  const handleFinalPlaceOrderUpdateWithoutPaymentMethods = () => {
+    if (!order) return;
+    if (order) {
+      return buildOrder(
+        generateChangeStoreResponse({
+          ...order,
+          paymentMethod: {},
+          userOptions: {
+            ...order.userOptions,
+            trackingID: generateOrderTrackingId(trackingData),
+          },
+        }, pcid)
+      );
+    }
+  };
+  
   const getClickToPayTransactionData = async (
     flowId: string,
     transId: string,
@@ -633,6 +653,43 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
       throw new Error(errorMessage);
     }
   };
+
+  const handleClick2PayOrderRemove = (): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      if (order) {
+        buildOrder(
+          generateChangeStoreResponse(
+            {
+              ...order,
+              paymentMethod: {},
+            },
+            pcid
+          )
+        )
+          .then((response: any) => {
+            setOrderData(response.response.success.data);
+            setOrderNotifications(
+              getOrderNotifications(response.response.success)
+            );
+            console.log("Click2pay removed successfully");
+            resolve();
+          })
+          .catch((error: { message: string }) => {
+            console.error("c2p remove failed: " + error.message);
+            reject(error);
+          });
+      }
+    });
+  }
+
+  useEffect(() => {
+    if (paymentTypeId !== CLICK2PAY.typeId) {
+      // remove C2P if present from the Order
+      handleClick2PayOrderRemove();
+      return;
+    };
+    handleClick2PayOrderUpdate();
+  }, [paymentTypeId])
 
   const handleClick2PayOrderUpdate = (): Promise<void> => {
     return new Promise((resolve, reject) => {
@@ -703,23 +760,37 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             if (isGuest) {
               updatedOrder.paymentMethod = {
                 ...order.paymentMethod,
-                accountName: response.name,
+                accountName: response.accountName,
                 number: response.number,
                 token: response.token,
-                typeID: response.type,
-                expMonth: response.month,
-                expYear: response.year,
+                typeID: response.typeID,
+                expMonth: response.expMonth,
+                expYear: response.expYear,
+                type: response.type,
+                categoryID: response.categoryID,
               };
             } else {
               updatedOrder.paymentMethod = {
                 ...order.paymentMethod,
                 id: response.id,
+                accountName: response.accountName,
+                number: response.number,
+                token: response.token,
+                typeID: response.typeID,
+                expMonth: response.expMonth,
+                expYear: response.expYear,
+                type: response.type,
+                categoryID: response.categoryID,
               };
             }
-            return buildOrder(generateChangeStoreResponse(updatedOrder, pcid));
+            return buildOrder(
+              generateChangeStoreResponse(updatedOrder, pcid)
+            );
           }
         })
-        .then(() => {
+        .then((response: any) => {
+          setOrderData(response.response.success.data);
+          setOrderNotifications(getOrderNotifications(response.response.success));
           console.log("Click2pay place order completed successfully");
           resolve(); // Fulfill the outer promise
         })
@@ -745,10 +816,6 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
       throw new Error(errMsg);
     }
   };
-
-  // if (isLoading) {
-  //   return <Spinner />;
-  // }
 
   return (
     <div className="checkout-place-order margin-5">

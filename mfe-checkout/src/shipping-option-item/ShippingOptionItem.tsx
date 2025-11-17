@@ -61,7 +61,22 @@ export const ShippingOptionItem: React.FC<IShippingOptionItem> = ({
           </div>
         </div>
 
-        <div>{shippingOption?.totalStr}</div>
+        <div>
+          {shippingOption?.shipDisc >0 ? (
+            <div className="shipping-option-shipDisc-wrapper">
+              <span className="shipping-option-shipDisc-span">
+                {shippingOption?.shipDiscStr}
+              </span>
+              <span className="shipping-option-shipDisc-strikeout">
+                {shippingOption?.totalStr}
+              </span>
+            </div>
+          ) : (
+            <div>
+              {shippingOption?.totalStr}
+            </div>
+          )}
+        </div>
       </div>
       {hasAutoship && shippingOption.isSelected && (
         <div
