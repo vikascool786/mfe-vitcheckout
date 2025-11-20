@@ -5,15 +5,15 @@ const { ProvidePlugin } = require("webpack");
 const deps = require("./package.json").dependencies;
 
 module.exports = (env, argv) => {
-  const mode = argv.mode || 'development';
-  const isDev = mode === 'development';
-  const isProduction = mode === 'production';
-  const isStaging = process.env.NODE_ENV === 'staging' || mode === 'staging';
+  const mode = argv.mode || "development";
+  const isDev = mode === "development";
+  const isProduction = mode === "production";
+  const isStaging = process.env.NODE_ENV === "staging" || mode === "staging";
   const dotenvFilename = isProduction
-    ? '.env.production'
+    ? ".env.production"
     : isStaging
-      ? '.env.staging'
-      : '.env.development';
+    ? ".env.staging"
+    : ".env.development";
   const isLocal = env.local ?? false;
   const domainEndpoint = () => {
     if (env.development) return "d29q5zo2af0lw0.cloudfront.net";
@@ -22,7 +22,7 @@ module.exports = (env, argv) => {
   };
 
   return {
-    mode: isStaging ? 'development' : mode, // Use 'development' mode for staging
+    mode: isStaging ? "development" : mode, // Use 'development' mode for staging
 
     output: {
       publicPath: isDev
@@ -39,8 +39,10 @@ module.exports = (env, argv) => {
       historyApiFallback: true,
       headers: {
         "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
-        "Access-Control-Allow-Headers": "X-Requested-With, content-type, Authorization",
+        "Access-Control-Allow-Methods":
+          "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+        "Access-Control-Allow-Headers":
+          "X-Requested-With, content-type, Authorization",
       },
     },
 
@@ -64,32 +66,47 @@ module.exports = (env, argv) => {
           test: /\.(png|jpe?g|gif)$/i,
           use: [{ loader: "file-loader" }],
         },
+        {
+          test: /\.svg$/,
+          use: [
+            {
+              loader: "svg-url-loader",
+              options: {
+                limit: 10000, // Inline files smaller than 10 kB as data URIs
+                noquotes: true,
+              },
+            },
+          ],
+        },
       ],
     },
 
-  plugins: [
+    plugins: [
       new ModuleFederationPlugin({
-          name: "mfeCheckoutContainer",
-          filename: "remoteEntry.js",
-          remotes: {
-              mfeStore: isLocal
-                  ? "mfeStore@http://localhost:3000/remoteEntry.js"
-                  : `mfeStore@${domainEndpoint()}/Store/remoteEntry.js`,
+        name: "mfeCheckoutContainer",
+        filename: "remoteEntry.js",
+        remotes: {
+          mfeStore: isLocal
+            ? "mfeStore@http://localhost:3000/remoteEntry.js"
+            : `mfeStore@${domainEndpoint()}/Store/remoteEntry.js`,
+        },
+        exposes: {
+          "./CheckoutSkeleton": "./src/CheckoutContainerWrapper",
+          "./React": "react",
+          "./ReactDOM": "react-dom",
+          "./ReactDOMClient": "react-dom/client",
+          "./CheckoutContainerElement": "./src/CheckoutContainerElement",
+        },
+        shared: {
+          ...deps,
+          react: { singleton: true, requiredVersion: deps.react },
+          "react-dom": { singleton: true, requiredVersion: deps["react-dom"] },
+          "react-dom/client": {
+            singleton: true,
+            requiredVersion: deps["react-dom"],
           },
-          exposes: {
-              "./CheckoutSkeleton": "./src/CheckoutContainerWrapper",
-              "./React": "react",
-              "./ReactDOM": "react-dom",
-              "./ReactDOMClient": "react-dom/client",
-              './CheckoutContainerElement': './src/CheckoutContainerElement',
-          },
-          shared: {
-              ...deps,
-              react: { singleton: true, requiredVersion: deps.react },
-              "react-dom": { singleton: true, requiredVersion: deps["react-dom"] },
-              "react-dom/client": { singleton: true, requiredVersion: deps["react-dom"] },
-              "@fontsource/roboto": { singleton: true },
-          },
+          "@fontsource/roboto": { singleton: true },
+        },
       }),
 
       new HtmlWebPackPlugin({ template: "./src/index.html" }),
