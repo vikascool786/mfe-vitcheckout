@@ -38,7 +38,7 @@ interface IOrderSummary {
   setPaymentTypeId: (id: number) => void;
 }
 
-interface ICouponState {
+export interface ICouponState {
   coupon: string;
   couponError: string;
 }
@@ -319,6 +319,8 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
   };
   const handleAddCoupon = async () => {
     try {
+      console.log('coupon', coupon);
+      console.log('order', order);
       if (coupon.coupon) {
         if (order) {
           const { coupons } = order?.userOptions || {};
@@ -664,15 +666,6 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
               );
             })}
 
-            {order?.totals.rebateAmount && parseFloat(order.totals.rebateAmount.toString()) > 0 ?
-                    
-            <div className="order-summary-row">
-            <div className="order-summary-row">Click to Pay Rebate</div>
-                    <div className={"qa-sub-totaltotal"}>
-                      -{order.totals?.rebateAmountStr}
-                    </div>
-                  </div> : null}
-
         {order?.totals?.priceActualStr !== order?.totals.priceStr && (
           <div className="order-summary-row">
             <div className="order-summary-row">{getString("subTotal")}</div>
@@ -681,6 +674,14 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
             </div>
           </div>
         )}
+
+        {order?.totals.rebateAmount && parseFloat(order.totals.rebateAmount.toString()) > 0 ?
+          <div className="order-summary-row">
+            <div className="order-summary-row">Click to Pay Rebate</div>
+            <div className={"qa-rebate"}>
+              -{order.totals?.rebateAmountStr}
+            </div>
+          </div> : null}
 
         {order?.userOptions?.applyEWallet && eWalletData?.totalCoaCBAvail && (
           <div className="order-summary-row">
@@ -788,6 +789,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
             </div>
           )}
       </>
+      
     </div>
   );
 };

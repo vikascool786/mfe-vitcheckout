@@ -53,11 +53,18 @@ export const PAYPAL_RECURRING: PaymentType = {
     siteflagTypeId: 580
 }
 
+export const APPLEPAY: PaymentType = {
+    name: "ApplePay",
+    typeId: 50,
+    siteflagTypeId: 587
+}
+
 const thirdPartyPayments = [
     CLICK2PAY,
     SEZZLE,
     PAYPAL,
     PAYPAL_RECURRING,
+    APPLEPAY
 ]
 
 const paypalPayments = [

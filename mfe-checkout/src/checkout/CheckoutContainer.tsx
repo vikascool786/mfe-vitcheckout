@@ -61,6 +61,7 @@ import { getShoppingCart } from "../api/ajaxaction/ShoppingCart";
 import { customerApiData } from "./customerAtom";
 import { setGuestEmailForSession } from "../api/ajaxaction/FamosSession";
 import { generateOrderTrackingId } from "../utils/helpers/GenerateOrderTrackingId";
+import { ApplePayButton } from "../component/ApplePay/ApplePay";
 
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
@@ -576,6 +577,12 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                   <Notifications notificationMessages={orderNotifications || []} />
                 </div>  
                 <div className="place-order">
+                {
+                //   isGuest &&  <div id="mfe-apple-pay-button-portal">
+                //   <p>Test Express checkout</p>
+                // <ApplePayButton pcid={pcid} confirmOrder={confirmOrder} isGuestCheckout={isGuest} cartId={cartId} siteId={siteId} />
+                // </div>
+                }
                   {(isAddressSaved && customerId.length > 0 && paymentMethodOptions) && (
                     <PlaceOrder
                       confirmOrder={confirmOrder}
