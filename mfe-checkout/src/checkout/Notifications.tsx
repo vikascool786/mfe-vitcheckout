@@ -41,6 +41,11 @@ const parseMessage = (message: string): React.ReactNode[] => {
 export const Notifications: React.FC<INotifications> = ({ notificationMessages }) => {
     if (notificationMessages.length === 0) return null;
 
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+    
     return (
         <div>
             {notificationMessages.map((message, index) => (

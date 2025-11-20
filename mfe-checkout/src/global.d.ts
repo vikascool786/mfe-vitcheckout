@@ -4,19 +4,14 @@ declare global {
     FS: {
       getCurrentSessionURL: () => string;
     };
-    ApplePaySession?: ApplePaySession;
+    ApplePaySession: any;
+    ApplePayError: any;
   }
-
+}
+declare global {
   namespace JSX {
     interface IntrinsicElements {
-      "apple-pay-button": React.DetailedHTMLProps<
-        React.HTMLAttributes<HTMLElement>,
-        HTMLElement
-      > & {
-        buttonstyle?: string;
-        type?: string;
-        locale?: string;
-      };
+      "apple-pay-button": any;
     }
   }
 }

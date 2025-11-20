@@ -143,6 +143,19 @@ export const commitOrder = async (cartId: string): Promise<any> => {
   }
 };
 
+export const getShippingMethods = async (cartId: string, updatedOrderPayload: any): Promise<any> => {
+  try {
+    const response = await axiosInstance(shopperUpdateOrderEndpoint(cartId)).post(
+      "",
+      updatedOrderPayload
+    );
+    return response;
+  } catch (error) {
+    return error;
+  }
+};
+
+
 export const deleteUniversalOrder = async (cartId: string): Promise<any> => {
   try {
     await axiosInstance(shopperOrderAPIEndpoint(cartId)).delete("");

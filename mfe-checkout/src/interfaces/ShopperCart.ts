@@ -30,6 +30,7 @@ export interface ITotal {
   cashBackStr: string;
   couponCode?: string;
   couponTerms?: any[];
+  coupons?: number;
   taxStr?: string;
   shippingStr?: string;
   cashBackAppliedStr?: string;

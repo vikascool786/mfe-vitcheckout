@@ -73,6 +73,18 @@ module.exports = (env, argv) => {
           test: /\.(png|jpe?g|gif)$/i,
           use: [{ loader: "file-loader" }],
         },
+        {
+          test: /\.svg$/,
+          use: [
+            {
+              loader: "svg-url-loader",
+              options: {
+                limit: 10000, // Inline files smaller than 10 kB as data URIs
+                noquotes: true,
+              },
+            },
+          ],
+        },
       ],
     },
 
@@ -82,7 +94,7 @@ module.exports = (env, argv) => {
         filename: "remoteEntry.js",
         remotes: {
           mfeStore: isLocal
-            ? "mfeStore@https://localhost:3000/remoteEntry.js"
+            ? "mfeStore@http://localhost:3000/remoteEntry.js"
             : `mfeStore@${domainEndpoint()}/Store/remoteEntry.js`,
         },
         exposes: {

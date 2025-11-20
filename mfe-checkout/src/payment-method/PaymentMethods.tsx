@@ -23,6 +23,7 @@ import { createPaymentMethod } from "../utils/helpers/GeneratePaymentMethod";
 import "./PaymentMethods.scss";
 import * as Yup from "yup";
 import {
+  APPLEPAY,
   CLICK2PAY,
   creditCardTypeIds,
   isThirdPartyPayment,
@@ -82,15 +83,19 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   const { siteFlags } = useSiteFlags();
   const [isExpanded, setIsExpanded] = useState(false);
 
+  console.log('pm', paymentMethods)
+
   // addresses for user wallet
   const { addresses } = useShopperEWalletAddresses(shopperId || "");
 
   const [order] = useAtom(orderAtom);
+  console.log('order from payment method', order)
 
   const shouldShowClick2Pay = order?.paymentMethods.some(
     (method) => method.typeID === CLICK2PAY.typeId
   );
   const [showClick2Pay, setShowClick2Pay] = useState(shouldShowClick2Pay);
+  const [showApplePay, setShowApplePay] = useState(true);
 
   const [isPaymentsFetched, setIsPaymentsFetched] = useState<boolean>(false);
 
@@ -549,6 +554,10 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         (method) => method.typeID === PAYPAL_RECURRING.typeId
     );
 
+    const shouldShowApplePay = order?.paymentMethods.some(
+      method => method.typeID === APPLEPAY.typeId
+    );
+
     if (!isSezzleAllowed()) {
       paymentOptions = paymentOptions.filter(
           (method) => method.paymentMethod.typeID !== SEZZLE.typeId
@@ -579,6 +588,12 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         paymentOptions = [...paymentMethods, sezzlePayment];
       }
     }
+
+  if (!shouldShowApplePay || window.ApplePaySession.canMakePayments()) {
+    paymentOptions = paymentOptions.filter(
+        (method) => method.paymentMethod.typeID !== APPLEPAY.typeId
+    );
+  }
 
     return paymentOptions;
   };
@@ -929,8 +944,8 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
           };
         }
 
-        // when selected paypal or sezzle, set editing false
-        if (id === -1001 || id === -1002 || id === -1003) {
+        // when selected paypal or sezzle or apple pay, set editing false
+        if (id === -1001 || id === -1002 || id === -1003 || id === -1004) {
           updatePaymentTypeId(id);
           return {
             ...paymentMethod,

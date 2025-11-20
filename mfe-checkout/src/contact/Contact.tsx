@@ -12,6 +12,8 @@ import { Address } from "../interfaces/Address";
 import { Order } from "../interfaces/Order";
 import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStoreResponse";
 import { useContentStrings } from "../hooks/useContentStrings";
+import { guestShopperIdAtom } from "../store";
+import { useSetAtom } from "jotai";
 
 interface IContactProps {
     portalId: string;
@@ -45,6 +47,7 @@ export const Contact: React.FC<IContactProps> = ({
         return `/nbts/login-myaccount.xhtml?ischeckout=true&returnurl=/nbts/checkout/v2`;
     }
 
+    const setGuestShopperId = useSetAtom(guestShopperIdAtom)
     const [email, setEmail] = useState("");
     const [debouncedEmail, setDebouncedEmail] = useState("");
     const [isValidEmail, setIsValidEmail] = useState(false);
@@ -106,6 +109,7 @@ export const Contact: React.FC<IContactProps> = ({
                         //commenting out sign in alert since they chose to come in as guest. Keeping in case we decide otherwise
                         //setIsFullRegEmail(isFullRegShopper(response)); //show sign in alert in UI
                         setShowOptInCheckbox(false);
+                        setGuestShopperId(response.shopperID);
                         fetchShopperDetail(response.shopperID)
                             .then(response => {
                                 if (response.shopperAccountDisabled == 1) {
