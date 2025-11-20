@@ -755,6 +755,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   useEffect(() => {
     if (paymentTypeId !== CLICK2PAY.typeId) {
       // remove C2P if present from the Order
+      if (order?.paymentMethod.typeID !== CLICK2PAY.typeId) return;
       handleClick2PayOrderRemove();
       return;
     };
@@ -951,7 +952,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                       ? getString("payWith") as string
                       : (getString("placeOrder") as string)
                 }
-                disabled={isLoading || isGuestEmailValid || (isCheckboxChecked && hasPhoneError)}
+                disabled={isLoading || isGuestEmailValid || (isCheckboxChecked && hasPhoneError) || orderNotifications?.length != 0 }
                 btnType={
                   paymentTypeId === SEZZLE.typeId
                     ? "sezzle"
