@@ -5,35 +5,30 @@ import React, { memo, SetStateAction, useEffect, useState } from "react";
 import { fetchSezzleUrl } from "../../api/ajaxaction/Sezzle";
 import { getTransactionData } from "../../api/service/Click2PayTransaction";
 import { buildOrder, changeOrder } from "../../api/service/Order";
-import { getPaypalToken } from "../../api/service/PaypalCheckout";
 import {
   addTempPaymentMethod,
   generatePayPalTransactionDetails,
 } from "../../api/service/ShoppersPaymentMethods";
 import { siteApiData } from "../../checkout/siteAtom";
 import { Button } from "../../component/Button/Button";
-import { useCreditCardFormContext } from "../../component/Form/CreditCardFormContext";
-import { useContentStrings } from "../../hooks/useContentStrings";
-import { useSiteFlags } from "../../hooks/useSiteFlags";
+import { Checkbox } from "../../component/Form/Checkbox/Checkbox";
 import { Address } from "../../interfaces/Address";
 import { Order } from "../../interfaces/Order";
 import { OrderConsolidationData } from "../../interfaces/OrderConsolidationData";
 import Click2PayPlaceOrder from "../../payment-method-click2pay/Click2PayPlaceOrder";
+import { Back } from "../../assets/svgs/Back";
 import {
   // cvvValidAtom,
   IPaymentOption,
   guestShopperIdAtom,
   orderNotificationsAtom,
 } from "../../store";
-import { handleSaveCard } from "../../utils/helpers/CreditCardHelper";
 import { generateChangeStoreResponse } from "../../utils/helpers/GenerateChangeStoreResponse";
 import { generateOrderTrackingId } from "../../utils/helpers/GenerateOrderTrackingId";
-import { isIOSSafari } from "../../utils/helpers/UserAgentHelper";
 import {
   getOrderConsolidateData,
   getOrderNotifications,
-  orderHasAutoshipItems,
-  orderHasShippingAddress,
+  orderHasAutoshipItems, orderHasShippingAddress,
 } from "../../utils/OrderUtils";
 import {
   GET_PAYPAL_CHECKOUT_URL,
@@ -48,6 +43,8 @@ import { useContentStrings } from "../../hooks/useContentStrings";
 import { useSiteFlags } from "../../hooks/useSiteFlags";
 import { getPaypalToken } from "../../api/service/PaypalCheckout";
 import { isIOSSafari } from "../../utils/helpers/UserAgentHelper";
+import { ApplePayButton } from "../../component/ApplePay/ApplePay";
+import { decryptAppleData, getLineItems, getMerchantSession, savePaymentMethod, getShippingMethodsFromOrder } from "../../component/ApplePay/ApplePayUtils";
 
 interface IPlaceOrder {
   confirmOrder: () => void;
@@ -102,9 +99,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   const { getString } = useContentStrings();
   const { siteFlags } = useSiteFlags();
   const [orderConsolidateData, setOrderConsolidateData] =
-    useState<OrderConsolidationData>(
-      getOrderConsolidateData(order || null, getString)
-    );
+    useState<OrderConsolidationData>(getOrderConsolidateData(order || null, getString));
 
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
@@ -132,25 +127,19 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     if (isPaypalPayment(paymentTypeId) && order) {
       const isRecurring = PAYPAL_RECURRING.typeId === paymentTypeId;
       const ppShopperId = isGuest ? cartId : shopperId;
-      const tokenResponse = getPaypalToken(
-        ppShopperId,
-        isRecurring,
-        order?.totals.price,
-        isGuest
-      );
-      tokenResponse.then((response) => {
-        if (isRecurring) {
-          setPaypalTokenId(response.data.token_id);
-          const approvalUrl =
-            response.data.links.find(
-              (link: { rel: string; href: string }) =>
-                link.rel === "approval_url"
+      const tokenResponse = getPaypalToken(ppShopperId, isRecurring, order?.totals.price, isGuest)
+      tokenResponse
+        .then((response) => {
+          if (isRecurring) {
+            setPaypalTokenId(response.data.token_id);
+            const approvalUrl = response.data.links.find((link: { rel: string; href: string }) =>
+              link.rel === "approval_url"
             )?.href || "";
-          setPaypalRecurringUrl(approvalUrl);
-        } else {
-          setPaypalTokenId(response.tokenId);
-        }
-      });
+            setPaypalRecurringUrl(approvalUrl);
+          } else {
+            setPaypalTokenId(response.tokenId);
+          }
+        })
     } else {
       setPaypalTokenId("");
       setPaypalRecurringUrl("");
@@ -179,9 +168,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
       setIsLoading(true);
 
       if (isPaypalCallback || isRecurringPaypalCallback) {
-        const transactionToken = isRecurringPaypalCallback
-          ? baToken
-          : token || "";
+        const transactionToken = isRecurringPaypalCallback ? baToken : token || "";
         const ppShopperId = isGuest ? cartId : shopperId;
         try {
           const response = await generatePayPalTransactionDetails(
@@ -209,8 +196,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
               },
             };
 
-            const orderBillingAddress =
-              response.billing ?? order?.shippingAddress; //use billing from token response, otherwise fall back to shipping
+            const orderBillingAddress = response.billing ?? order?.shippingAddress; //use billing from token response, otherwise fall back to shipping
             if (orderBillingAddress) {
               changeOrderPayload.billing = {
                 ...orderBillingAddress,
@@ -218,6 +204,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             }
 
             await changeOrder(changeOrderPayload, order?.id);
+
             confirmOrder();
           }
         } catch (error) {
@@ -227,10 +214,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
       }
     };
 
-    if (
-      (isPaypalCallback || isRecurringPaypalCallback) &&
-      !isCanceledCallback
-    ) {
+    if ((isPaypalCallback || isRecurringPaypalCallback) && !isCanceledCallback) {
       fetchPayPalTransactionDetails();
     }
   }, []); // Ensure dependencies are correctly handled
@@ -353,8 +337,8 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     let isCreditCardRequired =
       !isOrderCoveredUnderVIFT && !isOrderCoveredByGiftCard;
 
-    if (isOrderCoveredUnderVIFT) {
-      isCreditCardRequired = false;
+    if(isOrderCoveredUnderVIFT){
+        isCreditCardRequired = false;
     }
     if (isCreditCardRequired && selectedPaymentMethod?.paymentMethod.id === 0) {
       if (!hasNewCreditCardDataToSave) {
@@ -504,7 +488,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             selectedPaymentMethod?.paymentMethod.expYear || 0
           );
 
-          if (isOrderCoveredUnderVIFT && isCardExpiredFlag) {
+          if(isOrderCoveredUnderVIFT && isCardExpiredFlag){
             isCardExpiredFlag = false;
           }
 
@@ -512,9 +496,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             order &&
               setOrderData({
                 ...order,
-                shouldShowInvalidCVVMessage: `${getString(
-                  "creditCardExpired"
-                )}.`,
+                shouldShowInvalidCVVMessage: `${getString("creditCardExpired")}.`,
               });
             setIsLoading(false);
             return;
@@ -557,7 +539,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                 ...order,
                 shouldShowInvalidCVVMessage:
                   order?.shouldShowInvalidCVVMessage ===
-                  `${getString("creditCardExpired")}.`
+                    `${getString("creditCardExpired")}.`
                     ? order.shouldShowInvalidCVVMessage
                     : getString("checkCvv"),
               });
@@ -573,21 +555,17 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     } catch (error: any) {
       setIsLoading(false);
       const errorMessage =
-        error?.response?.data?.message ||
-        error?.message ||
-        (getString("errorPlacingOrder") as string);
+        error?.response?.data?.message || error?.message || getString("errorPlacingOrder") as string;
       updateOrderErrorMessage(errorMessage);
     }
   };
-
 
   const handlePaypalOrderRedirect = async (isRecurring: boolean) => {
     // @ts-ignore
     const data = JSON.parse(siteFlags[0].auxDataText);
 
     let ppClientId = GET_PAYPAL_CLIENT_ID();
-    if (isIOSSafari()) {
-      // add cache-busting parameter
+    if (isIOSSafari()) { // add cache-busting parameter
       ppClientId += `&t=${Date.now()}`;
     }
 
@@ -607,7 +585,9 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
         }
         // console.log("PayPal SDK loaded:", paypal);
       })
-      .catch((error) => console.error("PayPal SDK failed to load", error));
+      .catch((error) =>
+        console.error("PayPal SDK failed to load", error)
+      );
 
     if (paypalTokenId.length < 1) {
       alert("Failed to fetch PayPal token, check console for message");
@@ -618,28 +598,94 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     window.open(url, "_self");
   }
 
+  const handleApplePay = async (order:Order) => {
+    const request = {
+        countryCode: 'US',
+        currencyCode: 'USD',
+        supportedNetworks: ['visa', 'masterCard', 'amex', 'discover'],
+        merchantCapabilities: ['supports3DS', "supportsDebit",
+        "supportsCredit"],
+   
+        total: { label: 'Market America', amount: order?.totals.price},
+    // Add line items for breakdown (including potential discount)
+      lineItems: getLineItems(order!)
+      };
+      const session = new window.ApplePaySession(14, request)
+      session.begin();
+      session.onvalidatemerchant = async () => {
+        const merchantSession = await getMerchantSession();
+        session.completeMerchantValidation(merchantSession);
+      }
+
+      session.onpaymentauthorized = async (event: any) => {
+        const { payment } = event;
+        try {
+       const decryptedPayment = await decryptAppleData(payment, order?.totals.price.toString(), "USD"); 
+       if (decryptedPayment.error) {
+        errorMessage = decryptedPayment.error;
+        session.completePayment(window.ApplePaySession.STATUS_FAILURE);
+        throw new Error(errorMessage);
+  
+       }
+       const savePaymentPayload = {
+        number: decryptedPayment.ipgTransactionId, 
+        number2: decryptedPayment.clientRequestId,
+        token: decryptedPayment.orderId,
+        siteId: siteId,
+        type: APPLEPAY.typeId,
+        name: isGuest ? guestShopperId: shopperId
+       }
+    const savedPaymentMethod = await savePaymentMethod(savePaymentPayload, shopperId);
+    const changeOrderDetails = generateChangeStoreResponse(order!, pcid);
+    trackingData.set("applePay", "");
+    const changeOrderPayload = {
+      ...changeOrderDetails,
+      paymentMethod: {
+       ...savedPaymentMethod
+      },
+      billing: order?.shippingAddress,
+      userOptions: {
+        ...changeOrderDetails.userOptions,
+        trackingData: generateOrderTrackingId(trackingData)
+      }
+    }
+    await changeOrder(changeOrderPayload, order?.id!);
+    confirmOrder();
+    session.completePayment(window.ApplePaySession.STATUS_SUCCESS);
+        } catch (e) {
+          console.log('Something went wrong!', e);
+          updateOrderErrorMessage("There was an error processing your payment. Please try again later!");
+          session.completePayment(window.ApplePaySession.STATUS_FAILURE);
+        }
+      }
+
+      session.oncancel = () => {
+        setIsLoading(false);
+      }
+
+      session.abort = () => {
+        setIsLoading(false);
+      }
+  }
+
   const getPaypalUrl = (isRecurring: boolean) => {
-    const paypalRedirectUrl = isRecurring
-      ? paypalRecurringUrl
-      : `${GET_PAYPAL_CHECKOUT_URL()}?token=${paypalTokenId}`;
+    const paypalRedirectUrl = isRecurring ? paypalRecurringUrl : `${GET_PAYPAL_CHECKOUT_URL()}?token=${paypalTokenId
+      }`;
 
     return `${paypalRedirectUrl}&useraction=commit`;
-  };
+  }
 
   const handleFinalPlaceOrderUpdate = () => {
     if (!order || isGuest) return;
     if (order) {
       return buildOrder(
-        generateChangeStoreResponse(
-          {
-            ...order,
-            userOptions: {
-              ...order.userOptions,
-              trackingID: generateOrderTrackingId(trackingData),
-            },
+        generateChangeStoreResponse({
+          ...order,
+          userOptions: {
+            ...order.userOptions,
+            trackingID: generateOrderTrackingId(trackingData),
           },
-          pcid
-        )
+        }, pcid)
       );
     }
   };
@@ -744,12 +790,8 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
 
             return getClickToPayTransactionData(flowId, transId, total);
           } else {
-            console.error(
-              `click2pay place order failed: ` + response
-                ? response
-                : `Click2pay checkoutActionCode not Complete`
-            );
-            const C2P_UNAVAILABLE_TRY_DIFFERENT_PAYMENT = `We're sorry, we have encountered an error with click2pay. Please try another payment method`;
+            console.error(`click2pay place order failed: ` + response ? response : `Click2pay checkoutActionCode not Complete`);
+            const C2P_UNAVAILABLE_TRY_DIFFERENT_PAYMENT = `We're sorry, we have encountered an error with click2pay. Please try another payment method`
             throw new Error(C2P_UNAVAILABLE_TRY_DIFFERENT_PAYMENT);
           }
         })
@@ -767,11 +809,10 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
           c2pBillingAddress = response.data.billing;
           c2pBillingAddress.country = siteData.siteCountryCode;
 
-          return isGuest
-            ? walletData
-            : addTempPaymentMethod(shopperId, walletData);
+          return isGuest ? walletData : addTempPaymentMethod(shopperId, walletData);
         })
         .then((response: any) => {
+
           if (order) {
             const updatedOrder = {
               ...order,
@@ -849,12 +890,16 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
         onSubmit={() => handlePlaceOrder(paymentMethods)}
       >
         {({ submitForm }) => {
+
           return (
             <form>
               {orderHasAutoshipItems(order || null) && (
                 <div className="checkout-place-order-autoship checkout-place-order-text">
-                  <div className="checkout-place-order-text__flex"></div>
-                  <div className={`checkout-place-order-text__box`}>
+                  <div className="checkout-place-order-text__flex">
+                  </div>
+                  <div
+                    className={`checkout-place-order-text__box`}
+                  >
                     <div className="checkout-place-order-text">
                       {getString("autoShipAgreement")}
                     </div>
@@ -885,9 +930,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                   {/* <div className="error-message-order--bold">
                   Please complete your payment information
                 </div> */}
-                  <div className="error-message-order--bold">
-                    {errorMessage}
-                  </div>
+                  <div className="error-message-order--bold">{errorMessage}</div>
                 </div>
               )}
               {orderConsolidateData.oosConsolidate === 2 && (
@@ -895,7 +938,9 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                   {getString("chargedWhenShipped")}
                 </div>
               )}
-              <Button
+             {
+              paymentTypeId !== APPLEPAY.typeId ? (
+                <Button
                 id="mfe-place-order-btn"
                 qaTag={"qa-order"}
                 label={
@@ -907,25 +952,36 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                       ? getString("payWith") as string
                       : (getString("placeOrder") as string)
                 }
-                disabled={isLoading || isGuestEmailValid || (isCheckboxChecked && hasPhoneError)}
+                disabled={isLoading || isGuestEmailValid || (isCheckboxChecked && hasPhoneError) || orderNotifications?.length != 0 }
                 btnType={
                   paymentTypeId === SEZZLE.typeId
                     ? "sezzle"
                     : isPaypalPayment(paymentTypeId)
                       ? "paypal"
                       : "primary"
-                  }
-                  onClick={submitForm}
-                  logo={
-                    paymentTypeId === SEZZLE.typeId
-                      ? "https://img.shop.com/Image/resources/checkout/Sezzle-Color-White-Logo.svg"
-                      : isPaypalPayment(paymentTypeId)
+                }
+                onClick={submitForm}
+                logo={
+                  paymentTypeId === SEZZLE.typeId
+                    ? "https://img.shop.com/Image/resources/checkout/Sezzle-Color-White-Logo.svg"
+                    : isPaypalPayment(paymentTypeId)
                       ? "https://img.shop.com/Image/resources/checkout/PayPal-White-Logo.svg"
                       : paymentTypeId === CLICK2PAY.typeId
                         ? "https://img.shop.com/Image/resources/checkout/click-to-pay-white.svg"
                         : ""
                 }
               />
+              ): (
+              <div id="apple-pay-button-wrapper" tabIndex={-1}>
+                  <apple-pay-button
+                          buttonstyle="black"
+                          type="order"
+                          locale="en-US"
+                          id="mfe-apple-pay-button-payment"
+                          />
+              </div>
+              )
+             }
             </form>
           );
         }}
