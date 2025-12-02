@@ -106,6 +106,7 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({
           ...prevData,
           email: customerData.email_address,
           mobilePhone: customerData.cell_phone,
+          transactionAmount: order ? order?.totals.price : 0,
           address: {
             ...c2pCustomerData.address,
             first: customerData.first_name,
@@ -148,7 +149,7 @@ export const PaymentOptionClick2Pay: React.FC<IClick2PayProps> = ({
       dpaTransactionOptions: {
         dpaLocale: "en_US",
         transactionAmount: {
-          transactionAmount: Number(c2pData.transactionAmount.toFixed(2)),
+          transactionAmount: Number(order?.totals.price.toFixed(2)),
           transactionCurrencyCode: "USD",
         },
         merchantCategoryCode: `${c2pData.mcc}`,
