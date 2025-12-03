@@ -86,6 +86,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
 
   const [paymentMethods] = useAtom(paymentMethodsAtom);
   const [order, setOrder] = useAtom(orderAtom);
+  
   const [siteData] = useAtom(siteApiData(siteId));
 
   const shippingAddress = getShippingAddressFromAddressList(addressList, siteData.siteCountryCode);
@@ -201,6 +202,7 @@ export const CardInformation: React.FC<ICardInformationProps> = ({
           setOrderNotifications(
             getOrderNotifications(orderResponse.response.success)
           );
+          scrollTo(0, 0);
         }
         // updatePaymentValidationStatus(values.id as number);
         onCancel();

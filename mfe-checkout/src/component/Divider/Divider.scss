@@ -1,0 +1,16 @@
+.mfe-divider {
+    position: relative;
+    padding: 15px 0px;
+    hr {
+        border-color: rgba(121, 120, 120, 0.2);
+    }
+    span {
+        background-color: white;
+        font-weight: 200;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        padding: 5px 10px;
+    }
+}

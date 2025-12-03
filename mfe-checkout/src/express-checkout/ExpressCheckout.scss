@@ -1,0 +1,18 @@
+.express-checkout-container {
+    text-align: center;
+    width: 100%;
+    border: 1px solid rgba(121, 120, 120, 0.2);
+    padding: 20px;
+    border-radius: 5px;
+    h3 {
+        margin: 0 0 10px 0;
+    }
+    .express-checkout-options {
+        display: flex;
+        justify-content: space-around;
+        .apple-pay-button-wrapper {
+            height: 44px;
+            min-width: 200px;
+        }
+    }
+}

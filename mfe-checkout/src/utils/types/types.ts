@@ -16,3 +16,7 @@ export interface IOrderNotification {
   developer_message: string;
   product_id: string;
 }
+
+type Dispatch<A> = (value: A) => void;
+type SetStateAction<S> = S | ((prevState: S) => S);
+export type StateArray<S> = [S, Dispatch<SetStateAction<S>>];

@@ -10,6 +10,7 @@ import {
 import { RadioButton } from "../component/RadioButton/RadioButton";
 import { CardInformation } from "../payment-method/card-information/CardInformation";
 import {
+  APPLEPAY,
   isThirdPartyPayment,
   PAYPAL,
   SEZZLE,
@@ -223,6 +224,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
             getOrderNotifications(orderResponse.response.success)
           );
           setOrder({ ...orderResponse.response.success.data });
+          scrollTo(0, 0);
         }
         setOrder({
           ...orderResponse.response.success.data,
@@ -345,7 +347,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
         </div>
 
         {!isCard && (
-          <img src={paymentMethod.imageUrl} alt={paymentMethod.accountName} />
+           <img src={paymentMethod.imageUrl} alt={paymentMethod.accountName} style={paymentMethod.typeID === APPLEPAY.typeId ? {width: '4rem'} : {}}/>
         )}
         {!isEditing && isCard ? (
           <form id="card-form" className={`qa-payment-form`} autoComplete="off">

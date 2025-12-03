@@ -1,6 +1,6 @@
 import { loadScript } from "@paypal/paypal-js";
 import { Formik } from "formik";
-import { useAtom } from "jotai/index";
+import { useAtom, useAtomValue } from "jotai/index";
 import React, { memo, SetStateAction, useEffect, useState } from "react";
 import { fetchSezzleUrl } from "../../api/ajaxaction/Sezzle";
 import { getTransactionData } from "../../api/service/Click2PayTransaction";
@@ -20,6 +20,7 @@ import { Back } from "../../assets/svgs/Back";
 import {
   // cvvValidAtom,
   IPaymentOption,
+  guestShopperIdAtom,
   orderNotificationsAtom,
 } from "../../store";
 import { generateChangeStoreResponse } from "../../utils/helpers/GenerateChangeStoreResponse";
@@ -34,7 +35,7 @@ import {
   GET_PAYPAL_CLIENT_ID,
 } from "../../utils/urlResolver";
 import { placeOrderSchema } from "../../validation/placeOrderSchema";
-import { CLICK2PAY, isPaypalPayment, isThirdPartyPayment, PAYPAL, PAYPAL_RECURRING, SEZZLE } from "../PaymentType";
+import { APPLEPAY, CLICK2PAY, isPaypalPayment, isThirdPartyPayment, PAYPAL, PAYPAL_RECURRING, SEZZLE } from "../PaymentType";
 import "./PlaceOrder.scss";
 import { useCreditCardFormContext } from "../../component/Form/CreditCardFormContext";
 import { handleSaveCard } from "../../utils/helpers/CreditCardHelper";
@@ -42,6 +43,7 @@ import { useContentStrings } from "../../hooks/useContentStrings";
 import { useSiteFlags } from "../../hooks/useSiteFlags";
 import { getPaypalToken } from "../../api/service/PaypalCheckout";
 import { isIOSSafari } from "../../utils/helpers/UserAgentHelper";
+import { decryptAppleData, getLineItems, getMerchantSession, savePaymentMethod, getShippingMethodsFromOrder } from "../../component/ApplePay/ApplePayUtils";
 
 interface IPlaceOrder {
   confirmOrder: () => void;
@@ -91,6 +93,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   const [orderNotifications, setOrderNotifications] = useAtom(
     orderNotificationsAtom
   );
+  const guestShopperId = useAtomValue(guestShopperIdAtom);
   const selectedPaymentMethod = paymentMethods.find((pm) => pm.isSelected);
   const { getString } = useContentStrings();
   const { siteFlags } = useSiteFlags();
@@ -213,6 +216,24 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     }
   }, []); // Ensure dependencies are correctly handled
 
+  useEffect(() => {
+    if (paymentTypeId !== APPLEPAY.typeId) return;
+  const applePayBtn = document.getElementById("mfe-apple-pay-button-payment");
+  if (!applePayBtn){
+    return;
+   
+  }
+  const applePayWrapper = document.getElementById("apple-pay-button-wrapper"); // to fix the outline on focus
+  
+  const handleApplePayClick = () => {
+    applePayWrapper?.focus();
+    handlePlaceOrder(paymentMethods)
+  };
+  applePayBtn.addEventListener("click", handleApplePayClick);
+  return () => applePayBtn.removeEventListener("click", handleApplePayClick)
+
+}, [paymentTypeId, order])
+
   const onToggleAccordion = () => {
     setIsExpanded((prev) => !prev);
     if (!isExpanded) {
@@ -289,7 +310,6 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
 
   const handlePlaceOrder = async (paymentMethods: IPaymentOption[]) => {
     setIsLoading(true);
-
     if (hasPhoneError && isCheckboxChecked) {
       window.scrollTo({
         top: document.body.scrollHeight,
@@ -450,6 +470,9 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
         case PAYPAL_RECURRING.typeId:
           await handlePaypalOrderRedirect(true);
           break;
+        case APPLEPAY.typeId:
+          await handleApplePay(order);
+          break;  
         default:
           const selectedPaymentMethod = paymentMethods.find(
             (pm) => pm.isSelected
@@ -570,6 +593,77 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     window.open(url, "_self");
   }
 
+  const handleApplePay = async (order:Order) => {
+    const request = {
+        countryCode: 'US',
+        currencyCode: 'USD',
+        supportedNetworks: ['visa', 'masterCard', 'amex', 'discover'],
+        merchantCapabilities: ['supports3DS', "supportsDebit",
+        "supportsCredit"],
+   
+        total: { label: 'Market America', amount: order?.totals.price},
+    // Add line items for breakdown (including potential discount)
+      lineItems: getLineItems(order!)
+      };
+      const session = new window.ApplePaySession(14, request)
+      session.begin();
+      session.onvalidatemerchant = async () => {
+        const merchantSession = await getMerchantSession();
+        session.completeMerchantValidation(merchantSession);
+      }
+
+      session.onpaymentauthorized = async (event: any) => {
+        const { payment } = event;
+        const tempShopperId = isGuest ? guestShopperId : shopperId;
+        try {
+       const decryptedPayment = await decryptAppleData(payment, order?.totals.price.toString(), "USD"); 
+       if (decryptedPayment.error) {
+        errorMessage = decryptedPayment.error;
+        session.completePayment(window.ApplePaySession.STATUS_FAILURE);
+        throw new Error(errorMessage);
+  
+       }
+       const savePaymentPayload = {
+        number: decryptedPayment.ipgTransactionId, 
+        number2: decryptedPayment.clientRequestId,
+        token: decryptedPayment.orderId,
+        siteId: siteId,
+        type: APPLEPAY.typeId,
+        name:tempShopperId
+       }
+    const savedPaymentMethod = await savePaymentMethod(savePaymentPayload, tempShopperId!);
+    const changeOrderDetails = generateChangeStoreResponse(order!, pcid);
+    trackingData.set("applePay", "");
+    const changeOrderPayload = {
+      ...changeOrderDetails,
+      paymentMethod: {
+       ...savedPaymentMethod
+      },
+      billing: order?.shippingAddress,
+      userOptions: {
+        ...changeOrderDetails.userOptions,
+        trackingData: generateOrderTrackingId(trackingData)
+      }
+    }
+    await changeOrder(changeOrderPayload, order?.id!);
+    confirmOrder();
+    session.completePayment(window.ApplePaySession.STATUS_SUCCESS);
+        } catch (e) {
+          console.log('Something went wrong!', e);
+          updateOrderErrorMessage("There was an error processing your payment. Please try again later!");
+          session.completePayment(window.ApplePaySession.STATUS_FAILURE);
+        }
+      }
+
+      session.oncancel = () => {
+        setIsLoading(false);
+      }
+
+      session.abort = () => {
+        setIsLoading(false);
+      }
+  }
+
   const getPaypalUrl = (isRecurring: boolean) => {
     const paypalRedirectUrl = isRecurring ? paypalRecurringUrl : `${GET_PAYPAL_CHECKOUT_URL()}?token=${paypalTokenId
       }`;
@@ -661,7 +755,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
       return;
     };
     handleClick2PayOrderUpdate();
-  }, [paymentTypeId])
+  }, [paymentTypeId, Click2PayPlaceOrder.getDigitalCardId()])
 
   const handleClick2PayOrderUpdate = (): Promise<void> => {
     return new Promise((resolve, reject) => {
@@ -839,7 +933,9 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                   {getString("chargedWhenShipped")}
                 </div>
               )}
-              <Button
+             {
+              paymentTypeId !== APPLEPAY.typeId ? (
+                <Button
                 id="mfe-place-order-btn"
                 qaTag={"qa-order"}
                 label={
@@ -851,7 +947,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                       ? getString("payWith") as string
                       : (getString("placeOrder") as string)
                 }
-                disabled={isLoading || isGuestEmailValid || (isCheckboxChecked && hasPhoneError)}
+                disabled={isLoading || isGuestEmailValid || (isCheckboxChecked && hasPhoneError || orderNotifications?.length != 0)}
                 btnType={
                   paymentTypeId === SEZZLE.typeId
                     ? "sezzle"
@@ -870,6 +966,17 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                         : ""
                 }
               />
+              ): (
+              <div id="apple-pay-button-wrapper" tabIndex={-1}>
+                  <apple-pay-button
+                          buttonstyle="black"
+                          type="order"
+                          locale="en-US"
+                          id="mfe-apple-pay-button-payment"
+                          />
+              </div>
+              )
+             }
             </form>
           );
         }}

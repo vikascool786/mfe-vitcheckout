@@ -241,7 +241,7 @@ const Checkout: React.FC<ICheckout> = ({
     return {
       ...defaultAddress,
       ...address,
-      phone: address.phone.replace(/\D/g, ""),
+      phone: address?.phone?.replace(/\D/g, ""),
       id: shippingAddress.id || 0,
       country: siteData.siteCountryCode,
     };

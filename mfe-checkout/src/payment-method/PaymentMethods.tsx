@@ -23,6 +23,7 @@ import { createPaymentMethod } from "../utils/helpers/GeneratePaymentMethod";
 import "./PaymentMethods.scss";
 import * as Yup from "yup";
 import {
+  APPLEPAY,
   CLICK2PAY,
   creditCardTypeIds,
   isThirdPartyPayment,
@@ -50,6 +51,7 @@ import {
 } from "../utils/types/PaymentOptionUtils";
 import { Spinner } from "../component/Spinner/Spinner";
 import { useSiteFlags } from "../hooks/useSiteFlags";
+import { useApplePayAvailable } from "../component/ApplePay/useApplePayAvailable";
 
 interface IPaymentMethod {
   shopperId: string;
@@ -77,6 +79,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   isGuest,
 }) => {
   // initial payment methods
+  const isApplePaySupported = useApplePayAvailable();
   const [paymentMethods, setPaymentMethods] = useAtom(paymentMethodsAtom);
   const { getString } = useContentStrings();
   const { siteFlags } = useSiteFlags();
@@ -87,10 +90,11 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
 
   const [order] = useAtom(orderAtom);
 
-  const shouldShowClick2Pay = order?.paymentMethods.some(
+  const shouldShowClick2Pay:any = order?.paymentMethods.some(
     (method) => method.typeID === CLICK2PAY.typeId
   );
   const [showClick2Pay, setShowClick2Pay] = useState(shouldShowClick2Pay);
+  const [showC2P, setShowC2P] = useState(false);
 
   const [isPaymentsFetched, setIsPaymentsFetched] = useState<boolean>(false);
 
@@ -111,6 +115,19 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       setShowClick2Pay(c2pSiteflag ? c2pSiteflag.active : false);
     });
   }, []);
+
+  useEffect(() => {
+    setShowC2P(shouldShowClick2Pay);
+  }, [shouldShowClick2Pay])
+  
+
+  useEffect(() => {
+    // this is added to handle race condition between Adding sdks using Helmet and us actually using it.
+    // It make sures that apple pay will display if the device supports it
+    if (isApplePaySupported) {
+      setPaymentMethods(handleThirdPartyPaymentVisibility(paymentMethods));
+    }
+  }, [isApplePaySupported])
 
   useEffect(() => {
     const fetchShoppersSavedPayments = async (
@@ -182,7 +199,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
               }));
             }
           }
-
           setPaymentMethods(handleThirdPartyPaymentVisibility(staticMethods));
           // console.debug("[PM] setPaymentMethods called (no payments) ->", {
           //   newCount: staticMethods.length,
@@ -303,7 +319,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
               };
             }
           });
-
           setPaymentMethods(handleThirdPartyPaymentVisibility(updatedPaymentOptions));
           setIsPaymentsFetched(true);
         }
@@ -489,7 +504,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
           });
         }
 
-        // console.log("Updated Payment Options: ", updatedPaymentOptions);
         setTimeout(() => {
           setPaymentMethods(handleThirdPartyPaymentVisibility(updatedPaymentOptions));
           // console.debug("[PM] setPaymentMethods called (isVisible merged) ->", {
@@ -545,8 +559,16 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         (method) => method.type.toLowerCase() === PAYPAL.name.toLowerCase()
     );
 
+    const shouldShowC2P = order?.paymentMethods.some(
+        (method) => method.type.toLowerCase() === CLICK2PAY.name.toLowerCase()
+    );
+
     const showPaypalRecurring = order?.paymentMethods.some(
         (method) => method.typeID === PAYPAL_RECURRING.typeId
+    );
+
+    const shouldShowApplePay = order?.paymentMethods.some(
+      method => method.typeID === APPLEPAY.typeId
     );
 
     if (!isSezzleAllowed()) {
@@ -558,6 +580,12 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     if (!shouldShowPaypal) {
       paymentOptions = paymentOptions.filter(
           (method) => method.paymentMethod.typeID !== PAYPAL.typeId
+      );
+    }
+
+    if (!shouldShowC2P) {
+      paymentOptions = paymentOptions.filter(
+          (method) => method.paymentMethod.typeID !== CLICK2PAY.typeId
       );
     }
 
@@ -579,7 +607,18 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         paymentOptions = [...paymentMethods, sezzlePayment];
       }
     }
-
+    const isApplePayAdded = paymentOptions.find(method => method.paymentMethod.typeID == APPLEPAY.typeId);
+  if (!shouldShowApplePay || !window?.ApplePaySession?.canMakePayments()) {
+    paymentOptions = paymentOptions.filter(
+        (method) => method.paymentMethod.typeID !== APPLEPAY.typeId
+    );
+  }
+  if (!isApplePayAdded && isApplePaySupported) {
+    const applePay = initialPaymentMethods.find(method => method.paymentMethod.typeID == APPLEPAY.typeId);
+    if (applePay) {
+      paymentOptions = [...paymentOptions, applePay];
+    }
+  }
     return paymentOptions;
   };
 
@@ -767,7 +806,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       isSelected: false,
       isEditing: false,
     }));
-
     setPaymentMethods([
       ...updatedPaymentOptions,
       createNewCardOption(),
@@ -929,8 +967,8 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
           };
         }
 
-        // when selected paypal or sezzle, set editing false
-        if (id === -1001 || id === -1002 || id === -1003) {
+        // when selected paypal or sezzle or apple pay, set editing false
+        if (id === -1001 || id === -1002 || id === -1003 || id === -1004) {
           updatePaymentTypeId(id);
           return {
             ...paymentMethod,
@@ -958,7 +996,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         updatedPaymentMethods.find((pm) => pm.paymentMethod.id === id)
           ?.paymentMethod.typeID || 0
       );
-
       setPaymentMethods(updatedPaymentMethods as IPaymentOption[]);
       setShowNewCard(false);
       setIsExpanded(false);
@@ -1088,8 +1125,10 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
                 return null;
               })}
 
-            {showClick2Pay && (
-              <PaymentOptionClick2Pay pcid={pcid} order={order} isGuest={isGuest} updateOrderErrorMessage={updateOrderErrorMessage} />
+            {showC2P && (
+              showClick2Pay && (
+                <PaymentOptionClick2Pay pcid={pcid} order={order} isGuest={isGuest} updateOrderErrorMessage={updateOrderErrorMessage} />
+              )
             )}
           </div>
         </div>

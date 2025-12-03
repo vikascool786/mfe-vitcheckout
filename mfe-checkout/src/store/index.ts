@@ -1,10 +1,11 @@
 import { atom, createStore } from "jotai";
 import PaypalIcon from "../assets/images/PayPal.png";
+import ApplePayMark from "../assets/svgs/Apple_Pay_Mark.svg";
 import SezzleIcon from "../assets/images/Sezzle.png";
 import { Address } from "../interfaces/Address";
 import { Order } from "../interfaces/Order";
 import { IPaymentMethod } from "../interfaces/PaymentMethod";
-import { PAYPAL, PAYPAL_RECURRING, SEZZLE } from "../payment-method/PaymentType";
+import { APPLEPAY, PAYPAL, PAYPAL_RECURRING, SEZZLE } from "../payment-method/PaymentType";
 import { createPaymentMethod } from "../utils/helpers/GeneratePaymentMethod";
 
 export interface IPaymentOption {
@@ -62,6 +63,18 @@ export const initialPaymentMethods: IPaymentOption[] = [
     isSelected: false,
     isVisible: true,
   },
+  {
+    paymentMethod: createPaymentMethod({
+      accountName: APPLEPAY.name,
+      typeID: APPLEPAY.typeId,
+      imageUrl: ApplePayMark,
+      id: -1004
+    }),
+    isPaymentValidated: false,
+    paymentAddress: {} as Address,
+    isSelected: false,
+    isVisible: true
+  }
 ];
 
 export const orderAtom = atom<Order>();
@@ -69,6 +82,8 @@ export const orderAtom = atom<Order>();
 export const addressAtom = atom<Address[]>([]);
 
 export const paymentMethodsAtom = atom<IPaymentOption[]>(initialPaymentMethods);
+
+export const guestShopperIdAtom = atom<string>();
 
 export const siteFlagsAtom = atom<siteFlagData[]>([]);
 
