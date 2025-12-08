@@ -543,7 +543,19 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
             return;
           }
           setIsLoading(true);
-          await handleFinalPlaceOrderUpdate();
+          const orderResponse = await handleFinalPlaceOrderUpdate();
+          if (
+            orderResponse?.response.success.notifications &&
+            orderResponse?.response.success.notifications?.length > 0
+          ) {
+            setOrderNotifications(
+              getOrderNotifications(
+                orderResponse.response.success
+              )
+            );
+            setIsLoading(false);
+            return;
+          }
           confirmOrder();
           break;
       }
