@@ -1,3 +1,4 @@
+import { enqueueChangeOrder, waitForAllChangeOrders } from "../../utils/changeOrderQueue";
 import { loadScript } from "@paypal/paypal-js";
 import { Formik } from "formik";
 import { useAtom, useAtomValue } from "jotai/index";
@@ -199,8 +200,13 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                 ...orderBillingAddress,
               };
             }
+            await waitForAllChangeOrders();
 
-            await changeOrder(changeOrderPayload, order?.id);
+            await enqueueChangeOrder(() =>
+              changeOrder(changeOrderPayload, order?.id!)
+            );
+
+            await waitForAllChangeOrders();
 
             confirmOrder();
           }
