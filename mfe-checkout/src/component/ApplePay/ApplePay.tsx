@@ -1,16 +1,15 @@
 
-import React, {useCallback, useEffect, useRef} from 'react'
+import React, {useCallback, useEffect, useRef, useState} from 'react'
 import { withApplePaySupport } from './withApplePaySupport';
-import { useAtom } from 'jotai';
-import {  orderAtom } from '../../store';
+import { useAtom, useSetAtom } from 'jotai';
+import {  applePayAtom, orderAtom } from '../../store';
 import { changeOrder, buildOrder } from '../../api/service/Order';
 import { generateChangeStoreResponse } from '../../utils/helpers/GenerateChangeStoreResponse';
-import { getLineItems, getMerchantSession, getShippingMethodsFromOrder, getOrderTotal, getCurrentSelectedShipping } from './ApplePayUtils';
+import { getLineItems, getMerchantSession, getShippingMethodsFromOrder, getOrderTotal,  getCurrentSelectedShipping } from './ApplePayUtils';
 import { fetchShopperDirectory } from '../../api/service/ShopperDirectory';
 import { fetchShopperDetail } from '../../api/service/ShopperDetail';
 import { isFullRegShopper, isEZRegShopper } from '../../interfaces/ShopperDirectory';
 import { postEZReg } from '../../api/service/ShopperEZReg';
-import { buildInitialGuestOrder } from '../../api/service/Order';
 import { REG_TYPE_GUEST_CHECKOUT } from '../../api/service/ShopperEZReg';
 import { useContentStrings } from '../../hooks/useContentStrings';
 import { generateOrderTrackingId } from '../../utils/helpers/GenerateOrderTrackingId';
@@ -18,36 +17,38 @@ import { savePaymentMethod } from './ApplePayUtils';
 import { decryptAppleData } from './ApplePayUtils';
 import { APPLEPAY } from '../../payment-method/PaymentType';
 import { handleStoreShippingSelections } from './ApplePayUtils';
+import './ApplePay.scss';
+
+
 interface ApplePayProps {
-  confirmOrder: () => void;
-  updateErrorMessage: (newMessage: string) => void;
-  pcid: string;
-  cartId: string;
+  confirmOrder: any;
   siteId: string;
   portalId: string;
 }
 const ApplePay: React.FC<ApplePayProps> =   ({
   confirmOrder,
-  updateErrorMessage,
-  pcid,
   siteId,
-  cartId,
   portalId
 }) => {
+  const  setIsApplePayActive= useSetAtom(applePayAtom);
+  const [errorMessage, setErrorMessage] = useState("");
   const trackingData = new Map<string, string>();
   const [order, setOrder] = useAtom(orderAtom);
   const orderRef = useRef(order);
   const applePayState = useRef({
-    customerId: ''
+    customerId: '',
+    email: '',
+    guestShopper: '',
+    portalId: ''
   });
   const { getString } = useContentStrings();
-
 
   useEffect(() => {
     orderRef.current = order;
   }, [order])
 
 const onCreateSession = useCallback(() => {
+  setIsApplePayActive(true);
   const request = {
       countryCode: 'US',
       currencyCode: 'USD',
@@ -179,7 +180,6 @@ const onCreateSession = useCallback(() => {
           address1: "city",
           city: locality,
           zip: postalCode,
-          isoalpha3Code: countryCode,
           state: administrativeArea,
           country
         }
@@ -227,16 +227,35 @@ const onCreateSession = useCallback(() => {
     }
 
     session.onpaymentauthorized = async (event: any) => {
+      const initialTotal = orderRef.current?.totals.price;
       const {payment} = event;
-        let guestShopper = '';
-        let portalId = '';
-        let shippingAddress = null;
-        let fullAddress= {};
+      const {addressLines, administrativeArea, country, countryCode, locality, postalCode, familyName, givenName} = payment.shippingContact;
+        let shippingAddress = {
+          address1: addressLines[0] || '',
+          city: locality,
+          zip: postalCode,
+          state: administrativeArea,
+          country,
+          first: givenName,
+          last: familyName
+        };
        let errors = []; 
        let email = payment.shippingContact.emailAddress;
+       const orderWithNewAddress = {
+        ...orderRef.current!,
+        shippingAddress: {
+          ...shippingAddress
+        },
+        billingAddress: {
+          ...shippingAddress
+        }
+      };
+     
+      if (applePayState.current.email != email) {
         // first we need to create cart based on the user following the steps in Contact.tsx
         try {
           // Await the initial fetchShopperDirectory Promise
+          applePayState.current.email = email;
           const response = await fetchShopperDirectory(email);
   
           if (response?.foreign) {
@@ -250,8 +269,8 @@ const onCreateSession = useCallback(() => {
   
           } else if (isFullRegShopper(response) || isEZRegShopper(response)) {
               // Handle existing registered shopper case
-              guestShopper = response.shopperID;
-              
+              applePayState.current.guestShopper = response.shopperID;
+            //  setGuestShopperId(response.shopperID);
               try {
                   // Await the nested fetchShopperDetail Promise
                   const detailResponse = await fetchShopperDetail(response.shopperID);
@@ -268,16 +287,19 @@ const onCreateSession = useCallback(() => {
                   }
                   
                   applePayState.current.customerId = detailResponse.pcid;
-                  portalId = detailResponse.portal?.portalId;
-                  
+                  applePayState.current.portalId = detailResponse.portal?.portalId;
+                //  setCustomerId(detailResponse.pcid);
+                //  setCurrentPortalId(detailResponse.portal?.portalId)
                   // Await the nested buildInitialGuestOrder Promise
-                  const orderResponse = await buildInitialGuestOrder(cartId, portalId, detailResponse.pcid, shippingAddress);
+                //  const orderResponse = await buildInitialGuestOrder(cartId, portalId, detailResponse.pcid, shippingAddress);
+                  const orderResponse = await buildOrder(
+                    generateChangeStoreResponse(orderWithNewAddress, applePayState.current.customerId || "")
+                  );
                   orderRef.current = orderResponse?.response.success?.data || null;
-                  
               } catch (error) {
                   // You may want specific error handling for fetchShopperDetail failure here
                   console.error("APP fetchShopperDetail error: ", error);
-                  // Depending on requirements, you might push an error to the errors array
+                  // Depending on requirements, you might push an error toß the errors array
               }
   
           } else {
@@ -287,11 +309,11 @@ const onCreateSession = useCallback(() => {
                   const ezRegResponse = await postEZReg(email, portalId, REG_TYPE_GUEST_CHECKOUT, false);
                   const ezPcid = ezRegResponse?.shopper?.pcid;
                   applePayState.current.customerId = ezPcid;
-                  
                   // Await the nested buildInitialGuestOrder Promise
-                  const orderResponse = await buildInitialGuestOrder(cartId, portalId, ezPcid, shippingAddress);
+                  const orderResponse = await await buildOrder(
+                    generateChangeStoreResponse(orderWithNewAddress, applePayState.current.customerId || "")
+                  );
                   orderRef.current = orderResponse?.response.success?.data || null;
-
               } catch (error) {
                   // Handle the postEZReg rejection (the original .catch block)
                   console.error("EZ reg error: ", error);
@@ -311,6 +333,7 @@ const onCreateSession = useCallback(() => {
           errors.push(errorUserEmail);
           // Depending on requirements, you might push a general network/API error to errors array
       }
+      }
         if (errors.length > 0) {
           session.completePayment({
             status: window.ApplePaySession.STATUS_FAILURE,
@@ -318,34 +341,15 @@ const onCreateSession = useCallback(() => {
           });
           return;
         }
-        const {addressLines, administrativeArea, country, countryCode, locality, postalCode, familyName, givenName} = payment.shippingContact;
-        const oldShippingSelections = getShippingMethodsFromOrder(orderRef.current!);
-         fullAddress = {
-          address1: addressLines[0] || '',
-          city: locality,
-          zip: postalCode,
-          isoalpha3Code: countryCode,
-          state: administrativeArea,
-          country,
-          first: givenName,
-          last: familyName
+        const finalTotal = orderRef.current?.totals.price;
+        if (initialTotal != finalTotal) {
+          session.completePayment({
+            status: window.ApplePaySession.STATUS_FAILURE,
+            errors: [new window.ApplePayError("unknown", null, "There was an issue with total. Please try again!")]
+          });
+          return;
         }
-        const orderWithNewAddress = {
-          ...orderRef.current!,
-          shippingAddress: {
-            ...fullAddress
-          },
-          billingAddress: {
-            ...fullAddress
-          }
-        };
-       
-        const changeOrderDetails = await buildOrder(
-          generateChangeStoreResponse(orderWithNewAddress, applePayState.current.customerId || "")
-        );
-        if (changeOrderDetails.response.success.data) {
-          orderRef.current = changeOrderDetails.response.success.data
-        }
+      
         const newShippingSelection = getShippingMethodsFromOrder(orderRef.current!);
         const currentSelectedShipping = getCurrentSelectedShipping(orderRef.current!);
         const hasSelectedShippingChanged = newShippingSelection.find(selection => selection.amount == currentSelectedShipping.total && selection.id== currentSelectedShipping.id);
@@ -357,6 +361,8 @@ const onCreateSession = useCallback(() => {
             })
             return;
         }
+       
+
        try {
             const decryptedPayment = await decryptAppleData(payment, orderRef.current!.totals.price.toString(), "USD"); 
             if (decryptedPayment.error) {
@@ -370,7 +376,7 @@ const onCreateSession = useCallback(() => {
               token:  decryptedPayment.orderId,
               siteId: siteId,
               type: APPLEPAY.typeId,
-              name: guestShopper,
+              name: applePayState.current.guestShopper,
               address1: addressLines[0] || '',
               first: givenName,
               last: familyName,
@@ -378,7 +384,7 @@ const onCreateSession = useCallback(() => {
               state: administrativeArea,
               zip: postalCode
             }
-          const savedPaymentMethod = await savePaymentMethod(savePaymentPayload, guestShopper!);
+          const savedPaymentMethod = await savePaymentMethod(savePaymentPayload, applePayState.current.guestShopper! || applePayState.current.customerId);
           const changeOrderDetails = generateChangeStoreResponse(orderRef.current!, applePayState.current.customerId || "");
           trackingData.set("applePay", "");
           const changeOrderPayload = {
@@ -386,7 +392,8 @@ const onCreateSession = useCallback(() => {
             paymentMethod: {
             ...savedPaymentMethod
             },
-            billing: fullAddress,
+            shipping: shippingAddress,
+            billing: shippingAddress,
             userOptions: {
               ...changeOrderDetails.userOptions,
               trackingData: generateOrderTrackingId(trackingData)
@@ -394,13 +401,17 @@ const onCreateSession = useCallback(() => {
           }
 
           await changeOrder(changeOrderPayload, orderRef.current!.id!);
-          confirmOrder();
+          confirmOrder(true, email);
           session.completePayment(window.ApplePaySession.STATUS_SUCCESS);
+         // setIsApplePayActive(false);
               } catch (e) {
                 console.log('Something went wrong!', e);
-                updateErrorMessage(e as string);
+                setErrorMessage(e as string)
                 session.completePayment(window.ApplePaySession.STATUS_FAILURE);
               }
+    }
+    session.oncancel = () => {
+      setIsApplePayActive(false);
     }
     
 }, [order])
@@ -422,6 +433,14 @@ useEffect(() => {
     locale="en-US"
     id="mfe-apple-pay-button"
      />
+     {errorMessage.length > 0 && (
+                <div className="error-message-order">
+                  {/* <div className="error-message-order--bold">
+                  Please complete your payment information
+                </div> */}
+                  <div className="error-message-order--bold">{errorMessage}</div>
+                </div>
+              )}
   </>
 
   )

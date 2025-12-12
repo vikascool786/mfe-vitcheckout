@@ -1,6 +1,6 @@
 import { atom, createStore } from "jotai";
 import PaypalIcon from "../assets/images/PayPal.png";
-import ApplePayMark from "../assets/svgs/Apple_Pay_Mark.svg";
+import ApplePayMark from "../assets/images/AppleMark.png";
 import SezzleIcon from "../assets/images/Sezzle.png";
 import { Address } from "../interfaces/Address";
 import { Order } from "../interfaces/Order";
@@ -94,3 +94,5 @@ export const loadingAtom = atom<boolean>(false);
 export const orderNotificationsAtom = atom<string[]>();
 
 export const contentStringsAtom = atom<Record<string, string>>({});
+
+export const applePayAtom = atom<boolean>(false);

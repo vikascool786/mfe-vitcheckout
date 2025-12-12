@@ -131,6 +131,7 @@ export interface IPaymentMethod {
   supportedForAutoship?: boolean;
   imageTag?: string;
   number?: string;
+  mask?: string;
   token?: string;
   accountName?: string;
   expMonth?: number;

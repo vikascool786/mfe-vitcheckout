@@ -90,10 +90,11 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
 
   const [order] = useAtom(orderAtom);
 
-  const shouldShowClick2Pay:any = order?.paymentMethods.some(
+  const shouldShowClick2Pay: any = order?.paymentMethods.some(
     (method) => method.typeID === CLICK2PAY.typeId
   );
   const [showClick2Pay, setShowClick2Pay] = useState(shouldShowClick2Pay);
+  const [showC2POption, setShowC2POption] = useState(false);
   const [showC2P, setShowC2P] = useState(false);
 
   const [isPaymentsFetched, setIsPaymentsFetched] = useState<boolean>(false);
@@ -119,7 +120,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   useEffect(() => {
     setShowC2P(shouldShowClick2Pay);
   }, [shouldShowClick2Pay])
-  
 
   useEffect(() => {
     // this is added to handle race condition between Adding sdks using Helmet and us actually using it.
@@ -1125,10 +1125,8 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
                 return null;
               })}
 
-            {showC2P && (
-              showClick2Pay && (
-                <PaymentOptionClick2Pay pcid={pcid} order={order} isGuest={isGuest} updateOrderErrorMessage={updateOrderErrorMessage} />
-              )
+            {showC2P && showClick2Pay && (
+              <PaymentOptionClick2Pay pcid={pcid} order={order} isGuest={isGuest} updateOrderErrorMessage={updateOrderErrorMessage} />
             )}
           </div>
         </div>

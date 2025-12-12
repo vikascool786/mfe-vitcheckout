@@ -289,7 +289,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     localStorage.setItem("processedOrders", JSON.stringify(orders));
   };
 
-  const confirmOrder = () => {
+  const confirmOrder = (isApplePay = false, applePayEmail = '') => {
     let processedOrders = getProcessedOrders();
 
     // Prevent duplicate processing for the same cartId
@@ -301,7 +301,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
     setProcessedOrders(processedOrders);
 
     if(isGuest){
-      const orderEmail = shopperEmail.length < 1 && orderData ? orderData.email : shopperEmail;
+      const orderEmail = isApplePay ? applePayEmail : shopperEmail.length < 1 && orderData ? orderData.email : shopperEmail;
       setGuestEmailForSession(orderEmail).finally(() => {
             commitFinalOrder(processedOrders);
       })
@@ -499,14 +499,11 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                 {isGuest && (
                   <div className="guest-customer-container checkout-form-container">
                     <ExpressCheckout
-                     updateErrorMessage={handleOrderError} 
                      confirmOrder={confirmOrder} 
-                     pcid={pcid}
-                     cartId={cartId}
                      siteId={siteId} 
                      portalId={currentPortalId}
                        />
-                       <Divider content="OR"/>
+                     
                       <Contact 
                        portalId={currentPortalId}
                        cartId={cartId} 

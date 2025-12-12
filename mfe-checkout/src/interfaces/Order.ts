@@ -78,6 +78,7 @@ export interface IPaymentMethod2 {
   typeID: number;
   type: string;
   categoryID: number;
+  mask: string;
   visible: boolean;
   supportedForAutoship?: boolean;
   imageTag: string;

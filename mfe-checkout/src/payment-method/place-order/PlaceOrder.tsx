@@ -200,8 +200,8 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                 ...orderBillingAddress,
               };
             }
-            await waitForAllChangeOrders();
 
+            await waitForAllChangeOrders();
             await enqueueChangeOrder(() =>
               changeOrder(changeOrderPayload, order?.id!)
             );
@@ -227,10 +227,10 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   const applePayBtn = document.getElementById("mfe-apple-pay-button-payment");
   if (!applePayBtn){
     return;
-   
+
   }
   const applePayWrapper = document.getElementById("apple-pay-button-wrapper"); // to fix the outline on focus
-  
+
   const handleApplePayClick = () => {
     applePayWrapper?.focus();
     handlePlaceOrder(paymentMethods)
@@ -478,7 +478,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
           break;
         case APPLEPAY.typeId:
           await handleApplePay(order);
-          break;  
+          break;
         default:
           const selectedPaymentMethod = paymentMethods.find(
             (pm) => pm.isSelected
@@ -618,7 +618,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
         supportedNetworks: ['visa', 'masterCard', 'amex', 'discover'],
         merchantCapabilities: ['supports3DS', "supportsDebit",
         "supportsCredit"],
-   
+
         total: { label: 'Market America', amount: order?.totals.price},
     // Add line items for breakdown (including potential discount)
       lineItems: getLineItems(order!)
@@ -634,15 +634,15 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
         const { payment } = event;
         const tempShopperId = isGuest ? guestShopperId : shopperId;
         try {
-       const decryptedPayment = await decryptAppleData(payment, order?.totals.price.toString(), "USD"); 
+       const decryptedPayment = await decryptAppleData(payment, order?.totals.price.toString(), "USD");
        if (decryptedPayment.error) {
         errorMessage = decryptedPayment.error;
         session.completePayment(window.ApplePaySession.STATUS_FAILURE);
         throw new Error(errorMessage);
-  
+
        }
        const savePaymentPayload = {
-        number: decryptedPayment.ipgTransactionId, 
+        number: decryptedPayment.ipgTransactionId,
         number2: decryptedPayment.clientRequestId,
         token: decryptedPayment.orderId,
         siteId: siteId,
@@ -822,7 +822,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
           c2pBillingAddress = response.data.billing;
           c2pBillingAddress.country = siteData.siteCountryCode;
 
-          return isGuest ? walletData : addTempPaymentMethod(shopperId, walletData);
+          return isGuest ? addTempPaymentMethod(guestShopperId as string, walletData) : addTempPaymentMethod(shopperId, walletData);
         })
         .then((response: any) => {
 
@@ -842,6 +842,8 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                 accountName: response.accountName,
                 number: response.number,
                 token: response.token,
+                mask: response.mask,
+                id: response.id,
                 typeID: response.typeID,
                 expMonth: response.expMonth,
                 expYear: response.expYear,
@@ -965,7 +967,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                       ? getString("payWith") as string
                       : (getString("placeOrder") as string)
                 }
-                disabled={isLoading || isGuestEmailValid || (isCheckboxChecked && hasPhoneError || orderNotifications?.length != 0)}
+                disabled={isLoading || isGuestEmailValid || (isCheckboxChecked && hasPhoneError) || orderNotifications?.length != 0}
                 btnType={
                   paymentTypeId === SEZZLE.typeId
                     ? "sezzle"
