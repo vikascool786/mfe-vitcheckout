@@ -144,6 +144,7 @@ export const Contact: React.FC<IContactProps> = ({
                             .then((response) => {
                                 const ezPcid = response?.shopper?.pcid;
                                 setCustomerId(ezPcid);
+                                setGuestShopperId(response?.cid)
                                 const shippingAddress = addressList && addressList.length > 0 ? addressList[0] : null;
                                 const orderResponse = buildInitialGuestOrder(cartId, portalId, ezPcid, shippingAddress);
                                 orderResponse.then((res) => {

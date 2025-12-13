@@ -766,14 +766,29 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     });
   }
 
+  // Track last processed Click2Pay digital card id to avoid duplicate API calls
+  const lastC2PDigitalCardIdRef = React.useRef<string | null>(null);
+
   useEffect(() => {
+    const digitalCardId = Click2PayPlaceOrder.getDigitalCardId();
+
+    // If not Click2Pay, remove it once and exit
     if (paymentTypeId !== CLICK2PAY.typeId) {
-      // remove C2P if present from the Order
-      handleClick2PayOrderRemove();
+      if (lastC2PDigitalCardIdRef.current !== null) {
+        handleClick2PayOrderRemove();
+        lastC2PDigitalCardIdRef.current = null;
+      }
       return;
-    };
+    }
+
+    // Guard: only act when digitalCardId actually changes
+    if (!digitalCardId || lastC2PDigitalCardIdRef.current === digitalCardId) {
+      return;
+    }
+
+    lastC2PDigitalCardIdRef.current = digitalCardId;
     handleClick2PayOrderUpdate();
-  }, [paymentTypeId, Click2PayPlaceOrder.getDigitalCardId()])
+  }, [paymentTypeId]);
 
   const handleClick2PayOrderUpdate = (): Promise<void> => {
     return new Promise((resolve, reject) => {
