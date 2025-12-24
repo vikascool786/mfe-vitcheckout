@@ -69,6 +69,15 @@ const onCreateSession = useCallback(() => {
     "shippingMethods": getShippingMethodsFromOrder(orderRef.current!),
     lineItems: getLineItems(orderRef.current!, true)
     };
+    // this is added to let the api know we are now using apple pay
+    orderRef.current = {
+      ...orderRef.current,
+      paymentMethod: {
+        type: "Apple Pay",
+        typeID: 50,
+        categoryID: 7
+    }
+    };
     const session = new window.ApplePaySession(14, request)
     session.begin();
     session.onvalidatemerchant = async () => {
@@ -229,7 +238,7 @@ const onCreateSession = useCallback(() => {
     session.onpaymentauthorized = async (event: any) => {
       const initialTotal = orderRef.current?.totals.price;
       const {payment} = event;
-      const {addressLines, administrativeArea, country, countryCode, locality, postalCode, familyName, givenName} = payment.shippingContact;
+      const {addressLines, administrativeArea, country, locality, postalCode, familyName, givenName} = payment.shippingContact;
         let shippingAddress = {
           address1: addressLines[0] || '',
           city: locality,
@@ -309,6 +318,7 @@ const onCreateSession = useCallback(() => {
                   const ezRegResponse = await postEZReg(email, portalId, REG_TYPE_GUEST_CHECKOUT, false);
                   const ezPcid = ezRegResponse?.shopper?.pcid;
                   applePayState.current.customerId = ezPcid;
+                  applePayState.current.guestShopper = ezRegResponse.cid;
                   // Await the nested buildInitialGuestOrder Promise
                   const orderResponse = await await buildOrder(
                     generateChangeStoreResponse(orderWithNewAddress, applePayState.current.customerId || "")
@@ -361,8 +371,6 @@ const onCreateSession = useCallback(() => {
             })
             return;
         }
-       
-
        try {
             const decryptedPayment = await decryptAppleData(payment, orderRef.current!.totals.price.toString(), "USD"); 
             if (decryptedPayment.error) {
@@ -406,7 +414,8 @@ const onCreateSession = useCallback(() => {
          // setIsApplePayActive(false);
               } catch (e) {
                 console.log('Something went wrong!', e);
-                setErrorMessage(e as string)
+                const message = e instanceof Error ? e?.message : e || "Something went wrong!";
+                setErrorMessage(message as string)
                 session.completePayment(window.ApplePaySession.STATUS_FAILURE);
               }
     }
@@ -426,13 +435,16 @@ useEffect(() => {
 
 }, [onCreateSession])
   return (
-    <>
-      <apple-pay-button
+    <div className="apple-pay-button-container">
+    <div className='apple-pay-button-wrapper'>
+    <apple-pay-button
     buttonstyle="black"
     type="plain"
     locale="en-US"
     id="mfe-apple-pay-button"
      />
+    </div>
+
      {errorMessage.length > 0 && (
                 <div className="error-message-order">
                   {/* <div className="error-message-order--bold">
@@ -441,7 +453,7 @@ useEffect(() => {
                   <div className="error-message-order--bold">{errorMessage}</div>
                 </div>
               )}
-  </>
+  </div>
 
   )
 };

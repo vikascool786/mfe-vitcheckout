@@ -35,6 +35,8 @@ module.exports = (env, argv) => {
     },
 
     devServer: {
+      allowedHosts: "all",
+      host: "0.0.0.0",
       port: 3011,
       historyApiFallback: true,
       headers: {
@@ -61,7 +63,7 @@ module.exports = (env, argv) => {
           use: { loader: "babel-loader" },
         },
         {
-          test: /\.(png|jpe?g|gif)$/i,
+          test: /\.(png|jpe?g|gif|svg)$/i,
           use: [{ loader: "file-loader" }],
         },
       ],
@@ -70,11 +72,11 @@ module.exports = (env, argv) => {
   plugins: [
       new ModuleFederationPlugin({
           name: "mfeCheckoutContainer",
-          filename: "remoteEntry.js",
+          filename: "remoteEntry-search.js",
           remotes: {
               mfeStore: isLocal
-                  ? "mfeStore@http://localhost:3000/remoteEntry.js"
-                  : `mfeStore@${domainEndpoint()}/Store/remoteEntry.js`,
+                  ? "mfeStore@http://localhost:3000/remoteEntry-search.js"
+                  : `mfeStore@${domainEndpoint()}/Store/remoteEntry-search.js`,
           },
           exposes: {
               "./CheckoutSkeleton": "./src/CheckoutContainerWrapper",

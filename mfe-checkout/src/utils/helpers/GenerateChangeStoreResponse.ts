@@ -91,6 +91,11 @@ export const generateChangeStoreResponse = (order: Order, customer_id: string): 
     updatedPayload.paymentMethod = updatedPayload.paymentMethod ?? {};
     updatedPayload.paymentMethod.typeID = order.paymentMethod.typeID;
     updatedPayload.paymentMethod.accountName = order.paymentMethod.accountName;
+  } else if(order.paymentMethod && order.paymentMethod.type) {
+    // this is added to turn off iTransact users when using apple pay
+    updatedPayload.paymentMethod = updatedPayload.paymentMethod ?? {};
+    updatedPayload.paymentMethod.typeID = order.paymentMethod.typeID;
+    updatedPayload.paymentMethod.type = order.paymentMethod.type;
   }
 
   if(!order.userOptions?.userAgent) {

@@ -668,7 +668,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     session.completePayment(window.ApplePaySession.STATUS_SUCCESS);
         } catch (e) {
           console.log('Something went wrong!', e);
-          updateOrderErrorMessage("There was an error processing your payment. Please try again later!");
+          updateOrderErrorMessage(getString("errorPlacingOrder") as string);
           session.completePayment(window.ApplePaySession.STATUS_FAILURE);
         }
       }

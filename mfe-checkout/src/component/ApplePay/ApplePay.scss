@@ -1,4 +1,11 @@
-.error-message-order {
+
+.apple-pay-button-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  .error-message-order {
     background: #f0f1f7;
     color: #202340;
     border: 2px solid red;
@@ -20,3 +27,9 @@
       padding-top: 10px;
     }
   }
+
+  .apple-pay-button-wrapper {
+    height: 44px;
+    min-width: 200px;
+}
+}

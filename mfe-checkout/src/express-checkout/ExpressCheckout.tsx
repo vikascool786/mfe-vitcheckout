@@ -23,13 +23,11 @@ const ExpressCheckout: React.FC<ExpressCheckoutProps> =   (
       isApplePaySupported ?<> <div className="express-checkout-container">
       <h3>Express Checkout</h3>
       <div className="express-checkout-options">
-      <div className="apple-pay-button-wrapper">
       <ApplePayButton
          confirmOrder={confirmOrder} 
          siteId={siteId}
          portalId={portalId}
          />
-      </div>
       </div>
     
      
