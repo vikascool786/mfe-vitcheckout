@@ -90,7 +90,6 @@ export const getInitialBuildOrderData = (
     signatureRequired: false,
     oosConsolidate: 3,
     userSessionID: "",
-    coupons: [],
     portalId: portalId || "",
   },
 });
