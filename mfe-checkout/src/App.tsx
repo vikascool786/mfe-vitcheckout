@@ -113,13 +113,13 @@ const App: React.FC<AppProps> = () => {
         /> */}
         {/* click to pay dev  */}
         <CheckoutContainer
-          cartId="cart_1694108796_W_USA_USA_ENG"
-          shopperId="jhVZWmxjzjhzZzhkWhzYjqzzzhezXZWUjjkZzwxwqm"
-          pcid="1694108796"
+          cartId="cart_c22f9eaa-229a-46f9-aad4-3042be6d6ddc_W_USA_USA_ENG"
+          shopperId="XWjVVhUZzzjxjzhhVwzYjYUzeWUkzUVkzjmUzemejh"
+          pcid="1646548472"
           siteId="222"
-          sessionId="3006960775"
-          portalId="HAHACAN.COM"
-          isGuest={false}
+          sessionId="3007019014"
+          portalId="TEST.COM"
+          isGuest={true}
         />
         {/* click to pay stage  */}
         {/* <CheckoutContainer

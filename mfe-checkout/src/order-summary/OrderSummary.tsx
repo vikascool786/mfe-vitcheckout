@@ -319,8 +319,6 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
   };
   const handleAddCoupon = async () => {
     try {
-      console.log('coupon', coupon);
-      console.log('order', order);
       if (coupon.coupon) {
         if (order) {
           const { coupons } = order?.userOptions || {};
@@ -386,6 +384,7 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
     }));
 
   useEffect(() => {
+    console.log("test")
       const COUPON_CODE_SURVEY10 = "SURVEY10";
       const hasTakenHealthSurvey = shopperAttributes.some(
         (entry: ShopperAttribute) => entry.typeId === 609 && entry.value === 1
@@ -424,7 +423,9 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
                 );
                 updatedOrder
                   .then((response) => {
-                    setOrder(response.response?.success?.data);
+                    setTimeout(() => {
+                      setOrder(response.response?.success?.data);
+                    }, 2000);
                   })
                   .catch((error) => {
                     console.error("Error updating order with coupon ", error);

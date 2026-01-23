@@ -5,7 +5,7 @@ import { useAtom, useSetAtom } from 'jotai';
 import {  applePayAtom, orderAtom } from '../../store';
 import { changeOrder, buildOrder } from '../../api/service/Order';
 import { generateChangeStoreResponse } from '../../utils/helpers/GenerateChangeStoreResponse';
-import { getLineItems, getMerchantSession, getShippingMethodsFromOrder, getOrderTotal,  getCurrentSelectedShipping } from './ApplePayUtils';
+import { getLineItems, getMerchantSession, getShippingMethodsFromOrder, getOrderTotal,  getCurrentSelectedShipping, getSupportedApplePayVersion } from './ApplePayUtils';
 import { fetchShopperDirectory } from '../../api/service/ShopperDirectory';
 import { fetchShopperDetail } from '../../api/service/ShopperDetail';
 import { isFullRegShopper, isEZRegShopper } from '../../interfaces/ShopperDirectory';
@@ -18,6 +18,7 @@ import { decryptAppleData } from './ApplePayUtils';
 import { APPLEPAY } from '../../payment-method/PaymentType';
 import { handleStoreShippingSelections } from './ApplePayUtils';
 import './ApplePay.scss';
+import ApplePayEmailDialog from './ApplePayEmailDialogue';
 
 
 interface ApplePayProps {
@@ -31,9 +32,12 @@ const ApplePay: React.FC<ApplePayProps> =   ({
   portalId
 }) => {
   const  setIsApplePayActive= useSetAtom(applePayAtom);
+  const [emailErrorMessage, setEmailErrorMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const trackingData = new Map<string, string>();
   const [order, setOrder] = useAtom(orderAtom);
+  const [custId, setCustId] = useState("");
+   const [openEmailDialog, setOpenEmailDialog] = useState(false);
   const orderRef = useRef(order);
   const applePayState = useRef({
     customerId: '',
@@ -48,7 +52,10 @@ const ApplePay: React.FC<ApplePayProps> =   ({
   }, [order])
 
 const onCreateSession = useCallback(() => {
-  setIsApplePayActive(true);
+  const version = getSupportedApplePayVersion();
+  if (!version) {
+    throw new Error("There was a problem in apple pay version");
+  }
   const request = {
       countryCode: 'US',
       currencyCode: 'USD',
@@ -56,8 +63,8 @@ const onCreateSession = useCallback(() => {
       merchantCapabilities: ['supports3DS', "supportsDebit",
       "supportsCredit"],
       total: { label: 'Market America', amount: getOrderTotal(orderRef.current!, true)},
-      // couponCode: '',
-      // "supportsCouponCode": true,
+      couponCode: '',
+      "supportsCouponCode": true,
       requiredShippingContactFields: [
         "postalAddress",
         "name",
@@ -78,7 +85,7 @@ const onCreateSession = useCallback(() => {
         categoryID: 7
     }
     };
-    const session = new window.ApplePaySession(14, request)
+    const session = new window.ApplePaySession(version, request)
     session.begin();
     session.onvalidatemerchant = async () => {
       const merchantSession = await getMerchantSession();
@@ -248,109 +255,6 @@ const onCreateSession = useCallback(() => {
           first: givenName,
           last: familyName
         };
-       let errors = []; 
-       let email = payment.shippingContact.emailAddress;
-       const orderWithNewAddress = {
-        ...orderRef.current!,
-        shippingAddress: {
-          ...shippingAddress
-        },
-        billingAddress: {
-          ...shippingAddress
-        }
-      };
-     
-      if (applePayState.current.email != email) {
-        // first we need to create cart based on the user following the steps in Contact.tsx
-        try {
-          // Await the initial fetchShopperDirectory Promise
-          applePayState.current.email = email;
-          const response = await fetchShopperDirectory(email);
-  
-          if (response?.foreign) {
-              // Handle foreign shopper case
-              const emailAddressError = new window.ApplePayError(
-                  "recipientContactInvalid",
-                  null,
-                  "The email address entered is for an account on a another SHOP.COM site, please use a valid email"
-              );
-              errors.push(emailAddressError);
-  
-          } else if (isFullRegShopper(response) || isEZRegShopper(response)) {
-              // Handle existing registered shopper case
-              applePayState.current.guestShopper = response.shopperID;
-            //  setGuestShopperId(response.shopperID);
-              try {
-                  // Await the nested fetchShopperDetail Promise
-                  const detailResponse = await fetchShopperDetail(response.shopperID);
-                  
-                  if (detailResponse.shopperAccountDisabled === 1) {
-                      // Handle disabled account case
-                      const accountDisabledError = new window.ApplePayError(
-                          "recipientContactInvalid", 
-                          null, 
-                          getString("emailAddressError", ['1-866-420-1709'])
-                      );
-                      errors.push(accountDisabledError); 
-                      return; // Exit if account is disabled
-                  }
-                  
-                  applePayState.current.customerId = detailResponse.pcid;
-                  applePayState.current.portalId = detailResponse.portal?.portalId;
-                //  setCustomerId(detailResponse.pcid);
-                //  setCurrentPortalId(detailResponse.portal?.portalId)
-                  // Await the nested buildInitialGuestOrder Promise
-                //  const orderResponse = await buildInitialGuestOrder(cartId, portalId, detailResponse.pcid, shippingAddress);
-                  const orderResponse = await buildOrder(
-                    generateChangeStoreResponse(orderWithNewAddress, applePayState.current.customerId || "")
-                  );
-                  orderRef.current = orderResponse?.response.success?.data || null;
-              } catch (error) {
-                  // You may want specific error handling for fetchShopperDetail failure here
-                  console.error("APP fetchShopperDetail error: ", error);
-                  // Depending on requirements, you might push an error toß the errors array
-              }
-  
-          } else {
-              // Handle new EZ registration (Guest Checkout) case
-              try {
-                  // Await the nested postEZReg Promise
-                  const ezRegResponse = await postEZReg(email, portalId, REG_TYPE_GUEST_CHECKOUT, false);
-                  const ezPcid = ezRegResponse?.shopper?.pcid;
-                  applePayState.current.customerId = ezPcid;
-                  applePayState.current.guestShopper = ezRegResponse.cid;
-                  // Await the nested buildInitialGuestOrder Promise
-                  const orderResponse = await await buildOrder(
-                    generateChangeStoreResponse(orderWithNewAddress, applePayState.current.customerId || "")
-                  );
-                  orderRef.current = orderResponse?.response.success?.data || null;
-              } catch (error) {
-                  // Handle the postEZReg rejection (the original .catch block)
-                  console.error("EZ reg error: ", error);
-                  const errorMessage =
-                      error?.response?.data ??
-                      error?.message ??
-                      "This email address cannot be used. Please try again.";
-                  const errorEmail = new window.ApplePayError("recipientContactInvalid", null, errorMessage);   
-                  errors.push(errorEmail);
-              }
-          }
-          
-      } catch (error) {
-          // This is where you would catch errors from the initial fetchShopperDirectory call
-          console.error("APP fetchShopperDirectory initial error: ", error);
-          const errorUserEmail = new window.ApplePayError("recipientContactInvalid", null, "There was an error processing your order!");  
-          errors.push(errorUserEmail);
-          // Depending on requirements, you might push a general network/API error to errors array
-      }
-      }
-        if (errors.length > 0) {
-          session.completePayment({
-            status: window.ApplePaySession.STATUS_FAILURE,
-            errors
-          });
-          return;
-        }
         const finalTotal = orderRef.current?.totals.price;
         if (initialTotal != finalTotal) {
           session.completePayment({
@@ -409,7 +313,7 @@ const onCreateSession = useCallback(() => {
           }
 
           await changeOrder(changeOrderPayload, orderRef.current!.id!);
-          confirmOrder(true, email);
+          confirmOrder(true, applePayState.current.email);
           session.completePayment(window.ApplePaySession.STATUS_SUCCESS);
          // setIsApplePayActive(false);
               } catch (e) {
@@ -425,36 +329,128 @@ const onCreateSession = useCallback(() => {
     
 }, [order])
 
-useEffect(() => {
-  const applePayBtn = document.getElementById("mfe-apple-pay-button");
-  if (!applePayBtn){
-    return;
-  }
-  applePayBtn.addEventListener("click", onCreateSession);
-  return () => applePayBtn.removeEventListener("click", onCreateSession)
 
-}, [onCreateSession])
+const handleApplePay = () => {
+  setIsApplePayActive(true);
+  setOpenEmailDialog(true);
+  setErrorMessage('');
+}
+
+
+
+const handleEmailSubmit = async (email: string) => {
+  applePayState.current.email = email;
+  applePayState.current.customerId = ""
+  applePayState.current.guestShopper = "";
+  setCustId('');
+  setEmailErrorMessage('');
+  try {
+    // Await the initial fetchShopperDirectory Promise
+    const response = await fetchShopperDirectory(email);
+
+    if (response?.foreign) {
+        // Handle foreign shopper case
+       setEmailErrorMessage("The email address entered is for an account on a another SHOP.COM site, please use a valid email")
+
+    } else if (isFullRegShopper(response) || isEZRegShopper(response)) {
+        // Handle existing registered shopper case
+        applePayState.current.guestShopper = response.shopperID;
+        
+        try {
+            // Await the nested fetchShopperDetail Promise
+            const detailResponse = await fetchShopperDetail(response.shopperID);
+            
+            if (detailResponse.shopperAccountDisabled === 1) {
+                // Handle disabled account case
+                const accountDisabledError = new window.ApplePayError(
+                    "recipientContactInvalid", 
+                    null, 
+                    getString("emailAddressError", ['1-866-420-1709'])
+                );
+               // errors.push(accountDisabledError); 
+                return; // Exit if account is disabled
+            }
+            
+            applePayState.current.customerId = detailResponse.pcid;
+            setCustId(detailResponse.pcid)
+            applePayState.current.portalId = detailResponse.portal?.portalId;
+            applePayState.current.guestShopper = detailResponse.cid;
+            
+            // Await the nested buildInitialGuestOrder Promise
+          //  const orderResponse = await buildInitialGuestOrder(cartId, portalId, detailResponse.pcid, shippingAddress);
+          const orderResponse = await buildOrder(
+            generateChangeStoreResponse(orderRef.current!, applePayState.current.customerId || "")
+          );
+            orderRef.current = orderResponse?.response.success?.data || null;
+            
+        } catch (error) {
+            // You may want specific error handling for fetchShopperDetail failure here
+            console.error("APP fetchShopperDetail error: ", error);
+            setEmailErrorMessage(`There was an error fetching shopper details:${error}`, )
+            // Depending on requirements, you might push an error to the errors array
+        }
+
+    } else {
+        // Handle new EZ registration (Guest Checkout) case
+        try {
+            // Await the nested postEZReg Promise
+            const ezRegResponse = await postEZReg(email, portalId, REG_TYPE_GUEST_CHECKOUT, false);
+            const ezPcid = ezRegResponse?.shopper?.pcid;
+            applePayState.current.customerId = ezPcid;
+            applePayState.current.guestShopper = ezRegResponse.cid;
+            setCustId(ezPcid);
+            
+            // Await the nested buildInitialGuestOrder Promise
+            const orderResponse = await await buildOrder(
+              generateChangeStoreResponse(orderRef.current!, applePayState.current.customerId || "")
+            );
+            orderRef.current = orderResponse?.response.success?.data || null;
+
+        } catch (error) {
+            // Handle the postEZReg rejection (the original .catch block)
+            console.error("EZ reg error: ", error);
+            const errorMessage =
+                error?.response?.data ??
+                error?.message ??
+                "This email address cannot be used. Please try again.";
+                setEmailErrorMessage(errorMessage);
+        }
+    }
+
+
+    
+} catch (error) {
+    // This is where you would catch errors from the initial fetchShopperDirectory call
+    console.error("APP fetchShopperDirectory initial error: ", error); 
+    setEmailErrorMessage(`Error fetching shopper detail: ${error}`)
+}
+}
+
+const onApplePayEmailDialogClose = (next: string) => {
+  setOpenEmailDialog(false); setCustId('');
+  if (next !== 'createSession') {
+    setIsApplePayActive(false);
+  }
+  
+}
+
   return (
     <div className="apple-pay-button-container">
-    <div className='apple-pay-button-wrapper'>
-    <apple-pay-button
-    buttonstyle="black"
-    type="plain"
-    locale="en-US"
-    id="mfe-apple-pay-button"
-     />
-    </div>
-
-     {errorMessage.length > 0 && (
+        <button
+              className={`apple-pay-btn enabled`}
+              onClick={handleApplePay}
+            >
+              <span className="apple-pay-inner">
+                <span className="txt">Continue with Apple Pay</span>
+              </span>
+            </button>
+            {errorMessage.length > 0 && (
                 <div className="error-message-order">
-                  {/* <div className="error-message-order--bold">
-                  Please complete your payment information
-                </div> */}
                   <div className="error-message-order--bold">{errorMessage}</div>
                 </div>
               )}
+     <ApplePayEmailDialog open={openEmailDialog} onClose={onApplePayEmailDialogClose} onSubmit={handleEmailSubmit} customerId={custId} onCreateSession={onCreateSession} errorMessage={emailErrorMessage} />
   </div>
-
   )
 };
 export const ApplePayButton = withApplePaySupport(ApplePay);

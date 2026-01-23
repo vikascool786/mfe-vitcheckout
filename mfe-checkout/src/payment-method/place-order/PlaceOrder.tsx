@@ -44,7 +44,7 @@ import { useContentStrings } from "../../hooks/useContentStrings";
 import { useSiteFlags } from "../../hooks/useSiteFlags";
 import { getPaypalToken } from "../../api/service/PaypalCheckout";
 import { isIOSSafari } from "../../utils/helpers/UserAgentHelper";
-import { decryptAppleData, getLineItems, getMerchantSession, savePaymentMethod, getShippingMethodsFromOrder } from "../../component/ApplePay/ApplePayUtils";
+import { decryptAppleData, getLineItems, getMerchantSession, savePaymentMethod, getShippingMethodsFromOrder, getSupportedApplePayVersion } from "../../component/ApplePay/ApplePayUtils";
 
 interface IPlaceOrder {
   confirmOrder: () => void;
@@ -612,6 +612,10 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
   }
 
   const handleApplePay = async (order:Order) => {
+    const version = getSupportedApplePayVersion();
+    if (!version) {
+      throw new Error("There was a problem in apple pay version");
+    }
     const request = {
         countryCode: 'US',
         currencyCode: 'USD',
@@ -623,7 +627,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
     // Add line items for breakdown (including potential discount)
       lineItems: getLineItems(order!)
       };
-      const session = new window.ApplePaySession(14, request)
+      const session = new window.ApplePaySession(version, request)
       session.begin();
       session.onvalidatemerchant = async () => {
         const merchantSession = await getMerchantSession();

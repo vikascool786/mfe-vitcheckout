@@ -1,10 +1,9 @@
 import { Order } from "../../interfaces/Order";
-import { ShippingSelection } from "../../interfaces/ShippingMethod";
 import { GET_API_ENDPOINT_BASE_URL_ONLY, GET_API_KEY, GET_BASE_URL } from "../../utils/urlResolver";
 import { OrderStores } from "../../interfaces/Order";
-import { OOS_CONSOLIDATE_SPLIT_CODE } from "../../interfaces/OrderConsolidationData";
 
 const APPLE_TIMEOUT = 31000;
+const SUPPORTED_VERSIONS = [14, 12, 10, 8, 6, 3];
 
 export const getOrderTotal = (order: Order, isGuest = false) => {
   const storesTotals =
@@ -39,8 +38,34 @@ export const getLineItems = (order: Order, isGuest =false) => {
     }, 0) : null;
 
     const shippingTotal = order.totals?.shipping || 0;
+    let warningProducts = [{
+      // Short-form Prop 65 text
+      label: "⚠️ WARNING: Cancer & Reproductive Harm",
+      amount: "0.00", // Shows as $0.00 or just text depending on OS
+      type: "pending" // Visually distinguishes it from a charge
+  },
+  {
+    label: "www.P65Warnings.ca.gov",
+    amount: "0.00",
+    type: "pending"
+}];
+    if (order.shippingAddress.state == 'CA') {
+      const store = Object.entries(order.stores).map(([_key, store]) => store)[0];
+      for (const item of store!.items) {
+        let  hasProp65Warning = (item.shipWarningMessages && item.shipWarningMessages.length > 0 && item.shipWarningMessages[0]!.includes("P65Warnings")) || false;
+        if(hasProp65Warning) {
+          warningProducts.push({
+            label: `📦  ${item.caption}`,
+            amount: "0.00",
+            type: "pending"
+          });        
+        }
+      }   
+    }
+
 
     return [
+      ...(warningProducts.length > 2 ? warningProducts: []),
       ...(order?.totals.cashBack ? [{
         type: "final", label: 'VIFT Cashback earned', amount: order?.totals.cashBack
       }]: []),
@@ -119,7 +144,6 @@ export const getMerchantSession = async () => {
 
   export const haveShippingMethodsChanged = (oldMethods: any[], newMethods: any[]) => {
     if (oldMethods.length !== newMethods.length) {
-      console.log("Change detected: Array lengths differ.");
       return true;
     }
   
@@ -130,7 +154,6 @@ export const getMerchantSession = async () => {
       const oldMethod = oldMap.get(newMethod.id);
   
       if (!oldMethod) {
-        console.log(`Change detected: New method ID ${newMethod.id} is not in the old list.`);
         return true;
       }
   
@@ -141,7 +164,6 @@ export const getMerchantSession = async () => {
         oldMethod.label !== newMethod.label
 
       ) {
-        console.log(`Change detected: Details for method ID ${newMethod.id} have changed.`);
         return true;
       }
 
@@ -177,4 +199,18 @@ export const getMerchantSession = async () => {
 
     const stores = Object.entries(order.stores)[0]![1];
     return stores.shipping;
+  }
+
+  export function getSupportedApplePayVersion(): number | null {
+    const ApplePaySession = (window as any).ApplePaySession;
+    if (!ApplePaySession) return null;
+  
+    for (const version of SUPPORTED_VERSIONS) {
+      if (ApplePaySession.supportsVersion(version)) {
+        console.log('Supported version::', version);
+        return version;
+      }
+    }
+  
+    return null;
   }

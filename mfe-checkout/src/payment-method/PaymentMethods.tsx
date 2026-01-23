@@ -64,6 +64,7 @@ interface IPaymentMethod {
   updatePaymentTypeId: (newValue: number) => void;
   updateOrderErrorMessage: (newMessage: string) => void;
   isGuest: boolean;
+  isApplePayActive?: boolean;
 }
 
 const PaymentMethod: React.FC<IPaymentMethod> = ({
@@ -77,6 +78,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   updateOrderErrorMessage,
   portalId,
   isGuest,
+  isApplePayActive = false
 }) => {
   // initial payment methods
   const isApplePaySupported = useApplePayAvailable();
@@ -127,7 +129,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
     if (isApplePaySupported) {
       setPaymentMethods(handleThirdPartyPaymentVisibility(paymentMethods));
     }
-  }, [isApplePaySupported])
+  }, [isApplePaySupported, isApplePayActive])
 
   useEffect(() => {
     const fetchShoppersSavedPayments = async (
@@ -569,7 +571,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
 
     const shouldShowApplePay = order?.paymentMethods.some(
       method => method.typeID === APPLEPAY.typeId
-    );
+    ) && isApplePayActive;
 
     if (!isSezzleAllowed()) {
       paymentOptions = paymentOptions.filter(
@@ -613,7 +615,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         (method) => method.paymentMethod.typeID !== APPLEPAY.typeId
     );
   }
-  if (!isApplePayAdded && isApplePaySupported) {
+  if (!isApplePayAdded && isApplePaySupported && shouldShowApplePay) {
     const applePay = initialPaymentMethods.find(method => method.paymentMethod.typeID == APPLEPAY.typeId);
     if (applePay) {
       paymentOptions = [...paymentOptions, applePay];

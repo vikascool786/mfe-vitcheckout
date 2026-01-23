@@ -54,7 +54,7 @@ export const PAYPAL_RECURRING: PaymentType = {
 }
 
 export const APPLEPAY: PaymentType = {
-    name: "ApplePay",
+    name: "Apple Pay",
     typeId: 50,
     siteflagTypeId: 587
 }

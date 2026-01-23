@@ -61,9 +61,8 @@ import { getShoppingCart } from "../api/ajaxaction/ShoppingCart";
 import { customerApiData } from "./customerAtom";
 import { setGuestEmailForSession } from "../api/ajaxaction/FamosSession";
 import { generateOrderTrackingId } from "../utils/helpers/GenerateOrderTrackingId";
-import { ApplePayButton } from "../component/ApplePay/ApplePay";
 import ExpressCheckout from "../express-checkout/ExpressCheckout";
-import Divider from "../component/Divider/Divider";
+import { APPLEPAY } from "../payment-method/PaymentType";
 
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
@@ -270,6 +269,10 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   const checkOrderConfirmationFlag = (siteFlagData: siteFlagData[]) => {
     return siteFlagData.find(flag => (flag.flagID === 646 && flag.active == true)) ?? false;
   };
+
+  const isApplePayActive = useMemo(() => {
+    return siteFlags.some(flag => (flag.flagID === APPLEPAY.siteflagTypeId && flag.active == true))
+  }, [siteFlags])
 
   const orderHasNewAutoship = (): boolean => {
     if (orderData) {
@@ -502,6 +505,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                      confirmOrder={confirmOrder} 
                      siteId={siteId} 
                      portalId={currentPortalId}
+                     isApplePayActive={isApplePayActive}
                        />
                      
                       <Contact 
@@ -556,6 +560,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                       updateOrderErrorMessage={handleUpdateOrderErrorMessage}
                       portalId={currentPortalId}
                       isGuest={isGuest}
+                      isApplePayActive={isApplePayActive}
                     />
                   )
                 ) : (

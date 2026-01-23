@@ -8,19 +8,21 @@ interface ExpressCheckoutProps {
     confirmOrder: () => void;
   siteId: string;
   portalId: string;
+  isApplePayActive: boolean;
 }
 const ExpressCheckout: React.FC<ExpressCheckoutProps> =   (
   {
     confirmOrder,
     siteId,
-    portalId
+    portalId,
+    isApplePayActive
   }
 ) => {
   const isApplePaySupported = useApplePayAvailable();
 
   return (<>
     {
-      isApplePaySupported ?<> <div className="express-checkout-container">
+      isApplePaySupported && isApplePayActive ?<> <div className="express-checkout-container">
       <h3>Express Checkout</h3>
       <div className="express-checkout-options">
       <ApplePayButton
