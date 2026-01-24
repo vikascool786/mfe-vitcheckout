@@ -14,6 +14,7 @@ import { generateChangeStoreResponse } from "../utils/helpers/GenerateChangeStor
 import { useContentStrings } from "../hooks/useContentStrings";
 import { applePayAtom, guestShopperIdAtom } from "../store";
 import { useAtomValue, useSetAtom } from "jotai";
+import { validateSurveyCoupon } from "../utils/helpers/ValidateCoupon";
 
 interface IContactProps {
     portalId: string;
@@ -26,6 +27,7 @@ interface IContactProps {
     addressList: Address[];
     order: Order | undefined;
     setCurrentPortalId: any;
+    hasTakenHealthSurvey: boolean;
     setIsGuestEmailInvalid: (isValid: boolean) => void;
 }
 
@@ -40,6 +42,7 @@ export const Contact: React.FC<IContactProps> = ({
     addressList,
     order,
     setCurrentPortalId,
+    hasTakenHealthSurvey,
     setIsGuestEmailInvalid,
 }) => {
 
@@ -57,6 +60,7 @@ export const Contact: React.FC<IContactProps> = ({
     const [emailErrorMessage, setEmailErrorMessage] = useState("");
     const [emailTouched, setEmailTouched] = useState(false);
     const { getString } = useContentStrings();
+    const initialCoupons = hasTakenHealthSurvey ? ["SURVEY10"] : [];
 
     useEffect(() => {
         const emailInput = document.querySelector(".js-email-input") as HTMLInputElement;
@@ -111,7 +115,7 @@ export const Contact: React.FC<IContactProps> = ({
                         setShowOptInCheckbox(false);
                         setGuestShopperId(response.shopperID); 
                         fetchShopperDetail(response.shopperID)
-                            .then(response => {
+                            .then(async response => {
                                 if (response.shopperAccountDisabled == 1) {
                                     setIsGuestEmailInvalid(true);
                                     setEmailErrorMessage(
@@ -119,11 +123,16 @@ export const Contact: React.FC<IContactProps> = ({
                                     );
                                     return;
                                 }
+                
                                 setCustomerId(response.pcid);
+                                const validCoupons = await validateSurveyCoupon(response.pcid, order?.totals?.price || 0, hasTakenHealthSurvey,cartId );
                                 setIsGuestEmailInvalid(false);
                                 setCurrentPortalId(response.portal?.portalId);
                                 if (order && ((order?.userOptions?.coupons?.length > 0) || (token && !payerId))) {
-                                    const orderResponse = changeOrder(generateChangeStoreResponse(order, response.pcid), cartId);
+                                    const orderResponse = changeOrder(generateChangeStoreResponse({...order, userOptions: {
+                                        ...order.userOptions,
+                                        coupons: validCoupons.length > 0 ? validCoupons : order.userOptions?.coupons || []
+                                    }}, response.pcid), cartId);
                                     orderResponse.then((res) => {
                                         setOrderData(res?.response.success?.data || null);
                                         setUseCartSummary(false);
@@ -131,7 +140,7 @@ export const Contact: React.FC<IContactProps> = ({
                                     });
                                 } else {
                                     const shippingAddress = addressList && addressList.length > 0 ? addressList[0] : null;
-                                    const orderResponse = buildInitialGuestOrder(cartId, portalId, response.pcid, shippingAddress);
+                                    const orderResponse = buildInitialGuestOrder(cartId, portalId, response.pcid, shippingAddress, validCoupons);
                                     orderResponse.then((res) => {
                                         setOrderData(res?.response.success?.data || null);
                                         setUseCartSummary(false);
@@ -141,12 +150,13 @@ export const Contact: React.FC<IContactProps> = ({
                             })
                     } else {
                         postEZReg(email, portalId, REG_TYPE_GUEST_CHECKOUT, (isOptInChecked && showOptInCheckbox))
-                            .then((response) => {
+                            .then(async (response) => {
                                 const ezPcid = response?.shopper?.pcid;
                                 setCustomerId(ezPcid);
                                 setGuestShopperId(response?.cid)
                                 const shippingAddress = addressList && addressList.length > 0 ? addressList[0] : null;
-                                const orderResponse = buildInitialGuestOrder(cartId, portalId, ezPcid, shippingAddress);
+                                const validCoupons = await validateSurveyCoupon(ezPcid, order?.totals?.price || 0, hasTakenHealthSurvey,cartId );
+                                const orderResponse = buildInitialGuestOrder(cartId, portalId, ezPcid, shippingAddress, validCoupons);
                                 orderResponse.then((res) => {
                                     setOrderData(res?.response.success?.data || null);
                                     setUseCartSummary(false);

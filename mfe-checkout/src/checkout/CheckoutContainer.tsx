@@ -63,6 +63,10 @@ import { setGuestEmailForSession } from "../api/ajaxaction/FamosSession";
 import { generateOrderTrackingId } from "../utils/helpers/GenerateOrderTrackingId";
 import ExpressCheckout from "../express-checkout/ExpressCheckout";
 import { APPLEPAY } from "../payment-method/PaymentType";
+import { shopperAttributesAtomFamily } from "./shopperAttributesAtom";
+import { ShopperAttribute } from "../interfaces/ShopperAttribute";
+import { validateSurveyCoupon } from "../utils/helpers/ValidateCoupon";
+import { getOrderValidatePromoCode } from "../api/service/PromoCodeAPI";
 
 const apiDomain = GET_API_ENDPOINT_BASE_URL_ONLY();
 const apiKey = GET_API_KEY();
@@ -157,6 +161,10 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   const [cartData, setCartData] = useState<ShoppingCart>(DEFAULT_CART_DATA);
   const [useCartSummary, setUseCartSummary] = useState<boolean>(isGuest);
   const [shopperEmail, setShopperEmail] = useState<string>("");
+  const shopperAttributes = useAtomValue(shopperAttributesAtomFamily(shopperId));
+  const hasTakenHealthSurvey = useMemo(() => shopperAttributes.some(
+      (entry: ShopperAttribute) => entry.typeId === 609 && entry.value === 1
+  ), [shopperAttributes]);
 
   const addressUrl = `${apiDomain}/shopper-addressbooks/v1/${shopperId}/AddressBook?siteId=${siteId}&api_key=${apiKey}`;
   const paymentUrl = `${apiDomain}/shopper-wallets/v1/Shopper/${shopperId}/Wallet?api_key=${apiKey}`;
@@ -385,43 +393,65 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
         if(isGuest && customerId.length < 1){ //do not build the order until we have a pcid/customerId
           return;
         }
-        let buildOrderPayload = getInitialBuildOrderData(
-          cartId,
-          portalData?.portalId,
-          customerId
-        );
-        if (defaultAddress?.id) {
-          buildOrderPayload.shipping = buildOrderPayload.shipping ?? { id: 0 };
-          buildOrderPayload.shipping.id = defaultAddress.id;
-        }
-        if (defaultPaymentMethod?.addressId) {
-          buildOrderPayload.billing = buildOrderPayload.billing ?? { id: 0 };
-          buildOrderPayload.billing.id = defaultPaymentMethod.addressId;
-        }
-        if (defaultPaymentMethod) {
-          buildOrderPayload.paymentMethod = { id: defaultPaymentMethod.id };
-        }
+        const buildInitialOrder = async () => {
+            let buildOrderPayload = getInitialBuildOrderData(
+              cartId,
+              portalData?.portalId,
+              customerId
+            );
+            
+            if (defaultAddress?.id) {
+              buildOrderPayload.shipping = buildOrderPayload.shipping ?? { id: 0 };
+              buildOrderPayload.shipping.id = defaultAddress.id;
+            }
+            if (defaultPaymentMethod?.addressId) {
+              buildOrderPayload.billing = buildOrderPayload.billing ?? { id: 0 };
+              buildOrderPayload.billing.id = defaultPaymentMethod.addressId;
+            }
+            if (defaultPaymentMethod) {
+              buildOrderPayload.paymentMethod = { id: defaultPaymentMethod.id };
+            }
 
-        //add session and user agent data
-        buildOrderPayload.userOptions.userSessionID = sessionId;
-        buildOrderPayload.userOptions.userAgent = getUserAgent();
+            buildOrderPayload.userOptions.userSessionID = sessionId;
+            buildOrderPayload.userOptions.userAgent = getUserAgent();
 
-        const orderResponse = buildOrder(buildOrderPayload);
-        orderResponse.then((response) => {
-          if (
-            response.response?.errors?.message ===
-            `${getString("emptyCartMessage")}.`
-          ) {
-            window.location.href = GET_SHOP_CART_URL();
-          }
-          setOrderData(response?.response.success?.data || null);
-          setOrderNotifications(
-            getOrderNotifications(response?.response.success)
-          );
-          handleSetSkeleton((loadingAddresses || loadingPaymentMethods || loadingOrder), response?.response.success?.data);
-        });
+            // Validate Coupon if Survey Taken
+            if (hasTakenHealthSurvey) {
+                try {
+                    // Total is 0 because order doesn't exist yet
+                    const response = await getOrderValidatePromoCode(cartId, "SURVEY10", 0, customerId);
+                    const canRedeem = response && response?.isCouponValid === "1" && (response?.svrMessage?.length ?? 0) <= 0;
+                    if (canRedeem) {
+                         buildOrderPayload.userOptions.coupons = ["SURVEY10"];
+                    }
+                } catch (e) {
+                    console.error("Error validating survey coupon in container", e);
+                }
+            }
+
+            // Build Order
+            const orderResponse = await buildOrder(buildOrderPayload);
+            
+            if (
+                orderResponse.response?.errors?.message ===
+                `${getString("emptyCartMessage")}.`
+            ) {
+                window.location.href = GET_SHOP_CART_URL();
+            }
+            setOrderData(orderResponse?.response.success?.data || null);
+            setOrderNotifications(
+                getOrderNotifications(orderResponse?.response.success)
+            );
+            handleSetSkeleton((loadingAddresses || loadingPaymentMethods || loadingOrder), orderResponse?.response.success?.data);
+        };
+
+        buildInitialOrder();
+
       } else {
         if (!order.response.success.data) return;
+        if (hasTakenHealthSurvey) {
+          buildOrderForSurveyCoupon(order.response.success.data);
+        }
         const orderResponse = order.response.success.data;
         if (!orderResponse.billingAddress.id) {
           orderResponse.billingAddress.id =
@@ -441,6 +471,24 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
   function handleSetSkeleton(isLoading: boolean, orderResponse: Order) {
     setShowSkeleton(isLoading || !orderResponse);
   }
+
+  const buildOrderForSurveyCoupon = async (order: Order) => {
+    const validCoupons = await validateSurveyCoupon(customerId, order?.totals?.price || 0, hasTakenHealthSurvey,cartId );
+    if (validCoupons.length > 0 && order) {
+      const updatedOrderPayload = generateChangeStoreResponse({
+        ...order,
+        userOptions: {
+          ...order.userOptions,
+          coupons: validCoupons,
+        },
+      }, customerId);
+      const orderResponse = await buildOrder(updatedOrderPayload);
+      setOrderData(orderResponse?.response.success?.data || null);
+      setOrderNotifications(
+        getOrderNotifications(orderResponse?.response.success)
+      );
+    }
+  };
 
   useEffect(() => {
     const currentOrderData = order ? order.response.success.data : orderData;
@@ -517,6 +565,7 @@ const CheckoutContainer: React.FC<ICheckoutContainer> = ({
                        setShopperEmail={setShopperEmail} 
                        addressList={addressList}
                        order={orderData} 
+                       hasTakenHealthSurvey={hasTakenHealthSurvey}
                        setCurrentPortalId={setCurrentPortalId} 
                        setIsGuestEmailInvalid={setIsGuestEmailInvalid}
                        />

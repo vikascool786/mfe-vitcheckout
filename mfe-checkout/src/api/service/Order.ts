@@ -88,6 +88,7 @@ export const buildInitialGuestOrder = async (
     portalId: string,
     pcid: string,
     shipAddress: Shipping | undefined | null,
+    coupons?: string[]
 ): Promise<OrderResponse> => {
   let buildOrderPayload = getInitialBuildOrderData(
       cartId,
@@ -113,6 +114,11 @@ export const buildInitialGuestOrder = async (
       country: shipAddress.country
     }
   }
+
+  if (coupons && coupons.length > 0) {
+      buildOrderPayload.userOptions.coupons = coupons;
+  }
+  
   return buildOrder(buildOrderPayload);
 };
 
