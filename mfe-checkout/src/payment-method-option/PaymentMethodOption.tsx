@@ -69,7 +69,7 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
   const [order, setOrder] = useAtom(orderAtom);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [paymentMethods] = useAtom(paymentMethodsAtom);
-  const setOrderNotifications = useSetAtom(orderNotificationsAtom);
+  const [orderNotifications, setOrderNotifications] = useAtom(orderNotificationsAtom);
   const {
     paymentMethod,
     paymentAddress,
@@ -164,6 +164,12 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     const previouslySelectedPayment = paymentMethods.find(
       (pm) => pm.isSelected
     );
+
+    const isExpiredCardMessagePresent = orderNotifications?.find(notification => notification.includes("expiration"))
+    if (isExpiredCardMessagePresent && previouslySelectedPayment?.paymentMethod.id !== paymentMethod.id) {
+      const updatedNotifications = orderNotifications?.filter(notification => !notification.includes("expiration"));
+      setOrderNotifications(updatedNotifications);
+    }      
     updateOrderErrorMessage("");
     if (previouslySelectedPayment?.paymentMethod.id !== paymentMethod.id) {
       onCollapse(paymentMethod.id);
