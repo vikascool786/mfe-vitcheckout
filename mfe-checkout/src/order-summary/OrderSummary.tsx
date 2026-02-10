@@ -383,62 +383,6 @@ export const OrderSummary: React.FC<IOrderSummary> = ({
       store,
     }));
 
-  // useEffect(() => {
-  //   console.log("test")
-  //     const COUPON_CODE_SURVEY10 = "SURVEY10";
-  //     const hasTakenHealthSurvey = shopperAttributes.some(
-  //       (entry: ShopperAttribute) => entry.typeId === 609 && entry.value === 1
-  //     );
-  //     if (hasTakenHealthSurvey) {
-  //       //check if coupon has been redeemed
-  //       getOrderValidatePromoCode(
-  //         cartId,
-  //         COUPON_CODE_SURVEY10,
-  //         order?.totals?.price || 0,
-  //           pcid,
-  //       )
-  //         .then((response) => {
-  //           const canRedeem =
-  //             response &&
-  //             response?.isCouponValid === "1" &&
-  //             (response?.svrMessage?.length ?? 0) <= 0;
-  //           if (canRedeem) {
-  //             //apply coupon to order
-  //             if (
-  //               order &&
-  //               !order?.userOptions?.coupons?.includes(COUPON_CODE_SURVEY10)
-  //             ) {
-  //               const updatedCoupons = [
-  //                 ...(order?.userOptions?.coupons ?? []),
-  //                 COUPON_CODE_SURVEY10,
-  //               ];
-  //               const updatedOrder = buildOrder(
-  //                 generateChangeStoreResponse({
-  //                   ...order,
-  //                   userOptions: {
-  //                     ...order.userOptions,
-  //                     coupons: updatedCoupons,
-  //                   },
-  //                 }, pcid)
-  //               );
-  //               updatedOrder
-  //                 .then((response) => {
-  //                   setTimeout(() => {
-  //                     setOrder(response.response?.success?.data);
-  //                   }, 2000);
-  //                 })
-  //                 .catch((error) => {
-  //                   console.error("Error updating order with coupon ", error);
-  //                 });
-  //             }
-  //           }
-  //         })
-  //         .catch((error) => {
-  //           console.error("Error with getOrderValidatePromoCode", error);
-  //         });
-  //     }
-  // }, []);
-
   useEffect(() => {
     setgcState((prevState) => ({
       ...prevState,

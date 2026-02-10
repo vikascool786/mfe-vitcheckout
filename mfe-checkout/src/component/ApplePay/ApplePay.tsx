@@ -2,7 +2,7 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react'
 import { withApplePaySupport } from './withApplePaySupport';
 import { useAtom, useSetAtom } from 'jotai';
-import {  applePayAtom, orderAtom } from '../../store';
+import {  applePayAtom, loadingAtom, orderAtom } from '../../store';
 import { changeOrder, buildOrder } from '../../api/service/Order';
 import { generateChangeStoreResponse } from '../../utils/helpers/GenerateChangeStoreResponse';
 import { getLineItems, getMerchantSession, getShippingMethodsFromOrder, getOrderTotal,  getCurrentSelectedShipping, getSupportedApplePayVersion } from './ApplePayUtils';
@@ -25,13 +25,22 @@ interface ApplePayProps {
   confirmOrder: any;
   siteId: string;
   portalId: string;
+  shopperId?: string;
+  email?: string;
+  customerId?: string;
+  isGuest?: boolean;
 }
 const ApplePay: React.FC<ApplePayProps> =   ({
   confirmOrder,
   siteId,
-  portalId
+  portalId,
+  shopperId = '',
+  email = '',
+  customerId='',
+  isGuest = true
 }) => {
   const  setIsApplePayActive= useSetAtom(applePayAtom);
+  const setIsLoading = useSetAtom(loadingAtom);
   const [emailErrorMessage, setEmailErrorMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const trackingData = new Map<string, string>();
@@ -39,12 +48,16 @@ const ApplePay: React.FC<ApplePayProps> =   ({
   const [custId, setCustId] = useState("");
    const [openEmailDialog, setOpenEmailDialog] = useState(false);
   const orderRef = useRef(order);
+  const applePayButtonRef = useRef<HTMLElement | null>(null);
   const applePayState = useRef({
-    customerId: '',
-    email: '',
-    guestShopper: '',
+    customerId: customerId,
+    email: email,
+    guestShopper: shopperId,
     portalId: ''
   });
+
+  useEffect(() => {
+  }, [applePayState.current])
   const { getString } = useContentStrings();
 
   useEffect(() => {
@@ -278,7 +291,7 @@ const onCreateSession = useCallback(() => {
        try {
             const decryptedPayment = await decryptAppleData(payment, orderRef.current!.totals.price.toString(), "USD"); 
             if (decryptedPayment.error) {
-              let errorMessage = decryptedPayment.error.message;
+              let errorMessage = decryptedPayment.error.message || decryptedPayment.error;
               session.completePayment(window.ApplePaySession.STATUS_FAILURE);
               throw new Error(errorMessage);
             }
@@ -311,7 +324,7 @@ const onCreateSession = useCallback(() => {
               trackingData: generateOrderTrackingId(trackingData)
             }
           }
-
+          setIsLoading(true);
           await changeOrder(changeOrderPayload, orderRef.current!.id!);
           confirmOrder(true, applePayState.current.email);
           session.completePayment(window.ApplePaySession.STATUS_SUCCESS);
@@ -321,14 +334,33 @@ const onCreateSession = useCallback(() => {
                 const message = e instanceof Error ? e?.message : e || "Something went wrong!";
                 setErrorMessage(message as string)
                 session.completePayment(window.ApplePaySession.STATUS_FAILURE);
+                setIsLoading(false);
               }
     }
     session.oncancel = () => {
       setIsApplePayActive(false);
+      setIsLoading(false);
     }
+
+    session.abort = () => {
+      setIsLoading(false);
+    }
+
     
 }, [order])
 
+const setApplePayRef = useCallback((node: HTMLElement | null) => {
+  if (!node) {
+      return;
+  };
+
+  // Prevent double binding
+  if (applePayButtonRef.current) {
+    applePayButtonRef.current.removeEventListener("click", onCreateSession);
+  };
+  applePayButtonRef.current = node;
+  node.addEventListener("click", onCreateSession);
+}, [customerId]);
 
 const handleApplePay = () => {
   setIsApplePayActive(true);
@@ -436,14 +468,29 @@ const onApplePayEmailDialogClose = (next: string) => {
 
   return (
     <div className="apple-pay-button-container">
-        <button
+        {
+          isGuest ? (
+            <button
               className={`apple-pay-btn enabled`}
               onClick={handleApplePay}
+              tabIndex={-1}
             >
               <span className="apple-pay-inner">
                 <span className="txt">Continue with Apple Pay</span>
               </span>
             </button>
+          ): (
+            <div className="apple-pay-button-wrapper" tabIndex={-1}>
+               <apple-pay-button
+               ref={setApplePayRef}
+                  buttonstyle="black"
+                  type="check-out"
+                  locale="en-US"
+                  id="mfe-apple-pay-button"
+                 />
+            </div>
+          )
+        }
             {errorMessage.length > 0 && (
                 <div className="error-message-order">
                   <div className="error-message-order--bold">{errorMessage}</div>

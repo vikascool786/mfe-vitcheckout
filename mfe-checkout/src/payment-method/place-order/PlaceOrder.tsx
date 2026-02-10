@@ -330,17 +330,16 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
       (creditCardFormData?.cardInfo?.number ?? "").length > 0;
 
     const isOrderCoveredUnderVIFT =
-      order?.userOptions.applyEWallet && order?.totals.price === 0;
+        !!order?.userOptions?.applyEWallet && order?.totals?.price === 0;
+
 
     const isOrderCoveredByGiftCard =
-      order?.userOptions?.gcNum && order?.totals.price === 0;
+        !!order?.userOptions?.gcNum && order?.totals?.price === 0;
+
 
     let isCreditCardRequired =
-      !isOrderCoveredUnderVIFT && !isOrderCoveredByGiftCard;
+        (!isOrderCoveredUnderVIFT && !isOrderCoveredByGiftCard) || orderHasAutoshipItems(order);
 
-    if(isOrderCoveredUnderVIFT){
-        isCreditCardRequired = false;
-    }
     if (isCreditCardRequired && selectedPaymentMethod?.paymentMethod.id === 0) {
       if (!hasNewCreditCardDataToSave) {
         updateOrderErrorMessage(getString("completePaymentInfo") as string);
@@ -454,7 +453,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
 
         // If order is fully covered under VIFT or gift card, skip sending payment method
       if (
-        (isOrderCoveredUnderVIFT || isOrderCoveredByGiftCard)
+        (isOrderCoveredUnderVIFT || isOrderCoveredByGiftCard) && !orderHasAutoshipItems(order)
       ) {
 
         await handleFinalPlaceOrderUpdateWithoutPaymentMethods();
@@ -1009,7 +1008,7 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
               <div id="apple-pay-button-wrapper" tabIndex={-1}>
                   <apple-pay-button
                           buttonstyle="black"
-                          type="order"
+                          type="pay"
                           locale="en-US"
                           id="mfe-apple-pay-button-payment"
                           />

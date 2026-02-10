@@ -1,10 +1,25 @@
 
+apple-pay-button {
+  --apple-pay-button-width: 100%;
+  --apple-pay-button-padding: 7px 0px;
+  --apple-pay-button-border-radius: 50px;
+  --apple-pay-button-font-size: 18px;
+  --apple-pay-button-font-weight: 500;
+  &:focus,
+  &:focus-visible {
+    outline: none;
+  }
+}
 .apple-pay-button-container {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   gap: 10px;
+  .apple-pay-btn {
+    min-width: 200px;
+    height: 44px;
+  }
   .error-message-order {
     background: #f0f1f7;
     color: #202340;

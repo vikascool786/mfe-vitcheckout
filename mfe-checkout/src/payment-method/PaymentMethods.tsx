@@ -81,7 +81,7 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   isApplePayActive = false
 }) => {
   // initial payment methods
-  const isApplePaySupported = useApplePayAvailable();
+  const {eligible: isApplePaySupported, loading: isApplePayLoading} = useApplePayAvailable();
   const [paymentMethods, setPaymentMethods] = useAtom(paymentMethodsAtom);
   const { getString } = useContentStrings();
   const { siteFlags } = useSiteFlags();
@@ -126,10 +126,10 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
   useEffect(() => {
     // this is added to handle race condition between Adding sdks using Helmet and us actually using it.
     // It make sures that apple pay will display if the device supports it
-    if (isApplePaySupported) {
+    if (!isApplePayLoading) {
       setPaymentMethods(handleThirdPartyPaymentVisibility(paymentMethods));
     }
-  }, [isApplePaySupported, isApplePayActive])
+  }, [isApplePaySupported, isApplePayActive, isApplePayLoading])
 
   useEffect(() => {
     const fetchShoppersSavedPayments = async (
@@ -569,10 +569,6 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
         (method) => method.typeID === PAYPAL_RECURRING.typeId
     );
 
-    const shouldShowApplePay = order?.paymentMethods.some(
-      method => method.typeID === APPLEPAY.typeId
-    ) && isApplePayActive;
-
     if (!isSezzleAllowed()) {
       paymentOptions = paymentOptions.filter(
           (method) => method.paymentMethod.typeID !== SEZZLE.typeId
@@ -610,12 +606,12 @@ const PaymentMethod: React.FC<IPaymentMethod> = ({
       }
     }
     const isApplePayAdded = paymentOptions.find(method => method.paymentMethod.typeID == APPLEPAY.typeId);
-  if (!shouldShowApplePay || !window?.ApplePaySession?.canMakePayments()) {
+  if (!isApplePayActive || !isApplePaySupported) {
     paymentOptions = paymentOptions.filter(
         (method) => method.paymentMethod.typeID !== APPLEPAY.typeId
     );
   }
-  if (!isApplePayAdded && isApplePaySupported && shouldShowApplePay) {
+  if (!isApplePayAdded && isApplePaySupported && isApplePayActive) {
     const applePay = initialPaymentMethods.find(method => method.paymentMethod.typeID == APPLEPAY.typeId);
     if (applePay) {
       paymentOptions = [...paymentOptions, applePay];

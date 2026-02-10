@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
+import { detectApplePayEligibility } from "./ApplePayUtils";
 
-const waitForApplePay = (timeout = 2000) => {
+const waitForApplePay = (timeout = 4000) => {
     return new Promise(resolve => {
       if (window.ApplePaySession) return resolve(true);
       const interval = setInterval(() => {
@@ -17,22 +18,23 @@ const waitForApplePay = (timeout = 2000) => {
   }
 
 export function useApplePayAvailable() {
-  const [supported, setSupported] = useState(false);
+  const [state, setState] = useState({loading: true, eligible: false});
+
 
   useEffect(() => {
     let mounted = true;
 
-    waitForApplePay().then(() => {
+    waitForApplePay().then(async () => {
+      const supported = await detectApplePayEligibility();
       if (!mounted) return;
-
-      if (window.ApplePaySession &&
-          window.ApplePaySession.canMakePayments()) {
-        setSupported(true);
+      if (!supported) {
+        console.log("Apple pay is not supported")
       }
+      setState({loading:false, eligible: supported});
     });
 
     return () => { mounted = false; };
   }, []);
 
-  return supported;
+  return state;
 }

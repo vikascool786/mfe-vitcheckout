@@ -123,7 +123,6 @@ export const Contact: React.FC<IContactProps> = ({
                                     );
                                     return;
                                 }
-                
                                 setCustomerId(response.pcid);
                                 const validCoupons = await validateSurveyCoupon(response.pcid, order?.totals?.price || 0, hasTakenHealthSurvey,cartId );
                                 setIsGuestEmailInvalid(false);

@@ -1,9 +1,17 @@
 import { Order } from "../../interfaces/Order";
-import { GET_API_ENDPOINT_BASE_URL_ONLY, GET_API_KEY, GET_BASE_URL } from "../../utils/urlResolver";
+import { GET_API_ENDPOINT_BASE_URL_ONLY, GET_API_KEY, GET_API_MODE, GET_BASE_URL } from "../../utils/urlResolver";
 import { OrderStores } from "../../interfaces/Order";
 
 const APPLE_TIMEOUT = 31000;
+
 const SUPPORTED_VERSIONS = [14, 12, 10, 8, 6, 3];
+
+const MERCHANT_IDS: Record<string, string> = {
+  dev: 'merchant.com.marketamerica.test.shopapp2',
+  localhost: 'merchant.com.marketamerica.test.shopapp2',
+  staging: 'merchant.com.marketamerica.test.shopapp2',
+  prod: 'merchant.com.marketamerica.prod.shopapp2',
+};
 
 export const getOrderTotal = (order: Order, isGuest = false) => {
   const storesTotals =
@@ -38,34 +46,9 @@ export const getLineItems = (order: Order, isGuest =false) => {
     }, 0) : null;
 
     const shippingTotal = order.totals?.shipping || 0;
-    let warningProducts = [{
-      // Short-form Prop 65 text
-      label: "⚠️ WARNING: Cancer & Reproductive Harm",
-      amount: "0.00", // Shows as $0.00 or just text depending on OS
-      type: "pending" // Visually distinguishes it from a charge
-  },
-  {
-    label: "www.P65Warnings.ca.gov",
-    amount: "0.00",
-    type: "pending"
-}];
-    if (order.shippingAddress.state == 'CA') {
-      const store = Object.entries(order.stores).map(([_key, store]) => store)[0];
-      for (const item of store!.items) {
-        let  hasProp65Warning = (item.shipWarningMessages && item.shipWarningMessages.length > 0 && item.shipWarningMessages[0]!.includes("P65Warnings")) || false;
-        if(hasProp65Warning) {
-          warningProducts.push({
-            label: `📦  ${item.caption}`,
-            amount: "0.00",
-            type: "pending"
-          });        
-        }
-      }   
-    }
 
 
     return [
-      ...(warningProducts.length > 2 ? warningProducts: []),
       ...(order?.totals.cashBack ? [{
         type: "final", label: 'VIFT Cashback earned', amount: order?.totals.cashBack
       }]: []),
@@ -213,4 +196,32 @@ export const getMerchantSession = async () => {
     }
   
     return null;
+  }
+
+  export const getAppleMerchantId = (): string => {
+    const apiMode = GET_API_MODE();
+    return MERCHANT_IDS[apiMode] || '';
+  }
+
+  export async function detectApplePayEligibility(): Promise<boolean> {
+    if (typeof window === "undefined" || !window.ApplePaySession) {
+      return false;
+    }
+    const {ApplePaySession} = window;
+    const merchantId = getAppleMerchantId();
+    if ("applePayCapabilities" in ApplePaySession) {
+      try {
+        const capabilities = await ApplePaySession.applePayCapabilities(merchantId);
+        return capabilities.paymentCredentialStatus !== "applePayUnsupported";
+      } catch (err) {
+        console.log('Apple pay capability error::', err)
+        return false;
+      }
+    }
+    try {
+      return await ApplePaySession.canMakePayments();
+    } catch(err) {
+      console.log('Apple pay legacy check error::', err);
+      return false;
+    }
   }

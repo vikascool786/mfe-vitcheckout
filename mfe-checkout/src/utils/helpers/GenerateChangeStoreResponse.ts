@@ -1,6 +1,6 @@
 import { ChangeOrder } from "../../interfaces/ChangeOrder";
 import { Order } from "../../interfaces/Order";
-import { getAmosUserSessionID, getUserAgent } from "./UserSessionDataHelper";
+import { getAmosUserSessionID, getPortalId, getUserAgent } from "./UserSessionDataHelper";
 import { isAddressDefaultMAAddress } from "../AddressUtils";
 
 export const generateChangeStoreResponse = (order: Order, customer_id: string): ChangeOrder => {
@@ -104,6 +104,10 @@ export const generateChangeStoreResponse = (order: Order, customer_id: string): 
 
   if(!order.userOptions?.userSessionID) {
     updatedPayload.userOptions.userSessionID = getAmosUserSessionID();
+  }
+
+  if(!order.userOptions?.portalId) {
+    updatedPayload.userOptions.portalId = getPortalId();
   }
 
   return updatedPayload;

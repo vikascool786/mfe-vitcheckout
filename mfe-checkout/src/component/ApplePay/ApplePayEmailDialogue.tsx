@@ -94,7 +94,7 @@ export default function ApplePayEmailDialog({ open, initialEmail = "", onClose, 
           <div className="title">Express Checkout</div>
         </div>
 
-        <form className="apple-body" noValidate>
+        <form className="apple-body" noValidate onSubmit={e => e.preventDefault()}>
           <div className="prompt">Enter an email</div>
 
           <label className={`apple-input ${touched && !isValid ? "invalid" : ""}`}>
@@ -123,9 +123,9 @@ export default function ApplePayEmailDialog({ open, initialEmail = "", onClose, 
           {isValid && !customerId && !errorMessage && <p>Checking...</p>}
           {errorMessage && <div className="error">{errorMessage}</div>}
          
-          {customerId && <div className="actions">
+          {customerId && <div className="actions" tabIndex={-1}>
                 <apple-pay-button
-                ref={setApplePayRef}
+                  ref={setApplePayRef}
                   buttonstyle="black"
                   type="check-out"
                   locale="en-US"
