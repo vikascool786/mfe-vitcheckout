@@ -43,7 +43,7 @@ export const SHOPPER_CART = {
           opContainerId: 1587999423,
           weight: 0.45,
           image: {
-            url: "https://img.shop.com/Image/250000/259100/259190/products/1855205799.jpg?size=100x100",
+            url: "https://img.mashop.com/Image/250000/259100/259190/products/1855205799.jpg?size=100x100",
           },
           limitShippingMethodIDs: [],
           storeMaVendorId: "1887",
@@ -54,7 +54,7 @@ export const SHOPPER_CART = {
             caption:
               "Sonic the Hedgehog Red Running Shoes Plush Cosplay Slippers | One Size",
             image: {
-              url: "https://img.shop.com/Image/250000/259100/259190/products/1855205799.jpg?size=100x100",
+              url: "https://img.mashop.com/Image/250000/259100/259190/products/1855205799.jpg?size=100x100",
             },
             maxOrderQuantity: 0,
             volumeID: 259190,

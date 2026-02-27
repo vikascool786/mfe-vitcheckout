@@ -81,7 +81,6 @@ const onCreateSession = useCallback(() => {
       requiredShippingContactFields: [
         "postalAddress",
         "name",
-        "phoneticName",
         "phone",
         "email"
     ],

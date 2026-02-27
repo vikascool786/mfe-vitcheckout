@@ -169,7 +169,8 @@ export const PaymentOption: React.FC<IPaymentOptionProps> = ({
     if (isExpiredCardMessagePresent && previouslySelectedPayment?.paymentMethod.id !== paymentMethod.id) {
       const updatedNotifications = orderNotifications?.filter(notification => !notification.includes("expiration"));
       setOrderNotifications(updatedNotifications);
-    }      
+    }  
+
     updateOrderErrorMessage("");
     if (previouslySelectedPayment?.paymentMethod.id !== paymentMethod.id) {
       onCollapse(paymentMethod.id);

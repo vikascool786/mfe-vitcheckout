@@ -15,38 +15,38 @@ export const GET_API_ENDPOINT_BASE_URL = (
   if (isTranslationService) {
     switch (mode) {
       case "localhost":
-        return `https://devapi2.shop.com{{path}}?api_key=6f598d0a7639480eae2d266a1e87c15c`;
+        return `https://stagingapi2.mashop.com{{path}}?api_key=759ef1fc9e4c4e8bbf900db5f4b7caba`;
       case "dev":
-        return `https://devapi2.shop.com{{path}}?api_key=6f598d0a7639480eae2d266a1e87c15c`;
+        return `https://devapi2.mashop.com{{path}}?api_key=6f598d0a7639480eae2d266a1e87c15c`;
       case "staging":
-        return `https://stagingapi2.shop.com{{path}}?api_key=759ef1fc9e4c4e8bbf900db5f4b7caba`;
+        return `https://stagingapi2.mashop.com{{path}}?api_key=759ef1fc9e4c4e8bbf900db5f4b7caba`;
       case "prod":
       default:
-        return `https://api2.shop.com{{path}}?api_key=93ccfc2eb6624b028341f00fed1db9a1`;
+        return `https://api2.mashop.com{{path}}?api_key=93ccfc2eb6624b028341f00fed1db9a1`;
     }
   }
   switch (mode) {
     case "localhost":
-     return `https://devapi2.shop.com{{path}}?api_key=${
+      return `https://stagingapi2.mashop.com{{path}}?api_key=${
         isModuleRanker
-          ? "010308abff314fcbad7452230f0a918d"
-          : "6f598d0a7639480eae2d266a1e87c15c"
+          ? "78cfbfddd65949e886faef65db6bba26"
+          : "759ef1fc9e4c4e8bbf900db5f4b7caba"
       }`;
     case "dev":
-      return `https://devapi2.shop.com{{path}}?api_key=${
+      return `https://devapi2.mashop.com{{path}}?api_key=${
         isModuleRanker
           ? "010308abff314fcbad7452230f0a918d"
           : "6f598d0a7639480eae2d266a1e87c15c"
       }`;
     case "staging":
-      return `https://stagingapi2.shop.com{{path}}?api_key=${
+      return `https://stagingapi2.mashop.com{{path}}?api_key=${
         isModuleRanker
           ? "78cfbfddd65949e886faef65db6bba26"
           : "759ef1fc9e4c4e8bbf900db5f4b7caba"
       }`;
     case "prod":
     default:
-      return `https://api2.shop.com{{path}}?api_key=${
+      return `https://api2.mashop.com{{path}}?api_key=${
         isModuleRanker
           ? "a1f1ee59f2074026bcca990180af26d7"
           : "93ccfc2eb6624b028341f00fed1db9a1"
@@ -57,28 +57,28 @@ export const GET_API_ENDPOINT_BASE_URL = (
 export const GET_API_ENDPOINT_BASE_URL_FOR_TRANSLATIONS = (mode: APIMODE) => {
   switch (mode) {
     case "localhost":
-      return `https://devapi2.shop.com{{path}}?api_key=cf39b2e3855c4c95a23a007e254b6e08`;
+      return `https://devapi2.mashop.com{{path}}?api_key=cf39b2e3855c4c95a23a007e254b6e08`;
     case "dev":
-      return `https://devapi2.shop.com{{path}}?api_key=cf39b2e3855c4c95a23a007e254b6e08`;
+      return `https://devapi2.mashop.com{{path}}?api_key=cf39b2e3855c4c95a23a007e254b6e08`;
     case "staging":
-      return `https://stagingapi2.shop.com{{path}}?api_key=c6002c7143b548078242c682a79e8a55`;
+      return `https://stagingapi2.mashop.com{{path}}?api_key=c6002c7143b548078242c682a79e8a55`;
     case "prod":
     default:
-      return `https://api2.shop.com{{path}}?api_key=f5a6d749fb6848648f5dc3454de8ac38`;
+      return `https://api2.mashop.com{{path}}?api_key=f5a6d749fb6848648f5dc3454de8ac38`;
   }
 };
 export const GET_API_ENDPOINT_BASE_URL_ONLY = () => {
   const mode = GET_API_MODE();
   switch (mode) {
     case "localhost":
-      return "https://devapi2.shop.com";
+      return "https://stagingapi2.mashop.com";
     case "dev":
-      return "https://devapi2.shop.com";
+      return "https://devapi2.mashop.com";
     case "staging":
-      return "https://stagingapi2.shop.com";
+      return "https://stagingapi2.mashop.com";
     case "prod":
     default:
-      return "https://api2.shop.com";
+      return "https://api2.mashop.com";
   }
 };
 
@@ -111,7 +111,7 @@ export const GET_PAYPAL_CHECKOUT_URL = () => {
 export const GET_PAYPAL_CLIENT_ID = () => {
   switch (GET_API_MODE()) {
     case "localhost":
-      return "AdKcUB21vu4saO5O4Hcyzw0gytZyJ-R0Nq16Uci9W4NAYKRCPD_ITB7ppw5xZkOOCg4JKjIB-Uwn0Eqc";
+      return "ARxYpxURBvfOG4_8UoCf8686KdIHB_1Vg6L_9E_oK8PycqgRHQnwpx46MS3Ej7dzZiv9r0Kui72LeEVw";
     case "dev":
       return "AdKcUB21vu4saO5O4Hcyzw0gytZyJ-R0Nq16Uci9W4NAYKRCPD_ITB7ppw5xZkOOCg4JKjIB-Uwn0Eqc";
     case "staging":
@@ -139,7 +139,7 @@ export const GET_APM_URL = () => {
 export const GET_API_KEY = () => {
   switch (GET_API_MODE()) {
     case "localhost":
-      return "6f598d0a7639480eae2d266a1e87c15c";
+      return "759ef1fc9e4c4e8bbf900db5f4b7caba";
     case "dev":
       return "6f598d0a7639480eae2d266a1e87c15c";
     case "staging":

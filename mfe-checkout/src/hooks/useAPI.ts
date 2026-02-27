@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
+import { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
+import axiosInstance from "../api/axios"
 import { Order } from "../interfaces/Order";
 
 type IAPIMethod = "GET" | "POST" | "PUT" | "PATCH";
@@ -11,6 +12,8 @@ export const useApi = <T>(
   options?: AxiosRequestConfig,
   enabled: boolean = true
 ) => {
+  const api = axiosInstance(url);
+
   const [data, setData] = useState<T | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<unknown | null>(null);
@@ -21,7 +24,11 @@ export const useApi = <T>(
     setIsLoading(true);
 
     try {
-      const response: AxiosResponse<T> = await axios(url, options);
+      const response: AxiosResponse<T> = await api.request({
+        url: "",
+        method,
+        ...options,
+      });
       setData(response.data);
     } catch (error) {
       setError(error as AxiosError);
@@ -38,11 +45,12 @@ export const useApi = <T>(
     setIsLoading(true);
 
     try {
-      const response: AxiosResponse<T> = await axios.post(
-        url,
-        body,
-        customOptions ? customOptions : options
-      );
+      const response: AxiosResponse<T> = await api.request({
+        url: "",
+        method: "POST",
+        data: body,
+        ...(customOptions ?? options),
+      });
       setData(response.data);
       setIsLoading(false);
       return response.data;

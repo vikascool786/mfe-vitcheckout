@@ -110,7 +110,7 @@ export const CardInputs: React.FC<ICardInputProps> = ({
           onBlur={handleBlur}
           errorMessage={touched.cardInfo?.number && errors.cardInfo?.number}
           errorRefs={errorRefs}
-          icon={{url: "https://img.shop.com/Image/resources/checkout/lock-icon.png", alt: "lock icon"}}
+          icon={{url: "https://img.mashop.com/Image/resources/checkout/lock-icon.png", alt: "lock icon"}}
         />
       )}
       <div className="form-field-container">

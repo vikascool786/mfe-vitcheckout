@@ -996,11 +996,11 @@ const PlaceOrder: React.FC<IPlaceOrder> = ({
                 onClick={submitForm}
                 logo={
                   paymentTypeId === SEZZLE.typeId
-                    ? "https://img.shop.com/Image/resources/checkout/Sezzle-Color-White-Logo.svg"
+                    ? "https://img.mashop.com/Image/resources/checkout/Sezzle-Color-White-Logo.svg"
                     : isPaypalPayment(paymentTypeId)
-                      ? "https://img.shop.com/Image/resources/checkout/PayPal-White-Logo.svg"
+                      ? "https://img.mashop.com/Image/resources/checkout/PayPal-White-Logo.svg"
                       : paymentTypeId === CLICK2PAY.typeId
-                        ? "https://img.shop.com/Image/resources/checkout/click-to-pay-white.svg"
+                        ? "https://img.mashop.com/Image/resources/checkout/click-to-pay-white.svg"
                         : ""
                 }
               />

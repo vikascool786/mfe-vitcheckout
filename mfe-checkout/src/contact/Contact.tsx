@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FormHeading } from "../component/Form/Heading/FormHeading";
 import { FormField } from "../component/Form/Field/FormField";
 import "./Contact.scss"
@@ -52,6 +52,7 @@ export const Contact: React.FC<IContactProps> = ({
     const isApplePayActive = useAtomValue(applePayAtom);
     const setGuestShopperId = useSetAtom(guestShopperIdAtom)
     const [email, setEmail] = useState("");
+    const isEmailFromApiSet = useRef({order: false, customerData: false});
     const [debouncedEmail, setDebouncedEmail] = useState("");
     const [isValidEmail, setIsValidEmail] = useState(false);
     const [isFullRegEmail, setIsFullRegEmail] = useState(false);
@@ -70,22 +71,24 @@ export const Contact: React.FC<IContactProps> = ({
     }, []);
 
     useEffect(() => {
-        if (order) {
+        if (order && !isEmailFromApiSet.current.order && !isEmailFromApiSet.current.customerData && order.email) {
             setEmail(order.email);
+            isEmailFromApiSet.current.order = true;
         }
     }, [order]);
 
     useEffect(() => {
-        if (customerData) {
+        if (customerData && !isEmailFromApiSet.current.customerData && !isEmailFromApiSet.current.order && customerData.email_address) {
             setEmail(customerData?.email_address);
             setShopperEmail(customerData?.email_address);
+            isEmailFromApiSet.current.customerData = true;
         }
     }, [customerData]);
 
     useEffect(() => {
         setIsValidEmail(false); //invalidate email when it gets changed
         const handler = setTimeout(() => {
-            setDebouncedEmail(email);
+            setDebouncedEmail(email || "");
         }, 500); // 500ms after last keypress
 
         return () => clearTimeout(handler);
@@ -94,7 +97,15 @@ export const Contact: React.FC<IContactProps> = ({
     useEffect(() => {
         setIsFullRegEmail(false);
         const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        setIsValidEmail(emailPattern.test(debouncedEmail));
+        const isValid = emailPattern.test(debouncedEmail)
+        setIsValidEmail(isValid);
+        if (!isValid) {
+            if (debouncedEmail.length > 1) {
+                setEmailErrorMessage("Please enter a valid email address");
+            } else {
+                setEmailErrorMessage("");
+            }
+        }
     }, [debouncedEmail]);
 
     useEffect(() => {
@@ -173,11 +184,6 @@ export const Contact: React.FC<IContactProps> = ({
                 });
         } else {
             setShowOptInCheckbox(true);
-            if (email.length > 1) {
-                setEmailErrorMessage("Please enter a valid email address");
-            } else {
-                setEmailErrorMessage("");
-            }
         }
     }, [isValidEmail]);
 
@@ -209,7 +215,7 @@ export const Contact: React.FC<IContactProps> = ({
                             label="Email Address"
                             required
                             value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            onChange={(e) =>  setEmail(e.target.value)}
                             onBlur={() => setEmailTouched(true)}
                             errorMessage={
                                 emailTouched && !email && !isApplePayActive

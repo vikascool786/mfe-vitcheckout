@@ -6,6 +6,9 @@ declare global {
     };
     ApplePaySession: any;
     ApplePayError: any;
+    __MFE_RUNTIME__?: {
+      isLTV?: boolean;
+    };
   }
 }
 declare global {

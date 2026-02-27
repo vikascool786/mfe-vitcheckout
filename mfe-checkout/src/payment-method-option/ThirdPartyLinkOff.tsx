@@ -11,7 +11,7 @@ export const ThirdPartyLinkOff: React.FC<IThirdPartyLinkOffProps> = ({paymentMet
     const { getString } = useContentStrings();
     return (
         <div className="third-party-link-off-container">
-            {/* <img className="third-party-link-off-container__icon" src="https://img.shop.com/Image/local/images/cc/thirdPartyPaymentLinkOff.svg" alt={"Third party payment link off"}/> */}
+            {/* <img className="third-party-link-off-container__icon" src="https://img.mashop.com/Image/local/images/cc/thirdPartyPaymentLinkOff.svg" alt={"Third party payment link off"}/> */}
             <div className="third-party-link-off-container__text">{getString("payWithAccountRedirect",[paymentMethod.accountName,paymentMethod.accountName])}</div>
         </div>
     );

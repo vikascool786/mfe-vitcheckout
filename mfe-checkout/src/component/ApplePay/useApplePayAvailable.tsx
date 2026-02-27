@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { detectApplePayEligibility } from "./ApplePayUtils";
 
-const waitForApplePay = (timeout = 4000) => {
+const waitForApplePay = (timeout = 20000) => {
     return new Promise(resolve => {
       if (window.ApplePaySession) return resolve(true);
       const interval = setInterval(() => {
